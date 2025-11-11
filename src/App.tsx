@@ -8,6 +8,8 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { POSProvider } from "@/context/POSContext";
 import { ExpenseProvider } from "@/context/ExpenseContext";
+import { SubscriptionProvider } from "@/context/SubscriptionContext";
+import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 
@@ -30,6 +32,8 @@ import BookingPage from "./pages/BookingPage";
 import BookingManagement from "./pages/BookingManagement";
 import StaffManagement from "./pages/StaffManagement";
 import StaffPortal from "./pages/StaffPortal";
+import Subscription from "./pages/Subscription";
+import AdminSubscription from "./pages/AdminSubscription";
 
 // Payment routes
 import PublicPaymentSuccess from "./pages/PublicPaymentSuccess";
@@ -107,13 +111,15 @@ const ProtectedRoute = ({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <POSProvider>
-        <ExpenseProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
+      <SubscriptionProvider>
+        <POSProvider>
+          <ExpenseProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <SubscriptionGuard>
+                  <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/login-logs" element={<LoginLogs />} />
@@ -233,12 +239,34 @@ const App = () => (
                   }
                 />
 
+                {/* Subscription - User-facing */}
+                <Route
+                  path="/subscription"
+                  element={
+                    <ProtectedRoute>
+                      <Subscription />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Admin Subscription - PIN Protected, not in sidebar */}
+                <Route
+                  path="/admin-subscription"
+                  element={
+                    <ProtectedRoute>
+                      <AdminSubscription />
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ExpenseProvider>
-      </POSProvider>
+                  </Routes>
+                </SubscriptionGuard>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ExpenseProvider>
+        </POSProvider>
+      </SubscriptionProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

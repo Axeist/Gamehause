@@ -1,7 +1,7 @@
 // src/components/AppSidebar.tsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ShoppingCart, User, BarChart2, Settings, Package, Clock, Users, Menu, Shield, PowerOff, BookOpen, Calendar, Users2, UserCircle } from 'lucide-react';
+import { Home, ShoppingCart, User, BarChart2, Settings, Package, Clock, Users, Menu, Shield, PowerOff, BookOpen, Calendar, Users2, UserCircle, CreditCard } from 'lucide-react';
 import { 
   Sidebar, 
   SidebarContent, 
@@ -53,6 +53,7 @@ const AppSidebar: React.FC = () => {
     // Staff sees "My Portal" menu (admin does NOT see this)
     ...(!isAdmin ? [{ icon: UserCircle, label: 'My Portal', path: '/staff-portal' }] : []),
     { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: CreditCard, label: 'Subscription', path: '/subscription' },
     { icon: BookOpen, label: 'How to Use', path: '/how-to-use' },
   ];
 
@@ -85,6 +86,7 @@ const AppSidebar: React.FC = () => {
                         <Link 
                           key={item.path}
                           to={item.path} 
+                          onClick={() => toggleSidebar()}
                           className={`flex items-center py-3 px-3 rounded-md my-1 ${location.pathname === item.path ? 'bg-nerfturf-purple/40 text-nerfturf-lightpurple' : 'text-white hover:bg-nerfturf-purple/20'}`}
                         >
                           <item.icon className={`mr-3 h-5 w-5 ${location.pathname === item.path ? 'text-nerfturf-lightpurple animate-pulse-soft' : ''}`} />
