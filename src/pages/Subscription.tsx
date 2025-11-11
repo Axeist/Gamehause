@@ -218,7 +218,19 @@ const Subscription: React.FC = () => {
               <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
                 <span className="text-gray-300 font-medium">Billing Cycle:</span>
                 <span className="text-white font-semibold capitalize">
-                  {subscription.subscription_type === 'lifetime' ? 'Lifetime' : subscription.subscription_type}
+                  {(() => {
+                    if (subscription.subscription_type === 'lifetime') return 'Lifetime';
+                    const plan = subscription.plan_name ? getPlanByName(subscription.plan_name) : null;
+                    if (plan) {
+                      if (plan.duration === 6) return '6 Months (Semi-Annual)';
+                      if (plan.duration === 3) return '3 Months (Quarterly)';
+                      if (plan.duration === 12) return '12 Months (Annual)';
+                      if (plan.duration === 1) return '1 Month (Monthly)';
+                      return `${plan.duration} Month${plan.duration > 1 ? 's' : ''}`;
+                    }
+                    // Fallback to subscription_type if plan not found
+                    return subscription.subscription_type;
+                  })()}
                 </span>
               </div>
 
