@@ -14,6 +14,8 @@ import { TimeSlotPicker } from "@/components/booking/TimeSlotPicker";
 import CouponPromotionalPopup from "@/components/CouponPromotionalPopup";
 import BookingConfirmationDialog from "@/components/BookingConfirmationDialog";
 import LegalDialog from "@/components/dialog/LegalDialog";
+import { useSubscription } from "@/context/SubscriptionContext";
+import UpgradeDialog from "@/components/UpgradeDialog";
 import {
   CalendarIcon,
   Clock,
@@ -133,12 +135,20 @@ const getBookingDuration = (stationIds: string[], stations: Station[]) => {
    Component
    ========================= */
 export default function PublicBooking() {
+  const { hasBookingAccess, isLoading: subscriptionLoading } = useSubscription();
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
   const [stationType, setStationType] = useState<"all" | StationType>("all");
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+
+  useEffect(() => {
+    if (!subscriptionLoading && !hasBookingAccess) {
+      setShowUpgradeDialog(true);
+    }
+  }, [hasBookingAccess, subscriptionLoading]);
 
   const [customerNumber, setCustomerNumber] = useState("");
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -2135,6 +2145,12 @@ export default function PublicBooking() {
           </div>
         </div>
       )}
+
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        featureName="Booking"
+      />
     </div>
   );
 }

@@ -5,11 +5,15 @@ import { toast } from 'sonner';
 interface Subscription {
   id: string;
   is_active: boolean;
-  subscription_type: 'monthly' | 'quarterly' | 'yearly';
+  subscription_type: 'monthly' | 'quarterly' | 'yearly' | 'lifetime';
   start_date: string;
   end_date: string;
   amount_paid: number;
   pages_enabled: boolean;
+  plan_name?: string;
+  booking_access?: boolean;
+  staff_management_access?: boolean;
+  allow_custom_end_date?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -18,6 +22,8 @@ interface SubscriptionContextType {
   subscription: Subscription | null;
   isLoading: boolean;
   isSubscriptionValid: boolean;
+  hasBookingAccess: boolean;
+  hasStaffManagementAccess: boolean;
   refreshSubscription: () => Promise<void>;
   updateSubscription: (data: Partial<Subscription>) => Promise<boolean>;
 }
@@ -152,12 +158,17 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const isSubscriptionValid = checkSubscriptionValidity(subscription);
+  
+  const hasBookingAccess = subscription?.booking_access === true && isSubscriptionValid;
+  const hasStaffManagementAccess = subscription?.staff_management_access === true && isSubscriptionValid;
 
   return (
     <SubscriptionContext.Provider value={{
       subscription,
       isLoading,
       isSubscriptionValid,
+      hasBookingAccess,
+      hasStaffManagementAccess,
       refreshSubscription,
       updateSubscription,
     }}>

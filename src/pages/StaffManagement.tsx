@@ -12,15 +12,25 @@ import AttendanceManagement from '@/components/staff/AttendanceManagement';
 import LeaveManagement from '@/components/staff/LeaveManagement';
 import PayrollManagement from '@/components/staff/PayrollManagement';
 import CreateStaffDialog from '@/components/staff/CreateStaffDialog';
+import { useSubscription } from '@/context/SubscriptionContext';
+import UpgradeDialog from '@/components/UpgradeDialog';
 
 const StaffManagement = () => {
   const { toast } = useToast();
+  const { hasStaffManagementAccess, isLoading: subscriptionLoading } = useSubscription();
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [staffProfiles, setStaffProfiles] = useState<any[]>([]);
   const [activeShifts, setActiveShifts] = useState<any[]>([]);
   const [pendingLeaves, setPendingLeaves] = useState<any[]>([]);
   const [monthlyPayroll, setMonthlyPayroll] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  useEffect(() => {
+    if (!subscriptionLoading && !hasStaffManagementAccess) {
+      setShowUpgradeDialog(true);
+    }
+  }, [hasStaffManagementAccess, subscriptionLoading]);
 
   useEffect(() => {
     fetchStaffData();
@@ -234,6 +244,12 @@ const StaffManagement = () => {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onSuccess={fetchStaffData}
+      />
+
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        featureName="Staff Management"
       />
     </div>
   );

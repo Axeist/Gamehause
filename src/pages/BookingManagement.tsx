@@ -12,6 +12,8 @@ import { BookingStatusBadge } from '@/components/booking/BookingStatusBadge';
 import { BookingEditDialog } from '@/components/booking/BookingEditDialog';
 import { BookingDeleteDialog } from '@/components/booking/BookingDeleteDialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useSubscription } from '@/context/SubscriptionContext';
+import UpgradeDialog from '@/components/UpgradeDialog';
 import {
   Calendar, Search, Filter, Download, Phone, Mail, Plus, Clock, MapPin, ChevronDown, ChevronRight, Users,
   Trophy, Gift, Tag, Zap, Megaphone, DollarSign, Percent, Ticket, RefreshCw, TrendingUp, TrendingDown, Activity,
@@ -183,10 +185,18 @@ const getDateRangeFromPreset = (preset: string) => {
 };
 
 export default function BookingManagement() {
+  const { hasBookingAccess, isLoading: subscriptionLoading } = useSubscription();
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [allBookings, setAllBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    if (!subscriptionLoading && !hasBookingAccess) {
+      setShowUpgradeDialog(true);
+    }
+  }, [hasBookingAccess, subscriptionLoading]);
   const [filters, setFilters] = useState<Filters>({
     datePreset: 'last7days',
     dateFrom: format(subDays(new Date(), 6), 'yyyy-MM-dd'),
@@ -2391,6 +2401,12 @@ export default function BookingManagement() {
             onOpenChange={setDeleteDialogOpen}
             booking={selectedBooking}
             onBookingDeleted={fetchBookings}
+          />
+
+          <UpgradeDialog
+            open={showUpgradeDialog}
+            onOpenChange={setShowUpgradeDialog}
+            featureName="Booking"
           />
         </>
       )}
