@@ -61,8 +61,10 @@ const Subscription: React.FC = () => {
       'silver-advanced': 'Ideal for growing businesses that need booking and staff management capabilities along with core features.',
       'gold-basic': 'Best value for businesses committed to quarterly subscriptions. Save 10% while getting all core features.',
       'gold-advanced': 'Comprehensive quarterly plan with booking and staff management. Perfect for established businesses.',
-      'diamond-basic': 'Annual subscription with maximum savings. Get 15% off on all core features for a full year.',
-      'diamond-advanced': 'Premium annual plan with all features unlocked. Best for businesses looking for long-term commitment.',
+      'platinum-basic': 'Premium 6-month subscription with enhanced savings. Get 15% off on all core features with extended support.',
+      'platinum-advanced': 'Elite 6-month plan with all features unlocked. Ideal for businesses seeking premium support and advanced capabilities.',
+      'diamond-basic': 'Annual subscription with maximum savings. Get 25% off on all core features for a full year with dedicated support.',
+      'diamond-advanced': 'Premium annual plan with all features unlocked. Best for businesses looking for long-term commitment and maximum value.',
       'lifetime': 'One-time payment for lifetime access. Includes priority support, 5 years of updates, and enterprise features.',
     };
     return descriptions[plan.id] || 'Comprehensive subscription plan tailored for your business needs.';
@@ -102,21 +104,41 @@ const Subscription: React.FC = () => {
         'Custom report generation',
         'API access',
       ],
+      'platinum-basic': [
+        'All Silver Basic features',
+        '15% cost savings',
+        '6 months validity',
+        'Priority email support',
+        'Extended data retention',
+        'Advanced analytics dashboard',
+        'Semi-annual business reviews',
+      ],
+      'platinum-advanced': [
+        'All Silver Advanced features',
+        '15% cost savings',
+        '6 months validity',
+        'Priority support channel',
+        'Custom report generation',
+        'API access',
+        'Semi-annual consultations',
+      ],
       'diamond-basic': [
         'All Silver Basic features',
-        '15% maximum savings',
+        '25% maximum savings',
         'Dedicated account manager',
         'Annual business review',
         'Unlimited data retention',
         'Premium analytics dashboard',
+        '24/7 email support',
       ],
       'diamond-advanced': [
         'All Silver Advanced features',
-        '15% maximum savings',
+        '25% maximum savings',
         '24/7 priority support',
         'Quarterly strategy sessions',
         'Custom integrations',
         'White-label options',
+        'Dedicated account manager',
       ],
       'lifetime': [
         'All features forever',
@@ -375,6 +397,7 @@ const Subscription: React.FC = () => {
               const isLifetime = plan.id === 'lifetime';
               const isAdvanced = plan.name.includes('Advanced');
               const isGold = plan.name.includes('Gold');
+              const isPlatinum = plan.name.includes('Platinum');
               const isDiamond = plan.name.includes('Diamond');
               const planDescription = getPlanDescription(plan);
               const planBenefits = getPlanBenefits(plan);
@@ -389,6 +412,8 @@ const Subscription: React.FC = () => {
                       ? 'bg-gradient-to-br from-yellow-500/15 via-orange-500/10 to-yellow-500/15 border-yellow-500/50 hover:border-yellow-500/70 hover:shadow-2xl hover:shadow-yellow-500/30'
                       : isDiamond
                       ? 'bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-cyan-500/15 border-cyan-500/40 hover:border-cyan-500/60 hover:shadow-2xl hover:shadow-cyan-500/20'
+                      : isPlatinum
+                      ? 'bg-gradient-to-br from-purple-500/15 via-pink-500/10 to-purple-500/15 border-purple-500/40 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/20'
                       : isGold
                       ? 'bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-amber-500/15 border-amber-500/40 hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/20'
                       : 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-nerfturf-purple/40 hover:border-nerfturf-purple/60'
@@ -405,6 +430,7 @@ const Subscription: React.FC = () => {
                           <h3 className={`text-2xl font-bold ${
                             isLifetime ? 'text-yellow-400' : 
                             isDiamond ? 'text-cyan-400' : 
+                            isPlatinum ? 'text-purple-400' : 
                             isGold ? 'text-amber-400' : 
                             'text-white'
                           }`}>
@@ -434,6 +460,7 @@ const Subscription: React.FC = () => {
                         <span className={`text-4xl font-bold ${
                           isLifetime ? 'text-yellow-400' : 
                           isDiamond ? 'text-cyan-400' : 
+                          isPlatinum ? 'text-purple-400' : 
                           isGold ? 'text-amber-400' : 
                           'bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent'
                         }`}>
