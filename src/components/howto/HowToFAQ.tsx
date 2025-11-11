@@ -50,7 +50,7 @@ const faqs = [
   },
   {
     q: "What if I need more help or encounter an issue?",
-    a: "Contact Cuephoria Tech Support Line at +91 93451 87098 or email contact@nerfturf.in. You can also revisit this guide anytime from the sidebar menu. For urgent issues, call the support line immediately.",
+    a: "Contact Cuephoria Tech Support Line at +91 86676 37565 or email contact@cuephoria.in. You can also revisit this guide anytime from the sidebar menu. For urgent issues, call the support line immediately.",
   },
 ];
 

@@ -27,12 +27,12 @@ const HowToUse: React.FC = () => (
           <p>
             <b className="text-nerfturf-lightpurple">Need Help?</b> Contact your administrator or reach out to{" "}
             <b className="text-nerfturf-magenta">Cuephoria Tech Support Line</b> at{" "}
-            <a href="tel:+919345187098" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">
-              +91 93451 87098
+            <a href="tel:+918667637565" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">
+              +91 86676 37565
             </a>
             {" "}or email{" "}
-            <a href="mailto:contact@nerfturf.in" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">
-              contact@nerfturf.in
+            <a href="mailto:contact@cuephoria.in" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">
+              contact@cuephoria.in
             </a>.
           </p>
         </div>

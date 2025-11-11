@@ -595,8 +595,8 @@ const steps = [
           <li><b>Tooltips & Hints:</b> Hover over buttons and icons throughout the app for quick explanations</li>
           <li><b>In-App Help:</b> Contextual help available on most pages</li>
           <li><b>Training Resources:</b> Use this guide for staff training and onboarding</li>
-          <li><b>Support Contact:</b> For any issues or questions, contact <b className="text-nerfturf-lightpurple">Cuephoria Tech Support Line: <a href="tel:+919345187098" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">+91 93451 87098</a></b></li>
-          <li><b>Email Support:</b> Reach out via <a href="mailto:contact@nerfturf.in" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">contact@nerfturf.in</a></li>
+          <li><b>Support Contact:</b> For any issues or questions, contact <b className="text-nerfturf-lightpurple">Cuephoria Tech Support Line: <a href="tel:+918667637565" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">+91 86676 37565</a></b></li>
+          <li><b>Email Support:</b> Reach out via <a href="mailto:contact@cuephoria.in" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">contact@cuephoria.in</a></li>
           <li><b>Feature Updates:</b> New features and improvements are documented in this guide</li>
         </ul>
         <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">

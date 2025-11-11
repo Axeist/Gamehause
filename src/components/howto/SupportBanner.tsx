@@ -23,21 +23,21 @@ const SupportBanner: React.FC = () => (
             Cuephoria Tech Support Line:
           </span>
           <a
-            href="tel:+919345187098"
+            href="tel:+918667637565"
             className="ml-2 underline text-nerfturf-lightpurple font-extrabold hover:text-nerfturf-magenta transition-colors"
             style={{ textDecorationThickness: 2 }}
           >
-            +91 93451 87098
+            +91 86676 37565
           </a>
         </span>
       </div>
       <div className="flex items-center gap-2">
         <Mail className="h-5 w-5 md:h-6 md:w-6 text-nerfturf-lightpurple flex-shrink-0" />
         <a
-          href="mailto:contact@nerfturf.in"
+          href="mailto:contact@cuephoria.in"
           className="text-white text-base md:text-lg font-bold leading-snug underline text-nerfturf-lightpurple hover:text-nerfturf-magenta transition-colors"
         >
-          contact@nerfturf.in
+          contact@cuephoria.in
         </a>
       </div>
     </div>
