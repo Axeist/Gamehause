@@ -83,11 +83,24 @@ export const fetchTournaments = async (): Promise<Tournament[]> => {
 // Format error message from Supabase for tournament operations
 const formatTournamentError = (error: PostgrestError): string => {
   if (error.code === '42501') {
-    return 'Permission denied. You may not have the required access rights to perform this operation. Only admins can manage tournaments.';
+    return 'Permission denied. You may not have the required access rights to perform this operation. Only authenticated users can manage tournaments.';
   }
-  if (error.message?.includes('auth.uid()')) {
-    return 'You need to be authenticated as an admin to perform this operation.';
+  if (error.code === 'PGRST301' || error.message?.includes('JWT')) {
+    return 'Authentication required. Please log in and try again.';
   }
+  if (error.message?.includes('auth.uid()') || error.message?.includes('auth.role()')) {
+    return 'You need to be authenticated to perform this operation.';
+  }
+  if (error.message?.includes('foreign key') || error.message?.includes('constraint')) {
+    return 'Cannot delete: This tournament has related records that must be deleted first.';
+  }
+  // Log the full error for debugging
+  console.error('Tournament error details:', {
+    code: error.code,
+    message: error.message,
+    details: error.details,
+    hint: error.hint
+  });
   return handleSupabaseError(error, 'tournament operation');
 };
 
@@ -206,15 +219,59 @@ export const deleteTournament = async (id: string): Promise<{ success: boolean; 
   try {
     console.log('Starting tournament deletion for ID:', id);
     
-    // First, delete related tournament history entries
+    // Try to delete related records first, but don't fail if RLS blocks it
+    // (Foreign key constraints may handle cascading deletes, or we may need admin privileges)
+    
+    // Delete related tournament public registrations
+    const { error: publicRegistrationsError } = await supabase
+      .from('tournament_public_registrations')
+      .delete()
+      .eq('tournament_id', id);
+      
+    if (publicRegistrationsError) {
+      console.warn('Warning: Could not delete tournament public registrations (may be blocked by RLS):', publicRegistrationsError);
+      // Continue - foreign key may handle this with CASCADE
+    } else {
+      console.log('Deleted tournament public registrations');
+    }
+    
+    // Delete related tournament registrations (legacy)
+    const { error: registrationsError } = await supabase
+      .from('tournament_registrations')
+      .delete()
+      .eq('tournament_id', id);
+      
+    if (registrationsError) {
+      console.warn('Warning: Could not delete tournament registrations (may be blocked by RLS):', registrationsError);
+      // Continue - foreign key may handle this with CASCADE
+    } else {
+      console.log('Deleted tournament registrations');
+    }
+    
+    // Delete related tournament winner images
+    const { error: winnerImagesError } = await supabase
+      .from('tournament_winner_images')
+      .delete()
+      .eq('tournament_id', id);
+      
+    if (winnerImagesError) {
+      console.warn('Warning: Could not delete tournament winner images:', winnerImagesError);
+      // Continue - try to delete tournament anyway
+    } else {
+      console.log('Deleted tournament winner images');
+    }
+    
+    // Delete related tournament history entries
     const { error: historyError } = await supabase
       .from('tournament_history')
       .delete()
       .eq('tournament_id', id);
       
     if (historyError) {
-      console.error('Error deleting tournament history:', historyError);
-      return { success: false, error: formatTournamentError(historyError) };
+      console.warn('Warning: Could not delete tournament history:', historyError);
+      // Continue - try to delete tournament anyway
+    } else {
+      console.log('Deleted tournament history');
     }
     
     // Delete related tournament winner entries
@@ -224,20 +281,53 @@ export const deleteTournament = async (id: string): Promise<{ success: boolean; 
       .eq('tournament_id', id);
       
     if (winnersError) {
-      console.error('Error deleting tournament winners:', winnersError);
-      return { success: false, error: formatTournamentError(winnersError) };
+      console.warn('Warning: Could not delete tournament winners:', winnersError);
+      // Continue - try to delete tournament anyway
+    } else {
+      console.log('Deleted tournament winners');
     }
     
     // Finally, delete the tournament itself
-    const { error } = await tournamentsTable
+    // This is the critical operation - if this fails, the whole deletion fails
+    const { error: deleteError } = await tournamentsTable
       .delete()
       .eq('id', id);
       
-    if (error) {
-      console.error('Error deleting tournament:', error);
-      return { success: false, error: formatTournamentError(error) };
+    if (deleteError) {
+      console.error('Error deleting tournament:', deleteError);
+      // Check if it's a foreign key constraint error
+      if (deleteError.message?.includes('foreign key') || deleteError.message?.includes('constraint')) {
+        return { 
+          success: false, 
+          error: 'Cannot delete tournament: It has related records that must be deleted first. Please contact an administrator.' 
+        };
+      }
+      return { success: false, error: formatTournamentError(deleteError) };
     }
     
+    console.log('Tournament delete operation completed');
+    
+    // Verify the tournament was actually deleted by trying to fetch it
+    const { data: verifyData, error: verifyError } = await tournamentsTable
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
+    
+    if (verifyError && verifyError.code !== 'PGRST116') {
+      // Some error other than "not found" - log it but assume success if delete didn't error
+      console.warn('Error verifying tournament deletion:', verifyError);
+    }
+    
+    if (verifyData) {
+      // Tournament still exists - deletion didn't work
+      console.error('Tournament still exists after deletion attempt. Data:', verifyData);
+      return { 
+        success: false, 
+        error: 'Tournament deletion failed. The tournament still exists in the database. Please check your permissions and try again.' 
+      };
+    }
+    
+    // Tournament not found - deletion was successful
     console.log('Tournament and all related entries deleted successfully');
     return { success: true, error: null };
   } catch (error) {
