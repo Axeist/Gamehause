@@ -470,7 +470,22 @@ const AdminSubscription: React.FC = () => {
               {[
                 { label: 'Plan', value: subscription.plan_name || 'Not Set', highlight: true },
                 { label: 'Status', value: subscription.is_active ? 'Active' : 'Inactive', highlight: subscription.is_active },
-                { label: 'Type', value: subscription.subscription_type, highlight: false },
+                { 
+                  label: 'Type', 
+                  value: (() => {
+                    if (subscription.subscription_type === 'lifetime') return 'Lifetime';
+                    const plan = subscription.plan_name ? getPlanByName(subscription.plan_name) : null;
+                    if (plan) {
+                      if (plan.duration === 6) return '6 Months (Semi-Annual)';
+                      if (plan.duration === 3) return '3 Months (Quarterly)';
+                      if (plan.duration === 12) return '12 Months (Annual)';
+                      if (plan.duration === 1) return '1 Month (Monthly)';
+                      return `${plan.duration} Month${plan.duration > 1 ? 's' : ''}`;
+                    }
+                    return subscription.subscription_type;
+                  })(), 
+                  highlight: false 
+                },
                 { label: 'Start Date', value: format(new Date(subscription.start_date), 'MMM dd, yyyy'), highlight: false },
                 { label: 'End Date', value: subscription.subscription_type === 'lifetime' ? 'Lifetime' : format(new Date(subscription.end_date), 'MMM dd, yyyy'), highlight: false },
                 { label: 'Amount Paid', value: `₹${subscription.amount_paid.toLocaleString('en-IN')}`, highlight: true },
