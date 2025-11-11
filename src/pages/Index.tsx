@@ -52,19 +52,12 @@ const Index: React.FC = () => {
         <Logo />
         <div className="ml-auto flex items-center gap-3">
           <Button
-            variant="ghost"
-            className="text-nerfturf-lightpurple hover:bg-nerfturf-purple/20 hover:text-white transition-all duration-300"
+            variant="outline"
+            className="text-nerfturf-lightpurple border-nerfturf-purple/50 hover:bg-nerfturf-purple/30 hover:border-nerfturf-purple/70 transition-all duration-300"
             onClick={() => navigate('/login')}
           >
             <LogIn className="h-4 w-4 mr-2" />
             Management Login
-          </Button>
-          <Button
-            variant="outline"
-            className="text-nerfturf-lightpurple border-nerfturf-purple/50 hover:bg-nerfturf-purple/30 hover:border-nerfturf-purple/70 transition-all duration-300"
-            onClick={() => window.open('https://nerfturf.in', '_blank')}
-          >
-            Official Website
           </Button>
           <Button
             variant="default"
