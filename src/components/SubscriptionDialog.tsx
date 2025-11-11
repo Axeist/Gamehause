@@ -44,7 +44,7 @@ const SubscriptionDialog: React.FC<SubscriptionDialogProps> = ({ open }) => {
               <XCircle className="h-6 w-6 text-red-400" />
             </div>
             <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-              Subscription Ended or Deactivated
+              Access Denied
             </DialogTitle>
           </div>
         </DialogHeader>

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DollarSign, Save, Lock, Settings, Calendar, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
@@ -204,63 +205,88 @@ const AdminSubscription: React.FC = () => {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Subscription Configuration */}
-        <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Settings className="h-5 w-5 text-nerfturf-lightpurple" />
-              Subscription Configuration
+        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/30 hover:border-nerfturf-purple/50 transition-all duration-300">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-white flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
+                <Settings className="h-5 w-5 text-nerfturf-lightpurple" />
+              </div>
+              <span className="text-xl font-semibold">Subscription Configuration</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="plan_name" className="text-white">Subscription Plan</Label>
+              <Label htmlFor="plan_name" className="text-white font-medium">Subscription Plan</Label>
               <Select
                 value={formData.plan_name}
                 onValueChange={handlePlanChange}
               >
-                <SelectTrigger className="bg-black/30 border-nerfturf-purple/30 text-white">
+                <SelectTrigger className="bg-black/40 border-nerfturf-purple/40 text-white hover:border-nerfturf-purple/60 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#1A1F2C] border-nerfturf-purple/30">
                   {SUBSCRIPTION_PLANS.map((plan) => (
-                    <SelectItem key={plan.id} value={plan.name}>
-                      {plan.name} - ₹{plan.finalPrice.toLocaleString('en-IN')}
-                      {plan.discount && ` (${plan.discount}% off)`}
+                    <SelectItem 
+                      key={plan.id} 
+                      value={plan.name}
+                      className="text-white hover:bg-nerfturf-purple/20 focus:bg-nerfturf-purple/20"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-semibold">{plan.name}</span>
+                        <span className="ml-2 text-nerfturf-lightpurple">
+                          ₹{plan.finalPrice.toLocaleString('en-IN')}
+                          {plan.discount && (
+                            <span className="text-green-400 text-xs ml-1">({plan.discount}% off)</span>
+                          )}
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedPlan && (
-                <p className="text-xs text-gray-400 mt-1">
-                  {selectedPlan.type === 'lifetime' ? 'Lifetime' : `${selectedPlan.duration} Month${selectedPlan.duration > 1 ? 's' : ''}`} • 
-                  {selectedPlan.hasBookingAccess && ' Booking Access'} • 
-                  {selectedPlan.hasStaffManagementAccess && ' Staff Management'}
-                </p>
+                <div className="p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30 mt-2">
+                  <div className="flex items-center gap-4 text-xs">
+                    <span className="text-gray-300">
+                      <span className="font-semibold text-white">{selectedPlan.type === 'lifetime' ? 'Lifetime' : `${selectedPlan.duration} Month${selectedPlan.duration > 1 ? 's' : ''}`}</span>
+                    </span>
+                    {selectedPlan.hasBookingAccess && (
+                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs px-2">
+                        Booking
+                      </Badge>
+                    )}
+                    {selectedPlan.hasStaffManagementAccess && (
+                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs px-2">
+                        Staff Mgmt
+                      </Badge>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Status</Label>
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-black/20">
+                <Label className="text-white font-medium">Status</Label>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-nerfturf-purple/20 hover:border-nerfturf-purple/40 transition-colors">
                   <Switch
                     checked={formData.is_active}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                   />
-                  <span className="text-gray-300 text-sm">
+                  <span className={`text-sm font-medium ${formData.is_active ? 'text-green-400' : 'text-red-400'}`}>
                     {formData.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Pages Enabled</Label>
-                <div className="flex items-center gap-3 p-2 rounded-lg bg-black/20">
+                <Label className="text-white font-medium">Pages Enabled</Label>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-nerfturf-purple/20 hover:border-nerfturf-purple/40 transition-colors">
                   <Switch
                     checked={formData.pages_enabled}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, pages_enabled: checked }))}
                   />
-                  <span className="text-gray-300 text-sm">
+                  <span className={`text-sm font-medium ${formData.pages_enabled ? 'text-green-400' : 'text-red-400'}`}>
                     {formData.pages_enabled ? 'Enabled' : 'Disabled'}
                   </span>
                 </div>
@@ -268,25 +294,31 @@ const AdminSubscription: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="start_date" className="text-white">Start Date</Label>
+              <Label htmlFor="start_date" className="text-white font-medium flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-nerfturf-lightpurple" />
+                Start Date
+              </Label>
               <Input
                 id="start_date"
                 type="date"
                 value={formData.start_date}
                 onChange={(e) => handleStartDateChange(e.target.value)}
-                className="bg-black/30 border-nerfturf-purple/30 text-white"
+                className="bg-black/40 border-nerfturf-purple/40 text-white hover:border-nerfturf-purple/60 transition-colors"
               />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="end_date" className="text-white">End Date</Label>
+                <Label htmlFor="end_date" className="text-white font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-nerfturf-lightpurple" />
+                  End Date
+                </Label>
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={useCustomEndDate}
                     onCheckedChange={setUseCustomEndDate}
                   />
-                  <span className="text-xs text-gray-400">Custom Date</span>
+                  <span className="text-xs text-gray-400">Custom</span>
                 </div>
               </div>
               {useCustomEndDate ? (
@@ -295,24 +327,27 @@ const AdminSubscription: React.FC = () => {
                   type="date"
                   value={formData.end_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
-                  className="bg-black/30 border-nerfturf-purple/30 text-white"
+                  className="bg-black/40 border-nerfturf-purple/40 text-white hover:border-nerfturf-purple/60 transition-colors"
                 />
               ) : (
-                <div className="p-3 bg-black/30 border border-nerfturf-purple/30 rounded-md text-gray-300">
+                <div className="p-3 bg-black/40 border border-nerfturf-purple/40 rounded-md text-gray-200 font-medium">
                   {formData.end_date ? format(new Date(formData.end_date), 'MMM dd, yyyy') : 'Auto-calculated'}
                 </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount_paid" className="text-white">Amount Paid (₹)</Label>
+              <Label htmlFor="amount_paid" className="text-white font-medium flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-nerfturf-lightpurple" />
+                Amount Paid (₹)
+              </Label>
               <Input
                 id="amount_paid"
                 type="number"
                 step="0.01"
                 value={formData.amount_paid}
                 onChange={(e) => setFormData(prev => ({ ...prev, amount_paid: parseFloat(e.target.value) || 0 }))}
-                className="bg-black/30 border-nerfturf-purple/30 text-white"
+                className="bg-black/40 border-nerfturf-purple/40 text-white hover:border-nerfturf-purple/60 transition-colors"
                 placeholder="0.00"
               />
             </div>
@@ -320,59 +355,82 @@ const AdminSubscription: React.FC = () => {
         </Card>
 
         {/* Feature Access */}
-        <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-nerfturf-lightpurple" />
-              Feature Access
+        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/30 hover:border-nerfturf-purple/50 transition-all duration-300">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-white flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-nerfturf-magenta/30 to-nerfturf-purple/30">
+                <CreditCard className="h-5 w-5 text-nerfturf-lightpurple" />
+              </div>
+              <span className="text-xl font-semibold">Feature Access</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-2">
-              <Label className="text-white">Booking Access</Label>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-black/20">
+              <Label className="text-white font-medium">Booking Access</Label>
+              <div className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
+                formData.booking_access 
+                  ? 'bg-green-500/10 border-green-500/30' 
+                  : 'bg-black/30 border-nerfturf-purple/20'
+              }`}>
                 <Switch
                   checked={formData.booking_access}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, booking_access: checked }))}
                   disabled={!selectedPlan?.hasBookingAccess}
                 />
                 <div className="flex-1">
-                  <span className="text-gray-300 text-sm">
+                  <span className={`text-sm font-medium ${
+                    formData.booking_access ? 'text-green-400' : 'text-gray-400'
+                  }`}>
                     {formData.booking_access ? 'Enabled' : 'Disabled'}
                   </span>
                   {!selectedPlan?.hasBookingAccess && (
-                    <p className="text-xs text-gray-500 mt-1">Not available in this plan</p>
+                    <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                      <XCircle className="h-3 w-3" />
+                      Not available in this plan
+                    </p>
                   )}
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-white">Staff Management Access</Label>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-black/20">
+              <Label className="text-white font-medium">Staff Management Access</Label>
+              <div className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
+                formData.staff_management_access 
+                  ? 'bg-green-500/10 border-green-500/30' 
+                  : 'bg-black/30 border-nerfturf-purple/20'
+              }`}>
                 <Switch
                   checked={formData.staff_management_access}
                   onCheckedChange={(checked) => setFormData(prev => ({ ...prev, staff_management_access: checked }))}
                   disabled={!selectedPlan?.hasStaffManagementAccess}
                 />
                 <div className="flex-1">
-                  <span className="text-gray-300 text-sm">
+                  <span className={`text-sm font-medium ${
+                    formData.staff_management_access ? 'text-green-400' : 'text-gray-400'
+                  }`}>
                     {formData.staff_management_access ? 'Enabled' : 'Disabled'}
                   </span>
                   {!selectedPlan?.hasStaffManagementAccess && (
-                    <p className="text-xs text-gray-500 mt-1">Not available in this plan</p>
+                    <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
+                      <XCircle className="h-3 w-3" />
+                      Not available in this plan
+                    </p>
                   )}
                 </div>
               </div>
             </div>
 
             {selectedPlan && (
-              <div className="p-4 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-                <h4 className="text-white font-semibold mb-2">Plan Features</h4>
-                <ul className="space-y-1 text-sm text-gray-300">
+              <div className="p-4 rounded-lg bg-gradient-to-br from-nerfturf-purple/10 to-nerfturf-magenta/10 border border-nerfturf-purple/30">
+                <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-nerfturf-lightpurple" />
+                  Plan Features
+                </h4>
+                <ul className="space-y-2 text-sm">
                   {selectedPlan.features.slice(0, 5).map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <span className="text-green-400">•</span>
+                    <li key={index} className="flex items-center gap-2 text-gray-300">
+                      <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -383,12 +441,12 @@ const AdminSubscription: React.FC = () => {
         </Card>
       </div>
 
-      <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
+      <Card className="bg-gradient-to-r from-nerfturf-purple/10 via-nerfturf-magenta/10 to-nerfturf-purple/10 border-nerfturf-purple/40">
         <CardContent className="p-6">
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple/90 hover:to-nerfturf-magenta/90"
+            className="w-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple/90 hover:to-nerfturf-magenta/90 shadow-lg shadow-nerfturf-purple/20"
             size="lg"
           >
             <Save className="h-4 w-4 mr-2" />
@@ -398,43 +456,38 @@ const AdminSubscription: React.FC = () => {
       </Card>
 
       {subscription && (
-        <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
+        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/30">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-nerfturf-lightpurple" />
-              Current Subscription Summary
+            <CardTitle className="text-white flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
+                <Calendar className="h-5 w-5 text-nerfturf-lightpurple" />
+              </div>
+              <span className="text-xl font-semibold">Current Subscription Summary</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div>
-                <span className="text-gray-400">Plan:</span>
-                <span className="ml-2 text-white font-semibold">{subscription.plan_name || 'Not Set'}</span>
-              </div>
-              <div>
-                <span className="text-gray-400">Status:</span>
-                <span className="ml-2 text-white">{subscription.is_active ? 'Active' : 'Inactive'}</span>
-              </div>
-              <div>
-                <span className="text-gray-400">Type:</span>
-                <span className="ml-2 text-white capitalize">{subscription.subscription_type}</span>
-              </div>
-              <div>
-                <span className="text-gray-400">Start Date:</span>
-                <span className="ml-2 text-white">{format(new Date(subscription.start_date), 'MMM dd, yyyy')}</span>
-              </div>
-              <div>
-                <span className="text-gray-400">End Date:</span>
-                <span className="ml-2 text-white">
-                  {subscription.subscription_type === 'lifetime' 
-                    ? 'Lifetime' 
-                    : format(new Date(subscription.end_date), 'MMM dd, yyyy')}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-400">Amount Paid:</span>
-                <span className="ml-2 text-white font-semibold">₹{subscription.amount_paid.toLocaleString('en-IN')}</span>
-              </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              {[
+                { label: 'Plan', value: subscription.plan_name || 'Not Set', highlight: true },
+                { label: 'Status', value: subscription.is_active ? 'Active' : 'Inactive', highlight: subscription.is_active },
+                { label: 'Type', value: subscription.subscription_type, highlight: false },
+                { label: 'Start Date', value: format(new Date(subscription.start_date), 'MMM dd, yyyy'), highlight: false },
+                { label: 'End Date', value: subscription.subscription_type === 'lifetime' ? 'Lifetime' : format(new Date(subscription.end_date), 'MMM dd, yyyy'), highlight: false },
+                { label: 'Amount Paid', value: `₹${subscription.amount_paid.toLocaleString('en-IN')}`, highlight: true },
+              ].map((item, index) => (
+                <div key={index} className="p-3 rounded-lg bg-black/20 border border-nerfturf-purple/20">
+                  <span className="text-gray-400 text-xs block mb-1">{item.label}</span>
+                  <span className={`text-sm font-semibold ${
+                    item.highlight 
+                      ? item.value === 'Active' 
+                        ? 'text-green-400' 
+                        : 'text-nerfturf-lightpurple'
+                      : 'text-white'
+                  }`}>
+                    {item.value}
+                  </span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

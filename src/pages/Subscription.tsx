@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useSubscription } from '@/context/SubscriptionContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, CheckCircle, XCircle, Clock, Shield, Zap, Phone, Mail, TrendingUp } from 'lucide-react';
+import { Calendar, DollarSign, CheckCircle, XCircle, Clock, Shield, Zap, Phone, Mail, TrendingUp, Sparkles } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { SUBSCRIPTION_PLANS, getPlanByName } from '@/lib/subscriptionPlans';
 
@@ -237,79 +237,133 @@ const Subscription: React.FC = () => {
       {/* Available Plans */}
       <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
         <CardHeader>
-          <CardTitle className="text-white text-xl font-semibold">Available Subscription Plans</CardTitle>
+          <CardTitle className="text-white text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta">
+            Available Subscription Plans
+          </CardTitle>
+          <p className="text-gray-400 text-sm mt-1">Choose the perfect plan for your business needs</p>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {SUBSCRIPTION_PLANS.map((plan) => {
               const isCurrentPlan = subscription?.plan_name === plan.name;
+              const isLifetime = plan.id === 'lifetime';
+              const isAdvanced = plan.name.includes('Advanced');
+              const isGold = plan.name.includes('Gold');
+              const isDiamond = plan.name.includes('Diamond');
+              
               return (
                 <div
                   key={plan.id}
-                  className={`p-5 rounded-lg border ${
+                  className={`group relative overflow-hidden rounded-xl border transition-all duration-300 ${
                     isCurrentPlan
-                      ? 'bg-gradient-to-br from-nerfturf-purple/20 to-nerfturf-magenta/20 border-nerfturf-purple/50'
-                      : 'bg-black/20 border-nerfturf-purple/30'
-                  }`}
+                      ? 'bg-gradient-to-br from-nerfturf-purple/30 via-nerfturf-magenta/20 to-nerfturf-purple/30 border-nerfturf-purple/50 shadow-lg shadow-nerfturf-purple/20 scale-105'
+                      : isLifetime
+                      ? 'bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-yellow-500/40 hover:border-yellow-500/60 hover:shadow-lg hover:shadow-yellow-500/20'
+                      : isDiamond
+                      ? 'bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-cyan-500/10 border-cyan-500/30 hover:border-cyan-500/50'
+                      : isGold
+                      ? 'bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-500/10 border-amber-500/30 hover:border-amber-500/50'
+                      : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-nerfturf-purple/30 hover:border-nerfturf-purple/50'
+                  } hover:scale-[1.02] hover:shadow-xl`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                    {isCurrentPlan && (
-                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                        Current
-                      </Badge>
-                    )}
-                  </div>
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   
-                  <div className="mb-3">
-                    <span className="text-2xl font-bold text-nerfturf-lightpurple">
-                      ₹{plan.finalPrice.toLocaleString('en-IN')}
-                    </span>
-                    {plan.discount && (
-                      <span className="ml-2 text-sm text-green-400">
-                        ({plan.discount}% off)
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <p className="text-gray-400 text-sm">
-                      {plan.type === 'lifetime' 
-                        ? 'Lifetime Access' 
-                        : `${plan.duration} Month${plan.duration > 1 ? 's' : ''}`}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 mb-4">
-                    {plan.hasBookingAccess && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-3 w-3 text-green-400" />
-                        <span className="text-gray-300">Booking Access</span>
+                  <div className="relative p-6">
+                    {/* Plan Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className={`text-xl font-bold mb-1 ${
+                          isLifetime ? 'text-yellow-400' : 
+                          isDiamond ? 'text-cyan-400' : 
+                          isGold ? 'text-amber-400' : 
+                          'text-white'
+                        }`}>
+                          {plan.name}
+                        </h3>
+                        <p className="text-gray-400 text-xs">
+                          {plan.type === 'lifetime' 
+                            ? 'Lifetime Access' 
+                            : `${plan.duration} Month${plan.duration > 1 ? 's' : ''}`}
+                        </p>
                       </div>
-                    )}
-                    {plan.hasStaffManagementAccess && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <CheckCircle className="h-3 w-3 text-green-400" />
-                        <span className="text-gray-300">Staff Management</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {plan.id === 'lifetime' && plan.contactInfo && (
-                    <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 mb-3">
-                      <p className="text-yellow-400 text-xs font-semibold mb-1">Enterprise Contact</p>
-                      <p className="text-gray-300 text-xs">{plan.contactInfo.name}</p>
-                      <a 
-                        href={`tel:+91${plan.contactInfo.phone}`}
-                        className="text-yellow-400 text-xs hover:underline"
-                      >
-                        +91 {plan.contactInfo.phone}
-                      </a>
+                      {isCurrentPlan && (
+                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs px-2 py-1">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Active
+                        </Badge>
+                      )}
                     </div>
-                  )}
+                    
+                    {/* Price */}
+                    <div className="mb-4">
+                      <div className="flex items-baseline gap-2">
+                        <span className={`text-3xl font-bold ${
+                          isLifetime ? 'text-yellow-400' : 
+                          isDiamond ? 'text-cyan-400' : 
+                          isGold ? 'text-amber-400' : 
+                          'bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent'
+                        }`}>
+                          ₹{plan.finalPrice.toLocaleString('en-IN')}
+                        </span>
+                        {plan.discount && (
+                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                            Save {plan.discount}%
+                          </Badge>
+                        )}
+                      </div>
+                      {plan.type !== 'lifetime' && (
+                        <p className="text-gray-500 text-xs mt-1">
+                          ₹{Math.round(plan.finalPrice / plan.duration).toLocaleString('en-IN')}/month
+                        </p>
+                      )}
+                    </div>
 
-                  <div className="text-xs text-gray-400">
-                    Contact administrator to upgrade
+                    {/* Features */}
+                    <div className="space-y-2 mb-4 min-h-[80px]">
+                      {plan.hasBookingAccess && (
+                        <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-green-500/10">
+                          <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
+                          <span className="text-gray-200 font-medium">Booking Access</span>
+                        </div>
+                      )}
+                      {plan.hasStaffManagementAccess && (
+                        <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-green-500/10">
+                          <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
+                          <span className="text-gray-200 font-medium">Staff Management</span>
+                        </div>
+                      )}
+                      {!plan.hasBookingAccess && !plan.hasStaffManagementAccess && (
+                        <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-gray-500/10">
+                          <CheckCircle className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-gray-400">Core Features Only</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Lifetime Special */}
+                    {isLifetime && plan.contactInfo && (
+                      <div className="p-3 rounded-lg bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 mb-4">
+                        <p className="text-yellow-300 text-xs font-bold mb-2 flex items-center gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          Enterprise Contact
+                        </p>
+                        <p className="text-white text-sm font-semibold mb-1">{plan.contactInfo.name}</p>
+                        <a 
+                          href={`tel:+91${plan.contactInfo.phone}`}
+                          className="text-yellow-300 text-sm hover:text-yellow-200 font-semibold underline"
+                        >
+                          +91 {plan.contactInfo.phone}
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="pt-4 border-t border-white/10">
+                      <p className="text-gray-400 text-xs text-center">
+                        Contact administrator to {isCurrentPlan ? 'renew' : 'upgrade'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );

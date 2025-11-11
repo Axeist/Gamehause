@@ -15,7 +15,7 @@ import CouponPromotionalPopup from "@/components/CouponPromotionalPopup";
 import BookingConfirmationDialog from "@/components/BookingConfirmationDialog";
 import LegalDialog from "@/components/dialog/LegalDialog";
 import { useSubscription } from "@/context/SubscriptionContext";
-import UpgradeDialog from "@/components/UpgradeDialog";
+import PublicBookingUnavailableDialog from "@/components/PublicBookingUnavailableDialog";
 import {
   CalendarIcon,
   Clock,
@@ -2146,10 +2146,9 @@ export default function PublicBooking() {
         </div>
       )}
 
-      <UpgradeDialog
+      <PublicBookingUnavailableDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        featureName="Booking"
       />
     </div>
   );
