@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useSubscription } from '@/context/SubscriptionContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, CheckCircle, XCircle, Clock, Shield, Zap, Phone, Mail, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, DollarSign, CheckCircle, XCircle, Clock, Shield, Zap, Phone, Mail, TrendingUp, Sparkles, Star, Award, Users, BarChart3, Settings, FileText, HelpCircle } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { SUBSCRIPTION_PLANS, getPlanByName } from '@/lib/subscriptionPlans';
 
@@ -13,6 +13,16 @@ const Subscription: React.FC = () => {
     if (!subscription?.plan_name) return null;
     return getPlanByName(subscription.plan_name);
   }, [subscription]);
+
+  // Calculate discount received
+  const discountReceived = useMemo(() => {
+    if (!subscription || !currentPlan) return 0;
+    if (subscription.amount_paid >= currentPlan.finalPrice) return 0;
+    
+    const discountAmount = currentPlan.finalPrice - subscription.amount_paid;
+    const discountPercent = (discountAmount / currentPlan.finalPrice) * 100;
+    return Math.round(discountPercent * 100) / 100; // Round to 2 decimal places
+  }, [subscription, currentPlan]);
 
   const subscriptionProgress = useMemo(() => {
     if (!subscription || subscription.subscription_type === 'lifetime') return 0;
@@ -44,80 +54,162 @@ const Subscription: React.FC = () => {
     );
   }
 
+  // Enhanced plan descriptions
+  const getPlanDescription = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
+    const descriptions: Record<string, string> = {
+      'silver-basic': 'Perfect for small businesses starting their digital journey. Includes all essential POS and management features.',
+      'silver-advanced': 'Ideal for growing businesses that need booking and staff management capabilities along with core features.',
+      'gold-basic': 'Best value for businesses committed to quarterly subscriptions. Save 10% while getting all core features.',
+      'gold-advanced': 'Comprehensive quarterly plan with booking and staff management. Perfect for established businesses.',
+      'diamond-basic': 'Annual subscription with maximum savings. Get 15% off on all core features for a full year.',
+      'diamond-advanced': 'Premium annual plan with all features unlocked. Best for businesses looking for long-term commitment.',
+      'lifetime': 'One-time payment for lifetime access. Includes priority support, 5 years of updates, and enterprise features.',
+    };
+    return descriptions[plan.id] || 'Comprehensive subscription plan tailored for your business needs.';
+  };
+
+  const getPlanBenefits = (plan: typeof SUBSCRIPTION_PLANS[0]) => {
+    const benefits: Record<string, string[]> = {
+      'silver-basic': [
+        'Unlimited transactions',
+        'Real-time inventory tracking',
+        'Customer database management',
+        'Sales reports & analytics',
+        'Multi-station support',
+        'Data export capabilities',
+      ],
+      'silver-advanced': [
+        'Everything in Silver Basic',
+        'Online booking system',
+        'Staff scheduling & management',
+        'Public booking portal',
+        'Advanced reporting',
+        'Customer notifications',
+      ],
+      'gold-basic': [
+        'All Silver Basic features',
+        '10% cost savings',
+        'Priority email support',
+        'Quarterly business reviews',
+        'Extended data retention',
+        'Advanced analytics',
+      ],
+      'gold-advanced': [
+        'All Silver Advanced features',
+        '10% cost savings',
+        'Priority support channel',
+        'Quarterly consultations',
+        'Custom report generation',
+        'API access',
+      ],
+      'diamond-basic': [
+        'All Silver Basic features',
+        '15% maximum savings',
+        'Dedicated account manager',
+        'Annual business review',
+        'Unlimited data retention',
+        'Premium analytics dashboard',
+      ],
+      'diamond-advanced': [
+        'All Silver Advanced features',
+        '15% maximum savings',
+        '24/7 priority support',
+        'Quarterly strategy sessions',
+        'Custom integrations',
+        'White-label options',
+      ],
+      'lifetime': [
+        'All features forever',
+        'Lifetime technical support',
+        '5 years of free updates',
+        'Priority feature requests',
+        'Dedicated support team',
+        'Enterprise-grade security',
+        'Custom development options',
+      ],
+    };
+    return benefits[plan.id] || [];
+  };
+
   return (
     <div className="flex-1 space-y-6 p-6 text-white bg-inherit min-h-screen">
-      {/* Header Section */}
-      <div className="relative overflow-hidden rounded-lg bg-[#1A1F2C] border border-nerfturf-purple/30 p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      {/* Enhanced Header Section */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-nerfturf-purple/20 via-nerfturf-magenta/10 to-nerfturf-purple/20 border border-nerfturf-purple/40 p-6 md:p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-nerfturf-lightpurple/5 to-transparent opacity-50"></div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple font-heading mb-2">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple font-heading mb-2">
               Subscription & Renewal
             </h2>
-            <p className="text-gray-300 text-sm md:text-base">
-              Manage and monitor your subscription status
+            <p className="text-gray-300 text-base md:text-lg">
+              Comprehensive subscription management and plan overview
             </p>
           </div>
           {isSubscriptionValid && subscription && (
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500/20 border border-green-500/30">
+            <div className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/40 backdrop-blur-sm">
+              <div className="h-3 w-3 rounded-full bg-green-400 animate-pulse"></div>
               <CheckCircle className="h-5 w-5 text-green-400" />
-              <span className="text-green-400 font-semibold">Active</span>
+              <span className="text-green-400 font-bold">Active Subscription</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Current Subscription Details */}
+      {/* Current Subscription Details - Enhanced */}
       {subscription && (
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
-            <CardHeader>
+          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40 hover:border-nerfturf-purple/60 transition-all duration-300">
+            <CardHeader className="pb-4">
               <CardTitle className="text-white flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-nerfturf-purple/20">
-                  <Calendar className="h-5 w-5 text-nerfturf-lightpurple" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
+                  <Calendar className="h-6 w-6 text-nerfturf-lightpurple" />
                 </div>
-                <span className="text-xl font-semibold">Subscription Details</span>
+                <span className="text-xl font-bold">Subscription Details</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                <span className="text-gray-300 font-medium">Status:</span>
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+                <span className="text-gray-300 font-medium flex items-center gap-2">
+                  <Award className="h-4 w-4" />
+                  Status:
+                </span>
                 {isSubscriptionValid ? (
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-3 py-1.5">
+                    <CheckCircle className="h-3 w-3 mr-1.5" />
                     Active
                   </Badge>
                 ) : (
-                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-                    <XCircle className="h-3 w-3 mr-1" />
+                  <Badge className="bg-red-500/20 text-red-400 border-red-500/30 px-3 py-1.5">
+                    <XCircle className="h-3 w-3 mr-1.5" />
                     Expired/Deactivated
                   </Badge>
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                <span className="text-gray-300">Plan Name:</span>
-                <span className="text-white font-semibold">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+                <span className="text-gray-300 font-medium">Plan Name:</span>
+                <span className="text-white font-bold text-lg bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent">
                   {subscription.plan_name || 'Not Set'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                <span className="text-gray-300">Type:</span>
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+                <span className="text-gray-300 font-medium">Billing Cycle:</span>
                 <span className="text-white font-semibold capitalize">
-                  {subscription.subscription_type}
+                  {subscription.subscription_type === 'lifetime' ? 'Lifetime' : subscription.subscription_type}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                <span className="text-gray-300">Start Date:</span>
-                <span className="text-white">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+                <span className="text-gray-300 font-medium">Start Date:</span>
+                <span className="text-white font-medium">
                   {format(new Date(subscription.start_date), 'MMM dd, yyyy')}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                <span className="text-gray-300">Valid Till:</span>
-                <span className={`font-semibold ${isSubscriptionValid ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+                <span className="text-gray-300 font-medium">Valid Till:</span>
+                <span className={`font-bold text-lg ${isSubscriptionValid ? 'text-green-400' : 'text-red-400'}`}>
                   {subscription.subscription_type === 'lifetime' 
                     ? 'Lifetime' 
                     : format(new Date(subscription.end_date), 'MMM dd, yyyy')}
@@ -125,14 +217,14 @@ const Subscription: React.FC = () => {
               </div>
 
               {subscription.subscription_type !== 'lifetime' && isSubscriptionValid && (
-                <div className="pt-2">
+                <div className="pt-3">
                   <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-                    <span>Progress</span>
-                    <span>{Math.round(subscriptionProgress)}%</span>
+                    <span className="font-medium">Subscription Progress</span>
+                    <span className="font-bold">{Math.round(subscriptionProgress)}%</span>
                   </div>
-                  <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                  <div className="h-3 bg-black/40 rounded-full overflow-hidden border border-nerfturf-purple/20">
                     <div 
-                      className="h-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-nerfturf-purple via-nerfturf-magenta to-nerfturf-lightpurple transition-all duration-500"
                       style={{ width: `${subscriptionProgress}%` }}
                     />
                   </div>
@@ -141,55 +233,84 @@ const Subscription: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
-            <CardHeader>
+          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40 hover:border-nerfturf-purple/60 transition-all duration-300">
+            <CardHeader className="pb-4">
               <CardTitle className="text-white flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-nerfturf-magenta/20">
-                  <DollarSign className="h-5 w-5 text-nerfturf-lightpurple" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-nerfturf-magenta/30 to-nerfturf-purple/30">
+                  <DollarSign className="h-6 w-6 text-nerfturf-lightpurple" />
                 </div>
-                <span className="text-xl font-semibold">Payment & Features</span>
+                <span className="text-xl font-bold">Payment & Features</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 rounded-lg bg-gradient-to-br from-nerfturf-purple/10 to-nerfturf-magenta/10 border border-nerfturf-purple/20">
-                <div className="flex items-center justify-between">
+              <div className="p-5 rounded-xl bg-gradient-to-br from-nerfturf-purple/20 via-nerfturf-magenta/15 to-nerfturf-purple/20 border border-nerfturf-purple/30">
+                <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-300 font-medium">Amount Paid:</span>
-                  <span className="text-white font-bold text-xl">
+                  <span className="text-white font-bold text-2xl bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent">
                     ₹{subscription.amount_paid.toLocaleString('en-IN')}
                   </span>
                 </div>
+                {currentPlan && (
+                  <div className="mt-3 pt-3 border-t border-nerfturf-purple/20">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-400">Plan Value:</span>
+                      <span className="text-gray-300 font-semibold">
+                        ₹{currentPlan.finalPrice.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    {discountReceived > 0 && (
+                      <div className="flex items-center justify-between text-sm mt-2">
+                        <span className="text-gray-400 flex items-center gap-1">
+                          <TrendingUp className="h-3 w-3 text-green-400" />
+                          Discount Received:
+                        </span>
+                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30 font-bold">
+                          {discountReceived}% OFF
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                  <span className="text-gray-300 flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
+              <div className="space-y-3">
+                <div className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                  subscription.booking_access 
+                    ? 'bg-green-500/10 border-green-500/30' 
+                    : 'bg-black/30 border-nerfturf-purple/20'
+                }`}>
+                  <span className="text-gray-300 font-medium flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
                     Booking Access:
                   </span>
                   {subscription.booking_access ? (
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                      <Zap className="h-3 w-3 mr-1" />
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-3 py-1.5">
+                      <Zap className="h-3 w-3 mr-1.5" />
                       Enabled
                     </Badge>
                   ) : (
-                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 px-3 py-1.5">
                       Not Available
                     </Badge>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg bg-black/20">
-                  <span className="text-gray-300 flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
+                <div className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                  subscription.staff_management_access 
+                    ? 'bg-green-500/10 border-green-500/30' 
+                    : 'bg-black/30 border-nerfturf-purple/20'
+                }`}>
+                  <span className="text-gray-300 font-medium flex items-center gap-2">
+                    <Users className="h-5 w-5" />
                     Staff Management:
                   </span>
                   {subscription.staff_management_access ? (
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                      <Zap className="h-3 w-3 mr-1" />
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-3 py-1.5">
+                      <Zap className="h-3 w-3 mr-1.5" />
                       Enabled
                     </Badge>
                   ) : (
-                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 px-3 py-1.5">
                       Not Available
                     </Badge>
                   )}
@@ -197,12 +318,14 @@ const Subscription: React.FC = () => {
               </div>
 
               {daysRemaining !== null && daysRemaining > 0 && (
-                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-green-500/15 to-emerald-500/15 border border-green-500/30">
                   <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-green-400" />
+                    <div className="p-2 rounded-lg bg-green-500/20">
+                      <Clock className="h-5 w-5 text-green-400" />
+                    </div>
                     <div>
-                      <p className="text-gray-300 text-sm">Days Remaining</p>
-                      <p className="text-green-400 font-bold text-lg">{daysRemaining} {daysRemaining === 1 ? 'Day' : 'Days'}</p>
+                      <p className="text-gray-300 text-sm font-medium">Days Remaining</p>
+                      <p className="text-green-400 font-bold text-xl">{daysRemaining} {daysRemaining === 1 ? 'Day' : 'Days'}</p>
                     </div>
                   </div>
                 </div>
@@ -212,21 +335,24 @@ const Subscription: React.FC = () => {
         </div>
       )}
 
-      {/* Current Plan Features */}
+      {/* Current Plan Features - Enhanced */}
       {currentPlan && (
-        <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
+        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-3">
-              <TrendingUp className="h-5 w-5 text-nerfturf-lightpurple" />
-              <span>Current Plan Features</span>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
+                <Star className="h-5 w-5 text-nerfturf-lightpurple" />
+              </div>
+              <span className="text-xl font-bold">Your Current Plan Benefits</span>
             </CardTitle>
+            <p className="text-gray-400 text-sm mt-2 ml-11">{getPlanDescription(currentPlan)}</p>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-3">
-              {currentPlan.features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-2 p-2 rounded-lg bg-black/20">
-                  <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                  <span className="text-gray-300 text-sm">{feature}</span>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {getPlanBenefits(currentPlan).map((benefit, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-nerfturf-purple/20 hover:border-nerfturf-purple/40 transition-colors">
+                  <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-200 text-sm leading-relaxed">{benefit}</span>
                 </div>
               ))}
             </div>
@@ -234,13 +360,13 @@ const Subscription: React.FC = () => {
         </Card>
       )}
 
-      {/* Available Plans */}
-      <Card className="bg-[#1A1F2C] border-nerfturf-purple/30">
-        <CardHeader>
-          <CardTitle className="text-white text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta">
+      {/* Available Plans - Enhanced */}
+      <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40">
+        <CardHeader className="pb-6">
+          <CardTitle className="text-white text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple mb-2">
             Available Subscription Plans
           </CardTitle>
-          <p className="text-gray-400 text-sm mt-1">Choose the perfect plan for your business needs</p>
+          <p className="text-gray-400 text-base">Choose the perfect plan that fits your business requirements and budget</p>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -250,55 +376,62 @@ const Subscription: React.FC = () => {
               const isAdvanced = plan.name.includes('Advanced');
               const isGold = plan.name.includes('Gold');
               const isDiamond = plan.name.includes('Diamond');
+              const planDescription = getPlanDescription(plan);
+              const planBenefits = getPlanBenefits(plan);
               
               return (
                 <div
                   key={plan.id}
-                  className={`group relative overflow-hidden rounded-xl border transition-all duration-300 ${
+                  className={`group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
                     isCurrentPlan
-                      ? 'bg-gradient-to-br from-nerfturf-purple/30 via-nerfturf-magenta/20 to-nerfturf-purple/30 border-nerfturf-purple/50 shadow-lg shadow-nerfturf-purple/20 scale-105'
+                      ? 'bg-gradient-to-br from-nerfturf-purple/40 via-nerfturf-magenta/30 to-nerfturf-purple/40 border-nerfturf-purple/60 shadow-2xl shadow-nerfturf-purple/30 scale-105 ring-2 ring-nerfturf-purple/50'
                       : isLifetime
-                      ? 'bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-500/10 border-yellow-500/40 hover:border-yellow-500/60 hover:shadow-lg hover:shadow-yellow-500/20'
+                      ? 'bg-gradient-to-br from-yellow-500/15 via-orange-500/10 to-yellow-500/15 border-yellow-500/50 hover:border-yellow-500/70 hover:shadow-2xl hover:shadow-yellow-500/30'
                       : isDiamond
-                      ? 'bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-cyan-500/10 border-cyan-500/30 hover:border-cyan-500/50'
+                      ? 'bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-cyan-500/15 border-cyan-500/40 hover:border-cyan-500/60 hover:shadow-2xl hover:shadow-cyan-500/20'
                       : isGold
-                      ? 'bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-500/10 border-amber-500/30 hover:border-amber-500/50'
-                      : 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-nerfturf-purple/30 hover:border-nerfturf-purple/50'
-                  } hover:scale-[1.02] hover:shadow-xl`}
+                      ? 'bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-amber-500/15 border-amber-500/40 hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/20'
+                      : 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-nerfturf-purple/40 hover:border-nerfturf-purple/60'
+                  } hover:scale-[1.03] hover:shadow-xl`}
                 >
                   {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   
                   <div className="relative p-6">
                     {/* Plan Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className={`text-xl font-bold mb-1 ${
-                          isLifetime ? 'text-yellow-400' : 
-                          isDiamond ? 'text-cyan-400' : 
-                          isGold ? 'text-amber-400' : 
-                          'text-white'
-                        }`}>
-                          {plan.name}
-                        </h3>
-                        <p className="text-gray-400 text-xs">
+                    <div className="flex items-start justify-between mb-5">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className={`text-2xl font-bold ${
+                            isLifetime ? 'text-yellow-400' : 
+                            isDiamond ? 'text-cyan-400' : 
+                            isGold ? 'text-amber-400' : 
+                            'text-white'
+                          }`}>
+                            {plan.name}
+                          </h3>
+                          {isCurrentPlan && (
+                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs px-2 py-1">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Active
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-gray-400 text-sm mb-1">
                           {plan.type === 'lifetime' 
-                            ? 'Lifetime Access' 
-                            : `${plan.duration} Month${plan.duration > 1 ? 's' : ''}`}
+                            ? 'Lifetime Access • One-time Payment' 
+                            : `${plan.duration} Month${plan.duration > 1 ? 's' : ''} Billing Cycle`}
+                        </p>
+                        <p className="text-gray-500 text-xs leading-relaxed mt-2">
+                          {planDescription}
                         </p>
                       </div>
-                      {isCurrentPlan && (
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs px-2 py-1">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Active
-                        </Badge>
-                      )}
                     </div>
                     
-                    {/* Price */}
-                    <div className="mb-4">
-                      <div className="flex items-baseline gap-2">
-                        <span className={`text-3xl font-bold ${
+                    {/* Price Section */}
+                    <div className="mb-5 p-4 rounded-xl bg-black/30 border border-white/10">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className={`text-4xl font-bold ${
                           isLifetime ? 'text-yellow-400' : 
                           isDiamond ? 'text-cyan-400' : 
                           isGold ? 'text-amber-400' : 
@@ -307,52 +440,76 @@ const Subscription: React.FC = () => {
                           ₹{plan.finalPrice.toLocaleString('en-IN')}
                         </span>
                         {plan.discount && (
-                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
+                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs px-2 py-1">
                             Save {plan.discount}%
                           </Badge>
                         )}
                       </div>
                       {plan.type !== 'lifetime' && (
-                        <p className="text-gray-500 text-xs mt-1">
-                          ₹{Math.round(plan.finalPrice / plan.duration).toLocaleString('en-IN')}/month
-                        </p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-gray-500 text-xs">
+                            ₹{Math.round(plan.finalPrice / plan.duration).toLocaleString('en-IN')}/month
+                          </p>
+                          {plan.discount && (
+                            <p className="text-gray-400 text-xs line-through">
+                              ₹{Math.round((plan.finalPrice / (1 - plan.discount / 100)) / plan.duration).toLocaleString('en-IN')}/month
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
 
-                    {/* Features */}
-                    <div className="space-y-2 mb-4 min-h-[80px]">
+                    {/* Key Features */}
+                    <div className="space-y-2 mb-5 min-h-[100px]">
                       {plan.hasBookingAccess && (
-                        <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-green-500/10">
+                        <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-green-500/15 border border-green-500/30">
                           <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                          <span className="text-gray-200 font-medium">Booking Access</span>
+                          <span className="text-gray-100 font-semibold">Booking Management System</span>
                         </div>
                       )}
                       {plan.hasStaffManagementAccess && (
-                        <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-green-500/10">
+                        <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-green-500/15 border border-green-500/30">
                           <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0" />
-                          <span className="text-gray-200 font-medium">Staff Management</span>
+                          <span className="text-gray-100 font-semibold">Staff Management Portal</span>
                         </div>
                       )}
                       {!plan.hasBookingAccess && !plan.hasStaffManagementAccess && (
-                        <div className="flex items-center gap-2 text-sm p-2 rounded-lg bg-gray-500/10">
+                        <div className="flex items-center gap-2 text-sm p-3 rounded-lg bg-gray-500/10 border border-gray-500/20">
                           <CheckCircle className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          <span className="text-gray-400">Core Features Only</span>
+                          <span className="text-gray-400">Core Business Features</span>
                         </div>
                       )}
+                    </div>
+
+                    {/* Plan Benefits */}
+                    <div className="mb-5">
+                      <h4 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+                        <Award className="h-4 w-4 text-nerfturf-lightpurple" />
+                        Key Benefits
+                      </h4>
+                      <div className="space-y-2">
+                        {planBenefits.slice(0, 4).map((benefit, index) => (
+                          <div key={index} className="flex items-start gap-2 text-xs">
+                            <CheckCircle className="h-3 w-3 text-green-400 flex-shrink-0 mt-1" />
+                            <span className="text-gray-300 leading-relaxed">{benefit}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Lifetime Special */}
                     {isLifetime && plan.contactInfo && (
-                      <div className="p-3 rounded-lg bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 mb-4">
+                      <div className="p-4 rounded-xl bg-gradient-to-r from-yellow-500/25 to-orange-500/25 border-2 border-yellow-500/50 mb-5">
                         <p className="text-yellow-300 text-xs font-bold mb-2 flex items-center gap-1">
                           <Sparkles className="h-3 w-3" />
-                          Enterprise Contact
+                          Enterprise Contact Required
                         </p>
                         <p className="text-white text-sm font-semibold mb-1">{plan.contactInfo.name}</p>
                         <a 
                           href={`tel:+91${plan.contactInfo.phone}`}
-                          className="text-yellow-300 text-sm hover:text-yellow-200 font-semibold underline"
+                          className="text-yellow-300 text-sm hover:text-yellow-200 font-semibold underline flex items-center gap-1"
                         >
+                          <Phone className="h-3 w-3" />
                           +91 {plan.contactInfo.phone}
                         </a>
                       </div>
@@ -361,7 +518,7 @@ const Subscription: React.FC = () => {
                     {/* Footer */}
                     <div className="pt-4 border-t border-white/10">
                       <p className="text-gray-400 text-xs text-center">
-                        Contact administrator to {isCurrentPlan ? 'renew' : 'upgrade'}
+                        {isCurrentPlan ? 'Contact administrator to renew' : 'Contact administrator to upgrade'}
                       </p>
                     </div>
                   </div>
@@ -372,31 +529,31 @@ const Subscription: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Contact Information */}
-      <Card className="bg-gradient-to-r from-nerfturf-purple/10 via-nerfturf-magenta/10 to-nerfturf-purple/10 border-nerfturf-purple/30">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-full bg-nerfturf-purple/20">
-              <Phone className="h-6 w-6 text-nerfturf-lightpurple" />
+      {/* Enhanced Contact Information */}
+      <Card className="bg-gradient-to-r from-nerfturf-purple/15 via-nerfturf-magenta/15 to-nerfturf-purple/15 border-nerfturf-purple/40">
+        <CardContent className="p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
+              <HelpCircle className="h-8 w-8 text-nerfturf-lightpurple" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-white mb-1">
+              <h3 className="text-xl font-bold text-white mb-2">
                 Need Help or Want to Upgrade?
               </h3>
-              <p className="text-gray-300 text-sm mb-2">
-                Contact Cuephoria Tech Support for subscription inquiries, upgrades, or renewals.
+              <p className="text-gray-300 text-sm mb-4 leading-relaxed">
+                Our dedicated support team is available to assist you with subscription inquiries, plan upgrades, renewals, and any technical questions. Reach out to us through any of the channels below.
               </p>
-              <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex flex-wrap gap-4">
                 <a
                   href="tel:+918667637565"
-                  className="text-nerfturf-lightpurple hover:text-nerfturf-magenta font-semibold underline flex items-center gap-1"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-nerfturf-purple/20 hover:bg-nerfturf-purple/30 border border-nerfturf-purple/40 text-nerfturf-lightpurple font-semibold transition-all hover:scale-105"
                 >
                   <Phone className="h-4 w-4" />
                   +91 86676 37565
                 </a>
                 <a
                   href="mailto:contact@cuephoria.in"
-                  className="text-nerfturf-lightpurple hover:text-nerfturf-magenta font-semibold underline flex items-center gap-1"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-nerfturf-purple/20 hover:bg-nerfturf-purple/30 border border-nerfturf-purple/40 text-nerfturf-lightpurple font-semibold transition-all hover:scale-105"
                 >
                   <Mail className="h-4 w-4" />
                   contact@cuephoria.in
