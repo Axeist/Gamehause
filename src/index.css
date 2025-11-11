@@ -103,12 +103,12 @@
 
 /* Gradient text for headings - NerfTurf purple/magenta gradient */
 .gradient-text {
-  @apply bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600 bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-nerfturf-purple via-nerfturf-magenta to-nerfturf-lightpurple bg-clip-text text-transparent;
 }
 
 /* Cards hover effects - NerfTurf purple glow */
 .card-hover {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20 hover:translate-y-[-4px];
+  @apply transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-purple/20 hover:translate-y-[-4px];
 }
 
 /* Mobile optimizations */

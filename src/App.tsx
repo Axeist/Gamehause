@@ -69,7 +69,7 @@ const ProtectedRoute = ({
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] via-[#0f1f0f] to-[#1a1a1a]">
-        <div className="animate-spin-slow h-10 w-10 rounded-full border-4 border-emerald-500 border-t-transparent shadow-lg shadow-emerald-900/50"></div>
+        <div className="animate-spin-slow h-10 w-10 rounded-full border-4 border-nerfturf-purple border-t-transparent shadow-lg shadow-nerfturf-purple/50"></div>
       </div>
     );
   }
@@ -95,8 +95,8 @@ const ProtectedRoute = ({
             <SidebarTrigger />
           </div>
           {children}
-          <footer className="mt-auto w-full py-2 text-center text-xs text-emerald-100/80 bg-black/80 border-t border-emerald-500/20 font-semibold tracking-wide z-50 backdrop-blur-sm">
-            Designed & Developed by RK<sup className="text-emerald-400">™</sup>
+          <footer className="mt-auto w-full py-2 text-center text-xs text-nerfturf-lightpurple/80 bg-black/80 border-t border-nerfturf-purple/20 font-semibold tracking-wide z-50 backdrop-blur-sm">
+            Designed & Developed by Cuephoria Tech<sup className="text-nerfturf-purple">™</sup>
           </footer>
         </div>
       </div>
@@ -213,7 +213,7 @@ const App = () => (
                       <Suspense
                         fallback={
                           <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] via-[#0f1f0f] to-[#1a1a1a]">
-                            <div className="animate-spin-slow h-10 w-10 rounded-full border-4 border-emerald-500 border-t-transparent shadow-lg shadow-emerald-900/50"></div>
+                            <div className="animate-spin-slow h-10 w-10 rounded-full border-4 border-nerfturf-purple border-t-transparent shadow-lg shadow-nerfturf-purple/50"></div>
                           </div>
                         }
                       >

@@ -29,9 +29,9 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className }) => {
     <div className="relative inline-flex items-center gap-2 group">
       <div className="relative">
         {/* Green glow effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-full opacity-60 blur-md group-hover:opacity-90 transition-opacity duration-300"></div>
+        <div className="absolute -inset-1 bg-gradient-to-r from-nerfturf-purple/20 to-nerfturf-magenta/20 rounded-full opacity-60 blur-md group-hover:opacity-90 transition-opacity duration-300"></div>
         <img
-          src="/nerfturf-logo.png"
+          src="https://iili.io/KpFz28x.jpg"
           alt="NerfTurf - Premier Snooker & 8-Ball"
           height={height}
           width={width}
@@ -40,7 +40,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className }) => {
             background: "transparent",
             maxHeight: height, 
             maxWidth: width,
-            filter: "drop-shadow(0 0 8px rgba(34, 197, 94, 0.4))",
+            filter: "drop-shadow(0 0 8px rgba(110, 89, 165, 0.4))",
           }}
           className={`select-none relative z-10 group-hover:drop-shadow-[0_0_12px_rgba(34,197,94,0.6)] transition-all duration-300 ${className || ""}`}
           draggable={false}
@@ -48,7 +48,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className }) => {
         />
       </div>
       {!isMobile && size !== 'sm' && (
-        <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-green-500 font-heading group-hover:from-emerald-300 group-hover:to-green-400 transition-all duration-300">
+        <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta font-heading group-hover:from-nerfturf-lightpurple group-hover:to-nerfturf-magenta transition-all duration-300">
           NerfTurf
         </span>
       )}

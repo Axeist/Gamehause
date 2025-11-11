@@ -5,7 +5,7 @@ const ReceiptFooter: React.FC = () => {
     <div className="border-t-2 border-dashed border-gray-400 pt-4 mt-6 text-center receipt-footer">
       {/* Thank You Message */}
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-emerald-700 mb-1">
+        <h3 className="text-lg font-bold text-nerfturf-purple mb-1">
           Thank You for Visiting!
         </h3>
         <p className="text-xs text-gray-600">
@@ -28,8 +28,8 @@ const ReceiptFooter: React.FC = () => {
       {/* Social Media & Contact */}
       <div className="text-xs text-gray-600 mb-3">
         <p className="font-semibold mb-1">Stay Connected!</p>
-        <p>Follow us on Instagram & Facebook: <span className="font-medium text-emerald-700">@nerfturf</span></p>
-        <p className="mt-1">Visit us: <span className="font-medium text-emerald-700">www.nerfturf.in</span></p>
+        <p>Follow us on Instagram & Facebook: <span className="font-medium text-nerfturf-purple">@nerfturf</span></p>
+        <p className="mt-1">Visit us: <span className="font-medium text-nerfturf-purple">www.nerfturf.in</span></p>
       </div>
       
       {/* Powered By */}
@@ -40,7 +40,7 @@ const ReceiptFooter: React.FC = () => {
       
       {/* Decorative Bottom */}
       <div className="mt-3 text-center">
-        <p className="text-lg font-bold text-emerald-700">★ ★ ★</p>
+        <p className="text-lg font-bold text-nerfturf-purple">★ ★ ★</p>
       </div>
     </div>
   );

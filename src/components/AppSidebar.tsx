@@ -72,41 +72,41 @@ const AppSidebar: React.FC = () => {
                 <div className="h-full flex flex-col">
                   <div className="p-4 flex items-center gap-3">
                     <img
-                      src="/nerfturf-logo.png"
+                      src="https://iili.io/KpFz28x.jpg"
                       alt="NerfTurf Logo"
                       className="h-12 w-12 object-contain animate-bounce filter drop-shadow-[0_0_15px_rgba(34,197,94,0.8)] animate-neon-pulse"
                     />
-                    <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 font-heading">NerfTurf</span>
+                    <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-purple font-heading">NerfTurf</span>
                   </div>
-                  <div className="mx-4 h-px bg-green-500/30" />
+                  <div className="mx-4 h-px bg-nerfturf-purple/30" />
                   <div className="flex-1 overflow-auto py-2">
                     <div className="px-2">
                       {menuItems.map((item, index) => (
                         <Link 
                           key={item.path}
                           to={item.path} 
-                          className={`flex items-center py-3 px-3 rounded-md my-1 ${location.pathname === item.path ? 'bg-green-900/40 text-green-400' : 'text-white hover:bg-green-900/20'}`}
+                          className={`flex items-center py-3 px-3 rounded-md my-1 ${location.pathname === item.path ? 'bg-nerfturf-purple/40 text-nerfturf-lightpurple' : 'text-white hover:bg-nerfturf-purple/20'}`}
                         >
-                          <item.icon className={`mr-3 h-5 w-5 ${location.pathname === item.path ? 'text-green-400 animate-pulse-soft' : ''}`} />
+                          <item.icon className={`mr-3 h-5 w-5 ${location.pathname === item.path ? 'text-nerfturf-lightpurple animate-pulse-soft' : ''}`} />
                           <span className="font-quicksand text-base">{item.label}</span>
                         </Link>
                       ))}
                     </div>
                   </div>
                   <div className="p-4">
-                    <div className="group bg-cuephoria-dark rounded-lg p-4 shadow-lg border border-green-500/20 hover:border-green-500/60 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all duration-300 ease-in-out">
+                    <div className="group bg-cuephoria-dark rounded-lg p-4 shadow-lg border border-nerfturf-purple/20 hover:border-nerfturf-purple/60 hover:shadow-[0_0_20px_rgba(110, 89, 165, 0.3)] transition-all duration-300 ease-in-out">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           {isAdmin ? (
-                            <Shield className="h-6 w-6 text-green-400" />
+                            <Shield className="h-6 w-6 text-nerfturf-lightpurple" />
                           ) : (
-                            <User className="h-6 w-6 text-emerald-400" />
+                            <User className="h-6 w-6 text-nerfturf-lightpurple" />
                           )}
                           <div className="flex flex-col">
                             <span className="text-sm font-medium font-quicksand text-white">
                               {user.username}
                             </span>
-                            <span className="text-xs text-green-400 font-quicksand">
+                            <span className="text-xs text-nerfturf-lightpurple font-quicksand">
                               {isAdmin ? '(Administrator)' : '(Staff)'}
                             </span>
                           </div>
@@ -124,7 +124,7 @@ const AppSidebar: React.FC = () => {
                 </div>
               </SheetContent>
             </Sheet>
-            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 font-heading">NerfTurf</span>
+            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-purple font-heading">NerfTurf</span>
           </div>
         </div>
         <div className="pt-16"></div>
@@ -141,9 +141,9 @@ const AppSidebar: React.FC = () => {
           alt="NerfTurf Logo"
           className="h-14 w-14 object-contain animate-bounce filter drop-shadow-[0_0_15px_rgba(34,197,94,0.8)] animate-neon-pulse"
         />
-        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 font-heading">NerfTurf</span>
+        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-purple font-heading">NerfTurf</span>
       </SidebarHeader>
-      <SidebarSeparator className="mx-4 bg-green-500/30" />
+      <SidebarSeparator className="mx-4 bg-nerfturf-purple/30" />
       <SidebarContent className="mt-2">
         <SidebarGroup>
           <SidebarGroupContent>
@@ -152,7 +152,7 @@ const AppSidebar: React.FC = () => {
                 <SidebarMenuItem key={item.path} className={`animate-fade-in delay-${index * 100} text-base`}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.path}>
                     <Link to={item.path} className="flex items-center menu-item py-2.5">
-                      <item.icon className={`mr-3 h-6 w-6 ${location.pathname === item.path ? 'text-green-400 animate-pulse-soft' : ''}`} />
+                      <item.icon className={`mr-3 h-6 w-6 ${location.pathname === item.path ? 'text-nerfturf-lightpurple animate-pulse-soft' : ''}`} />
                       <span className="font-quicksand">{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -163,19 +163,19 @@ const AppSidebar: React.FC = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <div className="group bg-cuephoria-dark rounded-lg p-4 shadow-lg border border-green-500/20 hover:border-green-500/60 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all duration-300 ease-in-out">
+        <div className="group bg-cuephoria-dark rounded-lg p-4 shadow-lg border border-nerfturf-purple/20 hover:border-nerfturf-purple/60 hover:shadow-[0_0_20px_rgba(110, 89, 165, 0.3)] transition-all duration-300 ease-in-out">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {isAdmin ? (
-                <Shield className="h-6 w-6 text-green-400" />
+                <Shield className="h-6 w-6 text-nerfturf-lightpurple" />
               ) : (
-                <User className="h-6 w-6 text-emerald-400" />
+                <User className="h-6 w-6 text-nerfturf-lightpurple" />
               )}
               <div className="flex flex-col">
                 <span className="text-sm font-medium font-quicksand text-white">
                   {user.username}
                 </span>
-                <span className="text-xs text-green-400 font-quicksand">
+                <span className="text-xs text-nerfturf-lightpurple font-quicksand">
                   {isAdmin ? '(Administrator)' : '(Staff)'}
                 </span>
               </div>

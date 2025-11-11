@@ -5,8 +5,8 @@ const HowToBanner: React.FC = () => (
   <div
     className="
       w-full flex items-center gap-6
-      bg-gradient-to-br from-black/80 via-emerald-950/40 to-black/80
-      rounded-xl shadow-xl relative px-5 pt-5 pb-4 mb-7 border border-emerald-500/20
+      bg-gradient-to-br from-black/80 via-nerfturf-purple/40 to-black/80
+      rounded-xl shadow-xl relative px-5 pt-5 pb-4 mb-7 border border-nerfturf-purple/20
       "
     style={{
       boxShadow:
@@ -16,16 +16,16 @@ const HowToBanner: React.FC = () => (
     {/* Logo image */}
     <div className="flex-shrink-0">
       <img
-        src="/nerfturf-logo.png"
+        src="https://iili.io/KpFz28x.jpg"
         alt="NerfTurf Logo"
-        className="w-20 h-20 md:w-24 md:h-24 rounded-lg object-cover shadow border-2 border-emerald-500/20 bg-black/60"
+        className="w-20 h-20 md:w-24 md:h-24 rounded-lg object-cover shadow border-2 border-nerfturf-purple/20 bg-black/60"
         loading="lazy"
       />
     </div>
     {/* Content */}
     <div className="flex-1 flex flex-col">
       <div className="flex items-center gap-2 mb-0.5">
-        <BookOpenText className="h-6 w-6 text-emerald-400" />
+        <BookOpenText className="h-6 w-6 text-nerfturf-lightpurple" />
         <h1 className="text-2xl font-heading font-bold text-white tracking-tight">
           Welcome to{" "}
           <span
@@ -62,7 +62,7 @@ const HowToBanner: React.FC = () => (
           This interactive guide unlocks every feature for your workflow.
         </span>
         <br />
-        <span className="text-emerald-400 font-semibold">Tip:</span>
+        <span className="text-nerfturf-lightpurple font-semibold">Tip:</span>
         <span className="ml-1 text-white/75">
           Click any section below for pro tips!
         </span>

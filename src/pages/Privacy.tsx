@@ -105,7 +105,7 @@ const Privacy: React.FC = () => {
       <footer className="py-6 border-t border-gray-800">
         <div className="text-center text-sm text-gray-500">
           <p>© {new Date().getFullYear()} Cuephoria. All rights reserved.</p>
-          <p className="text-xs mt-1">Designed and developed by RK™</p>
+          <p className="text-xs mt-1">Designed & Developed by Cuephoria Tech™</p>
         </div>
       </footer>
     </div>
