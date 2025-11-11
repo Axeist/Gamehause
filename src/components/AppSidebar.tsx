@@ -76,7 +76,7 @@ const AppSidebar: React.FC = () => {
                       alt="NerfTurf Logo"
                       className="h-12 w-12 object-contain animate-bounce filter drop-shadow-[0_0_15px_rgba(110,89,165,0.8)] animate-neon-pulse"
                     />
-                    <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-purple font-heading">NerfTurf</span>
+                    <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple font-heading">NerfTurf</span>
                   </div>
                   <div className="mx-4 h-px bg-nerfturf-purple/30" />
                   <div className="flex-1 overflow-auto py-2">
@@ -141,7 +141,7 @@ const AppSidebar: React.FC = () => {
           alt="NerfTurf Logo"
           className="h-14 w-14 object-contain animate-bounce filter drop-shadow-[0_0_15px_rgba(110,89,165,0.8)] animate-neon-pulse"
         />
-        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-purple font-heading">NerfTurf</span>
+        <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple font-heading">NerfTurf</span>
       </SidebarHeader>
       <SidebarSeparator className="mx-4 bg-nerfturf-purple/30" />
       <SidebarContent className="mt-2">
