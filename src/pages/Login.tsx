@@ -731,7 +731,7 @@ const Login = () => {
           <div className="relative mx-auto w-full max-w-[220px] h-auto sm:w-64 sm:h-64">
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-nerfturf-purple/20 to-nerfturf-magenta/10 blur-lg"></div>
             <img 
-              src="https://iili.io/KpFz28x.jpg" 
+              src="https://freeimage.host/i/KpfrAog" 
               alt="NerfTurf - Premier Snooker & 8-Ball" 
               className="relative w-full h-auto mx-auto drop-shadow-[0_0_15px_rgba(110, 89, 165, 0.4)]"
             />
