@@ -510,16 +510,16 @@ const PublicTournaments = () => {
     const [showHistory, setShowHistory] = useState(false);
 
     return (
-      <Card className="w-full bg-gradient-to-br from-cuephoria-dark via-cuephoria-dark to-cuephoria-darkpurple/20 border-cuephoria-lightpurple/30 hover:border-cuephoria-lightpurple/60 transition-all duration-500 hover:shadow-2xl hover:shadow-cuephoria-lightpurple/20 hover:-translate-y-2 hover:scale-[1.02] group overflow-hidden relative">
+      <Card className="w-full bg-gradient-to-br from-black via-black to-blackpurple/20 border-nerfturf-lightpurple/30 hover:border-nerfturf-lightpurple/60 transition-all duration-500 hover:shadow-2xl hover:shadow-nerfturf-lightpurple/20 hover:-translate-y-2 hover:scale-[1.02] group overflow-hidden relative">
         {/* Animated glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cuephoria-lightpurple/10 to-transparent animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-nerfturf-lightpurple/10 to-transparent animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity"></div>
         
         {/* Floating particles effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-cuephoria-lightpurple/30 rounded-full animate-float opacity-0 group-hover:opacity-100"
+              className="absolute w-1 h-1 bg-nerfturf-lightpurple/30 rounded-full animate-float opacity-0 group-hover:opacity-100"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -532,8 +532,8 @@ const PublicTournaments = () => {
 
         <CardHeader className="pb-3 relative z-10">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-bold text-cuephoria-lightpurple flex items-center gap-2 group-hover:text-white transition-colors">
-              <div className="p-2 rounded-lg bg-cuephoria-lightpurple/20 group-hover:bg-cuephoria-lightpurple/40 transition-all group-hover:scale-110">
+            <CardTitle className="text-lg font-bold text-nerfturf-lightpurple flex items-center gap-2 group-hover:text-white transition-colors">
+              <div className="p-2 rounded-lg bg-nerfturf-lightpurple/20 group-hover:bg-nerfturf-lightpurple/40 transition-all group-hover:scale-110">
                 {getGameIcon(tournament.game_type)}
               </div>
               {tournament.name}
@@ -542,14 +542,14 @@ const PublicTournaments = () => {
               {tournament.status.replace('-', ' ')}
             </Badge>
           </div>
-          <div className="text-sm text-cuephoria-grey flex items-center gap-2 mt-2">
+          <div className="text-sm text-gray-300 flex items-center gap-2 mt-2">
             {tournament.game_type === 'Pool' && tournament.game_variant && (
-              <span className="bg-cuephoria-purple/20 px-2 py-1 rounded-full text-xs">{tournament.game_variant}</span>
+              <span className="bg-nerfturf-purple/20 px-2 py-1 rounded-full text-xs">{tournament.game_variant}</span>
             )}
             {tournament.game_type === 'PS5' && tournament.game_title && (
-              <span className="bg-cuephoria-blue/20 px-2 py-1 rounded-full text-xs">{tournament.game_title}</span>
+              <span className="bg-nerfturf-cyan/20 px-2 py-1 rounded-full text-xs">{tournament.game_title}</span>
             )}
-            <div className="flex items-center gap-1 text-cuephoria-lightpurple">
+            <div className="flex items-center gap-1 text-nerfturf-lightpurple">
               <Calendar className="h-4 w-4" />
               {formatDate(tournament.date)}
             </div>
@@ -560,19 +560,19 @@ const PublicTournaments = () => {
           {/* Registration Progress */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-cuephoria-grey">
+              <div className="flex items-center gap-2 text-gray-300">
                 <Users className="h-4 w-4" />
                 <span className="text-sm font-medium">
                   {tournament.total_registrations}/{tournament.max_players} registered
                 </span>
               </div>
-              <div className="text-xs text-cuephoria-lightpurple font-semibold">
+              <div className="text-xs text-nerfturf-lightpurple font-semibold">
                 {Math.round((tournament.total_registrations / tournament.max_players) * 100)}%
               </div>
             </div>
-            <div className="w-full bg-cuephoria-grey/20 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-gray-300/20 rounded-full h-3 overflow-hidden">
               <div 
-                className="bg-gradient-to-r from-cuephoria-lightpurple to-cuephoria-blue h-3 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                className="bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-cyan h-3 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                 style={{ 
                   width: `${Math.min((tournament.total_registrations / tournament.max_players) * 100, 100)}%` 
                 }}
@@ -625,7 +625,7 @@ const PublicTournaments = () => {
                 <CollapsibleTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="w-full border-cuephoria-lightpurple/30 text-cuephoria-lightpurple hover:bg-cuephoria-lightpurple/10"
+                    className="w-full border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
                   >
                     <History className="mr-2 h-4 w-4" />
                     {showHistory ? 'Hide' : 'View'} Tournament History
@@ -649,7 +649,7 @@ const PublicTournaments = () => {
                 <CollapsibleTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="w-full border-cuephoria-lightpurple/30 text-cuephoria-lightpurple hover:bg-cuephoria-lightpurple/10"
+                    className="w-full border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
                   >
                     <History className="mr-2 h-4 w-4" />
                     {showHistory ? 'Hide' : 'View'} Match Results
@@ -677,7 +677,7 @@ const PublicTournaments = () => {
           {/* Registration Button */}
           {canRegister(tournament) && (
             <Button 
-              className="w-full bg-gradient-to-r from-cuephoria-lightpurple to-cuephoria-blue hover:from-cuephoria-lightpurple/90 hover:to-cuephoria-blue/90 text-white font-semibold py-3 transition-all duration-300 hover:shadow-xl hover:shadow-cuephoria-lightpurple/30 hover:scale-[1.02] group"
+              className="w-full bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-cyan hover:from-nerfturf-lightpurple/90 hover:to-nerfturf-cyan/90 text-white font-semibold py-3 transition-all duration-300 hover:shadow-xl hover:shadow-nerfturf-lightpurple/30 hover:scale-[1.02] group"
               onClick={() => handleTournamentSelect(tournament)}
             >
               <Trophy className="mr-2 h-4 w-4 group-hover:animate-bounce" />
@@ -784,9 +784,9 @@ const PublicTournaments = () => {
       const IconComponent = content?.icon || Trophy;
 
       return (
-        <div className="col-span-full text-center text-cuephoria-grey py-16">
+        <div className="col-span-full text-center text-gray-300 py-16">
           <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 rounded-full bg-cuephoria-lightpurple/20 animate-ping"></div>
+            <div className="absolute inset-0 rounded-full bg-nerfturf-lightpurple/20 animate-ping"></div>
             <IconComponent className="h-20 w-20 mx-auto opacity-50 relative z-10" />
           </div>
           <p className="text-2xl font-semibold mb-2">{content?.title}</p>
@@ -798,44 +798,47 @@ const PublicTournaments = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cuephoria-dark via-black to-cuephoria-darkpurple flex items-center justify-center overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
         <div className="w-full max-w-md flex flex-col items-center justify-center animate-fade-in">
           <div className="w-32 h-32 mb-8 flex items-center justify-center relative">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cuephoria-lightpurple to-cuephoria-blue opacity-20 animate-ping"></div>
-            <img 
-              src="/lovable-uploads/61f60a38-12c2-4710-b1c8-0000eb74593c.png" 
-              alt="Cuephoria Logo" 
-              className="animate-float z-10 relative"
-            />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta opacity-20 animate-ping"></div>
+              <img 
+                src="https://iili.io/KpfrAog.jpg" 
+                alt="NerfTurf Logo" 
+                className="animate-float z-10 relative"
+              />
           </div>
           
           <div className="text-center space-y-4 animate-fade-in flex flex-col items-center">
             <div className="relative flex justify-center items-center">
-              <div className="w-20 h-20 border-t-4 border-cuephoria-lightpurple border-solid rounded-full animate-spin"></div>
-              <div className="w-16 h-16 border-t-4 border-r-4 border-transparent border-solid rounded-full border-r-cuephoria-purple absolute animate-spin-slow"></div>
+              <div className="w-20 h-20 border-t-4 border-nerfturf-purple border-solid rounded-full animate-spin"></div>
+              <div className="w-16 h-16 border-t-4 border-r-4 border-transparent border-solid rounded-full border-r-nerfturf-magenta absolute animate-spin-slow"></div>
             </div>
             
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cuephoria-lightpurple to-cuephoria-blue animate-text-gradient mt-4">
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta animate-text-gradient mt-4">
               Loading Tournaments...
             </h2>
-            <p className="text-cuephoria-grey">Getting the latest tournament information</p>
+            <p className="text-gray-300">Getting the latest tournament information</p>
           </div>
         </div>
       </div>
     );
   }
 
+  // Feature flag to enable/disable promotional popup
+  const ENABLE_PROMOTIONAL_POPUP = false; // Set to true to enable popup
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cuephoria-dark via-black to-cuephoria-darkpurple text-white overflow-hidden">
-      {/* Promotional Popup */}
-      <PromotionalPopup />
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] text-white overflow-hidden">
+      {/* Promotional Popup - Disabled by default, can be enabled by setting ENABLE_PROMOTIONAL_POPUP to true */}
+      {ENABLE_PROMOTIONAL_POPUP && <PromotionalPopup />}
 
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-2 h-2 bg-cuephoria-lightpurple/20 rounded-full animate-float"
+            className="absolute w-2 h-2 bg-nerfturf-purple/20 rounded-full animate-float"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -851,28 +854,28 @@ const PublicTournaments = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col items-center mb-12">
             <div className="mb-8 animate-float relative">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cuephoria-lightpurple to-cuephoria-blue opacity-30 blur-xl animate-pulse"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta opacity-30 blur-xl animate-pulse"></div>
               <img 
-                src="/lovable-uploads/61f60a38-12c2-4710-b1c8-0000eb74593c.png" 
-                alt="Cuephoria Logo" 
-                className="h-32 relative z-10 shadow-2xl shadow-cuephoria-lightpurple/40"
+                src="https://iili.io/KpfrAog.jpg" 
+                alt="NerfTurf Logo" 
+                className="h-32 relative z-10 shadow-2xl shadow-nerfturf-purple/40"
               />
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-center font-heading bg-clip-text text-transparent bg-gradient-to-r from-cuephoria-lightpurple via-cuephoria-blue to-cuephoria-purple animate-text-gradient mb-4">
+            <h1 className="text-5xl md:text-7xl font-bold text-center font-heading bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple animate-text-gradient mb-4">
               Epic Tournaments
             </h1>
-            <p className="text-xl md:text-2xl text-cuephoria-grey max-w-3xl text-center leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl text-center leading-relaxed">
               Join the ultimate gaming experience with high-stakes competitions and amazing prizes
             </p>
           </div>
           
           {/* Enhanced stats summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 max-w-5xl mx-auto mb-12">
-            <div className="bg-gradient-to-br from-cuephoria-purple/40 to-cuephoria-purple/10 backdrop-blur-md p-6 rounded-2xl border border-cuephoria-purple/30 animate-scale-in hover:scale-105 transition-all duration-300" style={{animationDelay: '100ms'}}>
+            <div className="bg-gradient-to-br from-nerfturf-purple/40 to-nerfturf-purple/10 backdrop-blur-md p-6 rounded-2xl border border-nerfturf-purple/30 animate-scale-in hover:scale-105 transition-all duration-300" style={{animationDelay: '100ms'}}>
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm text-cuephoria-grey">Total Tournaments</div>
-                <Trophy className="h-6 w-6 text-cuephoria-lightpurple" />
+                <div className="text-sm text-gray-300">Total Tournaments</div>
+                <Trophy className="h-6 w-6 text-nerfturf-lightpurple" />
               </div>
               <div className="text-3xl font-bold text-white">{tournaments.length}</div>
               <div className="text-xs text-green-400 mt-1">Active competitions</div>
@@ -880,7 +883,7 @@ const PublicTournaments = () => {
             
             <div className="bg-gradient-to-br from-green-900/40 to-green-900/10 backdrop-blur-md p-6 rounded-2xl border border-green-800/30 animate-scale-in hover:scale-105 transition-all duration-300" style={{animationDelay: '200ms'}}>
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm text-cuephoria-grey">Open for Registration</div>
+                <div className="text-sm text-gray-300">Open for Registration</div>
                 <Users className="h-6 w-6 text-green-400" />
               </div>
               <div className="text-3xl font-bold text-white">
@@ -891,7 +894,7 @@ const PublicTournaments = () => {
             
             <div className="bg-gradient-to-br from-blue-900/40 to-blue-900/10 backdrop-blur-md p-6 rounded-2xl border border-blue-800/30 animate-scale-in hover:scale-105 transition-all duration-300" style={{animationDelay: '300ms'}}>
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm text-cuephoria-grey">Total Prize Pool</div>
+                <div className="text-sm text-gray-300">Total Prize Pool</div>
                 <Crown className="h-6 w-6 text-yellow-400" />
               </div>
               <div className="text-3xl font-bold text-white">
@@ -912,38 +915,38 @@ const PublicTournaments = () => {
         {/* Desktop Tabs */}
         {!isMobile && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-cuephoria-dark/80 backdrop-blur-md border border-cuephoria-lightpurple/30 rounded-xl p-1 mb-8">
+            <TabsList className="grid w-full grid-cols-5 bg-black/80 backdrop-blur-md border border-nerfturf-lightpurple/30 rounded-xl p-1 mb-8">
               <TabsTrigger 
                 value="upcoming" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cuephoria-lightpurple data-[state=active]:to-cuephoria-blue data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('upcoming')}
                 Upcoming ({filterTournaments('upcoming').length})
               </TabsTrigger>
               <TabsTrigger 
                 value="in-progress"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cuephoria-lightpurple data-[state=active]:to-cuephoria-blue data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('in-progress')}
                 Live ({filterTournaments('in-progress').length})
               </TabsTrigger>
               <TabsTrigger 
                 value="completed"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cuephoria-lightpurple data-[state=active]:to-cuephoria-blue data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('completed')}
                 Completed ({filterTournaments('completed').length})
               </TabsTrigger>
               <TabsTrigger 
                 value="gallery"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cuephoria-lightpurple data-[state=active]:to-cuephoria-blue data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('gallery')}
                 Gallery
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cuephoria-lightpurple data-[state=active]:to-cuephoria-blue data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('leaderboard')}
                 Leaderboard
@@ -979,7 +982,7 @@ const PublicTournaments = () => {
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-between bg-cuephoria-dark/80 backdrop-blur-md border-cuephoria-lightpurple/30 text-white hover:bg-cuephoria-lightpurple/10 hover:border-cuephoria-lightpurple/60"
+                  className="w-full justify-between bg-black/80 backdrop-blur-md border-nerfturf-lightpurple/30 text-white hover:bg-nerfturf-lightpurple/10 hover:border-nerfturf-lightpurple/60"
                 >
                   <div className="flex items-center">
                     {getTabIcon(activeTab)}
@@ -989,40 +992,40 @@ const PublicTournaments = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-full bg-cuephoria-dark border-cuephoria-lightpurple/30 backdrop-blur-md"
+                className="w-full bg-black border-nerfturf-lightpurple/30 backdrop-blur-md"
                 align="start"
               >
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('upcoming')}
-                  className={`text-white hover:bg-cuephoria-lightpurple/20 ${activeTab === 'upcoming' ? 'bg-cuephoria-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'upcoming' ? 'bg-nerfturf-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('upcoming')}
                   {getTabLabel('upcoming')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('in-progress')}
-                  className={`text-white hover:bg-cuephoria-lightpurple/20 ${activeTab === 'in-progress' ? 'bg-cuephoria-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'in-progress' ? 'bg-nerfturf-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('in-progress')}
                   {getTabLabel('in-progress')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('completed')}
-                  className={`text-white hover:bg-cuephoria-lightpurple/20 ${activeTab === 'completed' ? 'bg-cuephoria-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'completed' ? 'bg-nerfturf-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('completed')}
                   {getTabLabel('completed')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('gallery')}
-                  className={`text-white hover:bg-cuephoria-lightpurple/20 ${activeTab === 'gallery' ? 'bg-cuephoria-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'gallery' ? 'bg-nerfturf-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('gallery')}
                   {getTabLabel('gallery')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('leaderboard')}
-                  className={`text-white hover:bg-cuephoria-lightpurple/20 ${activeTab === 'leaderboard' ? 'bg-cuephoria-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'leaderboard' ? 'bg-nerfturf-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('leaderboard')}
                   {getTabLabel('leaderboard')}
@@ -1039,45 +1042,45 @@ const PublicTournaments = () => {
       </main>
       
       {/* Enhanced Footer with contact details, legal links, and action buttons */}
-      <footer className="py-12 px-4 sm:px-6 md:px-8 border-t border-cuephoria-lightpurple/20 mt-12 backdrop-blur-md bg-cuephoria-dark/50 relative z-10">
+      <footer className="py-12 px-4 sm:px-6 md:px-8 border-t border-nerfturf-lightpurple/20 mt-12 backdrop-blur-md bg-black/50 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Action Buttons Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Button
-              onClick={() => window.open('https://cuephoria.in/book', '_blank')}
-              className="bg-cuephoria-dark/80 hover:bg-cuephoria-dark border border-cuephoria-purple/20 hover:border-cuephoria-purple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-cuephoria-purple/10 group min-h-[80px]"
+              onClick={() => window.open('https://nerfturf.in/book', '_blank')}
+              className="bg-black/80 hover:bg-black border border-nerfturf-purple/20 hover:border-nerfturf-purple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-purple/10 group min-h-[80px]"
             >
               <div className="flex items-center w-full">
-                <CalendarDays className="mr-4 h-5 w-5 text-cuephoria-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
+                <CalendarDays className="mr-4 h-5 w-5 text-nerfturf-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-white">Book A Slot</div>
-                  <div className="text-sm text-cuephoria-grey mt-1">Reserve your gaming time</div>
+                  <div className="text-sm text-gray-300 mt-1">Reserve your gaming time</div>
                 </div>
               </div>
             </Button>
 
             <Button
-              onClick={() => window.open('https://cuephoria.in', '_blank')}
-              className="bg-cuephoria-dark/80 hover:bg-cuephoria-dark border border-cuephoria-blue/20 hover:border-cuephoria-blue/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-cuephoria-blue/10 group min-h-[80px]"
+              onClick={() => window.open('https://nerfturf.in', '_blank')}
+              className="bg-black/80 hover:bg-black border border-nerfturf-cyan/20 hover:border-nerfturf-cyan/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-cyan/10 group min-h-[80px]"
             >
               <div className="flex items-center w-full">
-                <Globe className="mr-4 h-5 w-5 text-cuephoria-blue group-hover:text-white transition-colors flex-shrink-0" />
+                <Globe className="mr-4 h-5 w-5 text-nerfturf-cyan group-hover:text-white transition-colors flex-shrink-0" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-white">Official Website</div>
-                  <div className="text-sm text-cuephoria-grey mt-1">Visit our main site</div>
+                  <div className="text-sm text-gray-300 mt-1">Visit our main site</div>
                 </div>
               </div>
             </Button>
 
             <Button
-              onClick={() => window.open('https://admin.cuephoria.in/public/stations', '_blank')}
-              className="bg-cuephoria-dark/80 hover:bg-cuephoria-dark border border-cuephoria-lightpurple/20 hover:border-cuephoria-lightpurple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-cuephoria-lightpurple/10 group min-h-[80px]"
+              onClick={() => window.open('https://admin.nerfturf.in/public/stations', '_blank')}
+              className="bg-black/80 hover:bg-black border border-nerfturf-lightpurple/20 hover:border-nerfturf-lightpurple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-lightpurple/10 group min-h-[80px]"
             >
               <div className="flex items-center w-full">
-                <Zap className="mr-4 h-5 w-5 text-cuephoria-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
+                <Zap className="mr-4 h-5 w-5 text-nerfturf-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-white">Live Session Status</div>
-                  <div className="text-sm text-cuephoria-grey mt-1">Check station availability</div>
+                  <div className="text-sm text-gray-300 mt-1">Check station availability</div>
                 </div>
               </div>
             </Button>
@@ -1087,11 +1090,11 @@ const PublicTournaments = () => {
             {/* Logo and description */}
             <div className="text-center md:text-left">
               <img 
-                src="/lovable-uploads/61f60a38-12c2-4710-b1c8-0000eb74593c.png"
-                alt="Cuephoria Logo" 
+                src="https://iili.io/KpfrAog.jpg"
+                alt="NerfTurf Logo" 
                 className="h-12 mb-4 mx-auto md:mx-0" 
               />
-              <p className="text-cuephoria-grey text-sm leading-relaxed mb-4">
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
                 The ultimate gaming destination offering premium PlayStation 5 gaming and professional pool tables with tournament-level competition.
               </p>
               <div className="flex justify-center md:justify-start space-x-4">
@@ -1099,7 +1102,7 @@ const PublicTournaments = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setTermsDialogOpen(true)}
-                  className="border-cuephoria-lightpurple/30 text-cuephoria-lightpurple hover:bg-cuephoria-lightpurple/10"
+                  className="border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Terms & Conditions
@@ -1108,7 +1111,7 @@ const PublicTournaments = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setPrivacyDialogOpen(true)}
-                  className="border-cuephoria-lightpurple/30 text-cuephoria-lightpurple hover:bg-cuephoria-lightpurple/10"
+                  className="border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
                 >
                   <Shield className="h-4 w-4 mr-2" />
                   Privacy Policy
@@ -1118,27 +1121,27 @@ const PublicTournaments = () => {
             
             {/* Contact Information */}
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-cuephoria-lightpurple mb-4">Contact Us</h3>
+              <h3 className="text-lg font-semibold text-nerfturf-lightpurple mb-4">Contact Us</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-center gap-2 text-cuephoria-grey hover:text-white transition-colors">
-                  <Phone className="h-4 w-4 text-cuephoria-lightpurple" />
+                <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
+                  <Phone className="h-4 w-4 text-nerfturf-lightpurple" />
                   <span className="text-sm">+91 93451 87098</span>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-cuephoria-grey hover:text-white transition-colors">
-                  <Mail className="h-4 w-4 text-cuephoria-lightpurple" />
-                  <span className="text-sm">contact@cuephoria.in</span>
+                <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
+                  <Mail className="h-4 w-4 text-nerfturf-lightpurple" />
+                  <span className="text-sm">contact@nerfturf.in</span>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-cuephoria-grey hover:text-white transition-colors">
-                  <Clock className="h-4 w-4 text-cuephoria-lightpurple" />
+                <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
+                  <Clock className="h-4 w-4 text-nerfturf-lightpurple" />
                   <span className="text-sm">11:00 AM - 11:00 PM</span>
                 </div>
                 <a
                   href="https://maps.app.goo.gl/oBUVebkaFMWa7EPk8"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 text-cuephoria-grey hover:text-cuephoria-lightpurple transition-colors group"
+                  className="flex items-center justify-center gap-2 text-gray-300 hover:text-nerfturf-lightpurple transition-colors group"
                 >
-                  <MapPin className="h-4 w-4 text-cuephoria-lightpurple" />
+                  <MapPin className="h-4 w-4 text-nerfturf-lightpurple" />
                   <span className="text-sm group-hover:underline">Find Us on Maps</span>
                   <ExternalLink className="h-3 w-3" />
                 </a>
@@ -1147,8 +1150,8 @@ const PublicTournaments = () => {
             
             {/* Features */}
             <div className="text-center md:text-right">
-              <h3 className="text-lg font-semibold text-cuephoria-lightpurple mb-4">Features</h3>
-              <div className="space-y-2 text-sm text-cuephoria-grey">
+              <h3 className="text-lg font-semibold text-nerfturf-lightpurple mb-4">Features</h3>
+              <div className="space-y-2 text-sm text-gray-300">
                 <div className="flex items-center justify-center md:justify-end gap-2">
                   <GamepadIcon className="h-4 w-4 text-green-400" />
                   <span>PlayStation 5 Gaming</span>
@@ -1166,12 +1169,12 @@ const PublicTournaments = () => {
           </div>
           
           {/* Bottom footer */}
-          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-cuephoria-lightpurple/10">
-            <p className="text-cuephoria-grey text-sm mb-4 md:mb-0">
-              © {new Date().getFullYear()} Cuephoria. All rights reserved.
+          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-nerfturf-lightpurple/10">
+            <p className="text-gray-300 text-sm mb-4 md:mb-0">
+              © {new Date().getFullYear()} NerfTurf. All rights reserved.
             </p>
             <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center text-cuephoria-grey">
+              <div className="flex items-center text-gray-300">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
                 <span>Live Updates</span>
               </div>
@@ -1182,9 +1185,9 @@ const PublicTournaments = () => {
 
       {/* Registration Dialog - Fixed to prevent page refresh */}
       <Dialog open={isDialogOpen && selectedTournament !== null} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="bg-cuephoria-dark border-cuephoria-lightpurple/30 text-white max-w-md">
+        <DialogContent className="bg-black border-nerfturf-lightpurple/30 text-white max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-cuephoria-lightpurple flex items-center gap-2">
+            <DialogTitle className="text-nerfturf-lightpurple flex items-center gap-2">
               <Trophy className="h-5 w-5" />
               Register for {selectedTournament?.name}
             </DialogTitle>
@@ -1193,21 +1196,21 @@ const PublicTournaments = () => {
           <form onSubmit={handleRegistration} className="space-y-4">
             {/* Phone Number Field (First) */}
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-cuephoria-grey">Phone Number *</Label>
+              <Label htmlFor="phone" className="text-gray-300">Phone Number *</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={registrationForm.customer_phone}
                 onChange={handlePhoneChange}
-                className="bg-cuephoria-dark border-cuephoria-grey/30 text-white focus:border-cuephoria-lightpurple"
+                className="bg-black border-gray-300/30 text-white focus:border-nerfturf-lightpurple"
                 placeholder="Enter your phone number"
                 autoComplete="tel"
               />
-              <p className="text-xs text-cuephoria-grey/80 italic">
+              <p className="text-xs text-gray-300/80 italic">
                 Already visited? Use your number used during billing
               </p>
               {isCheckingCustomer && (
-                <p className="text-xs text-cuephoria-grey">Checking for existing customer...</p>
+                <p className="text-xs text-gray-300">Checking for existing customer...</p>
               )}
             </div>
 
@@ -1226,13 +1229,13 @@ const PublicTournaments = () => {
 
             {/* Name Field */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-cuephoria-grey">Name *</Label>
+              <Label htmlFor="name" className="text-gray-300">Name *</Label>
               <Input
                 id="name"
                 type="text"
                 value={registrationForm.customer_name}
                 onChange={handleNameChange}
-                className="bg-cuephoria-dark border-cuephoria-grey/30 text-white focus:border-cuephoria-lightpurple"
+                className="bg-black border-gray-300/30 text-white focus:border-nerfturf-lightpurple"
                 placeholder="Enter your full name"
                 autoComplete="name"
                 disabled={!!existingCustomer}
@@ -1241,13 +1244,13 @@ const PublicTournaments = () => {
             
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-cuephoria-grey">Email (Optional)</Label>
+              <Label htmlFor="email" className="text-gray-300">Email (Optional)</Label>
               <Input
                 id="email"
                 type="email"
                 value={registrationForm.customer_email}
                 onChange={handleEmailChange}
-                className="bg-cuephoria-dark border-cuephoria-grey/30 text-white focus:border-cuephoria-lightpurple"
+                className="bg-black border-gray-300/30 text-white focus:border-nerfturf-lightpurple"
                 placeholder="Enter your email address"
                 autoComplete="email"
                 disabled={!!existingCustomer}
@@ -1263,7 +1266,7 @@ const PublicTournaments = () => {
             <Button 
               type="submit"
               disabled={isRegistering || isCheckingCustomer}
-              className="w-full bg-gradient-to-r from-cuephoria-lightpurple to-cuephoria-blue hover:from-cuephoria-lightpurple/90 hover:to-cuephoria-blue/90"
+              className="w-full bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-cyan hover:from-nerfturf-lightpurple/90 hover:to-nerfturf-cyan/90"
             >
               {isRegistering ? 'Registering...' : 'Confirm Registration'}
             </Button>
@@ -1273,14 +1276,14 @@ const PublicTournaments = () => {
 
       {/* Terms & Conditions Dialog */}
       <Dialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen}>
-        <DialogContent className="bg-cuephoria-dark border-cuephoria-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-black border-nerfturf-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-cuephoria-lightpurple flex items-center gap-2">
+            <DialogTitle className="text-nerfturf-lightpurple flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Terms & Conditions
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 text-sm text-cuephoria-grey leading-relaxed">
+          <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
             <div>
               <h4 className="text-white font-semibold mb-2">1. Tournament Registration</h4>
               <p>By registering for any tournament, you agree to abide by all tournament rules and regulations. Entry fees are non-refundable once paid.</p>
@@ -1295,7 +1298,7 @@ const PublicTournaments = () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">4. Equipment Rules</h4>
-              <p>All gaming equipment will be provided by Cuephoria. Personal equipment is not permitted during tournaments.</p>
+              <p>All gaming equipment will be provided by NerfTurf. Personal equipment is not permitted during tournaments.</p>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">5. Dispute Resolution</h4>
@@ -1303,7 +1306,7 @@ const PublicTournaments = () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">6. Liability</h4>
-              <p>Cuephoria is not responsible for any personal injury or loss of personal items during events.</p>
+              <p>NerfTurf is not responsible for any personal injury or loss of personal items during events.</p>
             </div>
           </div>
         </DialogContent>
@@ -1311,14 +1314,14 @@ const PublicTournaments = () => {
 
       {/* Privacy Policy Dialog */}
       <Dialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen}>
-        <DialogContent className="bg-cuephoria-dark border-cuephoria-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-black border-nerfturf-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-cuephoria-lightpurple flex items-center gap-2">
+            <DialogTitle className="text-nerfturf-lightpurple flex items-center gap-2">
               <Shield className="h-5 w-5" />
               Privacy Policy
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 text-sm text-cuephoria-grey leading-relaxed">
+          <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
             <div>
               <h4 className="text-white font-semibold mb-2">Information We Collect</h4>
               <p>We collect personal information such as name, phone number, and email address when you register for tournaments.</p>
@@ -1341,7 +1344,7 @@ const PublicTournaments = () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">Your Rights</h4>
-              <p>You have the right to access, update, or delete your personal information. Contact us at contact@cuephoria.in for any requests.</p>
+              <p>You have the right to access, update, or delete your personal information. Contact us at contact@nerfturf.in for any requests.</p>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">Contact Us</h4>

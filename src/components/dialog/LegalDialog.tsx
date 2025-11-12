@@ -27,7 +27,7 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-white">1. Acceptance of Terms</h3>
                 <p className="text-sm">
-                  By accessing and using Cuephoria's services, you agree to be bound by these Terms and Conditions. 
+                  By accessing and using NerfTurf's services, you agree to be bound by these Terms and Conditions. 
                   If you do not agree to these terms, please do not use our services.
                 </p>
               </section>
@@ -35,7 +35,7 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-white">2. Membership and Gaming Sessions</h3>
                 <p className="text-sm">
-                  Cuephoria provides gaming facilities and services on a pre-booking or walk-in basis, subject to availability.
+                  NerfTurf provides gaming facilities and services on a pre-booking or walk-in basis, subject to availability.
                   Members may receive preferential rates and privileges as communicated in our membership plans.
                 </p>
                 <p className="text-sm">
@@ -47,7 +47,7 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-white">3. Conduct and Responsibilities</h3>
                 <p className="text-sm">
-                  Users must maintain appropriate conduct within our premises. Cuephoria reserves the right to refuse service 
+                  Users must maintain appropriate conduct within our premises. NerfTurf reserves the right to refuse service 
                   to anyone engaging in disruptive, abusive, or inappropriate behavior.
                 </p>
                 <p className="text-sm">
@@ -70,7 +70,7 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-white">5. Modifications to Terms</h3>
                 <p className="text-sm">
-                  Cuephoria reserves the right to modify these terms at any time. Changes will be effective immediately 
+                  NerfTurf reserves the right to modify these terms at any time. Changes will be effective immediately 
                   upon posting on our website or premises. Continued use of our services constitutes acceptance of modified terms.
                 </p>
               </section>
@@ -86,7 +86,7 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-white">1. Information We Collect</h3>
                 <p className="text-sm">
-                  Cuephoria may collect personal information including but not limited to name, contact details, 
+                  NerfTurf may collect personal information including but not limited to name, contact details, 
                   and payment information when you register or book our services.
                 </p>
                 <p className="text-sm">
@@ -134,7 +134,7 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
               <section className="space-y-3">
                 <h3 className="text-lg font-semibold text-white">5. Changes to Privacy Policy</h3>
                 <p className="text-sm">
-                  Cuephoria reserves the right to update this privacy policy at any time. Changes will be posted on our website, 
+                  NerfTurf reserves the right to update this privacy policy at any time. Changes will be posted on our website, 
                   and your continued use of our services after such modifications constitutes acceptance of the updated policy.
                 </p>
               </section>
@@ -150,8 +150,8 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card className="bg-black/20 border-gray-700">
                   <CardContent className="p-4 flex flex-col items-center text-center">
-                    <div className="h-10 w-10 rounded-full bg-cuephoria-purple/20 flex items-center justify-center mb-3">
-                      <Phone className="h-5 w-5 text-cuephoria-purple" />
+                    <div className="h-10 w-10 rounded-full bg-nerfturf-purple/20 flex items-center justify-center mb-3">
+                      <Phone className="h-5 w-5 text-nerfturf-purple" />
                     </div>
                     <h4 className="font-semibold mb-2 text-white">Phone</h4>
                     <a href="tel:+919345187098" className="text-gray-300 hover:text-white transition-colors text-sm">
@@ -162,20 +162,20 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
                 
                 <Card className="bg-black/20 border-gray-700">
                   <CardContent className="p-4 flex flex-col items-center text-center">
-                    <div className="h-10 w-10 rounded-full bg-cuephoria-blue/20 flex items-center justify-center mb-3">
-                      <Mail className="h-5 w-5 text-cuephoria-blue" />
+                    <div className="h-10 w-10 rounded-full bg-nerfturf-blue/20 flex items-center justify-center mb-3">
+                      <Mail className="h-5 w-5 text-nerfturf-blue" />
                     </div>
                     <h4 className="font-semibold mb-2 text-white">Email</h4>
-                    <a href="mailto:contact@cuephoria.in" className="text-gray-300 hover:text-white transition-colors text-sm">
-                      contact@cuephoria.in
+                    <a href="mailto:contact@nerfturf.in" className="text-gray-300 hover:text-white transition-colors text-sm">
+                      contact@nerfturf.in
                     </a>
                   </CardContent>
                 </Card>
                 
                 <Card className="bg-black/20 border-gray-700">
                   <CardContent className="p-4 flex flex-col items-center text-center">
-                    <div className="h-10 w-10 rounded-full bg-cuephoria-orange/20 flex items-center justify-center mb-3">
-                      <Clock className="h-5 w-5 text-cuephoria-orange" />
+                    <div className="h-10 w-10 rounded-full bg-nerfturf-orange/20 flex items-center justify-center mb-3">
+                      <Clock className="h-5 w-5 text-nerfturf-orange" />
                     </div>
                     <h4 className="font-semibold mb-2 text-white">Business Hours</h4>
                     <p className="text-gray-300 text-sm">11:00 AM - 11:00 PM</p>
@@ -185,16 +185,16 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
                 
                 <Card className="bg-black/20 border-gray-700">
                   <CardContent className="p-4 flex flex-col items-center text-center">
-                    <div className="h-10 w-10 rounded-full bg-cuephoria-green/20 flex items-center justify-center mb-3">
-                      <MapPin className="h-5 w-5 text-cuephoria-green" />
+                    <div className="h-10 w-10 rounded-full bg-nerfturf-green/20 flex items-center justify-center mb-3">
+                      <MapPin className="h-5 w-5 text-nerfturf-green" />
                     </div>
                     <h4 className="font-semibold mb-2 text-white">Visit Us</h4>
-                    <p className="text-gray-300 text-sm">Cuephoria Gaming Lounge</p>
+                    <p className="text-gray-300 text-sm">NerfTurf Gaming Lounge</p>
                     <a 
-                      href="https://maps.app.goo.gl/cuephoria" 
+                      href="https://maps.app.goo.gl/nerfturf" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-cuephoria-purple hover:underline mt-2 text-xs"
+                      className="text-nerfturf-purple hover:underline mt-2 text-xs"
                     >
                       View on Google Maps
                     </a>
