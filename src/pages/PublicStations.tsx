@@ -127,6 +127,9 @@ const PublicStations = () => {
     return `${hours}h ${mins}m`;
   };
 
+  // Feature flag to enable/disable VR stations section
+  const ENABLE_VR_STATIONS = false; // Set to true to show VR Gaming Stations section
+
   // Separate stations by type - Added VR stations
   const ps5Stations = stations.filter(station => station.type === 'ps5');
   const ballStations = stations.filter(station => station.type === '8ball');
@@ -179,33 +182,28 @@ const PublicStations = () => {
             </div>
           </div>
           
-          {/* Stats summary - Updated to include VR */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 px-4 max-w-6xl mx-auto mb-10">
-            <div className="bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-purple/5 backdrop-blur-md p-4 rounded-xl border border-nerfturf-purple/20 animate-scale-in" style={{animationDelay: '100ms'}}>
+          {/* Stats summary - Reordered: Pool Table first, then PS5, VR hidden */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 max-w-6xl mx-auto mb-10">
+            <div className="bg-gradient-to-br from-green-900/30 to-green-900/5 backdrop-blur-md p-4 rounded-xl border border-green-800/20 animate-scale-in" style={{animationDelay: '100ms'}}>
+              <div className="text-sm text-gray-400">Pool Table</div>
+              <div className="text-2xl font-bold text-white mt-1">{ballStations.length}</div>
+              <div className="text-xs text-nerfturf-lightpurple mt-1">{ballStations.filter(s => !s.isOccupied).length} available</div>
+            </div>
+            <div className="bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-purple/5 backdrop-blur-md p-4 rounded-xl border border-nerfturf-purple/20 animate-scale-in" style={{animationDelay: '200ms'}}>
               <div className="text-sm text-gray-400">PS5 Consoles</div>
               <div className="text-2xl font-bold text-white mt-1">{ps5Stations.length}</div>
               <div className="text-xs text-nerfturf-lightpurple mt-1">{ps5Stations.filter(s => !s.isOccupied).length} available</div>
             </div>
-            <div className="bg-gradient-to-br from-green-900/30 to-green-900/5 backdrop-blur-md p-4 rounded-xl border border-green-800/20 animate-scale-in" style={{animationDelay: '200ms'}}>
-              <div className="text-sm text-gray-400">Pool Tables</div>
-              <div className="text-2xl font-bold text-white mt-1">{ballStations.length}</div>
-              <div className="text-xs text-nerfturf-lightpurple mt-1">{ballStations.filter(s => !s.isOccupied).length} available</div>
-            </div>
-            <div className="bg-gradient-to-br from-blue-900/30 to-blue-900/5 backdrop-blur-md p-4 rounded-xl border border-blue-800/20 animate-scale-in" style={{animationDelay: '300ms'}}>
-              <div className="text-sm text-gray-400">VR Gaming</div>
-              <div className="text-2xl font-bold text-white mt-1">{vrStations.length}</div>
-              <div className="text-xs text-nerfturf-lightpurple mt-1">{vrStations.filter(s => !s.isOccupied).length} available</div>
-            </div>
-            <div className="bg-gradient-to-br from-orange-900/30 to-orange-900/5 backdrop-blur-md p-4 rounded-xl border border-orange-800/20 animate-scale-in" style={{animationDelay: '400ms'}}>
+            <div className="bg-gradient-to-br from-orange-900/30 to-orange-900/5 backdrop-blur-md p-4 rounded-xl border border-orange-800/20 animate-scale-in" style={{animationDelay: '300ms'}}>
               <div className="text-sm text-gray-400">In Use</div>
               <div className="text-2xl font-bold text-white mt-1">
                 {stations.filter(s => s.isOccupied).length}
               </div>
               <div className="text-xs text-orange-400 mt-1">
-                {Math.round(stations.filter(s => s.isOccupied).length / stations.length * 100)}% occupancy
+                {stations.length > 0 ? Math.round(stations.filter(s => s.isOccupied).length / stations.length * 100) : 0}% occupancy
               </div>
             </div>
-            <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/10 backdrop-blur-md p-4 rounded-xl border border-gray-700/30 animate-scale-in" style={{animationDelay: '500ms'}}>
+            <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/10 backdrop-blur-md p-4 rounded-xl border border-gray-700/30 animate-scale-in" style={{animationDelay: '400ms'}}>
               <div className="text-sm text-gray-400">Network Status</div>
               <div className="text-md font-bold text-white mt-1 flex items-center">
                 <Wifi className="h-4 w-4 text-nerfturf-lightpurple mr-1.5 animate-pulse-soft" /> Online
@@ -222,8 +220,34 @@ const PublicStations = () => {
           opacity: refreshing ? 0.7 : 1,
           transform: refreshing ? 'scale(0.99)' : 'scale(1)'
         }}>
-        {/* PlayStation Section */}
+        {/* Pool Table Section - First */}
         <section className="mb-12 animate-slide-up">
+          <div className="flex items-center mb-6">
+            <div className="w-10 h-10 rounded-xl bg-green-900/30 flex items-center justify-center mr-3 animate-pulse-soft">
+              <Timer className="h-5 w-5 text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Pool Table</h2>
+          </div>
+          
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {ballStations.length === 0 ? (
+              <p className="text-gray-400 col-span-full text-center py-10">No pool tables available at this location</p>
+            ) : (
+              ballStations.map((station, index) => (
+                <div 
+                  key={station.id} 
+                  className="animate-scale-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <PublicStationCard station={station} />
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* PlayStation Section - Second */}
+        <section className="mb-12 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center mb-6">
             <div className="w-10 h-10 rounded-xl bg-nerfturf-purple/20 flex items-center justify-center mr-3 animate-pulse-soft">
               <Gamepad2 className="h-5 w-5 text-nerfturf-lightpurple" />
@@ -239,33 +263,7 @@ const PublicStations = () => {
                 <div 
                   key={station.id} 
                   className="animate-scale-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <PublicStationCard station={station} />
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-        
-        {/* Pool Tables Section */}
-        <section className="mb-12 animate-slide-up" style={{ animationDelay: '300ms' }}>
-          <div className="flex items-center mb-6">
-            <div className="w-10 h-10 rounded-xl bg-green-900/30 flex items-center justify-center mr-3 animate-pulse-soft">
-              <Timer className="h-5 w-5 text-green-500" />
-            </div>
-            <h2 className="text-2xl font-bold text-white">8-Ball Pool Tables</h2>
-          </div>
-          
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {ballStations.length === 0 ? (
-              <p className="text-gray-400 col-span-full text-center py-10">No pool tables available at this location</p>
-            ) : (
-              ballStations.map((station, index) => (
-                <div 
-                  key={station.id} 
-                  className="animate-scale-in"
-                  style={{ animationDelay: `${(index + ps5Stations.length) * 100}ms` }}
+                  style={{ animationDelay: `${(index + ballStations.length) * 100}ms` }}
                 >
                   <PublicStationCard station={station} />
                 </div>
@@ -274,31 +272,33 @@ const PublicStations = () => {
           </div>
         </section>
 
-        {/* VR Gaming Section - NEW SECTION */}
-        <section className="animate-slide-up" style={{ animationDelay: '600ms' }}>
-          <div className="flex items-center mb-6">
-            <div className="w-10 h-10 rounded-xl bg-blue-900/30 flex items-center justify-center mr-3 animate-pulse-soft">
-              <Headset className="h-5 w-5 text-blue-400" />
+        {/* VR Gaming Section - Hidden by default, can be enabled by setting ENABLE_VR_STATIONS to true */}
+        {ENABLE_VR_STATIONS && (
+          <section className="animate-slide-up" style={{ animationDelay: '600ms' }}>
+            <div className="flex items-center mb-6">
+              <div className="w-10 h-10 rounded-xl bg-blue-900/30 flex items-center justify-center mr-3 animate-pulse-soft">
+                <Headset className="h-5 w-5 text-blue-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">VR Gaming Stations</h2>
             </div>
-            <h2 className="text-2xl font-bold text-white">VR Gaming Stations</h2>
-          </div>
-          
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {vrStations.length === 0 ? (
-              <p className="text-gray-400 col-span-full text-center py-10">No VR gaming stations available at this location</p>
-            ) : (
-              vrStations.map((station, index) => (
-                <div 
-                  key={station.id} 
-                  className="animate-scale-in"
-                  style={{ animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms` }}
-                >
-                  <PublicStationCard station={station} />
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+            
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {vrStations.length === 0 ? (
+                <p className="text-gray-400 col-span-full text-center py-10">No VR gaming stations available at this location</p>
+              ) : (
+                vrStations.map((station, index) => (
+                  <div 
+                    key={station.id} 
+                    className="animate-scale-in"
+                    style={{ animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms` }}
+                  >
+                    <PublicStationCard station={station} />
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
       </main>
       
       {/* Footer */}
