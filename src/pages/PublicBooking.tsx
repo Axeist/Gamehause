@@ -654,7 +654,14 @@ export default function PublicBooking() {
     return availableIds;
   }
 
-  async function handleSlotSelect(slot: TimeSlot, range?: TimeSlot[]) {
+  async function handleSlotSelect(slot: TimeSlot | null, range?: TimeSlot[]) {
+    // Handle deselection
+    if (!slot) {
+      setSelectedSlot(null);
+      setSelectedSlotRange([]);
+      return;
+    }
+
     if (slot.status === 'elapsed') {
       toast.error("Cannot select a time slot that has already passed.");
       return;

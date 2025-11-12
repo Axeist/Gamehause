@@ -67,6 +67,14 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
   const handleSlotClick = (slot: TimeSlot) => {
     if (!slot.is_available) return;
 
+    // Check if clicking on the first slot of an existing range - if so, deselect
+    if (selectedSlotRange.length > 0 && selectedSlotRange[0].start_time === slot.start_time) {
+      // Deselect by passing null and empty range
+      setStartSlot(null);
+      onSlotSelect(null!, []);
+      return;
+    }
+
     if (!startSlot) {
       // First click - set as start
       setStartSlot(slot);
