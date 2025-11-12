@@ -1047,7 +1047,6 @@ export default function PublicBooking() {
         selectedStations.includes(s.id)
       );
       
-      const slotsToBook = selectedSlotRange.length > 0 ? selectedSlotRange : [selectedSlot!];
       const sessionDuration = `${slotsToBook.length * 30} minutes (${slotsToBook.length} slots)`;
       
       setBookingConfirmationData({
