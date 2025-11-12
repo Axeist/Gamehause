@@ -131,11 +131,11 @@ export const saveTournament = async (tournament: Tournament): Promise<{ data: To
     }
     
     // Check if the tournament already exists
-    const { data: existingTournament, error: checkError } = await tournamentsTable
-      .select()
+    const { data: existingTournament, error: checkError } = await supabase
+      .from('tournaments')
       .select('id')
       .eq('id', tournament.id)
-      .single();
+      .maybeSingle();
       
     if (checkError && checkError.code !== 'PGRST116') { // Not found is not an error in this case
       console.error('Error checking tournament existence:', checkError);
@@ -370,27 +370,31 @@ export const deleteTournament = async (id: string): Promise<{ success: boolean; 
     console.log('Tournament delete operation completed');
     
     // Verify the tournament was actually deleted by trying to fetch it
-    const { data: verifyData, error: verifyError } = await supabase
-      .from('tournaments')
-      .select('id')
-      .eq('id', id)
-      .maybeSingle();
-    
-    if (verifyError && verifyError.code !== 'PGRST116') {
-      // Some error other than "not found" - log it but assume success if delete didn't error
-      console.warn('Error verifying tournament deletion:', verifyError);
+    // Use a simple count query to avoid 406 errors
+    try {
+      const { count, error: verifyError } = await supabase
+        .from('tournaments')
+        .select('id', { count: 'exact', head: true })
+        .eq('id', id);
+      
+      if (verifyError) {
+        // If we can't verify, log it but assume success if delete didn't error
+        console.warn('Error verifying tournament deletion:', verifyError);
+      } else if (count && count > 0) {
+        // Tournament still exists - deletion didn't work
+        console.error('Tournament still exists after deletion attempt. Count:', count);
+        return { 
+          success: false, 
+          error: 'Tournament deletion failed. The tournament still exists in the database. Please check your permissions and try again.' 
+        };
+      }
+    } catch (verifyException) {
+      // If verification fails for any reason, log it but don't fail the deletion
+      // The delete operation itself succeeded, so we'll trust that
+      console.warn('Exception during tournament deletion verification:', verifyException);
     }
     
-    if (verifyData) {
-      // Tournament still exists - deletion didn't work
-      console.error('Tournament still exists after deletion attempt. Data:', verifyData);
-      return { 
-        success: false, 
-        error: 'Tournament deletion failed. The tournament still exists in the database. Please check your permissions and try again.' 
-      };
-    }
-    
-    // Tournament not found - deletion was successful
+    // Tournament not found or verification skipped - deletion was successful
     console.log('Tournament and all related entries deleted successfully');
     return { success: true, error: null };
   } catch (error) {
