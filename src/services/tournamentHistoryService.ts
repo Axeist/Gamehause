@@ -306,10 +306,42 @@ export const fetchTournamentLeaderboard = async (): Promise<{
     // First, try to ensure all completed tournaments are saved
     await saveAllCompletedTournaments();
 
-    const { data, error } = await supabase
+    // Try to select tournament_name, but fallback to joining with tournaments table if needed
+    let { data, error } = await supabase
       .from('tournament_winners')
-      .select('winner_name, tournament_name')
+      .select('winner_name, tournament_name, tournament_date')
       .order('created_at', { ascending: false });
+
+    // If tournament_name column doesn't exist, try to get it from tournaments table via join
+    if (error && error.message?.includes('tournament_name')) {
+      // Fallback: select all and get tournament name from tournaments table
+      const { data: winnersData, error: winnersError } = await supabase
+        .from('tournament_winners')
+        .select('winner_name, tournament_id, tournament_date')
+        .order('created_at', { ascending: false });
+      
+      if (winnersError) {
+        console.error('Error fetching leaderboard:', winnersError);
+        return [];
+      }
+      
+      // Fetch tournament names separately
+      const tournamentIds = [...new Set((winnersData || []).map(w => w.tournament_id))];
+      const { data: tournamentsData } = await supabase
+        .from('tournaments')
+        .select('id, name')
+        .in('id', tournamentIds);
+      
+      const tournamentMap = new Map((tournamentsData || []).map(t => [t.id, t.name]));
+      
+      // Map the data
+      data = (winnersData || []).map(w => ({
+        winner_name: w.winner_name,
+        tournament_name: tournamentMap.get(w.tournament_id) || `Tournament ${w.tournament_date}`,
+        tournament_date: w.tournament_date
+      }));
+      error = null;
+    }
 
     if (error) {
       console.error('Error fetching leaderboard:', error);
@@ -321,14 +353,15 @@ export const fetchTournamentLeaderboard = async (): Promise<{
     // Group by winner and count wins
     const leaderboard = (data || []).reduce((acc, record) => {
       const existing = acc.find(item => item.player === record.winner_name);
+      const tournamentName = record.tournament_name || `Tournament ${record.tournament_date || ''}`;
       if (existing) {
         existing.wins += 1;
-        existing.tournaments.push(record.tournament_name);
+        existing.tournaments.push(tournamentName);
       } else {
         acc.push({
           player: record.winner_name,
           wins: 1,
-          tournaments: [record.tournament_name]
+          tournaments: [tournamentName]
         });
       }
       return acc;

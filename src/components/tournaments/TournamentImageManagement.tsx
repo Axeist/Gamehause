@@ -54,11 +54,29 @@ const TournamentImageManagement: React.FC<TournamentImageManagementProps> = ({ o
 
   const fetchImages = async () => {
     try {
-      const { data, error } = await supabase
+      // Try uploaded_at first, fallback to created_at if it doesn't exist
+      let query = supabase
         .from('tournament_winner_images')
-        .select('*')
-        .order('uploaded_at', { ascending: false });
-
+        .select('*');
+      
+      // Try to order by uploaded_at, but if column doesn't exist, use created_at
+      const { data, error } = await query.order('uploaded_at', { ascending: false });
+      
+      // If error is about missing column, try created_at instead
+      if (error && error.message?.includes('uploaded_at')) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('tournament_winner_images')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (fallbackError) {
+          throw fallbackError;
+        }
+        
+        setImages(fallbackData || []);
+        return;
+      }
+      
       if (error) {
         console.error('Error fetching images:', error);
         return;
