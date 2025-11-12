@@ -34,25 +34,32 @@ export default function BookingConfirmationDialog({
   };
 
   const handleShare = async () => {
-    const shareText = `🎮 Booking Confirmed! 
+    const shareText = `🎮 Booking Confirmed at NerfTurf! 
+
 Booking ID: ${bookingData.bookingId}
 Customer: ${bookingData.customerName}
 Stations: ${bookingData.stationNames.join(', ')}
 Date: ${format(new Date(bookingData.date), 'EEEE, MMMM d, yyyy')}
 Time: ${bookingData.startTime} - ${bookingData.endTime}
-Total: ₹${bookingData.totalAmount}
-${bookingData.couponCode ? `Coupon: ${bookingData.couponCode}` : ''}
+Total Amount: ₹${bookingData.totalAmount}
+${bookingData.couponCode ? `Coupon Applied: ${bookingData.couponCode}` : ''}
+${bookingData.discountAmount ? `Discount: ₹${bookingData.discountAmount}` : ''}
 
-🎯 Cuephoria Gaming Lounge`;
+📍 NerfTurf - Chennai's Premier Snooker & Gaming Lounge
+📞 Contact: +91 93451 87098
+🌐 Visit: https://app.nerfturf.in
+
+Please arrive on time and show this confirmation at reception.`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Cuephoria Booking Confirmation',
+          title: 'NerfTurf Booking Confirmation',
           text: shareText,
         });
+        toast.success('Booking details shared successfully!');
       } catch (error) {
-        // Fallback to copy
+        // User cancelled or error occurred - fallback to copy
         navigator.clipboard.writeText(shareText);
         toast.success('Booking details copied to clipboard!');
       }
