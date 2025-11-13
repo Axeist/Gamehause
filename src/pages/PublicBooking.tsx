@@ -161,7 +161,7 @@ export default function PublicBooking() {
   const [appliedCoupons, setAppliedCoupons] = useState<Record<string, string>>({});
   const [couponCode, setCouponCode] = useState("");
 
-  const [paymentMethod, setPaymentMethod] = useState<"venue" | "phonepe">("venue");
+  const [paymentMethod, setPaymentMethod] = useState<"venue" | "razorpay">("venue");
   const [loading, setLoading] = useState(false);
 
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -176,137 +176,23 @@ export default function PublicBooking() {
   const [todayLoading, setTodayLoading] = useState(false);
   
   const [searchParams, setSearchParams] = useSearchParams();
-  const [paymentStatus, setPaymentStatus] = useState<"processing" | "success" | "failed" | null>(null);
 
+  // Load Razorpay script when payment method is set to razorpay
   useEffect(() => {
-    const pp = searchParams.get("pp");
-    const txn = searchParams.get("txn");
-    
-    if (pp && txn) {
-      setPaymentStatus("processing");
-      
-      if (pp === "success") {
-        handlePaymentSuccess(txn);
-      } else if (pp === "failed") {
-        setPaymentStatus("failed");
-        toast.error("Payment failed. Please try again or choose 'Pay at Venue'.");
+    if (paymentMethod === "razorpay") {
+      if (!(window as any).Razorpay) {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => console.log("✅ Razorpay script loaded");
+        script.onerror = () => {
+          console.error("❌ Failed to load Razorpay script");
+          toast.error("Failed to load payment gateway. Please refresh the page.");
+        };
+        document.body.appendChild(script);
       }
-      
-      setSearchParams({});
     }
-  }, [searchParams, setSearchParams]);
-
-  // ✅ UPDATED: Payment success handler with duplicate check and Customer ID
-  const handlePaymentSuccess = async (txnId: string) => {
-    try {
-      const statusResponse = await fetch(`https://admin.nerfturf.in/api/phonepe/status?txn=${encodeURIComponent(txnId)}`);
-      const statusData = await statusResponse.json();
-      
-      if (!statusData?.success) {
-        throw new Error("Payment verification failed");
-      }
-      
-      const pendingBookingData = localStorage.getItem("pendingBooking");
-      if (!pendingBookingData) {
-        throw new Error("No pending booking found");
-      }
-      
-      const pendingBooking = JSON.parse(pendingBookingData);
-      
-      let customerId = pendingBooking.customer.id;
-      
-      if (!customerId) {
-        const normalizedPhone = normalizePhoneNumber(pendingBooking.customer.phone);
-        
-        // ✅ Check for existing customer
-        const { data: existingCustomer } = await supabase
-          .from("customers")
-          .select("id")
-          .eq("phone", normalizedPhone)
-          .maybeSingle();
-        
-        if (existingCustomer?.id) {
-          customerId = existingCustomer.id;
-        } else {
-          const customerID = generateCustomerID(normalizedPhone);
-          
-          const { data: newCustomer, error } = await supabase
-            .from("customers")
-            .insert({
-              name: pendingBooking.customer.name,
-              phone: normalizedPhone,
-              email: pendingBooking.customer.email || null,
-              custom_id: customerID,
-              is_member: false,
-              loyalty_points: 0,
-              total_spent: 0,
-              total_play_time: 0,
-            })
-            .select("id")
-            .single();
-          
-          if (error) {
-            if (error.code === '23505') {
-              const { data: retryCustomer } = await supabase
-                .from("customers")
-                .select("id")
-                .eq("phone", normalizedPhone)
-                .single();
-              
-              if (retryCustomer) {
-                customerId = retryCustomer.id;
-              } else {
-                throw error;
-              }
-            } else {
-              throw error;
-            }
-          } else {
-            customerId = newCustomer.id;
-          }
-        }
-      }
-      
-      const bookingDuration = getBookingDuration(pendingBooking.selectedStations, stations);
-      const bookingRows = pendingBooking.selectedStations.map((stationId: string) => ({
-        station_id: stationId,
-        customer_id: customerId,
-        booking_date: pendingBooking.selectedDateISO,
-        start_time: pendingBooking.start_time,
-        end_time: pendingBooking.end_time,
-        duration: bookingDuration,
-        status: "confirmed",
-        original_price: pendingBooking.pricing.original,
-        discount_percentage: pendingBooking.pricing.discount > 0 
-          ? (pendingBooking.pricing.discount / pendingBooking.pricing.original) * 100 
-          : null,
-        final_price: pendingBooking.pricing.final,
-        coupon_code: pendingBooking.pricing.coupons || null,
-        payment_mode: "phonepe",
-        payment_txn_id: txnId,
-      }));
-      
-      const { error: bookingError } = await supabase
-        .from("bookings")
-        .insert(bookingRows);
-      
-      if (bookingError) throw bookingError;
-      
-      localStorage.removeItem("pendingBooking");
-      setPaymentStatus("success");
-      toast.success("🎉 Payment successful! Your booking is confirmed.");
-      
-      fetchTodaysBookings();
-      if (selectedStations.length > 0 && selectedDate) {
-        fetchAvailableSlots();
-      }
-      
-    } catch (error) {
-      console.error("Payment success handling error:", error);
-      setPaymentStatus("failed");
-      toast.error("Payment was successful but booking creation failed. Please contact support.");
-    }
-  };
+  }, [paymentMethod]);
 
   useEffect(() => {
     fetchStations();
@@ -1097,78 +983,115 @@ export default function PublicBooking() {
     }
   }
 
-  const initiatePhonePe = async () => {
-    if (finalPrice <= 0) {
+  const initiateRazorpay = async () => {
+    // 1. Validate inputs
+    const slotsToBook = selectedSlotRange.length > 0 ? selectedSlotRange : (selectedSlot ? [selectedSlot] : []);
+    const totalPrice = finalPrice * slotsToBook.length;
+
+    if (totalPrice <= 0) {
       toast.error("Amount must be greater than 0 for online payment.");
       return;
     }
-    if (!customerInfo.phone) {
-      toast.error("Customer phone is required for payment.");
+
+    if (!(window as any).Razorpay) {
+      toast.error("Payment gateway is loading. Please wait a moment and try again.");
       return;
     }
 
-    const txnId = genTxnId();
-    const origin = window.location.origin;
-    const successUrl = `${origin}/public/booking?pp=success`;
-    const failedUrl = `${origin}/public/booking?pp=failed`;
-
     setLoading(true);
     try {
+      // 2. Store pending booking in localStorage
       const bookingDuration = getBookingDuration(selectedStations, stations);
       const pendingBooking = {
         selectedStations,
         selectedDateISO: format(selectedDate, "yyyy-MM-dd"),
-        start_time: selectedSlotRange.length > 0 ? selectedSlotRange[0].start_time : selectedSlot!.start_time,
-        end_time: selectedSlotRange.length > 0 ? selectedSlotRange[selectedSlotRange.length - 1].end_time : selectedSlot!.end_time,
+        slots: slotsToBook.map(slot => ({
+          start_time: slot.start_time,
+          end_time: slot.end_time,
+        })),
         duration: bookingDuration,
         customer: customerInfo,
         pricing: {
-          original: originalPrice,
-          discount: discount,
-          final: finalPrice,
+          original: originalPrice * slotsToBook.length,
+          discount: discount * slotsToBook.length,
+          final: totalPrice,
           coupons: Object.values(appliedCoupons).join(","),
         },
       };
       localStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
 
-      const res = await fetch("/api/phonepe/pay", {
+      // 3. Create order on server
+      const orderRes = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          amount: finalPrice,
-          customerPhone: customerInfo.phone,
-          merchantTransactionId: txnId,
-          successUrl,
-          failedUrl,
+          amount: totalPrice,
+          receipt: genTxnId(),
+          notes: {
+            customer_name: customerInfo.name,
+            customer_phone: customerInfo.phone,
+            customer_email: customerInfo.email || "",
+            booking_date: format(selectedDate, "yyyy-MM-dd"),
+            stations: selectedStations.join(","),
+          },
         }),
       });
 
-      const raw = await res.text();
-      let data: any = null;
-      try {
-        data = JSON.parse(raw);
-      } catch {
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok || !orderData?.ok) {
+        throw new Error(orderData?.error || "Failed to create payment order");
       }
 
-      console.log("PhonePe pay upstream →", {
-        status: res.status,
-        ok: res.ok,
-        raw,
-        json: data,
+      // 4. Get Razorpay Key ID
+      const keyRes = await fetch("/api/razorpay/get-key-id");
+      const keyData = await keyRes.json();
+
+      if (!keyRes.ok || !keyData?.ok) {
+        throw new Error(keyData?.error || "Failed to get payment gateway key");
+      }
+
+      // 5. Initialize Razorpay checkout
+      const options = {
+        key: keyData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency || "INR",
+        name: "NerfTurf Gaming Lounge",
+        description: `Booking for ${slotsToBook.length} slot(s)`,
+        order_id: orderData.orderId,
+        handler: function (response: any) {
+          // Redirect to success page
+          window.location.href = `/public/payment/success?payment_id=${encodeURIComponent(response.razorpay_payment_id)}&order_id=${encodeURIComponent(response.razorpay_order_id)}&signature=${encodeURIComponent(response.razorpay_signature)}`;
+        },
+        prefill: {
+          name: customerInfo.name,
+          email: customerInfo.email || "",
+          contact: customerInfo.phone,
+        },
+        theme: {
+          color: "#8B5CF6", // Your brand color
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+            toast.info("Payment was cancelled");
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+
+      rzp.on("payment.failed", function (response: any) {
+        const error = response.error?.description || response.error?.reason || "Payment failed";
+        toast.error(`Payment failed: ${error}`);
+        setLoading(false);
+        window.location.href = `/public/payment/failed?order_id=${encodeURIComponent(orderData.orderId)}&error=${encodeURIComponent(error)}`;
       });
 
-      if (res.ok && data?.ok && data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      const apiErr = (data && (data.error || data.raw)) || raw || "Unknown error";
-      const step = data?.step ? ` (${data.step})` : "";
-      const status = res.status ? ` [HTTP ${res.status}]` : "";
-      toast.error(`Could not start PhonePe payment${step}${status}. ${apiErr}`);
+      rzp.open();
     } catch (e: any) {
-      toast.error(`Unable to start payment (network). ${e?.message || e}`);
-    } finally {
+      console.error("Razorpay payment error:", e);
+      toast.error(`Unable to start payment: ${e?.message || e}`);
       setLoading(false);
     }
   };
@@ -1194,7 +1117,7 @@ export default function PublicBooking() {
     if (paymentMethod === "venue") {
       await createVenueBooking();
     } else {
-      await initiatePhonePe();
+      await initiateRazorpay();
     }
   }
 
@@ -1842,10 +1765,10 @@ export default function PublicBooking() {
                       Pay at Venue
                     </button>
                     <button
-                      onClick={() => setPaymentMethod("phonepe")}
+                      onClick={() => setPaymentMethod("razorpay")}
                       className={cn(
                         "rounded-lg px-3 py-2 text-sm border inline-flex items-center justify-center gap-2",
-                        paymentMethod === "phonepe"
+                        paymentMethod === "razorpay"
                           ? "bg-white/10 border-white/20 text-white"
                           : "bg-black/20 border-white/10 text-gray-300"
                       )}
@@ -1854,9 +1777,9 @@ export default function PublicBooking() {
                       Pay Online
                     </button>
                   </div>
-                  {paymentMethod === "phonepe" && (
+                  {paymentMethod === "razorpay" && (
                     <p className="mt-2 text-[11px] text-gray-400">
-                      <span className="text-nerfturf-magenta font-semibold">Coming soon</span> - Online payment will be available shortly. For now, please use "Pay at Venue" option.
+                      Secure online payment via Razorpay. All major cards, UPI, and wallets accepted.
                     </p>
                   )}
                 </div>
@@ -1919,18 +1842,18 @@ export default function PublicBooking() {
                   size="lg"
                 >
                   {loading
-                    ? paymentMethod === "phonepe"
+                    ? paymentMethod === "razorpay"
                       ? "Starting Payment..."
                       : "Creating Booking..."
-                    : paymentMethod === "phonepe"
-                    ? "Confirm & Pay (PhonePe)"
+                    : paymentMethod === "razorpay"
+                    ? "Confirm & Pay Online"
                     : "Confirm Booking"}
                 </Button>
 
                 <p className="text-xs text-gray-400 text-center">
                   All prices are shown in <span className="font-semibold">INR (₹)</span>.{" "}
-                  {paymentMethod === "phonepe"
-                    ? "You will complete payment securely on PhonePe."
+                  {paymentMethod === "razorpay"
+                    ? "You will complete payment securely via Razorpay."
                     : "Payment will be collected at the venue."}
                 </p>
               </CardContent>
