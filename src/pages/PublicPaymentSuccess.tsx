@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import BookingConfirmationDialog from "@/components/BookingConfirmationDialog";
+import { CheckCircle2, Loader2, XCircle, Sparkles } from "lucide-react";
+import { format } from "date-fns";
 
 type PendingBooking = {
   selectedStations: string[];
@@ -19,6 +22,8 @@ export default function PublicPaymentSuccess() {
   const signature = searchParams.get("signature") || "";
   const [status, setStatus] = useState<"checking" | "creating" | "done" | "failed">("checking");
   const [msg, setMsg] = useState("Verifying your payment…");
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  const [bookingConfirmationData, setBookingConfirmationData] = useState<any>(null);
 
   useEffect(() => {
     const run = async () => {
@@ -130,7 +135,7 @@ export default function PublicPaymentSuccess() {
       const { error: bErr, data: insertedBookings } = await supabase
         .from("bookings")
         .insert(rows)
-        .select("id");
+        .select("id, station_id");
 
       if (bErr) {
         setStatus("failed");
@@ -138,49 +143,169 @@ export default function PublicPaymentSuccess() {
         return;
       }
 
-      // 5) Store confirmation and redirect
+      // 5) Fetch station names for confirmation
+      const stationIds = [...new Set(insertedBookings?.map(b => b.station_id) || [])];
+      const { data: stationsData } = await supabase
+        .from("stations")
+        .select("id, name")
+        .in("id", stationIds);
+
+      const stationNames = stationsData?.map(s => s.name) || pb.selectedStations;
+
+      // 6) Prepare confirmation data
+      const firstSlot = pb.slots[0];
+      const lastSlot = pb.slots[pb.slots.length - 1];
+      
       const confirmationData = {
-        bookingIds: insertedBookings?.map(b => b.id) || [],
-        paymentId,
-        orderId,
+        bookingId: insertedBookings?.[0]?.id.substring(0, 8).toUpperCase() || "N/A",
         customerName: pb.customer.name,
+        stationNames: stationNames,
+        date: pb.selectedDateISO,
+        startTime: new Date(`2000-01-01T${firstSlot.start_time}`).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }),
+        endTime: new Date(`2000-01-01T${lastSlot.end_time}`).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }),
         totalAmount: pb.pricing.final,
+        couponCode: pb.pricing.coupons || undefined,
+        discountAmount: pb.pricing.discount > 0 ? pb.pricing.discount : undefined,
+        paymentMode: "razorpay",
+        paymentTxnId: paymentId,
       };
 
-      localStorage.setItem("bookingConfirmation", JSON.stringify(confirmationData));
       localStorage.removeItem("pendingBooking");
       
+      setBookingConfirmationData(confirmationData);
       setStatus("done");
-      setMsg("Booking confirmed! Redirecting...");
+      setMsg("Booking confirmed successfully!");
       
-      // Redirect to booking page with success flag
+      // Show confirmation dialog after a brief delay
       setTimeout(() => {
-        navigate("/public/booking?booking_success=true");
-      }, 1500);
+        setShowConfirmationDialog(true);
+      }, 500);
     };
 
     run();
-  }, [paymentId, orderId, signature, navigate]);
+  }, [paymentId, orderId, signature]);
 
-  const title =
-    status === "done" ? "Payment Success"
-    : status === "failed" ? "Payment Issue"
-    : "Processing…";
+  const getStatusIcon = () => {
+    switch (status) {
+      case "checking":
+      case "creating":
+        return <Loader2 className="h-12 w-12 text-blue-400 animate-spin" />;
+      case "done":
+        return <CheckCircle2 className="h-12 w-12 text-green-400" />;
+      case "failed":
+        return <XCircle className="h-12 w-12 text-red-400" />;
+    }
+  };
+
+  const getStatusColor = () => {
+    switch (status) {
+      case "checking":
+      case "creating":
+        return "from-blue-500 to-cyan-500";
+      case "done":
+        return "from-green-500 to-emerald-500";
+      case "failed":
+        return "from-red-500 to-rose-500";
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-gray-200 p-6">
-      <div className="max-w-md w-full rounded-xl border border-white/10 bg-white/5 p-6 text-center">
-        <h1 className="text-xl font-bold mb-2">{title}</h1>
-        <p className="text-sm mb-6">{msg}</p>
-        {status === "done" && (
-          <button
-            onClick={() => navigate("/public/booking")}
-            className="inline-flex rounded-md bg-cuephoria-purple/80 hover:bg-cuephoria-purple px-4 py-2 text-white"
-          >
-            Back to Booking
-          </button>
-        )}
+    <>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] p-6 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        </div>
+
+        <div className="max-w-md w-full relative z-10">
+          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl shadow-2xl p-8 text-center">
+            {/* Icon */}
+            <div className="mb-6 flex justify-center">
+              <div className={`relative p-4 rounded-full bg-gradient-to-br ${getStatusColor()} bg-opacity-20`}>
+                {getStatusIcon()}
+                {status === "done" && (
+                  <div className="absolute -top-1 -right-1">
+                    <Sparkles className="h-5 w-5 text-yellow-400 animate-pulse" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Title */}
+            <h1 className={`text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r ${getStatusColor()}`}>
+              {status === "done" ? "Payment Successful!" : status === "failed" ? "Payment Issue" : "Processing Payment"}
+            </h1>
+
+            {/* Message */}
+            <p className="text-gray-300 mb-6 text-lg">
+              {msg}
+            </p>
+
+            {/* Status-specific content */}
+            {status === "done" && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <p className="text-sm text-green-400 font-medium">
+                    ✓ Payment verified and booking confirmed
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate("/public/booking")}
+                  className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-6 py-3 text-white font-semibold transition-all transform hover:scale-105 shadow-lg shadow-purple-500/50"
+                >
+                  Back to Booking
+                </button>
+              </div>
+            )}
+
+            {status === "failed" && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-400">
+                    Please try again or contact support if the issue persists.
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate("/public/booking")}
+                  className="w-full rounded-lg bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 px-6 py-3 text-white font-semibold transition-all transform hover:scale-105"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {status !== "done" && status !== "failed" && (
+              <div className="mt-4">
+                <div className="h-1 w-full bg-gray-800 rounded-full overflow-hidden">
+                  <div className={`h-full bg-gradient-to-r ${getStatusColor()} animate-pulse`} style={{ width: "60%" }} />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">Please wait while we process your payment...</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Booking Confirmation Dialog */}
+      {bookingConfirmationData && (
+        <BookingConfirmationDialog
+          isOpen={showConfirmationDialog}
+          onClose={() => {
+            setShowConfirmationDialog(false);
+            navigate("/public/booking");
+          }}
+          bookingData={bookingConfirmationData}
+        />
+      )}
+    </>
   );
 }

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle2, Download, Share2, Copy, Calendar, Clock, MapPin, Tag } from 'lucide-react';
+import { CheckCircle2, Download, Share2, Copy, Calendar, Clock, MapPin, Tag, CreditCard, Hash } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -21,6 +21,8 @@ interface BookingConfirmationDialogProps {
     totalAmount: number;
     couponCode?: string;
     discountAmount?: number;
+    paymentMode?: string;
+    paymentTxnId?: string;
   };
 }
 
@@ -42,6 +44,8 @@ Stations: ${bookingData.stationNames.join(', ')}
 Date: ${format(new Date(bookingData.date), 'EEEE, MMMM d, yyyy')}
 Time: ${bookingData.startTime} - ${bookingData.endTime}
 Total Amount: ₹${bookingData.totalAmount}
+${bookingData.paymentMode ? `Payment: ${bookingData.paymentMode === 'razorpay' ? 'Paid Online' : bookingData.paymentMode}` : 'Payment at venue'}
+${bookingData.paymentTxnId ? `Transaction ID: ${bookingData.paymentTxnId}` : ''}
 ${bookingData.couponCode ? `Coupon Applied: ${bookingData.couponCode}` : ''}
 ${bookingData.discountAmount ? `Discount: ₹${bookingData.discountAmount}` : ''}
 
@@ -143,15 +147,61 @@ Please arrive on time and show this confirmation at reception.`;
 
             <Separator className="bg-border" />
 
+            {/* Payment Information */}
+            {bookingData.paymentMode && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-green-400" />
+                  <span className="text-sm text-gray-300">
+                    Payment: <span className="font-semibold text-green-400">
+                      {bookingData.paymentMode === 'razorpay' ? 'Paid Online ✓' : bookingData.paymentMode}
+                    </span>
+                  </span>
+                </div>
+                {bookingData.paymentTxnId && (
+                  <div className="flex items-center gap-2">
+                    <Hash className="h-4 w-4 text-blue-400" />
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="text-xs text-gray-400">Txn ID:</span>
+                      <span className="text-xs font-mono text-blue-400 flex-1 truncate">
+                        {bookingData.paymentTxnId}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          navigator.clipboard.writeText(bookingData.paymentTxnId!);
+                          toast.success('Transaction ID copied!');
+                        }}
+                        className="h-5 w-5 p-0 hover:bg-gray-700"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <Separator className="bg-border" />
+
             {/* Total Amount */}
             <div className="text-center">
               <p className="text-sm text-gray-400">Total Amount</p>
               <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cuephoria-purple to-cuephoria-lightpurple">
                 ₹{bookingData.totalAmount}
               </p>
-              <p className="text-xs text-gray-400 mt-1">
-                Payment at venue
-              </p>
+              {!bookingData.paymentMode && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Payment at venue
+                </p>
+              )}
+              {bookingData.paymentMode === 'razorpay' && (
+                <p className="text-xs text-green-400 mt-1 flex items-center justify-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Payment completed
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
