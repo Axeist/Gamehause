@@ -2276,11 +2276,13 @@ export default function BookingManagement() {
                   <p>Try adjusting your filters or date range</p>
                 </div>
               ) : (
-                <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-background space-y-2 pr-2">
+                <div key={`bookings-${bookings.length}`} className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-background space-y-2 pr-2">
                   {Object.entries(groupedBookings)
                     .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
-                    .map(([date, customerBookings]) => (
-                      <Collapsible key={date}>
+                    .map(([date, customerBookings]) => {
+                      const totalBookingsForDate = Object.values(customerBookings).flat().length;
+                      return (
+                      <Collapsible key={`${date}-${totalBookingsForDate}`}>
                         <CollapsibleTrigger 
                           onClick={() => toggleDateExpansion(date)}
                           className="flex items-center gap-2 w-full p-3 text-left bg-muted/50 rounded-lg hover:bg-muted transition-colors"
@@ -2308,7 +2310,7 @@ export default function BookingManagement() {
                                 const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
                                 
                                 return (
-                                  <Collapsible key={key}>
+                                  <Collapsible key={`${key}-${bookingsForCustomer.length}`}>
                                     <CollapsibleTrigger 
                                       onClick={() => toggleCustomerExpansion(key)}
                                       className="flex items-center gap-2 w-full p-2 text-left bg-background rounded border hover:bg-muted/50 transition-colors"
@@ -2480,7 +2482,8 @@ export default function BookingManagement() {
                           )}
                         </CollapsibleContent>
                       </Collapsible>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
             </CardContent>
