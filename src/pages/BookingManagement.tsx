@@ -337,8 +337,8 @@ export default function BookingManagement() {
     if (error) throw error;
 
     if (!bookingsData || bookingsData.length === 0) {
+      setBookings([]);  // ← Clears bookings if none exist
       setAllBookings([]);
-      // setBookings will be updated automatically by the useEffect
       setCouponOptions([]);
       return;
     }
@@ -388,8 +388,8 @@ export default function BookingManagement() {
     });
 
     setAllBookings(transformed);
-    // Note: setBookings will be updated automatically by the useEffect that watches allBookings
-    // This ensures groupedBookings recalculates properly when bookings state updates
+    const filtered = applyFilters(transformed);
+    setBookings(filtered);  // ← Updates filtered bookings (triggers re-render)
 
     const presentCodes = Array.from(
       new Set(
@@ -2276,18 +2276,19 @@ export default function BookingManagement() {
                   <p>Try adjusting your filters or date range</p>
                 </div>
               ) : (
-                <div key={`bookings-${bookings.length}`} className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-background space-y-2 pr-2">
+                <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-background space-y-2 pr-2">
                   {Object.entries(groupedBookings)
                     .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
                     .map(([date, customerBookings]) => {
-                      const totalBookingsForDate = Object.values(customerBookings).flat().length;
+                      const bookingIds = Object.values(customerBookings).flat().map(b => b.id).join('-');
+                      const isDateExpanded = expandedDates.has(date);
                       return (
-                      <Collapsible key={`${date}-${totalBookingsForDate}`}>
+                      <Collapsible key={date} open={isDateExpanded}>
                         <CollapsibleTrigger 
                           onClick={() => toggleDateExpansion(date)}
                           className="flex items-center gap-2 w-full p-3 text-left bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                         >
-                          {expandedDates.has(date) ? (
+                          {isDateExpanded ? (
                             <ChevronDown className="h-4 w-4" />
                           ) : (
                             <ChevronRight className="h-4 w-4" />
@@ -2303,14 +2304,13 @@ export default function BookingManagement() {
                         </CollapsibleTrigger>
                         
                         <CollapsibleContent>
-                          {expandedDates.has(date) && (
-                            <div className="ml-6 mt-2 space-y-2">
-                              {Object.entries(customerBookings).map(([customerName, bookingsForCustomer]) => {
-                                const key = `${date}::${customerName}`;
-                                const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
-                                
-                                return (
-                                  <Collapsible key={`${key}-${bookingsForCustomer.length}`}>
+                          <div key={`${date}-content-${bookingIds}`} className="ml-6 mt-2 space-y-2">
+                            {Object.entries(customerBookings).map(([customerName, bookingsForCustomer]) => {
+                              const key = `${date}::${customerName}`;
+                              const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
+                              
+                              return (
+                                  <Collapsible key={key}>
                                     <CollapsibleTrigger 
                                       onClick={() => toggleCustomerExpansion(key)}
                                       className="flex items-center gap-2 w-full p-2 text-left bg-background rounded border hover:bg-muted/50 transition-colors"
@@ -2479,7 +2479,6 @@ export default function BookingManagement() {
                                 );
                               })}
                             </div>
-                          )}
                         </CollapsibleContent>
                       </Collapsible>
                       );
