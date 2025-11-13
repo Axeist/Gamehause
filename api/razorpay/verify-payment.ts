@@ -1,8 +1,5 @@
-// Using Node.js runtime to use Razorpay SDK
-// export const config = { runtime: "edge" }; // COMMENTED OUT
-
-// Import Razorpay at module level for better performance (avoids dynamic import on each request)
-import Razorpay from 'razorpay';
+// Using Node.js runtime
+// Note: Using direct HTTP calls instead of Razorpay SDK to avoid connection keep-alive issues
 
 function j(res: unknown, status = 200) {
   return new Response(JSON.stringify(res), {
@@ -37,15 +34,27 @@ function getRazorpayCredentials() {
   return { keyId, keySecret, mode };
 }
 
-async function fetchPaymentStatus(paymentId: string) {
+async function fetchPaymentStatus(paymentId: string, signal?: AbortSignal) {
   const { keyId, keySecret } = getRazorpayCredentials();
 
-  const razorpay = new Razorpay({
-    key_id: keyId,
-    key_secret: keySecret,
+  // Use direct HTTP call instead of SDK to avoid connection keep-alive issues
+  const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+  
+  const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Connection': 'close', // Explicitly close connection
+    },
+    signal: signal,
   });
 
-  const payment = await razorpay.payments.fetch(paymentId);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Razorpay API error: ${response.status} - ${errorText}`);
+  }
+
+  const payment = await response.json();
   return payment;
 }
 
@@ -68,12 +77,22 @@ export default async function handler(req: any) {
     }
 
     // Add timeout wrapper for Razorpay API call (8 seconds max to avoid Vercel timeout)
-    const paymentPromise = fetchPaymentStatus(razorpay_payment_id);
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("Request timeout: Razorpay API took too long")), 8000)
-    );
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, 8000);
 
-    const payment = await Promise.race([paymentPromise, timeoutPromise]) as any;
+    let payment: any;
+    try {
+      payment = await fetchPaymentStatus(razorpay_payment_id, abortController.signal);
+      clearTimeout(timeoutId);
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      if (abortController.signal.aborted || err?.message?.includes("aborted")) {
+        throw new Error("Request timeout: Razorpay API took too long");
+      }
+      throw err;
+    }
 
     // Check if payment is successful
     const isSuccess = payment.status === "captured" || payment.status === "authorized";

@@ -1,8 +1,5 @@
-// Using Node.js runtime to use Razorpay SDK
-// export const config = { runtime: "edge" }; // COMMENTED OUT
-
-// Import Razorpay at module level for better performance (avoids dynamic import on each request)
-import Razorpay from 'razorpay';
+// Using Node.js runtime
+// Note: Using direct HTTP calls instead of Razorpay SDK to avoid connection keep-alive issues
 
 function j(res: unknown, status = 200) {
   return new Response(JSON.stringify(res), {
@@ -45,14 +42,10 @@ async function createRazorpayOrder(amount: number, receipt: string, notes?: Reco
     throw new Error("Amount must be at least ₹1.00 (100 paise)");
   }
 
-  const razorpay = new Razorpay({
-    key_id: keyId,
-    key_secret: keySecret,
-    // Ensure connections are closed after request
-    headers: {
-      'Connection': 'close',
-    },
-  });
+  // Check if already aborted before making API call
+  if (signal?.aborted) {
+    throw new Error("Request aborted");
+  }
 
   const orderOptions: any = {
     amount: amountInPaise,
@@ -73,12 +66,26 @@ async function createRazorpayOrder(amount: number, receipt: string, notes?: Reco
     }
   }
 
-  // Check if already aborted
-  if (signal?.aborted) {
-    throw new Error("Request aborted");
+  // Use direct HTTP call instead of SDK to avoid connection keep-alive issues
+  const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+  
+  const response = await fetch('https://api.razorpay.com/v1/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${auth}`,
+      'Connection': 'close', // Explicitly close connection
+    },
+    body: JSON.stringify(orderOptions),
+    signal: signal,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Razorpay API error: ${response.status} - ${errorText}`);
   }
 
-  const order = await razorpay.orders.create(orderOptions);
+  const order = await response.json();
   
   // Check again after API call
   if (signal?.aborted) {
@@ -140,14 +147,8 @@ export default async function handler(req: any) {
       receipt: order.receipt,
     };
 
-    // Return response immediately - don't do anything after this
-    return new Response(JSON.stringify(responseData), {
-      status: 200,
-      headers: { 
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "no-cache",
-      },
-    });
+    // Return response immediately using the same format as other working endpoints
+    return j(responseData, 200);
   } catch (err: any) {
     const duration = Date.now() - startTime;
     console.error(`💥 Create order error (${duration}ms):`, err);
