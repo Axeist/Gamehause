@@ -12,23 +12,22 @@ function j(res: unknown, status = 200) {
   });
 }
 
-// Edge-safe env getter
-function need(name: string) {
-  const fromDeno = (globalThis as any)?.Deno?.env?.get?.(name);
-  const fromProcess = typeof process !== "undefined" ? (process.env as any)?.[name] : undefined;
-  const v = fromDeno ?? fromProcess;
-  if (!v) throw new Error(`Missing env: ${name}`);
-  return v;
-}
 
-// Get Razorpay webhook secret
-function getRazorpayWebhookSecret() {
-  const mode = need("RAZORPAY_MODE") || "test";
+// Get Razorpay webhook secret (optional but highly recommended for security)
+function getRazorpayWebhookSecret(): string | undefined {
+  const mode = getEnv("RAZORPAY_MODE") || "test";
   const isLive = mode === "live";
 
   return isLive
-    ? (need("RAZORPAY_WEBHOOK_SECRET_LIVE") || need("RAZORPAY_WEBHOOK_SECRET"))
-    : (need("RAZORPAY_WEBHOOK_SECRET_TEST") || need("RAZORPAY_WEBHOOK_SECRET"));
+    ? (getEnv("RAZORPAY_WEBHOOK_SECRET_LIVE") || getEnv("RAZORPAY_WEBHOOK_SECRET"))
+    : (getEnv("RAZORPAY_WEBHOOK_SECRET_TEST") || getEnv("RAZORPAY_WEBHOOK_SECRET"));
+}
+
+// Edge-safe env getter
+function getEnv(name: string): string | undefined {
+  const fromDeno = (globalThis as any)?.Deno?.env?.get?.(name);
+  const fromProcess = typeof process !== "undefined" ? (process.env as any)?.[name] : undefined;
+  return fromDeno ?? fromProcess;
 }
 
 // Verify webhook signature
@@ -70,12 +69,16 @@ export default async function handler(req: Request) {
       payloadLength: payload.length,
     });
 
-    // Verify webhook signature
+    // Verify webhook signature (if secret is configured)
     const webhookSecret = getRazorpayWebhookSecret();
-    const isValid = verifyWebhookSignature(payload, signature, webhookSecret);
-    if (!isValid) {
-      console.error("❌ Invalid webhook signature");
-      return j({ ok: false, error: "Invalid signature" }, 401);
+    if (webhookSecret) {
+      const isValid = verifyWebhookSignature(payload, signature, webhookSecret);
+      if (!isValid) {
+        console.error("❌ Invalid webhook signature");
+        return j({ ok: false, error: "Invalid signature" }, 401);
+      }
+    } else {
+      console.warn("⚠️ Webhook secret not configured - skipping signature verification (NOT RECOMMENDED for production)");
     }
 
     const data = JSON.parse(payload);
