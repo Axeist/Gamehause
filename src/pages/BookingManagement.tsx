@@ -1149,6 +1149,43 @@ export default function BookingManagement() {
     setDeleteDialogOpen(true); 
   };
 
+  const handleBookingDeleted = () => {
+    if (!selectedBooking) return;
+    
+    // Optimistically remove the booking from state immediately
+    setAllBookings(prev => {
+      const updated = prev.filter(b => b.id !== selectedBooking.id);
+      
+      // Clean up expanded state if no bookings remain for that date
+      const deletedDate = selectedBooking.booking_date;
+      const hasBookingsForDate = updated.some(b => b.booking_date === deletedDate);
+      
+      if (!hasBookingsForDate) {
+        setExpandedDates(prev => {
+          const next = new Set(prev);
+          next.delete(deletedDate);
+          return next;
+        });
+        
+        // Also clean up customer expansions for that date
+        setExpandedCustomers(prev => {
+          const next = new Set(prev);
+          Array.from(next).forEach(key => {
+            if (key.startsWith(deletedDate + '::')) {
+              next.delete(key);
+            }
+          });
+          return next;
+        });
+      }
+      
+      return updated;
+    });
+    
+    // Also refresh from server to ensure consistency
+    fetchBookings();
+  };
+
   const toggleDateExpansion = (date: string) => {
     setExpandedDates(prev => {
       const next = new Set(prev);
@@ -2494,7 +2531,7 @@ export default function BookingManagement() {
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
             booking={selectedBooking}
-            onBookingDeleted={fetchBookings}
+            onBookingDeleted={handleBookingDeleted}
           />
 
           <UpgradeDialog
