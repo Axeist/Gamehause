@@ -15,6 +15,21 @@ function getEnv(name: string): string | undefined {
   return fromDeno ?? fromProcess;
 }
 
+// Base64 encoding for Edge runtime (btoa works for ASCII, but we'll use a safer approach)
+function base64Encode(str: string): string {
+  // In Edge runtime, we can use TextEncoder + manual base64 or btoa
+  // btoa works for ASCII strings (which key_id and key_secret should be)
+  try {
+    return btoa(str);
+  } catch (e) {
+    // Fallback: use TextEncoder if btoa fails
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(str);
+    const binary = String.fromCharCode(...bytes);
+    return btoa(binary);
+  }
+}
+
 function need(name: string) {
   const v = getEnv(name);
   if (!v) throw new Error(`Missing env: ${name}`);
@@ -49,13 +64,20 @@ async function createRazorpayOrder(amount: number, receipt: string, notes?: Reco
     throw new Error("Request aborted");
   }
 
+  // Validate receipt is not empty
+  const receiptId = receipt.substring(0, 40).trim();
+  if (!receiptId) {
+    throw new Error("Receipt ID cannot be empty");
+  }
+
+  // Razorpay API expects specific format - only include required fields first
   const orderOptions: any = {
-    amount: amountInPaise,
-    currency: "INR",
-    receipt: receipt.substring(0, 40).trim(), // 40 char limit
+    amount: amountInPaise, // Amount in paise (smallest currency unit) - REQUIRED
+    currency: "INR", // REQUIRED
+    receipt: receiptId, // REQUIRED, max 40 chars
   };
 
-  // Validate and add notes if provided
+  // Add notes only if provided and valid (optional field)
   if (notes && typeof notes === 'object' && Object.keys(notes).length > 0) {
     const validNotes: Record<string, string> = {};
     for (const [key, value] of Object.entries(notes)) {
@@ -69,20 +91,33 @@ async function createRazorpayOrder(amount: number, receipt: string, notes?: Reco
   }
 
   // Use direct HTTP call instead of SDK to avoid connection keep-alive issues
-  const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+  // Edge runtime doesn't have Buffer, use base64 encoding function
+  const credentials = `${keyId}:${keySecret}`;
+  const auth = base64Encode(credentials);
   
   const controller = new AbortController();
   if (signal) {
     signal.addEventListener('abort', () => controller.abort());
   }
   
+  // Razorpay API requires specific headers and format
+  const requestBody = JSON.stringify(orderOptions);
+  
+  console.log('📤 Razorpay API request:', {
+    url: 'https://api.razorpay.com/v1/orders',
+    method: 'POST',
+    bodyLength: requestBody.length,
+    hasAuth: !!auth,
+  });
+  
   const response = await fetch('https://api.razorpay.com/v1/orders', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       'Authorization': `Basic ${auth}`,
     },
-    body: JSON.stringify(orderOptions),
+    body: requestBody,
     signal: controller.signal,
   });
 
@@ -92,7 +127,13 @@ async function createRazorpayOrder(amount: number, receipt: string, notes?: Reco
   }
 
   if (!response.ok) {
-    const errorText = await response.text();
+    let errorText = '';
+    try {
+      errorText = await response.text();
+    } catch (e) {
+      errorText = `HTTP ${response.status}`;
+    }
+    console.error(`Razorpay API error ${response.status}:`, errorText);
     throw new Error(`Razorpay API error: ${response.status} - ${errorText}`);
   }
 

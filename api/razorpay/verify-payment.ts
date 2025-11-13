@@ -15,6 +15,18 @@ function getEnv(name: string): string | undefined {
   return fromDeno ?? fromProcess;
 }
 
+// Base64 encoding for Edge runtime
+function base64Encode(str: string): string {
+  try {
+    return btoa(str);
+  } catch (e) {
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(str);
+    const binary = String.fromCharCode(...bytes);
+    return btoa(binary);
+  }
+}
+
 function need(name: string) {
   const v = getEnv(name);
   if (!v) throw new Error(`Missing env: ${name}`);
@@ -40,7 +52,9 @@ async function fetchPaymentStatus(paymentId: string, signal?: AbortSignal) {
   const { keyId, keySecret } = getRazorpayCredentials();
 
   // Use direct HTTP call instead of SDK to avoid connection keep-alive issues
-  const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+  // Edge runtime doesn't have Buffer, use base64 encoding function
+  const credentials = `${keyId}:${keySecret}`;
+  const auth = base64Encode(credentials);
   
   const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
     method: 'GET',
