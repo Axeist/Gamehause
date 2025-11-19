@@ -185,30 +185,30 @@ const Index: React.FC = () => {
         </div>
 
         {/* Live Station Status Section */}
-        <div className="w-full max-w-6xl mx-auto mb-20">
-          <div className="bg-gradient-to-br from-black/70 via-nerfturf-purple/20 to-black/70 border border-nerfturf-purple/50 rounded-3xl p-8 md:p-12 relative overflow-hidden backdrop-blur-md">
+        <div className="w-full max-w-6xl mx-auto mb-12 md:mb-20 px-4">
+          <div className="bg-gradient-to-br from-black/70 via-nerfturf-purple/20 to-black/70 border border-nerfturf-purple/50 rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12 relative overflow-hidden backdrop-blur-md">
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
             <div className="absolute top-0 right-0 h-96 w-96 bg-nerfturf-purple/10 blur-3xl rounded-full"></div>
             <div className="absolute bottom-0 left-0 h-96 w-96 bg-nerfturf-magenta/10 blur-3xl rounded-full"></div>
             
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30 border border-nerfturf-purple/40">
-                    <Radio className="h-6 w-6 text-nerfturf-lightpurple animate-pulse" />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30 border border-nerfturf-purple/40 shrink-0">
+                    <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-nerfturf-lightpurple animate-pulse" />
                   </div>
-                  <div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-1">Live Station Status</h2>
-                    <p className="text-gray-400 text-sm flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-                      Real-time updates every 30 seconds
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">Live Station Status</h2>
+                    <p className="text-gray-400 text-xs sm:text-sm flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse shrink-0"></span>
+                      <span className="truncate">Real-time updates every 30 seconds</span>
                     </p>
                   </div>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-nerfturf-lightpurple border-nerfturf-purple/50 hover:bg-nerfturf-purple/30"
+                  className="text-nerfturf-lightpurple border-nerfturf-purple/50 hover:bg-nerfturf-purple/30 shrink-0 whitespace-nowrap text-xs sm:text-sm"
                   onClick={() => navigate('/public/stations')}
                 >
                   View All Stations
