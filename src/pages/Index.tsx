@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Mail, Phone, Clock, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Station {
   id: string;
@@ -21,6 +22,7 @@ interface Station {
 const Index: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [openDialog, setOpenDialog] = useState<string | null>(null);
   const [liveStations, setLiveStations] = useState<Station[]>([]);
   const [stationsLoading, setStationsLoading] = useState(true);
@@ -98,68 +100,72 @@ const Index: React.FC = () => {
       </div>
 
       {/* Header */}
-      <header className="h-24 flex items-center px-8 border-b border-nerfturf-purple/30 relative z-10 backdrop-blur-md bg-black/40">
+      <header className="h-20 md:h-24 flex items-center px-4 md:px-8 border-b border-nerfturf-purple/30 relative z-10 backdrop-blur-md bg-black/40">
         <Logo />
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 md:gap-3">
           <Button
             variant="outline"
+            size={isMobile ? "icon" : "default"}
             className="text-nerfturf-lightpurple border-nerfturf-purple/50 hover:bg-nerfturf-purple/30 hover:border-nerfturf-purple/70 transition-all duration-300"
             onClick={() => navigate('/login')}
+            title="Management Login"
           >
-            <LogIn className="h-4 w-4 mr-2" />
-            Management Login
+            <LogIn className="h-4 w-4 md:mr-2" />
+            {!isMobile && <span>Management Login</span>}
           </Button>
           <Button
             variant="default"
-            className="bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta text-white hover:from-nerfturf-purple hover:to-nerfturf-magenta shadow-lg shadow-nerfturf-purple/50 transition-all duration-300"
+            size={isMobile ? "sm" : "default"}
+            className="bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta text-white hover:from-nerfturf-purple hover:to-nerfturf-magenta shadow-lg shadow-nerfturf-purple/50 transition-all duration-300 text-sm md:text-base"
             onClick={() => window.open('https://app.nerfturf.in/public/booking', '_blank')}
           >
-            <Calendar className="h-4 w-4 mr-2" />
-            Book a Slot
+            <Calendar className="h-4 w-4 md:mr-2" />
+            <span className="hidden sm:inline">Book a Slot</span>
+            <span className="sm:hidden">Book</span>
           </Button>
         </div>
       </header>
 
       {/* Hero section */}
-      <section className="flex-1 flex flex-col items-center justify-center px-4 py-16 relative z-10">
-        <div className="mb-10 animate-float-shadow">
+      <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-12 md:py-16 relative z-10">
+        <div className="mb-6 sm:mb-8 md:mb-10 animate-float-shadow">
           <div className="relative">
             <div className="absolute -inset-3 bg-gradient-to-r from-nerfturf-purple/30 to-nerfturf-magenta/30 rounded-full opacity-80 blur-2xl animate-pulse-glow"></div>
             <img
               src="https://iili.io/KpfrAog.jpg"
               alt="NerfTurf Logo" 
-              className="h-36 md:h-44 relative z-10 drop-shadow-[0_0_20px_rgba(110, 89, 165, 0.6)]"
+              className="h-28 sm:h-32 md:h-36 lg:h-44 relative z-10 drop-shadow-[0_0_20px_rgba(110, 89, 165, 0.6)]"
             />
           </div>
         </div>
         
-        <h1 className="text-5xl md:text-7xl font-bold text-center text-white font-heading leading-tight mb-6 tracking-tight">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-center text-white font-heading leading-tight mb-4 md:mb-6 tracking-tight px-2">
           Welcome to{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple animate-text-gradient">
             NerfTurf
           </span>
         </h1>
         
-        <p className="text-xl md:text-2xl text-center text-nerfturf-lightpurple/80 max-w-3xl mb-4 font-light">
+        <p className="text-lg sm:text-xl md:text-2xl text-center text-nerfturf-lightpurple/80 max-w-3xl mb-3 md:mb-4 font-light px-4">
           Chennai's Premier Snooker & Gaming Lounge
         </p>
         
-        <p className="text-lg text-center text-gray-300 max-w-2xl mb-8">
+        <p className="text-base sm:text-lg text-center text-gray-300 max-w-2xl mb-6 md:mb-8 px-4">
           Experience the elegance of professional snooker, pool tables, and PlayStation 5 gaming in a sophisticated, world-class setting.
         </p>
         
         {/* Primary Booking CTA - Prominent */}
-        <div className="mb-16 flex flex-col items-center">
+        <div className="mb-12 md:mb-16 flex flex-col items-center px-4">
           <Button
             size="lg"
-            className="bg-gradient-to-r from-nerfturf-purple via-nerfturf-magenta to-nerfturf-purple text-white hover:from-nerfturf-purple hover:via-nerfturf-magenta hover:to-nerfturf-purple shadow-2xl shadow-nerfturf-purple/50 transition-all duration-300 text-xl px-12 py-6 rounded-full group relative overflow-hidden animate-pulse-soft"
+            className="bg-gradient-to-r from-nerfturf-purple via-nerfturf-magenta to-nerfturf-purple text-white hover:from-nerfturf-purple hover:via-nerfturf-magenta hover:to-nerfturf-purple shadow-2xl shadow-nerfturf-purple/50 transition-all duration-300 text-base sm:text-lg md:text-xl px-8 sm:px-12 py-5 sm:py-6 rounded-full group relative overflow-hidden animate-pulse-soft"
             onClick={() => window.open('https://app.nerfturf.in/public/booking', '_blank')}
           >
             <div className="absolute inset-0 w-full bg-gradient-to-r from-nerfturf-purple/0 via-white/20 to-nerfturf-purple/0 animate-shimmer pointer-events-none"></div>
-            <Calendar className="mr-3 h-6 w-6 group-hover:scale-110 transition-transform" />
+            <Calendar className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform" />
             <span className="font-bold">Reserve a Slot</span>
           </Button>
-          <p className="text-sm text-gray-400 mt-4 text-center max-w-md">
+          <p className="text-xs sm:text-sm text-gray-400 mt-3 md:mt-4 text-center max-w-md px-2">
             Click above to book your snooker table, pool table, or PlayStation 5 gaming session
           </p>
         </div>
