@@ -844,6 +844,10 @@ export default function PublicBooking() {
   const discountBreakdown = discountObj.breakdown;
   const finalPrice = Math.max(originalPrice - discount, 0);
 
+  // Calculate number of selected slots
+  const numberOfSelectedSlots = selectedSlotRange.length > 0 ? selectedSlotRange.length : (selectedSlot ? 1 : 0);
+  const hasMinimumSlots = numberOfSelectedSlots >= 2;
+
   const isCustomerInfoComplete = () =>
     hasSearched && customerNumber.trim() !== "" && customerInfo.name.trim() !== "";
   const isStationSelectionAvailable = () => isCustomerInfoComplete();
@@ -854,6 +858,14 @@ export default function PublicBooking() {
   async function createVenueBooking() {
     setLoading(true);
     try {
+      // Check minimum slots requirement
+      const slotsToBook = selectedSlotRange.length > 0 ? selectedSlotRange : [selectedSlot!];
+      if (slotsToBook.length < 2) {
+        toast.error("Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.");
+        setLoading(false);
+        return;
+      }
+      
       let customerId = customerInfo.id;
       
       if (!customerId) {
@@ -987,6 +999,13 @@ export default function PublicBooking() {
   const initiateRazorpay = async () => {
     // 1. Validate inputs
     const slotsToBook = selectedSlotRange.length > 0 ? selectedSlotRange : (selectedSlot ? [selectedSlot] : []);
+    
+    // Check minimum slots requirement
+    if (slotsToBook.length < 2) {
+      toast.error("Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.");
+      return;
+    }
+    
     // finalPrice already includes all slots (calculateOriginalPrice multiplies by numberOfSlots)
     // So we don't need to multiply again
     const totalPrice = finalPrice;
@@ -1111,6 +1130,10 @@ export default function PublicBooking() {
     }
     if (!selectedSlot) {
       toast.error("Please select a time slot");
+      return;
+    }
+    if (!hasMinimumSlots) {
+      toast.error("Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.");
       return;
     }
     if (!customerInfo.name.trim()) {
@@ -1872,7 +1895,7 @@ export default function PublicBooking() {
                 <Button
                   onClick={handleConfirm}
                   disabled={
-                    !selectedSlot || selectedStations.length === 0 || !customerNumber || loading
+                    !selectedSlot || selectedStations.length === 0 || !customerNumber || !hasMinimumSlots || loading
                   }
                   className="w-full rounded-xl bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta"
                   size="lg"
@@ -1885,6 +1908,12 @@ export default function PublicBooking() {
                     ? "Confirm Booking (Pay at Venue)"
                     : "Confirm & Pay Online"}
                 </Button>
+                
+                {selectedSlot && !hasMinimumSlots && (
+                  <p className="text-xs text-amber-400 text-center mt-2">
+                    ⚠️ Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.
+                  </p>
+                )}
 
                 <p className="text-xs text-gray-400 text-center">
                   All prices are shown in <span className="font-semibold">INR (₹)</span>.{" "}

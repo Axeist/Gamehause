@@ -1836,10 +1836,10 @@ export default function BookingManagement() {
                       <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/50 rounded-lg">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                          <span className="font-medium">New Customers with Coupons</span>
+                          <span className="font-medium text-foreground">New Customers with Coupons</span>
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-green-600">
+                          <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                             {analytics.coupons.customerSegmentation.newCustomersWithCoupons}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -1854,10 +1854,10 @@ export default function BookingManagement() {
                       <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/50 rounded-lg">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                          <span className="font-medium">Returning Customers with Coupons</span>
+                          <span className="font-medium text-foreground">Returning Customers with Coupons</span>
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-blue-600">
+                          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                             {analytics.coupons.customerSegmentation.returningCustomersWithCoupons}
                           </p>
                           <p className="text-xs text-muted-foreground">
@@ -1883,8 +1883,8 @@ export default function BookingManagement() {
                     <div className="space-y-4">
                       <div className="p-3 bg-purple-50 dark:bg-purple-950/50 rounded-lg">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">Coupon Adoption Rate</span>
-                          <span className="text-2xl font-bold text-purple-600">
+                          <span className="font-medium text-foreground">Coupon Adoption Rate</span>
+                          <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                             {analytics.coupons.couponConversionRate.toFixed(1)}%
                           </span>
                         </div>
@@ -1895,8 +1895,8 @@ export default function BookingManagement() {
 
                       <div className="p-3 bg-orange-50 dark:bg-orange-950/50 rounded-lg">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">Average Discount Impact</span>
-                          <span className="text-2xl font-bold text-orange-600">
+                          <span className="font-medium text-foreground">Average Discount Impact</span>
+                          <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                             {analytics.coupons.averageDiscountPercentage.toFixed(1)}%
                           </span>
                         </div>
@@ -1907,8 +1907,8 @@ export default function BookingManagement() {
 
                       <div className="p-3 bg-teal-50 dark:bg-teal-950/50 rounded-lg">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">Revenue Efficiency</span>
-                          <span className="text-2xl font-bold text-teal-600">
+                          <span className="font-medium text-foreground">Revenue Efficiency</span>
+                          <span className="text-2xl font-bold text-teal-600 dark:text-teal-400">
                             ₹{analytics.coupons.totalCouponsUsed > 0 
                               ? Math.round(analytics.coupons.revenueWithCoupons / analytics.coupons.totalCouponsUsed)
                               : 0
@@ -2193,8 +2193,8 @@ export default function BookingManagement() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="bg-background border-border">
                   <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-t-lg border-b border-border">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Building2 className="h-5 w-5 text-blue-600" />
+                    <CardTitle className="flex items-center gap-2 text-lg text-foreground">
+                      <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       Station Performance Analytics
                     </CardTitle>
                   </CardHeader>
@@ -2237,8 +2237,8 @@ export default function BookingManagement() {
 
                 <Card className="bg-background border-border">
                   <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-t-lg border-b border-border">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <BarChart3 className="h-5 w-5 text-orange-600" />
+                    <CardTitle className="flex items-center gap-2 text-lg text-foreground">
+                      <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                       Hourly Distribution Analytics
                     </CardTitle>
                   </CardHeader>
