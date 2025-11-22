@@ -891,6 +891,10 @@ export default function BookingManagement() {
 
   const customerInsights = useMemo((): CustomerInsight[] => {
     const customerMap = new Map<string, CustomerInsight>();
+    
+    // Group bookings by payment_txn_id to calculate customer spending correctly
+    const customerPaymentGroups = new Map<string, Map<string, Booking[]>>();
+    const customerUngroupedBookings = new Map<string, Booking[]>();
 
     bookings.forEach(booking => {
       const customerId = booking.customer.name;
@@ -912,16 +916,64 @@ export default function BookingManagement() {
           favoriteStationType: '',
           bookingFrequency: 'Low'
         });
+        customerPaymentGroups.set(customerId, new Map());
+        customerUngroupedBookings.set(customerId, []);
+      }
+
+      // Group by payment_txn_id per customer
+      if (booking.payment_txn_id) {
+        const customerGroups = customerPaymentGroups.get(customerId)!;
+        const txnId = booking.payment_txn_id;
+        if (!customerGroups.has(txnId)) {
+          customerGroups.set(txnId, []);
+        }
+        customerGroups.get(txnId)!.push(booking);
+      } else {
+        customerUngroupedBookings.get(customerId)!.push(booking);
       }
 
       const customer = customerMap.get(customerId)!;
       customer.totalBookings++;
       customer.totalDuration += booking.duration;
-      customer.totalSpent += booking.final_price || 0;
       
       if (!customer.lastBookingDate || booking.booking_date > customer.lastBookingDate) {
         customer.lastBookingDate = booking.booking_date;
       }
+    });
+    
+    // Calculate totalSpent per customer using grouped payments
+    customerMap.forEach((customer, customerId) => {
+      let totalSpent = 0;
+      const customerGroups = customerPaymentGroups.get(customerId)!;
+      const countedPayments = new Set<string>();
+      
+      // Process grouped payments
+      customerGroups.forEach((groupBookings, txnId) => {
+        if (!countedPayments.has(txnId)) {
+          if (groupBookings.length === 1) {
+            totalSpent += groupBookings[0].final_price || 0;
+          } else {
+            const firstPrice = groupBookings[0].final_price || 0;
+            const allSame = groupBookings.every(b => (b.final_price || 0) === firstPrice);
+            
+            if (allSame) {
+              totalSpent += firstPrice;
+            } else {
+              const sum = groupBookings.reduce((s, b) => s + (b.final_price || 0), 0);
+              totalSpent += sum;
+            }
+          }
+          countedPayments.add(txnId);
+        }
+      });
+      
+      // Add ungrouped bookings
+      const ungrouped = customerUngroupedBookings.get(customerId) || [];
+      ungrouped.forEach(b => {
+        totalSpent += b.final_price || 0;
+      });
+      
+      customer.totalSpent = totalSpent;
     });
 
     customerMap.forEach((customer, customerId) => {
@@ -1128,6 +1180,9 @@ export default function BookingManagement() {
       bookings: Booking[];
     }> = {};
 
+    // Track which payment transactions have been counted for each coupon
+    const couponPaymentCounted = new Map<string, Set<string>>();
+
     currentPeriodData.forEach(b => {
       if (!b.coupon_code) return;
       const codes = extractCouponCodes(b.coupon_code);
@@ -1140,11 +1195,46 @@ export default function BookingManagement() {
             uniqueCustomers: new Set(),
             bookings: []
           };
+          couponPaymentCounted.set(code, new Set());
         }
         couponStats[code].usageCount += 1;
-        couponStats[code].totalRevenue += b.final_price || 0;
         couponStats[code].uniqueCustomers.add(b.customer.name);
         couponStats[code].bookings.push(b);
+        
+        // Calculate revenue: if booking has payment_txn_id, use grouped revenue
+        if (b.payment_txn_id) {
+          const txnId = b.payment_txn_id;
+          const countedSet = couponPaymentCounted.get(code)!;
+          if (!countedSet.has(txnId)) {
+            // Get all bookings for this payment transaction
+            const groupBookings = paymentGroups.get(txnId) || [];
+            // Check if any booking in this group uses this coupon
+            const hasCouponBooking = groupBookings.some(gb => 
+              gb.coupon_code && extractCouponCodes(gb.coupon_code).includes(code)
+            );
+            
+            if (hasCouponBooking) {
+              // Count this payment once for this coupon
+              const paymentRevenue = paymentRevenueMap.get(txnId) || 0;
+              // If multiple coupons share this payment, divide revenue equally
+              const uniqueCouponsInPayment = new Set<string>();
+              groupBookings.forEach(gb => {
+                if (gb.coupon_code) {
+                  extractCouponCodes(gb.coupon_code).forEach(c => uniqueCouponsInPayment.add(c));
+                }
+              });
+              const revenuePerCoupon = uniqueCouponsInPayment.size > 0 
+                ? paymentRevenue / uniqueCouponsInPayment.size 
+                : paymentRevenue;
+              couponStats[code].totalRevenue += revenuePerCoupon;
+              countedSet.add(txnId);
+            }
+          }
+        } else {
+          // No payment_txn_id, use final_price directly
+          couponStats[code].totalRevenue += b.final_price || 0;
+        }
+        
         if (b.discount_percentage && b.final_price) {
           const discountAmount = (b.final_price * b.discount_percentage) / (100 - b.discount_percentage);
           couponStats[code].totalDiscount += discountAmount;
