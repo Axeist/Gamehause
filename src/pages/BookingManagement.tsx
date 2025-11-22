@@ -1033,15 +1033,82 @@ export default function BookingManagement() {
     const stationStats: Record<string, { bookings: number; revenue: number; avgDuration: number }> = {};
     const hourlyStats: Record<string, number> = {};
 
+    // Group bookings by payment_txn_id to calculate revenue correctly per station
+    const paymentGroups = new Map<string, Booking[]>();
+    const ungroupedBookings: Booking[] = [];
+
+    currentPeriodData.forEach(b => {
+      if (b.payment_txn_id) {
+        const txnId = b.payment_txn_id;
+        if (!paymentGroups.has(txnId)) {
+          paymentGroups.set(txnId, []);
+        }
+        paymentGroups.get(txnId)!.push(b);
+      } else {
+        ungroupedBookings.push(b);
+      }
+    });
+
+    // Calculate revenue per payment group
+    const paymentRevenueMap = new Map<string, number>();
+    paymentGroups.forEach((groupBookings, txnId) => {
+      if (groupBookings.length === 1) {
+        paymentRevenueMap.set(txnId, groupBookings[0].final_price || 0);
+      } else {
+        const firstPrice = groupBookings[0].final_price || 0;
+        const allSame = groupBookings.every(b => (b.final_price || 0) === firstPrice);
+        
+        if (allSame) {
+          paymentRevenueMap.set(txnId, firstPrice);
+        } else {
+          const sum = groupBookings.reduce((s, b) => s + (b.final_price || 0), 0);
+          paymentRevenueMap.set(txnId, sum);
+        }
+      }
+    });
+
+    // Track which payment transactions have been counted per station
+    const stationPaymentCounted = new Map<string, Set<string>>();
+
+    // Process bookings for station stats
     currentPeriodData.forEach(b => {
       const stationKey = `${b.station.name} (${b.station.type})`;
       if (!stationStats[stationKey]) {
         stationStats[stationKey] = { bookings: 0, revenue: 0, avgDuration: 0 };
+        stationPaymentCounted.set(stationKey, new Set());
       }
       
       stationStats[stationKey].bookings += 1;
-      stationStats[stationKey].revenue += b.final_price || 0;
       stationStats[stationKey].avgDuration += b.duration;
+
+      // Calculate revenue: if booking has payment_txn_id, use grouped revenue
+      if (b.payment_txn_id) {
+        const txnId = b.payment_txn_id;
+        const countedSet = stationPaymentCounted.get(stationKey)!;
+        if (!countedSet.has(txnId)) {
+          // Get all bookings for this payment transaction
+          const groupBookings = paymentGroups.get(txnId) || [];
+          // Check if any booking in this group is for this station
+          const hasStationBooking = groupBookings.some(gb => 
+            `${gb.station.name} (${gb.station.type})` === stationKey
+          );
+          
+          if (hasStationBooking) {
+            // Count this payment once for this station
+            const paymentRevenue = paymentRevenueMap.get(txnId) || 0;
+            // If multiple stations share this payment, divide revenue equally
+            const uniqueStations = new Set(
+              groupBookings.map(gb => `${gb.station.name} (${gb.station.type})`)
+            );
+            const revenuePerStation = paymentRevenue / uniqueStations.size;
+            stationStats[stationKey].revenue += revenuePerStation;
+            countedSet.add(txnId);
+          }
+        }
+      } else {
+        // No payment_txn_id, use final_price directly
+        stationStats[stationKey].revenue += b.final_price || 0;
+      }
 
       const hour = new Date(`2000-01-01T${b.start_time}`).getHours();
       hourlyStats[hour] = (hourlyStats[hour] || 0) + 1;
