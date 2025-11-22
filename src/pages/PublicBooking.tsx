@@ -1738,13 +1738,6 @@ export default function PublicBooking() {
                   <p className="mt-1 text-[11px] text-gray-400">
                     All discounts and totals are calculated in INR (₹).
                   </p>
-                  <p className="mt-2 text-xs text-nerfturf-magenta">
-                    📝 Coupon rules:<br />
-                    NIT50/ALMA50: 50% off for students;<br />
-                    HH99: PS5 & 8-Ball @ ₹99/hr only Mon–Fri 11 AM–4 PM (not VR);<br />
-                    NerfTurf50: 50% off for students (ID required);<br />
-                    NerfTurf25: 25% off for everyone!
-                  </p>
 
                   {Object.entries(appliedCoupons).length > 0 && (
                     <div className="mt-2 space-y-2">
