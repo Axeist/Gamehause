@@ -1197,11 +1197,10 @@ export default function BookingManagement() {
           };
           couponPaymentCounted.set(code, new Set());
         }
-        couponStats[code].usageCount += 1;
         couponStats[code].uniqueCustomers.add(b.customer.name);
         couponStats[code].bookings.push(b);
         
-        // Calculate revenue: if booking has payment_txn_id, use grouped revenue
+        // Calculate usage count and revenue: if booking has payment_txn_id, use grouped logic
         if (b.payment_txn_id) {
           const txnId = b.payment_txn_id;
           const countedSet = couponPaymentCounted.get(code)!;
@@ -1214,6 +1213,9 @@ export default function BookingManagement() {
             );
             
             if (hasCouponBooking) {
+              // Count this payment once for this coupon (not per booking)
+              couponStats[code].usageCount += 1;
+              
               // Count this payment once for this coupon
               const paymentRevenue = paymentRevenueMap.get(txnId) || 0;
               // If multiple coupons share this payment, divide revenue equally
@@ -1227,17 +1229,33 @@ export default function BookingManagement() {
                 ? paymentRevenue / uniqueCouponsInPayment.size 
                 : paymentRevenue;
               couponStats[code].totalRevenue += revenuePerCoupon;
+              
+              // Calculate discount for the entire payment group
+              const groupDiscount = groupBookings.reduce((sum, gb) => {
+                if (gb.discount_percentage && gb.final_price) {
+                  const discountAmount = (gb.final_price * gb.discount_percentage) / (100 - gb.discount_percentage);
+                  return sum + discountAmount;
+                }
+                return sum;
+              }, 0);
+              // If multiple coupons share this payment, divide discount equally
+              const discountPerCoupon = uniqueCouponsInPayment.size > 0 
+                ? groupDiscount / uniqueCouponsInPayment.size 
+                : groupDiscount;
+              couponStats[code].totalDiscount += discountPerCoupon;
+              
               countedSet.add(txnId);
             }
           }
         } else {
-          // No payment_txn_id, use final_price directly
+          // No payment_txn_id, count each booking separately
+          couponStats[code].usageCount += 1;
           couponStats[code].totalRevenue += b.final_price || 0;
-        }
-        
-        if (b.discount_percentage && b.final_price) {
-          const discountAmount = (b.final_price * b.discount_percentage) / (100 - b.discount_percentage);
-          couponStats[code].totalDiscount += discountAmount;
+          
+          if (b.discount_percentage && b.final_price) {
+            const discountAmount = (b.final_price * b.discount_percentage) / (100 - b.discount_percentage);
+            couponStats[code].totalDiscount += discountAmount;
+          }
         }
       });
     });
