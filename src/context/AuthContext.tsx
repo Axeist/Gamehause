@@ -151,13 +151,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
+        // Get the first admin user (prefer is_admin = true, otherwise get first user)
         const { data, error } = await supabase
           .from('admin_users')
           .select('id, username, is_admin')
-          .single();
+          .eq('is_admin', true)
+          .limit(1)
+          .maybeSingle();
         
-        if (error) {
-          console.error('Error fetching admin user:', error);
+        if (error || !data) {
+          // If no admin found with is_admin = true, try to get any user (for backward compatibility)
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('admin_users')
+            .select('id, username, is_admin')
+            .limit(1)
+            .maybeSingle();
+          
+          if (fallbackError) {
+            console.error('Error fetching admin user:', fallbackError);
+            setIsLoading(false);
+            return;
+          }
+          
+          if (fallbackData) {
+            const adminUser = {
+              id: fallbackData.id,
+              username: fallbackData.username,
+              isAdmin: fallbackData.is_admin
+            };
+            setUser(adminUser);
+            localStorage.setItem('cuephoriaAdmin', JSON.stringify(adminUser));
+          }
           setIsLoading(false);
           return;
         }

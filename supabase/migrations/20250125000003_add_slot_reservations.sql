@@ -3,6 +3,11 @@
 -- (only block current slot when session is running, not all slots)
 -- Reservation logic has been temporarily removed - can be re-implemented later
 
+-- Drop all existing versions of get_available_slots to avoid function overloading conflicts
+DROP FUNCTION IF EXISTS public.get_available_slots(date, uuid, integer);
+DROP FUNCTION IF EXISTS public.get_available_slots(date, uuid, integer, text);
+
+-- Create the correct version without p_customer_phone parameter
 CREATE OR REPLACE FUNCTION public.get_available_slots(p_date date, p_station_id uuid, p_slot_duration integer DEFAULT 60)
  RETURNS TABLE(start_time time without time zone, end_time time without time zone, is_available boolean)
  LANGUAGE plpgsql
