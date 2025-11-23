@@ -206,6 +206,17 @@ export default function PublicBooking() {
   useEffect(() => {
     fetchStations();
     fetchTodaysBookings();
+    
+    // Clean up expired reservations periodically (every 2 minutes)
+    const cleanupInterval = setInterval(async () => {
+      try {
+        await supabase.rpc("cleanup_expired_reservations");
+      } catch (e) {
+        console.log("Failed to cleanup expired reservations:", e);
+      }
+    }, 2 * 60 * 1000); // Every 2 minutes
+    
+    return () => clearInterval(cleanupInterval);
   }, []);
 
   useEffect(() => {
@@ -247,11 +258,58 @@ export default function PublicBooking() {
   useEffect(() => {
     if (selectedStations.length > 0 && selectedDate) fetchAvailableSlots();
     else {
+      // Release reservations when stations or date changes
+      if (selectedSlot && selectedStations.length > 0) {
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
+        const slotsToRelease = selectedSlotRange.length > 0 ? selectedSlotRange : [selectedSlot];
+        
+        for (const releaseSlot of slotsToRelease) {
+          for (const stationId of selectedStations) {
+            try {
+              supabase.rpc("release_slot_reservation", {
+                p_station_id: stationId,
+                p_booking_date: dateStr,
+                p_start_time: releaseSlot.start_time,
+                p_end_time: releaseSlot.end_time,
+              });
+            } catch (e) {
+              // Silently fail
+              console.log("Failed to release reservation on change:", e);
+            }
+          }
+        }
+      }
+      
       setAvailableSlots([]);
       setSelectedSlot(null);
       setSelectedSlotRange([]);
     }
   }, [selectedStations, selectedDate]);
+  
+  // Cleanup reservations on unmount
+  useEffect(() => {
+    return () => {
+      if (selectedSlot && selectedStations.length > 0) {
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
+        const slotsToRelease = selectedSlotRange.length > 0 ? selectedSlotRange : [selectedSlot];
+        
+        for (const releaseSlot of slotsToRelease) {
+          for (const stationId of selectedStations) {
+            try {
+              supabase.rpc("release_slot_reservation", {
+                p_station_id: stationId,
+                p_booking_date: dateStr,
+                p_start_time: releaseSlot.start_time,
+                p_end_time: releaseSlot.end_time,
+              });
+            } catch (e) {
+              // Silently fail
+            }
+          }
+        }
+      }
+    };
+  }, []);
 
   // Auto-search customer when phone number reaches 10 digits
   useEffect(() => {
@@ -561,8 +619,30 @@ export default function PublicBooking() {
   }
 
   async function handleSlotSelect(slot: TimeSlot | null, range?: TimeSlot[]) {
-    // Handle deselection
+    // Handle deselection - release any existing reservations
     if (!slot) {
+      // Release reservations for previously selected slots
+      if (selectedSlot && selectedStations.length > 0) {
+        const slotsToRelease = selectedSlotRange.length > 0 ? selectedSlotRange : [selectedSlot];
+        const dateStr = format(selectedDate, "yyyy-MM-dd");
+        
+        for (const releaseSlot of slotsToRelease) {
+          for (const stationId of selectedStations) {
+            try {
+              await supabase.rpc("release_slot_reservation", {
+                p_station_id: stationId,
+                p_booking_date: dateStr,
+                p_start_time: releaseSlot.start_time,
+                p_end_time: releaseSlot.end_time,
+              });
+            } catch (e) {
+              // Silently fail - reservation might have expired already
+              console.log("Failed to release reservation:", e);
+            }
+          }
+        }
+      }
+      
       setSelectedSlot(null);
       setSelectedSlotRange([]);
       return;
@@ -592,10 +672,75 @@ export default function PublicBooking() {
         setSelectedSlotRange([]);
         return;
       }
+      
+      // Reserve all slots in the range for all selected stations
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+      const normalizedPhone = customerNumber ? normalizePhoneNumber(customerNumber) : null;
+      
+      for (const reserveSlot of slotsToCheck) {
+        for (const stationId of selectedStations) {
+          try {
+            const { data, error } = await supabase.rpc("reserve_slot", {
+              p_station_id: stationId,
+              p_booking_date: dateStr,
+              p_start_time: reserveSlot.start_time,
+              p_end_time: reserveSlot.end_time,
+              p_customer_phone: normalizedPhone,
+              p_reservation_duration_minutes: 5,
+            });
+            
+            if (error) throw error;
+            
+            // If reservation failed (slot already reserved), show error
+            if (data === false) {
+              toast.error("This slot was just booked by someone else. Please select another slot.");
+              setSelectedSlot(null);
+              setSelectedSlotRange([]);
+              // Refresh available slots
+              await fetchAvailableSlots();
+              return;
+            }
+          } catch (e) {
+            console.error("Failed to reserve slot:", e);
+            toast.error("Failed to reserve slot. Please try again.");
+            setSelectedSlot(null);
+            setSelectedSlotRange([]);
+            return;
+          }
+        }
+      }
+      
+      // Release old reservations if switching slots
+      if (selectedSlot && selectedSlotRange.length > 0) {
+        const oldSlots = selectedSlotRange.filter(
+          oldSlot => !slotsToCheck.some(newSlot => 
+            newSlot.start_time === oldSlot.start_time && newSlot.end_time === oldSlot.end_time
+          )
+        );
+        
+        for (const oldSlot of oldSlots) {
+          for (const stationId of selectedStations) {
+            try {
+              await supabase.rpc("release_slot_reservation", {
+                p_station_id: stationId,
+                p_booking_date: dateStr,
+                p_start_time: oldSlot.start_time,
+                p_end_time: oldSlot.end_time,
+              });
+            } catch (e) {
+              // Silently fail
+              console.log("Failed to release old reservation:", e);
+            }
+          }
+        }
+      }
     }
     
     setSelectedSlot(slot);
     setSelectedSlotRange(range || [slot]);
+    
+    // Refresh slots to show reservation status
+    await fetchAvailableSlots();
   }
 
   const allowedCoupons = [
@@ -984,6 +1129,24 @@ export default function PublicBooking() {
         .select("id");
         
       if (bookingError) throw bookingError;
+      
+      // Release slot reservations after successful booking
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
+      for (const slot of slotsToBook) {
+        for (const stationId of selectedStations) {
+          try {
+            await supabase.rpc("release_slot_reservation", {
+              p_station_id: stationId,
+              p_booking_date: dateStr,
+              p_start_time: slot.start_time,
+              p_end_time: slot.end_time,
+            });
+          } catch (e) {
+            // Silently fail - reservation might have expired already
+            console.log("Failed to release reservation after booking:", e);
+          }
+        }
+      }
 
       const stationObjects = stations.filter((s) =>
         selectedStations.includes(s.id)
