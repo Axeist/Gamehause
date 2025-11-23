@@ -46,7 +46,7 @@ BEGIN
           WHERE s.station_id = p_station_id
           AND s.end_time IS NULL
           AND DATE(s.start_time) = p_date
-          AND TIME(s.start_time) <= curr_time  -- Block slots starting at or after session start time
+          AND s.start_time::time <= curr_time  -- Block slots starting at or after session start time
         );
       END IF;
       
