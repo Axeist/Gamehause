@@ -352,7 +352,10 @@ export default function PublicBooking() {
           p_station_id: selectedStations[0],
           p_slot_duration: slotDuration,
         });
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching slots:", error);
+          throw error;
+        }
         
         let slotsToSet = data || [];
         
@@ -447,9 +450,10 @@ export default function PublicBooking() {
       ) {
         setSelectedSlot(null);
       }
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to load time slots");
+    } catch (e: any) {
+      console.error("Error in fetchAvailableSlots:", e);
+      const errorMessage = e?.message || e?.error?.message || "Failed to load time slots";
+      toast.error(`Failed to load time slots: ${errorMessage}`);
     } finally {
       setSlotsLoading(false);
     }
