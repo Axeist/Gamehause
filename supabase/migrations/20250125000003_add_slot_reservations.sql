@@ -1,140 +1,15 @@
--- Create slot_reservations table to temporarily reserve slots (like RedBus/BookMyShow)
--- This prevents duplicate bookings when multiple users select the same slot simultaneously
-CREATE TABLE IF NOT EXISTS public.slot_reservations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  station_id UUID NOT NULL REFERENCES public.stations(id) ON DELETE CASCADE,
-  booking_date DATE NOT NULL,
-  start_time TIME NOT NULL,
-  end_time TIME NOT NULL,
-  reserved_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '5 minutes'),
-  customer_phone TEXT, -- Optional: to identify who reserved it
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  
-  -- Ensure one reservation per station/slot combination
-  UNIQUE(station_id, booking_date, start_time, end_time)
-);
-
--- Index for fast lookups
-CREATE INDEX IF NOT EXISTS idx_slot_reservations_lookup 
-  ON public.slot_reservations(station_id, booking_date, start_time, end_time, expires_at);
-
--- Index for cleanup of expired reservations
-CREATE INDEX IF NOT EXISTS idx_slot_reservations_expires 
-  ON public.slot_reservations(expires_at);
-
--- Function to reserve a slot (returns true if successful, false if already reserved)
-CREATE OR REPLACE FUNCTION public.reserve_slot(
-  p_station_id UUID,
-  p_booking_date DATE,
-  p_start_time TIME,
-  p_end_time TIME,
-  p_customer_phone TEXT DEFAULT NULL,
-  p_reservation_duration_minutes INTEGER DEFAULT 5
-)
-RETURNS BOOLEAN
-LANGUAGE plpgsql
-AS $$
-DECLARE
-  v_expires_at TIMESTAMPTZ;
-BEGIN
-  -- First, clean up expired reservations for this slot
-  DELETE FROM public.slot_reservations
-  WHERE station_id = p_station_id
-    AND booking_date = p_booking_date
-    AND start_time = p_start_time
-    AND end_time = p_end_time
-    AND expires_at < NOW();
-  
-  -- Check if slot is already reserved (and not expired)
-  IF EXISTS (
-    SELECT 1 FROM public.slot_reservations
-    WHERE station_id = p_station_id
-      AND booking_date = p_booking_date
-      AND start_time = p_start_time
-      AND end_time = p_end_time
-      AND expires_at > NOW()
-  ) THEN
-    RETURN FALSE; -- Slot is already reserved
-  END IF;
-  
-  -- Reserve the slot
-  v_expires_at := NOW() + (p_reservation_duration_minutes || ' minutes')::INTERVAL;
-  
-  INSERT INTO public.slot_reservations (
-    station_id,
-    booking_date,
-    start_time,
-    end_time,
-    customer_phone,
-    expires_at
-  ) VALUES (
-    p_station_id,
-    p_booking_date,
-    p_start_time,
-    p_end_time,
-    p_customer_phone,
-    v_expires_at
-  )
-  ON CONFLICT (station_id, booking_date, start_time, end_time) 
-  DO UPDATE SET
-    reserved_at = NOW(),
-    expires_at = v_expires_at,
-    customer_phone = p_customer_phone;
-  
-  RETURN TRUE; -- Successfully reserved
-END;
-$$;
-
--- Function to release a slot reservation
-CREATE OR REPLACE FUNCTION public.release_slot_reservation(
-  p_station_id UUID,
-  p_booking_date DATE,
-  p_start_time TIME,
-  p_end_time TIME
-)
-RETURNS VOID
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  DELETE FROM public.slot_reservations
-  WHERE station_id = p_station_id
-    AND booking_date = p_booking_date
-    AND start_time = p_start_time
-    AND end_time = p_end_time;
-END;
-$$;
-
--- Function to clean up expired reservations (can be called periodically)
-CREATE OR REPLACE FUNCTION public.cleanup_expired_reservations()
-RETURNS INTEGER
-LANGUAGE plpgsql
-AS $$
-DECLARE
-  v_deleted_count INTEGER;
-BEGIN
-  DELETE FROM public.slot_reservations
-  WHERE expires_at < NOW();
-  
-  GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
-  RETURN v_deleted_count;
-END;
-$$;
-
--- Update get_available_slots to return reservation status
-CREATE OR REPLACE FUNCTION public.get_available_slots(p_date date, p_station_id uuid, p_slot_duration integer DEFAULT 60, p_customer_phone TEXT DEFAULT NULL)
- RETURNS TABLE(start_time time without time zone, end_time time without time zone, is_available boolean, is_reserved boolean, reserved_by_me boolean)
+-- Revert get_available_slots to use the slot blocking fix from 20250125000002
+-- This migration just ensures the function matches the fix (only block current slot when session is running)
+-- Reservation logic has been temporarily removed
+CREATE OR REPLACE FUNCTION public.get_available_slots(p_date date, p_station_id uuid, p_slot_duration integer DEFAULT 60)
+ RETURNS TABLE(start_time time without time zone, end_time time without time zone, is_available boolean)
  LANGUAGE plpgsql
 AS $function$
 DECLARE
   opening_time TIME := '11:00:00';  -- 11 AM opening time
   curr_time TIME;
   slot_end_time TIME;
-  v_is_reserved BOOLEAN;
-  v_reserved_by_me BOOLEAN;
 BEGIN
-  -- Clean up expired reservations first
-  PERFORM public.cleanup_expired_reservations();
   
   -- Generate time slots from opening to midnight
   curr_time := opening_time;
@@ -162,39 +37,6 @@ BEGIN
           )
       );
       
-      -- Check if slot is reserved
-      v_is_reserved := FALSE;
-      v_reserved_by_me := FALSE;
-      IF is_available THEN
-        SELECT EXISTS (
-          SELECT 1
-          FROM public.slot_reservations sr
-          WHERE sr.station_id = p_station_id
-            AND sr.booking_date = p_date
-            AND sr.start_time = curr_time
-            AND sr.end_time = slot_end_time
-            AND sr.expires_at > NOW()
-        ) INTO v_is_reserved;
-        
-        -- Check if reserved by current user
-        IF v_is_reserved AND p_customer_phone IS NOT NULL THEN
-          SELECT EXISTS (
-            SELECT 1
-            FROM public.slot_reservations sr
-            WHERE sr.station_id = p_station_id
-              AND sr.booking_date = p_date
-              AND sr.start_time = curr_time
-              AND sr.end_time = slot_end_time
-              AND sr.expires_at > NOW()
-              AND sr.customer_phone = p_customer_phone
-          ) INTO v_reserved_by_me;
-        END IF;
-        
-        -- Only mark as unavailable if reserved by someone else
-        IF v_is_reserved AND NOT v_reserved_by_me THEN
-          is_available := FALSE;
-        END IF;
-      END IF;
       
       -- Check if there's an active session that overlaps with this slot for today
       -- Only block the CURRENT slot (where the session is happening right now)
@@ -211,7 +53,7 @@ BEGIN
         );
       END IF;
       
-      RETURN QUERY SELECT curr_time, slot_end_time, is_available, v_is_reserved, v_reserved_by_me;
+      RETURN QUERY SELECT curr_time, slot_end_time, is_available;
       EXIT; -- This was the last slot
     END IF;
     
@@ -230,39 +72,6 @@ BEGIN
         )
     );
     
-    -- Check if slot is reserved
-    v_is_reserved := FALSE;
-    v_reserved_by_me := FALSE;
-    IF is_available THEN
-      SELECT EXISTS (
-        SELECT 1
-        FROM public.slot_reservations sr
-        WHERE sr.station_id = p_station_id
-          AND sr.booking_date = p_date
-          AND sr.start_time = curr_time
-          AND sr.end_time = slot_end_time
-          AND sr.expires_at > NOW()
-      ) INTO v_is_reserved;
-      
-      -- Check if reserved by current user
-      IF v_is_reserved AND p_customer_phone IS NOT NULL THEN
-        SELECT EXISTS (
-          SELECT 1
-          FROM public.slot_reservations sr
-          WHERE sr.station_id = p_station_id
-            AND sr.booking_date = p_date
-            AND sr.start_time = curr_time
-            AND sr.end_time = slot_end_time
-            AND sr.expires_at > NOW()
-            AND sr.customer_phone = p_customer_phone
-        ) INTO v_reserved_by_me;
-      END IF;
-      
-      -- Only mark as unavailable if reserved by someone else
-      IF v_is_reserved AND NOT v_reserved_by_me THEN
-        is_available := FALSE;
-      END IF;
-    END IF;
     
     -- Check if there's an active session that overlaps with this slot for today
     -- Only block the CURRENT slot (where the session is happening right now)
@@ -279,7 +88,7 @@ BEGIN
       );
     END IF;
     
-    RETURN QUERY SELECT curr_time, slot_end_time, is_available, v_is_reserved, v_reserved_by_me;
+    RETURN QUERY SELECT curr_time, slot_end_time, is_available;
     
     -- Move to next slot
     curr_time := slot_end_time;

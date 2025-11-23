@@ -7,9 +7,6 @@ interface TimeSlot {
   start_time: string; // e.g., "11:00"
   end_time: string;   // e.g., "12:00"
   is_available: boolean;
-  is_reserved?: boolean;
-  reserved_by_me?: boolean;
-  status?: 'available' | 'booked' | 'elapsed' | 'reserved';
 }
 
 interface TimeSlotPickerProps {
@@ -56,10 +53,9 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
     
     while (true) {
       // Find the next slot that starts where current ends
-      // Allow slots that are available OR reserved by me
       const next = slots.find(s => 
         s.start_time === current.end_time && 
-        (s.is_available || s.reserved_by_me)
+        s.is_available
       );
       
       if (!next) break;
@@ -71,8 +67,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
   };
 
   const handleSlotClick = (slot: TimeSlot) => {
-    // Allow clicking if available OR reserved by me
-    if (!slot.is_available && !slot.reserved_by_me) return;
+    if (!slot.is_available) return;
 
     // Check if clicking on the first slot of an existing range - if so, deselect
     if (selectedSlotRange.length > 0 && selectedSlotRange[0].start_time === slot.start_time) {
@@ -142,10 +137,6 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
           <div className="w-3 h-3 bg-muted border rounded-sm" />
           <span>Booked</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-amber-500 border rounded-sm" />
-          <span>Reserved</span>
-        </div>
         {selectedSlotRange.length > 1 && (
           <div className="ml-auto text-xs text-primary font-medium">
             {selectedSlotRange.length} slots selected ({formatTime(selectedSlotRange[0].start_time)} - {formatTime(selectedSlotRange[selectedSlotRange.length - 1].end_time)})
@@ -175,17 +166,15 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                   ? "default" 
                   : isSelected 
                     ? "default" 
-                    : (slot.is_available || slot.reserved_by_me)
+                    : slot.is_available 
                       ? "outline" 
                       : "ghost"
               }
-              disabled={!slot.is_available && !slot.reserved_by_me}
+              disabled={!slot.is_available}
               onClick={() => handleSlotClick(slot)}
               className={`h-12 flex flex-col items-center justify-center text-xs relative ${
-                (!slot.is_available && !slot.reserved_by_me) ? "opacity-50 cursor-not-allowed" : ""
-              } ${inRange ? "ring-2 ring-primary" : ""} ${
-                slot.reserved_by_me ? "ring-1 ring-amber-500 bg-amber-500/10" : ""
-              }`}
+                !slot.is_available ? "opacity-50 cursor-not-allowed" : ""
+              } ${inRange ? "ring-2 ring-primary" : ""}`}
               aria-pressed={isSelected || inRange}
             >
               <div className="font-medium">{formatTime(slot.start_time)}</div>
@@ -199,16 +188,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                 </div>
               )}
 
-              {slot.reserved_by_me && (
-                <div className="absolute -top-1 -right-1">
-                  <Badge
-                    className="text-xs px-1 py-0 text-[10px] leading-3 bg-amber-500 text-white"
-                  >
-                    Reserved
-                  </Badge>
-                </div>
-              )}
-              {!slot.is_available && !slot.reserved_by_me && (
+              {!slot.is_available && (
                 <div className="absolute -top-1 -right-1">
                   <Badge
                     variant="destructive"

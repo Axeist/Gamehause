@@ -179,23 +179,6 @@ export default function PublicPaymentSuccess() {
         return;
       }
 
-      // Release slot reservations after successful booking
-      for (const station_id of pb.selectedStations) {
-        for (const slot of pb.slots) {
-          try {
-            await supabase.rpc("release_slot_reservation", {
-              p_station_id: station_id,
-              p_booking_date: pb.selectedDateISO,
-              p_start_time: slot.start_time,
-              p_end_time: slot.end_time,
-            });
-          } catch (e) {
-            // Silently fail - reservation might have expired already
-            console.log("Failed to release reservation after payment:", e);
-          }
-        }
-      }
-
       // 5) Fetch station names for confirmation
       const stationIds = [...new Set(insertedBookings?.map(b => b.station_id) || [])];
       const { data: stationsData } = await supabase
