@@ -877,7 +877,8 @@ export default function PublicBooking() {
 
   // Calculate number of selected slots
   const numberOfSelectedSlots = selectedSlotRange.length > 0 ? selectedSlotRange.length : (selectedSlot ? 1 : 0);
-  const hasMinimumSlots = numberOfSelectedSlots >= 2;
+  // Allow 30-minute (1 slot) bookings when pay at venue is enabled, otherwise require 2 slots (60 minutes)
+  const hasMinimumSlots = payAtVenueEnabled ? numberOfSelectedSlots >= 1 : numberOfSelectedSlots >= 2;
 
   const isCustomerInfoComplete = () =>
     hasSearched && customerNumber.trim() !== "" && customerInfo.name.trim() !== "";
@@ -891,8 +892,12 @@ export default function PublicBooking() {
     try {
       // Check minimum slots requirement
       const slotsToBook = selectedSlotRange.length > 0 ? selectedSlotRange : [selectedSlot!];
-      if (slotsToBook.length < 2) {
-        toast.error("Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.");
+      const minSlotsRequired = payAtVenueEnabled ? 1 : 2;
+      if (slotsToBook.length < minSlotsRequired) {
+        const errorMessage = payAtVenueEnabled 
+          ? "Please select at least 1 slot (30 minutes)."
+          : "Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.";
+        toast.error(errorMessage);
         setLoading(false);
         return;
       }
@@ -1185,7 +1190,10 @@ export default function PublicBooking() {
       return;
     }
     if (!hasMinimumSlots) {
-      toast.error("Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.");
+      const errorMessage = payAtVenueEnabled 
+        ? "Please select at least 1 slot (30 minutes)."
+        : "Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.";
+      toast.error(errorMessage);
       return;
     }
     if (!customerInfo.name.trim()) {
@@ -1713,6 +1721,7 @@ export default function PublicBooking() {
                           selectedSlotRange={selectedSlotRange}
                           onSlotSelect={handleSlotSelect}
                           loading={slotsLoading}
+                          payAtVenueEnabled={payAtVenueEnabled}
                         />
                         </div>
                       </div>
@@ -1994,7 +2003,9 @@ export default function PublicBooking() {
                 
                 {selectedSlot && !hasMinimumSlots && (
                   <p className="text-xs text-amber-400 text-center mt-2">
-                    ⚠️ Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots.
+                    {payAtVenueEnabled 
+                      ? "⚠️ Please select at least 1 slot (30 minutes)."
+                      : "⚠️ Minimum booking is 2 slots (60 minutes). Please select at least 2 consecutive slots."}
                   </p>
                 )}
 

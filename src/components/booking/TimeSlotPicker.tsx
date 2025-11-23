@@ -15,6 +15,7 @@ interface TimeSlotPickerProps {
   selectedSlotRange?: TimeSlot[];
   onSlotSelect: (slot: TimeSlot, range?: TimeSlot[]) => void;
   loading?: boolean;
+  payAtVenueEnabled?: boolean;
 }
 
 // Helper to format a "HH:mm" string into a localized time (e.g., 11:00 AM)
@@ -35,6 +36,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
   selectedSlotRange = [],
   onSlotSelect,
   loading = false,
+  payAtVenueEnabled = false,
 }) => {
   const [startSlot, setStartSlot] = React.useState<TimeSlot | null>(null);
 
@@ -142,9 +144,11 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
         )}
       </div>
       
-      {selectedSlot && numberOfSelectedSlots < 2 && (
+      {selectedSlot && ((payAtVenueEnabled && numberOfSelectedSlots < 1) || (!payAtVenueEnabled && numberOfSelectedSlots < 2)) && (
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-md p-2 text-xs text-amber-400">
-          ⚠️ Minimum booking is 2 slots (60 minutes). Click another consecutive slot to complete your selection.
+          {payAtVenueEnabled 
+            ? "⚠️ Please select at least 1 slot (30 minutes)."
+            : "⚠️ Minimum booking is 2 slots (60 minutes). Click another consecutive slot to complete your selection."}
         </div>
       )}
 

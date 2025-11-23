@@ -37,8 +37,8 @@ BEGIN
       );
       
       -- Check if there's an active session that overlaps with this slot for today
-      -- Block slots that start at or after the active session's start time
-      -- This ensures that if a session is running, future slots are blocked but past slots remain available
+      -- Only block the CURRENT slot (where the session is happening right now)
+      -- Past and future slots should remain available
       IF p_date = CURRENT_DATE AND is_available THEN
         is_available := NOT EXISTS (
           SELECT 1
@@ -46,7 +46,8 @@ BEGIN
           WHERE s.station_id = p_station_id
           AND s.end_time IS NULL
           AND DATE(s.start_time) = p_date
-          AND s.start_time::time <= curr_time  -- Block slots starting at or after session start time
+          AND CURRENT_TIME >= curr_time  -- Current time is at or after slot start
+          AND CURRENT_TIME < slot_end_time  -- Current time is before slot end
         );
       END IF;
       
@@ -70,8 +71,8 @@ BEGIN
     );
     
     -- Check if there's an active session that overlaps with this slot for today
-    -- Block slots that start at or after the active session's start time
-    -- This ensures that if a session is running, future slots are blocked but past slots remain available
+    -- Only block the CURRENT slot (where the session is happening right now)
+    -- Past and future slots should remain available
     IF p_date = CURRENT_DATE AND is_available THEN
       is_available := NOT EXISTS (
         SELECT 1
@@ -79,7 +80,8 @@ BEGIN
         WHERE s.station_id = p_station_id
         AND s.end_time IS NULL
         AND DATE(s.start_time) = p_date
-        AND TIME(s.start_time) <= curr_time  -- Block slots starting at or after session start time
+        AND CURRENT_TIME >= curr_time  -- Current time is at or after slot start
+        AND CURRENT_TIME < slot_end_time  -- Current time is before slot end
       );
     END IF;
     
