@@ -21,6 +21,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import GlobalNotificationBell from '@/components/GlobalNotificationBell';
 
 const AppSidebar: React.FC = () => {
   const location = useLocation();
@@ -63,6 +64,7 @@ const AppSidebar: React.FC = () => {
       <>
         <div className="fixed top-0 left-0 w-full z-30 bg-[#1A1F2C] p-4 flex justify-between items-center shadow-md">
           <div className="flex items-center gap-2">
+            <GlobalNotificationBell />
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-white">
@@ -81,6 +83,11 @@ const AppSidebar: React.FC = () => {
                   </div>
                   <div className="mx-4 h-px bg-nerfturf-purple/30" />
                   <div className="flex-1 overflow-auto py-2">
+                    <div className="px-2 mb-2">
+                      <div className="flex items-center justify-center py-2">
+                        <GlobalNotificationBell />
+                      </div>
+                    </div>
                     <div className="px-2">
                       {menuItems.map((item, index) => (
                         <Link 

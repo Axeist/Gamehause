@@ -9,9 +9,11 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { POSProvider } from "@/context/POSContext";
 import { ExpenseProvider } from "@/context/ExpenseContext";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
+import { BookingNotificationProvider } from "@/context/BookingNotificationContext";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
+import GlobalNotificationBell from "@/components/GlobalNotificationBell";
 
 // Pages
 import Login from "./pages/Login";
@@ -95,8 +97,9 @@ const ProtectedRoute = ({
       <div className="flex min-h-screen w-full overflow-x-hidden">
         <AppSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden">
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center justify-between px-4 py-2 border-b">
             <SidebarTrigger />
+            <GlobalNotificationBell />
           </div>
           {children}
           <footer className="mt-auto w-full py-2 text-center text-xs text-nerfturf-lightpurple/80 bg-black/80 border-t border-nerfturf-purple/20 font-semibold tracking-wide z-50 backdrop-blur-sm">
@@ -114,12 +117,13 @@ const App = () => (
       <SubscriptionProvider>
         <POSProvider>
           <ExpenseProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <SubscriptionGuard>
-                  <Routes>
+            <BookingNotificationProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <SubscriptionGuard>
+                    <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/login-logs" element={<LoginLogs />} />
@@ -264,6 +268,7 @@ const App = () => (
                 </SubscriptionGuard>
               </BrowserRouter>
             </TooltipProvider>
+            </BookingNotificationProvider>
           </ExpenseProvider>
         </POSProvider>
       </SubscriptionProvider>
