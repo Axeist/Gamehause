@@ -173,9 +173,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       amount,
       receipt,
       notes,
+      bookingData, // Full booking data to store in order notes
     } = payload;
 
-    console.log("💳 Razorpay order request:", { amount, receipt });
+    console.log("💳 Razorpay order request:", { amount, receipt, hasBookingData: !!bookingData });
 
     if (!amount || Number(amount) <= 0) {
       return j(res, { ok: false, error: "Amount must be > 0" }, 400);
@@ -185,7 +186,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return j(res, { ok: false, error: "Receipt ID is required" }, 400);
     }
 
-    const order = await createRazorpayOrder(Number(amount), receipt, notes);
+    // Prepare notes - include booking data if provided
+    const orderNotes: Record<string, string> = { ...notes };
+    
+    // Store booking data as base64-encoded JSON to fit within 256 char limit
+    if (bookingData) {
+      try {
+        const bookingDataJson = JSON.stringify(bookingData);
+        // Base64 encode to reduce size and ensure it's a valid string
+        const bookingDataBase64 = Buffer.from(bookingDataJson).toString('base64');
+        
+        // If still too long, we'll need to split it or use a different approach
+        // Razorpay notes have 256 char limit per field
+        if (bookingDataBase64.length <= 256) {
+          orderNotes.booking_data = bookingDataBase64;
+        } else {
+          // Split into multiple fields if needed
+          const chunks = [];
+          for (let i = 0; i < bookingDataBase64.length; i += 250) {
+            chunks.push(bookingDataBase64.slice(i, i + 250));
+          }
+          chunks.forEach((chunk, index) => {
+            orderNotes[`booking_data_${index}`] = chunk;
+          });
+          orderNotes.booking_data_chunks = chunks.length.toString();
+        }
+      } catch (err) {
+        console.error("❌ Failed to encode booking data:", err);
+        // Continue without booking data - webhook will fall back to checking localStorage
+      }
+    }
+
+    const order = await createRazorpayOrder(Number(amount), receipt, orderNotes);
 
     return j(res, {
       ok: true,
