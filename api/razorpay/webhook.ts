@@ -15,17 +15,20 @@ function j(res: unknown, status = 200) {
   });
 }
 
-// Create Supabase client for Node.js runtime
-async function createSupabaseClient() {
+// Create Supabase client for Node.js runtime with service role key (for admin operations)
+async function getSupabaseClient() {
   const { createClient } = await import('@supabase/supabase-js');
-  const supabaseUrl = getEnv("VITE_SUPABASE_URL") || getEnv("SUPABASE_URL");
-  const supabaseKey = getEnv("VITE_SUPABASE_PUBLISHABLE_KEY") || getEnv("SUPABASE_ANON_KEY");
-  
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Missing Supabase environment variables");
-  }
+  const supabaseUrl = getEnv("VITE_SUPABASE_URL") || getEnv("SUPABASE_URL") || need("SUPABASE_URL");
+  // Use service role key for webhook operations (needed to create bookings and customers)
+  // Service role key bypasses RLS policies and is required for server-side operations
+  const supabaseKey = getEnv("SUPABASE_SERVICE_ROLE_KEY") || need("SUPABASE_SERVICE_ROLE_KEY");
   
   return createClient(supabaseUrl, supabaseKey);
+}
+
+// Alias for backward compatibility
+async function createSupabaseClient() {
+  return getSupabaseClient();
 }
 
 // Get Razorpay credentials for fetching order
@@ -249,6 +252,13 @@ function getEnv(name: string): string | undefined {
   // Fallback for Edge runtime
   const fromDeno = (globalThis as any)?.Deno?.env?.get?.(name);
   return fromDeno;
+}
+
+// Helper to require an environment variable
+function need(name: string): string {
+  const v = getEnv(name);
+  if (!v) throw new Error(`Missing env: ${name}`);
+  return v;
 }
 
 // Verify webhook signature
