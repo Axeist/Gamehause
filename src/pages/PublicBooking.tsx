@@ -1114,6 +1114,10 @@ export default function PublicBooking() {
       }
 
       // 5. Initialize Razorpay checkout
+      // Get base URL for callback
+      const baseUrl = window.location.origin;
+      const successUrl = `${baseUrl}/public/payment/success`;
+      
       const options = {
         key: keyData.keyId,
         amount: orderData.amount,
@@ -1121,8 +1125,10 @@ export default function PublicBooking() {
         name: "NerfTurf Gaming Lounge",
         description: `Booking for ${slotsToBook.length} slot(s)`,
         order_id: orderData.orderId,
+        callback_url: successUrl,
+        redirect: true, // Enable immediate redirect (bypasses 5-second delay)
         handler: function (response: any) {
-          // Redirect to success page
+          // Fallback handler in case redirect doesn't work
           window.location.href = `/public/payment/success?payment_id=${encodeURIComponent(response.razorpay_payment_id)}&order_id=${encodeURIComponent(response.razorpay_order_id)}&signature=${encodeURIComponent(response.razorpay_signature)}`;
         },
         prefill: {

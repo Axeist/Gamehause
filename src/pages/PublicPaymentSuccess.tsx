@@ -37,9 +37,10 @@ const generateCustomerID = (phone: string): string => {
 export default function PublicPaymentSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const paymentId = searchParams.get("payment_id") || "";
-  const orderId = searchParams.get("order_id") || "";
-  const signature = searchParams.get("signature") || "";
+  // Handle both formats: direct redirect (payment_id) and Razorpay callback (razorpay_payment_id)
+  const paymentId = searchParams.get("payment_id") || searchParams.get("razorpay_payment_id") || "";
+  const orderId = searchParams.get("order_id") || searchParams.get("razorpay_order_id") || "";
+  const signature = searchParams.get("signature") || searchParams.get("razorpay_signature") || "";
   const [status, setStatus] = useState<"checking" | "creating" | "done" | "failed">("checking");
   const [msg, setMsg] = useState("Verifying your payment…");
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
