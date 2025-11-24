@@ -2504,7 +2504,6 @@ export default function BookingManagement() {
                   {Object.entries(groupedBookings)
                     .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
                     .map(([date, customerBookings]) => {
-                      const bookingIds = Object.values(customerBookings).flat().map(b => b.id).join('-');
                       const isDateExpanded = expandedDates.has(date);
                       return (
                       <Collapsible key={date} open={isDateExpanded}>
@@ -2528,7 +2527,7 @@ export default function BookingManagement() {
                         </CollapsibleTrigger>
                         
                         <CollapsibleContent>
-                          <div key={`${date}-content-${bookingIds}`} className="ml-6 mt-2 space-y-2">
+                          <div key={`${date}-content`} className="ml-6 mt-2 space-y-2">
                             {Object.entries(customerBookings).map(([customerName, bookingsForCustomer]) => {
                               const key = `${date}::${customerName}`;
                               const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
