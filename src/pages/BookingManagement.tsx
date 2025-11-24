@@ -12,6 +12,7 @@ import { BookingStatusBadge } from '@/components/booking/BookingStatusBadge';
 import { BookingEditDialog } from '@/components/booking/BookingEditDialog';
 import { BookingDeleteDialog } from '@/components/booking/BookingDeleteDialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useSubscription } from '@/context/SubscriptionContext';
 import UpgradeDialog from '@/components/UpgradeDialog';
 import {
@@ -2560,142 +2561,200 @@ export default function BookingManagement() {
                                     </CollapsibleTrigger>
                                     
                                     <CollapsibleContent>
-                                      <div className="ml-6 mt-2 space-y-2">
-                                          {bookingsForCustomer
-                                            .sort((a, b) => a.start_time.localeCompare(b.start_time))
-                                            .map(booking => (
+                                      <div className="ml-6 mt-3 space-y-4">
+                                        {/* Customer Contact Info - Show once at top */}
+                                        <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
+                                          <div className="flex items-center gap-4 text-sm">
+                                            <div className="flex items-center gap-2">
+                                              <Phone className="h-4 w-4 text-muted-foreground" />
+                                              <span className="font-medium">{bookingsForCustomer[0]?.customer.phone}</span>
+                                            </div>
+                                            {bookingsForCustomer[0]?.customer.email && (
+                                              <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                                <span className="text-muted-foreground">{bookingsForCustomer[0].customer.email}</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {/* Group bookings by station */}
+                                        {(() => {
+                                          const sortedBookings = [...bookingsForCustomer].sort((a, b) => {
+                                            // First sort by station name, then by time
+                                            const stationCompare = a.station.name.localeCompare(b.station.name);
+                                            if (stationCompare !== 0) return stationCompare;
+                                            return a.start_time.localeCompare(b.start_time);
+                                          });
+
+                                          const stationGroups = new Map<string, Booking[]>();
+                                          sortedBookings.forEach(booking => {
+                                            const stationKey = `${booking.station.name}::${booking.station.type}`;
+                                            if (!stationGroups.has(stationKey)) {
+                                              stationGroups.set(stationKey, []);
+                                            }
+                                            stationGroups.get(stationKey)!.push(booking);
+                                          });
+
+                                          return Array.from(stationGroups.entries()).map(([stationKey, stationBookings]) => {
+                                            const [stationName, stationType] = stationKey.split('::');
+                                            const totalPrice = stationBookings.reduce((sum, b) => sum + (b.final_price || 0), 0);
+                                            const hasUnpaid = stationBookings.some(b => !b.payment_mode && b.final_price && b.final_price > 0);
+                                            const allPaid = stationBookings.every(b => b.payment_mode === 'razorpay');
+                                            
+                                            return (
                                               <div 
-                                                key={booking.id} 
-                                                className={`p-4 border rounded-lg bg-card shadow-sm ${
-                                                  booking.coupon_code 
+                                                key={stationKey}
+                                                className={`border rounded-lg bg-card shadow-sm overflow-hidden ${
+                                                  stationBookings.some(b => b.coupon_code) 
                                                     ? 'ring-2 ring-purple-200 bg-purple-50/30 dark:bg-purple-950/30' 
                                                     : ''
                                                 }`}
                                               >
-                                                <div className="flex items-center justify-between">
-                                                  <div className="grid grid-cols-1 md:grid-cols-7 gap-4 flex-1">
+                                                {/* Station Header */}
+                                                <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
+                                                  <div className="flex items-center gap-3">
+                                                    <MapPin className="h-4 w-4 text-blue-500" />
                                                     <div>
-                                                      <div className="text-sm text-muted-foreground">Booking Details</div>
-                                                      <div className="space-y-1">
-                                                        <div className="font-medium flex items-center gap-1 text-blue-600">
-                                                          <Hash className="h-3 w-3" />
-                                                          ID: {booking.id.substring(0, 8)}...
-                                                        </div>
-                                                        {booking.booking_views && booking.booking_views.length > 0 && (
-                                                          <div className="text-xs text-gray-500 flex items-center gap-1">
-                                                            <Eye className="h-2 w-2" />
-                                                            Access: {booking.booking_views[0].access_code}
-                                                          </div>
-                                                        )}
-                                                      </div>
-                                                    </div>
-                                                    
-                                                    <div>
-                                                      <div className="text-sm text-muted-foreground">Time</div>
-                                                      <div className="font-medium flex items-center gap-1">
-                                                        <Clock className="h-3 w-3" />
-                                                        {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
-                                                      </div>
-                                                      <div className="text-xs text-muted-foreground">{booking.duration}min</div>
-                                                    </div>
-                                                    
-                                                    <div>
-                                                      <div className="text-sm text-muted-foreground">Station</div>
-                                                      <div className="font-medium flex items-center gap-1">
-                                                        <MapPin className="h-3 w-3" />
-                                                        {booking.station.name}
-                                                      </div>
-                                                      <Badge variant="outline" className="text-xs mt-1">
-                                                        {getStationTypeLabel(booking.station.type)}
+                                                      <div className="font-semibold text-sm">{stationName}</div>
+                                                      <Badge variant="outline" className="text-xs mt-0.5">
+                                                        {getStationTypeLabel(stationType)}
                                                       </Badge>
                                                     </div>
-                                                    
-                                                    <div>
-                                                      <div className="text-sm text-muted-foreground">Contact</div>
-                                                      <div className="text-sm flex items-center gap-1">
-                                                        <Phone className="h-3 w-3" />
-                                                        {booking.customer.phone}
-                                                      </div>
-                                                      {booking.customer.email && (
-                                                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                                                          <Mail className="h-3 w-3" />
-                                                          {booking.customer.email}
-                                                        </div>
-                                                      )}
+                                                  </div>
+                                                  <div className="flex items-center gap-3">
+                                                    <div className="text-right">
+                                                      <div className="text-xs text-muted-foreground">Total</div>
+                                                      <div className="font-semibold">₹{totalPrice}</div>
                                                     </div>
-                                                    
-                                                    <div>
-                                                      <div className="text-sm text-muted-foreground">Status</div>
-                                                      <div className="flex items-center gap-1">
-                                                        <BookingStatusBadge status={booking.status} />
-                                                        {booking.payment_mode && (
-                                                          <Badge 
-                                                            variant={booking.payment_mode === 'razorpay' ? 'default' : 'secondary'} 
-                                                            className="text-xs"
-                                                          >
-                                                            {booking.payment_mode === 'razorpay' ? '💳 Paid' : booking.payment_mode}
-                                                          </Badge>
-                                                        )}
-                                                        {!booking.payment_mode && booking.final_price && booking.final_price > 0 && (
-                                                          <Badge variant="outline" className="text-xs text-orange-600">
-                                                            ⚠️ Unpaid
-                                                          </Badge>
-                                                        )}
-                                                      </div>
-                                                      {booking.payment_txn_id && (
-                                                        <div className="text-xs text-muted-foreground mt-1 font-mono">
-                                                          Txn: {booking.payment_txn_id.substring(0, 15)}...
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                    
-                                                    <div>
-                                                      <div className="text-sm text-muted-foreground">Pricing</div>
-                                                      <div className="space-y-1">
-                                                        {booking.original_price && booking.original_price !== booking.final_price && (
-                                                          <div className="text-xs text-gray-500 line-through">
-                                                            ₹{booking.original_price}
-                                                          </div>
-                                                        )}
-                                                        <div className="flex items-center gap-2">
-                                                          {typeof booking.final_price === 'number' && (
-                                                            <span className="text-sm font-medium">₹{booking.final_price}</span>
+                                                    <Badge variant={allPaid ? "default" : hasUnpaid ? "destructive" : "secondary"} className="text-xs">
+                                                      {stationBookings.length} slot{stationBookings.length !== 1 ? 's' : ''}
+                                                    </Badge>
+                                                  </div>
+                                                </div>
+
+                                                {/* Timeline of bookings for this station */}
+                                                <div className="p-3 space-y-2">
+                                                  {stationBookings.map((booking, idx) => (
+                                                    <div 
+                                                      key={booking.id}
+                                                      className="flex items-center justify-between p-2.5 rounded-md bg-background/50 border border-border/50 hover:bg-muted/30 transition-colors group"
+                                                    >
+                                                      <div className="flex items-center gap-4 flex-1">
+                                                        {/* Timeline connector */}
+                                                        <div className="flex flex-col items-center">
+                                                          <div className={`w-2 h-2 rounded-full ${
+                                                            idx === 0 ? 'bg-blue-500' : 'bg-muted-foreground'
+                                                          }`} />
+                                                          {idx < stationBookings.length - 1 && (
+                                                            <div className="w-0.5 h-6 bg-border mt-1" />
                                                           )}
-                                                          {!!booking.discount_percentage && (
+                                                        </div>
+
+                                                        {/* Time slot */}
+                                                        <div className="flex items-center gap-2 min-w-[140px]">
+                                                          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                                                          <div>
+                                                            <div className="font-medium text-sm">
+                                                              {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">{booking.duration}min</div>
+                                                          </div>
+                                                        </div>
+
+                                                        {/* Booking ID & Access */}
+                                                        <div className="flex items-center gap-3 text-xs">
+                                                          <div className="flex items-center gap-1 text-muted-foreground">
+                                                            <Hash className="h-3 w-3" />
+                                                            {booking.id.substring(0, 8)}...
+                                                          </div>
+                                                          {booking.booking_views && booking.booking_views.length > 0 && (
+                                                            <div className="flex items-center gap-1 text-muted-foreground">
+                                                              <Eye className="h-3 w-3" />
+                                                              {booking.booking_views[0].access_code}
+                                                            </div>
+                                                          )}
+                                                        </div>
+
+                                                        {/* Status & Payment */}
+                                                        <div className="flex items-center gap-2">
+                                                          <BookingStatusBadge status={booking.status} />
+                                                          {booking.payment_mode ? (
+                                                            <Badge variant="default" className="text-xs">
+                                                              💳 Paid
+                                                            </Badge>
+                                                          ) : booking.final_price && booking.final_price > 0 ? (
+                                                            <Badge variant="destructive" className="text-xs">
+                                                              ⚠️ Unpaid
+                                                            </Badge>
+                                                          ) : null}
+                                                        </div>
+
+                                                        {/* Pricing */}
+                                                        <div className="flex items-center gap-2">
+                                                          {booking.original_price && booking.original_price !== booking.final_price && (
+                                                            <span className="text-xs text-muted-foreground line-through">
+                                                              ₹{booking.original_price}
+                                                            </span>
+                                                          )}
+                                                          <span className="font-semibold text-sm">₹{booking.final_price || 0}</span>
+                                                          {booking.discount_percentage && (
                                                             <Badge variant="destructive" className="text-xs">
                                                               {Math.round(booking.discount_percentage)}% OFF
                                                             </Badge>
                                                           )}
+                                                          {booking.coupon_code && (
+                                                            <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                                                              <Gift className="h-2 w-2" />
+                                                              {booking.coupon_code}
+                                                            </Badge>
+                                                          )}
                                                         </div>
-                                                        {booking.coupon_code && (
-                                                          <Badge variant="secondary" className="text-xs mt-1 flex items-center gap-1 w-fit">
-                                                            <Gift className="h-2 w-2" />
-                                                            {booking.coupon_code}
-                                                          </Badge>
-                                                        )}
                                                       </div>
+
+                                                      {/* Actions */}
+                                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleEditBooking(booking)}>
+                                                          <Edit2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => handleDeleteBooking(booking)}>
+                                                          <Trash2 className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                      </div>
+
+                                                      {/* Notes indicator */}
+                                                      {booking.notes && (
+                                                        <TooltipProvider>
+                                                          <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                              <div className="ml-2">
+                                                                <Badge variant="outline" className="text-xs cursor-help">
+                                                                  📝
+                                                                </Badge>
+                                                              </div>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent className="max-w-xs">
+                                                              <p className="font-medium mb-1">Notes:</p>
+                                                              <p className="text-sm">{booking.notes}</p>
+                                                            </TooltipContent>
+                                                          </Tooltip>
+                                                        </TooltipProvider>
+                                                      )}
                                                     </div>
-                                                    
-                                                    <div className="flex gap-1 ml-4">
-                                                      <Button size="sm" variant="outline" onClick={() => handleEditBooking(booking)}>
-                                                        <Edit2 className="h-3 w-3" />
-                                                      </Button>
-                                                      <Button size="sm" variant="outline" onClick={() => handleDeleteBooking(booking)}>
-                                                        <Trash2 className="h-3 w-3" />
-                                                      </Button>
-                                                    </div>
-                                                  </div>
+                                                  ))}
                                                 </div>
-                                                
-                                                {booking.notes && (
-                                                  <div className="mt-3 p-2 bg-muted/50 rounded text-sm">
-                                                    <span className="text-muted-foreground">Notes: </span>
-                                                    {booking.notes}
+
+                                                {/* Payment Transaction ID if shared */}
+                                                {stationBookings[0]?.payment_txn_id && (
+                                                  <div className="px-3 pb-2 text-xs text-muted-foreground font-mono border-t pt-2">
+                                                    Txn: {stationBookings[0].payment_txn_id.substring(0, 20)}...
                                                   </div>
                                                 )}
                                               </div>
-                                            ))}
-                                        </div>
+                                            );
+                                          });
+                                        })()}
+                                      </div>
                                     </CollapsibleContent>
                                   </Collapsible>
                                 );
