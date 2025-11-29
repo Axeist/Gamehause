@@ -281,7 +281,7 @@ export default function BookingManagement() {
   const [reconStatusFilter, setReconStatusFilter] = useState<string>('all');
   const [reconDateFilter, setReconDateFilter] = useState<string>('all');
   const [deletingPayments, setDeletingPayments] = useState<Set<string>>(new Set());
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [paymentDeleteDialogOpen, setPaymentDeleteDialogOpen] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
 
   // NEW: Calendar view state
@@ -1600,7 +1600,7 @@ export default function BookingManagement() {
 
   const handleDeleteClick = (paymentId: string) => {
     setPaymentToDelete(paymentId);
-    setDeleteDialogOpen(true);
+    setPaymentDeleteDialogOpen(true);
   };
 
   const deletePayment = async () => {
@@ -1610,7 +1610,7 @@ export default function BookingManagement() {
     const paymentToRestore = pendingPayments.find(p => p.id === paymentId);
 
     // Close dialog immediately - non-blocking
-    setDeleteDialogOpen(false);
+    setPaymentDeleteDialogOpen(false);
     setPaymentToDelete(null);
     setDeletingPayments(prev => new Set(prev).add(paymentId));
 
@@ -3031,7 +3031,7 @@ export default function BookingManagement() {
           </Tabs>
 
           {/* Delete Payment Confirmation Dialog */}
-          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialog open={paymentDeleteDialogOpen} onOpenChange={setPaymentDeleteDialogOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Payment Record</AlertDialogTitle>
@@ -3041,7 +3041,7 @@ export default function BookingManagement() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => {
-                  setDeleteDialogOpen(false);
+                  setPaymentDeleteDialogOpen(false);
                   setPaymentToDelete(null);
                 }}>
                   Cancel
