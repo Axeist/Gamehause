@@ -13,6 +13,7 @@ import { BookingEditDialog } from '@/components/booking/BookingEditDialog';
 import { BookingDeleteDialog } from '@/components/booking/BookingDeleteDialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useSubscription } from '@/context/SubscriptionContext';
 import UpgradeDialog from '@/components/UpgradeDialog';
 import {
@@ -280,6 +281,8 @@ export default function BookingManagement() {
   const [reconStatusFilter, setReconStatusFilter] = useState<string>('all');
   const [reconDateFilter, setReconDateFilter] = useState<string>('all');
   const [deletingPayments, setDeletingPayments] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
 
   // NEW: Calendar view state
   const [calendarView, setCalendarView] = useState(false);
@@ -1595,32 +1598,61 @@ export default function BookingManagement() {
     toast.success(`Reconciliation complete: ${successful} successful, ${failed} failed`);
   };
 
-  const deletePayment = async (paymentId: string) => {
-    if (!confirm('Are you sure you want to delete this payment record? This action cannot be undone.')) {
-      return;
-    }
+  const handleDeleteClick = (paymentId: string) => {
+    setPaymentToDelete(paymentId);
+    setDeleteDialogOpen(true);
+  };
 
+  const deletePayment = async () => {
+    if (!paymentToDelete) return;
+
+    const paymentId = paymentToDelete;
+    const paymentToRestore = pendingPayments.find(p => p.id === paymentId);
+
+    // Close dialog immediately - non-blocking
+    setDeleteDialogOpen(false);
+    setPaymentToDelete(null);
     setDeletingPayments(prev => new Set(prev).add(paymentId));
-    try {
-      const { error } = await supabase
-        .from('pending_payments')
-        .delete()
-        .eq('id', paymentId);
 
-      if (error) throw error;
-      
-      toast.success('Payment record deleted successfully');
-      await fetchPendingPayments();
-    } catch (err: any) {
-      console.error('Error deleting payment:', err);
-      toast.error('Failed to delete payment record');
-    } finally {
-      setDeletingPayments(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(paymentId);
-        return newSet;
-      });
-    }
+    // Optimistic update - remove from UI immediately for instant feedback
+    setPendingPayments(prev => prev.filter(p => p.id !== paymentId));
+
+    // Defer the actual delete operation to avoid blocking UI
+    // This allows React to update the UI first
+    setTimeout(async () => {
+      try {
+        const { error } = await supabase
+          .from('pending_payments')
+          .delete()
+          .eq('id', paymentId);
+
+        if (error) throw error;
+        
+        toast.success('Payment record deleted successfully');
+        
+        // Only refetch if we need to sync with server state
+        // Since we already optimistically updated, we can skip immediate refetch
+        // or do it in background after a delay
+        setTimeout(() => {
+          fetchPendingPayments();
+        }, 500);
+      } catch (err: any) {
+        console.error('Error deleting payment:', err);
+        // Restore the payment on error
+        if (paymentToRestore) {
+          setPendingPayments(prev => [...prev, paymentToRestore].sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          ));
+        }
+        toast.error('Failed to delete payment record');
+      } finally {
+        setDeletingPayments(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(paymentId);
+          return newSet;
+        });
+      }
+    }, 10);
   };
 
   // Filtered payments based on search and filters
@@ -2968,11 +3000,11 @@ export default function BookingManagement() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => deletePayment(payment.id)}
-                                      disabled={isDeleting}
+                                      onClick={() => handleDeleteClick(payment.id)}
+                                      disabled={deletingPayments.has(payment.id)}
                                       className="min-w-[120px] border-red-500/50 text-red-500 hover:bg-red-500/10 hover:border-red-500"
                                     >
-                                      {isDeleting ? (
+                                      {deletingPayments.has(payment.id) ? (
                                         <>
                                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                                           Deleting...
@@ -2997,6 +3029,32 @@ export default function BookingManagement() {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {/* Delete Payment Confirmation Dialog */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Payment Record</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this payment record? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setPaymentToDelete(null);
+                }}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={deletePayment}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Bookings List */}
           <Card>
