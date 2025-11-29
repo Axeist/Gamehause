@@ -55,40 +55,47 @@ export default function PublicPaymentSuccess() {
       }
 
       // 1) RECONCILE PAYMENT - Check Razorpay API and create booking if payment succeeded
+      // The reconciliation endpoint has built-in idempotency checks to prevent duplicates
       // This is the core solution: verify payment status directly from Razorpay API
       // Works even if customer doesn't return to browser (can be called from anywhere)
       // Note: Automatic reconciliation runs every minute via cron, but we also try here for immediate feedback
-      try {
-        console.log("🔍 Reconciling payment with Razorpay API...");
-        const reconcileRes = await fetch("/api/razorpay/reconcile-payment", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            order_id: orderId,
-            payment_id: paymentId,
-          }),
-        });
+      {
+        // 2) RECONCILE PAYMENT - Check Razorpay API and create booking if payment succeeded
+        // This is the core solution: verify payment status directly from Razorpay API
+        // Works even if customer doesn't return to browser (can be called from anywhere)
+        // Note: Automatic reconciliation runs every minute via cron, but we also try here for immediate feedback
+        try {
+          console.log("🔍 Reconciling payment with Razorpay API...");
+          const reconcileRes = await fetch("/api/razorpay/reconcile-payment", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              order_id: orderId,
+              payment_id: paymentId,
+            }),
+          });
 
-        const reconcileData = await reconcileRes.json();
-        
-        if (reconcileRes.ok && reconcileData?.success) {
-          console.log("✅ Payment reconciled and booking created:", reconcileData.bookingId);
-          // Clear pending booking from localStorage
-          localStorage.removeItem("pendingBooking");
+          const reconcileData = await reconcileRes.json();
           
-          // Booking is created, fetch details and show confirmation
-          // Continue to fetch booking details below
-        } else {
-          console.warn("⚠️ Reconciliation failed or payment not successful:", reconcileData?.error);
+          if (reconcileRes.ok && reconcileData?.success) {
+            console.log("✅ Payment reconciled and booking created:", reconcileData.bookingId);
+            // Clear pending booking from localStorage
+            localStorage.removeItem("pendingBooking");
+            
+            // Booking is created, fetch details and show confirmation
+            // Continue to fetch booking details below
+          } else {
+            console.warn("⚠️ Reconciliation failed or payment not successful:", reconcileData?.error);
+            console.log("ℹ️ Payment will be automatically reconciled by cron job within 1 minute");
+            // Payment might not be successful yet, or already processed
+            // Automatic reconciliation will handle it if payment succeeds
+            // Continue to check if booking exists
+          }
+        } catch (err) {
+          console.error("❌ Error reconciling payment:", err);
           console.log("ℹ️ Payment will be automatically reconciled by cron job within 1 minute");
-          // Payment might not be successful yet, or already processed
-          // Automatic reconciliation will handle it if payment succeeds
           // Continue to check if booking exists
         }
-      } catch (err) {
-        console.error("❌ Error reconciling payment:", err);
-        console.log("ℹ️ Payment will be automatically reconciled by cron job within 1 minute");
-        // Continue to check if booking exists
       }
 
       // 2) Verify payment with backend (for UI confirmation)
@@ -119,11 +126,13 @@ export default function PublicPaymentSuccess() {
 
       // 3) Check if booking exists (created by reconciliation or webhook)
       // Reconciliation API should have created it, but check anyway
-      const { data: existingBooking } = await supabase
+      // Note: Server-side reconciliation has idempotency checks to prevent duplicates
+      const bookingQuery = supabase
         .from("bookings")
         .select("id, station_id, customer_id, booking_date, start_time, end_time")
         .eq("payment_txn_id", paymentId)
         .maybeSingle();
+      const { data: existingBooking } = await (bookingQuery as any);
 
       if (existingBooking) {
         // Booking already created by webhook (PRIMARY METHOD) - fetch full details
@@ -213,13 +222,13 @@ export default function PublicPaymentSuccess() {
         const normalizedPhone = normalizePhoneNumber(pb.customer.phone);
         
         // Check if exists by normalized phone
-        const { data: existingCustomer } = await supabase
-          .from("customers")
-          .select("id, name, custom_id")
-          .eq("phone", normalizedPhone)
-          .maybeSingle();
+          const { data: existingCustomer } = await supabase
+            .from("customers")
+            .select("id, name")
+            .eq("phone", normalizedPhone)
+            .maybeSingle();
 
-        if (existingCustomer) {
+        if (existingCustomer && existingCustomer.id) {
           customerId = existingCustomer.id;
         } else {
           // Generate customer ID (same as venue booking flow)

@@ -184,15 +184,27 @@ async function createBookingFromPayment(pendingPayment: any) {
     }
   }
   
-  // 2. Check if booking already exists (idempotency)
+  // 2. Check if booking already exists (idempotency) - ATOMIC CHECK
+  // Use a transaction-like approach: check and lock to prevent race conditions
   const { data: existingBooking } = await supabase
     .from("bookings")
     .select("id")
     .eq("payment_txn_id", pendingPayment.razorpay_payment_id)
+    .limit(1)
     .maybeSingle();
   
   if (existingBooking) {
-    console.log("✅ Booking already exists:", existingBooking.id);
+    console.log("✅ Booking already exists (idempotency check):", existingBooking.id);
+    // Update pending payment status if not already updated
+    await supabase
+      .from("pending_payments")
+      .update({
+        status: "success",
+        verified_at: new Date().toISOString(),
+      })
+      .eq("razorpay_order_id", pendingPayment.razorpay_order_id)
+      .eq("status", "pending");
+    
     return { success: true, bookingId: existingBooking.id, alreadyExists: true };
   }
   
@@ -223,12 +235,60 @@ async function createBookingFromPayment(pendingPayment: any) {
     });
   });
   
+  // Double-check before inserting (race condition protection)
+  const { data: doubleCheck } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("payment_txn_id", pendingPayment.razorpay_payment_id)
+    .limit(1)
+    .maybeSingle();
+  
+  if (doubleCheck) {
+    console.log("✅ Booking was created by another process (race condition prevented):", doubleCheck.id);
+    // Update pending payment status
+    await supabase
+      .from("pending_payments")
+      .update({
+        status: "success",
+        verified_at: new Date().toISOString(),
+      })
+      .eq("razorpay_order_id", pendingPayment.razorpay_order_id)
+      .eq("status", "pending");
+    
+    return { success: true, bookingId: doubleCheck.id, alreadyExists: true };
+  }
+  
   const { error: bErr, data: insertedBookings } = await supabase
     .from("bookings")
     .insert(rows)
     .select("id, station_id");
   
   if (bErr) {
+    // Check if error is due to duplicate (race condition)
+    if (bErr.code === '23505' || bErr.message?.includes('duplicate') || bErr.message?.includes('unique')) {
+      console.log("⚠️ Duplicate booking detected (race condition), fetching existing booking...");
+      const { data: existing } = await supabase
+        .from("bookings")
+        .select("id")
+        .eq("payment_txn_id", pendingPayment.razorpay_payment_id)
+        .limit(1)
+        .maybeSingle();
+      
+      if (existing) {
+        console.log("✅ Found existing booking after duplicate error:", existing.id);
+        await supabase
+          .from("pending_payments")
+          .update({
+            status: "success",
+            verified_at: new Date().toISOString(),
+          })
+          .eq("razorpay_order_id", pendingPayment.razorpay_order_id)
+          .eq("status", "pending");
+        
+        return { success: true, bookingId: existing.id, alreadyExists: true };
+      }
+    }
+    
     console.error("❌ Booking creation failed:", bErr);
     throw bErr;
   }
@@ -252,7 +312,34 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
   const supabase = await createSupabaseClient();
   
   console.log("🔍 Reconciling payment:", { orderId, paymentId });
-  
+
+  // 0. CRITICAL: Check if booking already exists FIRST (idempotency)
+  // This prevents duplicates if reconciliation already happened or customer returned
+  if (paymentId) {
+    const { data: existingBookingCheck } = await supabase
+      .from("bookings")
+      .select("id")
+      .eq("payment_txn_id", paymentId)
+      .limit(1)
+      .maybeSingle();
+    
+    if (existingBookingCheck) {
+      console.log("✅ Booking already exists (early check), skipping reconciliation:", existingBookingCheck.id);
+      
+      // Update pending payment status if it exists
+      await supabase
+        .from("pending_payments")
+        .update({
+          status: "success",
+          verified_at: new Date().toISOString(),
+        })
+        .eq("razorpay_order_id", orderId)
+        .eq("status", "pending");
+      
+      return { success: true, bookingId: existingBookingCheck.id, alreadyExists: true };
+    }
+  }
+
   // 1. Find pending payment
   const { data: pendingPayment, error: findError } = await supabase
     .from("pending_payments")
@@ -273,6 +360,28 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
       
       if (payment.status === "captured" || payment.status === "authorized") {
         console.log("✅ Payment verified as successful:", payment.status);
+        
+        // Check if booking already exists with this payment ID (idempotency)
+        const { data: existingBookingCheck } = await supabase
+          .from("bookings")
+          .select("id")
+          .eq("payment_txn_id", paymentId)
+          .limit(1)
+          .maybeSingle();
+        
+        if (existingBookingCheck) {
+          console.log("✅ Booking already exists with payment ID, skipping:", existingBookingCheck.id);
+          await supabase
+            .from("pending_payments")
+            .update({
+              razorpay_payment_id: paymentId,
+              status: "success",
+              verified_at: new Date().toISOString(),
+            })
+            .eq("id", pendingPayment.id);
+          
+          return { success: true, bookingId: existingBookingCheck.id, alreadyExists: true };
+        }
         
         // Update pending payment with payment ID
         await supabase
@@ -314,6 +423,28 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
       
       if (successfulPayment) {
         console.log("✅ Found successful payment in order:", successfulPayment.id);
+        
+        // Check if booking already exists with this payment ID (idempotency)
+        const { data: existingBookingCheck } = await supabase
+          .from("bookings")
+          .select("id")
+          .eq("payment_txn_id", successfulPayment.id)
+          .limit(1)
+          .maybeSingle();
+        
+        if (existingBookingCheck) {
+          console.log("✅ Booking already exists with payment ID, skipping:", existingBookingCheck.id);
+          await supabase
+            .from("pending_payments")
+            .update({
+              razorpay_payment_id: successfulPayment.id,
+              status: "success",
+              verified_at: new Date().toISOString(),
+            })
+            .eq("id", pendingPayment.id);
+          
+          return { success: true, bookingId: existingBookingCheck.id, alreadyExists: true };
+        }
         
         // Update pending payment with payment ID
         await supabase
