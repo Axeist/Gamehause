@@ -1,17 +1,18 @@
-// Automatic reconciliation cron job - Runs every minute
+// Automatic reconciliation endpoint - Processes all pending payments
+// Called by client-side polling (works on Vercel Hobby plan)
 // Checks all pending payments and reconciles them automatically
 // Using Node.js runtime to use Razorpay SDK and Supabase client
+// Note: This is NOT a Vercel Cron job - it's called from the browser
 export const config = {
   maxDuration: 60, // 60 seconds for batch processing
 };
 
-function j(res: unknown, status = 200) {
-  return new Response(JSON.stringify(res), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-    },
-  });
+// Response helper for Node.js runtime
+function j(res: VercelResponse, data: unknown, status = 200) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type');
+  res.status(status).json(data);
 }
 
 // Helper functions
@@ -337,28 +338,54 @@ async function reconcileSinglePayment(pendingPayment: any) {
   }
 }
 
-export default async function handler(req: Request) {
-  // This endpoint can be called by:
-  // 1. Vercel Cron (if Pro plan) - has x-vercel-cron header
-  // 2. Client-side polling (Hobby plan) - from browser
-  // 3. Manual API calls
+// Vercel Node.js runtime types
+type VercelRequest = {
+  method?: string;
+  body?: any;
+  query?: Record<string, string>;
+  headers?: Record<string, string | string[] | undefined>;
+};
+
+type VercelResponse = {
+  setHeader: (name: string, value: string) => void;
+  status: (code: number) => VercelResponse;
+  json: (data: any) => void;
+  end: () => void;
+};
+
+// Handler for Node.js runtime (client-side calls from browser)
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // This endpoint is called by:
+  // 1. Client-side polling (Hobby plan) - from browser
+  // 2. Manual API calls
+  // Note: Vercel Cron would use Edge runtime, but we're not using it on Hobby plan
   
-  const authHeader = req.headers.get("authorization");
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'content-type');
+    return res.status(200).end();
+  }
+
+  if (req.method !== "POST") {
+    return j(res, { ok: false, error: "Method not allowed" }, 405);
+  }
+  
+  // Get headers (Node.js runtime format)
+  const authHeader = req.headers?.["authorization"];
   const cronSecret = getEnv("CRON_SECRET");
-  const isCronRequest = req.headers.get("x-vercel-cron") === "1";
+  const authHeaderStr = Array.isArray(authHeader) ? authHeader[0] : authHeader;
   
-  // If CRON_SECRET is set and it's not a Vercel cron request, verify the secret
-  // This allows client-side calls if secret matches, or if no secret is set, allow all calls
-  if (cronSecret && !isCronRequest) {
-    // For client-side calls, we can allow them without secret (since they're from the same origin)
-    // Or require secret for security
-    // For now, allow client-side calls from same origin
-    const origin = req.headers.get("origin") || req.headers.get("referer");
-    // Allow if from same origin (browser security handles this)
+  // For client-side calls, allow them (browser security handles CORS)
+  // If CRON_SECRET is set, optionally verify it
+  if (cronSecret && authHeaderStr !== `Bearer ${cronSecret}`) {
+    // Allow same-origin requests (browser handles this)
+    // Only block if explicitly required
   }
 
   try {
-    console.log("⏰ Automatic reconciliation cron job started");
+    console.log("⏰ Automatic reconciliation started (client-side call)");
     const supabase = await createSupabaseClient();
     
     // Fetch all pending payments (not expired, created in last 24 hours)
@@ -378,7 +405,7 @@ export default async function handler(req: Request) {
 
     if (!pendingPayments || pendingPayments.length === 0) {
       console.log("✅ No pending payments to reconcile");
-      return j({
+      return j(res, {
         ok: true,
         processed: 0,
         successful: 0,
@@ -429,7 +456,7 @@ export default async function handler(req: Request) {
 
     console.log(`✅ Reconciliation complete: ${successful} successful, ${failed} failed`);
 
-    return j({
+    return j(res, {
       ok: true,
       processed: pendingPayments.length,
       successful,
@@ -437,8 +464,8 @@ export default async function handler(req: Request) {
       results,
     });
   } catch (err: any) {
-    console.error("❌ Cron job error:", err);
-    return j({
+    console.error("❌ Reconciliation error:", err);
+    return j(res, {
       ok: false,
       error: err?.message || String(err),
     }, 500);
