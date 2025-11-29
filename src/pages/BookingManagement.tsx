@@ -19,7 +19,7 @@ import {
   Calendar, Search, Filter, Download, Phone, Mail, Plus, Clock, MapPin, ChevronDown, ChevronRight, Users,
   Trophy, Gift, Tag, Zap, Megaphone, DollarSign, Percent, Ticket, RefreshCw, TrendingUp, TrendingDown, Activity,
   CalendarDays, Target, UserCheck, Edit2, Trash2, Hash, BarChart3, Building2, Eye, Timer, Star, 
-  GamepadIcon, TrendingUp as TrendingUpIcon, CalendarIcon, Expand, Minimize2
+  GamepadIcon, TrendingUp as TrendingUpIcon, CalendarIcon, Expand, Minimize2, CheckCircle2, XCircle, AlertCircle, Loader2
 } from 'lucide-react';
 import {
   format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears, isToday, isYesterday, isTomorrow
@@ -271,6 +271,11 @@ export default function BookingManagement() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
+  
+  // Payment Reconciliation state
+  const [pendingPayments, setPendingPayments] = useState<any[]>([]);
+  const [reconcilingPayments, setReconcilingPayments] = useState<Set<string>>(new Set());
+  const [loadingPayments, setLoadingPayments] = useState(false);
 
   // NEW: Calendar view state
   const [calendarView, setCalendarView] = useState(false);
@@ -279,6 +284,13 @@ export default function BookingManagement() {
 
   const extractCouponCodes = (coupon_code: string) =>
     coupon_code.split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
+
+  useEffect(() => {
+    fetchBookings();
+    if (activeTab === 'reconciliation') {
+      fetchPendingPayments();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     fetchBookings();
@@ -1443,6 +1455,76 @@ export default function BookingManagement() {
     window.URL.revokeObjectURL(url);
   };
 
+  // Payment Reconciliation functions
+  const fetchPendingPayments = async () => {
+    setLoadingPayments(true);
+    try {
+      const { data, error } = await supabase
+        .from('pending_payments')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+      setPendingPayments(data || []);
+    } catch (err: any) {
+      console.error('Error fetching pending payments:', err);
+      toast.error('Failed to fetch pending payments');
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+  const reconcilePayment = async (orderId: string, paymentId?: string) => {
+    setReconcilingPayments(prev => new Set(prev).add(orderId));
+    try {
+      const response = await fetch('/api/razorpay/reconcile-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: orderId,
+          payment_id: paymentId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success(`Payment reconciled successfully! Booking created: ${data.bookingId?.substring(0, 8)}`);
+        // Refresh pending payments and bookings
+        await fetchPendingPayments();
+        await fetchBookings();
+      } else {
+        toast.error(data.error || 'Failed to reconcile payment');
+      }
+    } catch (err: any) {
+      console.error('Error reconciling payment:', err);
+      toast.error('Failed to reconcile payment');
+    } finally {
+      setReconcilingPayments(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
+    }
+  };
+
+  const reconcileAllPending = async () => {
+    const pending = pendingPayments.filter(p => p.status === 'pending');
+    if (pending.length === 0) {
+      toast.info('No pending payments to reconcile');
+      return;
+    }
+
+    toast.info(`Reconciling ${pending.length} pending payments...`);
+    for (const payment of pending) {
+      await reconcilePayment(payment.razorpay_order_id, payment.razorpay_payment_id);
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    toast.success('Finished reconciling all pending payments');
+  };
+
   const resetFilters = () => {
     const defaultDateRange = getDateRangeFromPreset('last7days')!;
     setFilters({
@@ -1764,12 +1846,13 @@ export default function BookingManagement() {
 
           {/* Analytics Dashboard */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="revenue">Revenue</TabsTrigger>
               <TabsTrigger value="customers">Customers</TabsTrigger>
               <TabsTrigger value="coupons">Coupons & Marketing</TabsTrigger>
               <TabsTrigger value="stations">Stations</TabsTrigger>
+              <TabsTrigger value="reconciliation">Payment Reconciliation</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -2467,6 +2550,226 @@ export default function BookingManagement() {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            <TabsContent value="reconciliation" className="space-y-6">
+              <Card className="bg-background border-border">
+                <CardHeader className="bg-muted/20 rounded-t-lg border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg text-foreground">
+                      <RefreshCw className="h-5 w-5 text-blue-500" />
+                      Payment Reconciliation
+                    </CardTitle>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={fetchPendingPayments}
+                        disabled={loadingPayments}
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${loadingPayments ? 'animate-spin' : ''}`} />
+                        Refresh
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={reconcileAllPending}
+                        disabled={loadingPayments || pendingPayments.filter(p => p.status === 'pending').length === 0}
+                      >
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Reconcile All Pending
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {/* Stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Pending</p>
+                              <p className="text-2xl font-bold text-yellow-600">
+                                {pendingPayments.filter(p => p.status === 'pending').length}
+                              </p>
+                            </div>
+                            <AlertCircle className="h-8 w-8 text-yellow-600" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Success</p>
+                              <p className="text-2xl font-bold text-green-600">
+                                {pendingPayments.filter(p => p.status === 'success').length}
+                              </p>
+                            </div>
+                            <CheckCircle2 className="h-8 w-8 text-green-600" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Failed</p>
+                              <p className="text-2xl font-bold text-red-600">
+                                {pendingPayments.filter(p => p.status === 'failed').length}
+                              </p>
+                            </div>
+                            <XCircle className="h-8 w-8 text-red-600" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Total</p>
+                              <p className="text-2xl font-bold">
+                                {pendingPayments.length}
+                              </p>
+                            </div>
+                            <Activity className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Pending Payments List */}
+                    {loadingPayments ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : pendingPayments.length === 0 ? (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No pending payments found</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {pendingPayments.map((payment) => {
+                          const bookingData = payment.booking_data;
+                          const isReconciling = reconcilingPayments.has(payment.razorpay_order_id);
+                          const isExpired = new Date(payment.expires_at) < new Date();
+                          
+                          return (
+                            <Card
+                              key={payment.id}
+                              className={`border-2 ${
+                                payment.status === 'pending'
+                                  ? 'border-yellow-500/50 bg-yellow-50/50 dark:bg-yellow-950/20'
+                                  : payment.status === 'success'
+                                  ? 'border-green-500/50 bg-green-50/50 dark:bg-green-950/20'
+                                  : 'border-red-500/50 bg-red-50/50 dark:bg-red-950/20'
+                              }`}
+                            >
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1 space-y-2">
+                                    <div className="flex items-center gap-3">
+                                      <Badge
+                                        variant={
+                                          payment.status === 'pending'
+                                            ? 'default'
+                                            : payment.status === 'success'
+                                            ? 'default'
+                                            : 'destructive'
+                                        }
+                                        className={
+                                          payment.status === 'pending'
+                                            ? 'bg-yellow-500'
+                                            : payment.status === 'success'
+                                            ? 'bg-green-500'
+                                            : 'bg-red-500'
+                                        }
+                                      >
+                                        {payment.status === 'pending' && isExpired ? 'Expired' : payment.status}
+                                      </Badge>
+                                      <span className="text-sm font-mono text-muted-foreground">
+                                        Order: {payment.razorpay_order_id.substring(0, 20)}...
+                                      </span>
+                                      {payment.razorpay_payment_id && (
+                                        <span className="text-sm font-mono text-muted-foreground">
+                                          Payment: {payment.razorpay_payment_id.substring(0, 20)}...
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                      <div>
+                                        <p className="text-muted-foreground">Customer</p>
+                                        <p className="font-medium">{payment.customer_name}</p>
+                                        <p className="text-xs text-muted-foreground">{payment.customer_phone}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-muted-foreground">Amount</p>
+                                        <p className="font-medium">₹{payment.amount}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-muted-foreground">Created</p>
+                                        <p className="font-medium">
+                                          {format(new Date(payment.created_at), 'MMM d, h:mm a')}
+                                        </p>
+                                        {isExpired && payment.status === 'pending' && (
+                                          <p className="text-xs text-red-600">Expired</p>
+                                        )}
+                                      </div>
+                                      {bookingData && (
+                                        <div>
+                                          <p className="text-muted-foreground">Booking</p>
+                                          <p className="font-medium">
+                                            {bookingData.selectedStations?.length || 0} station(s)
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {bookingData.slots?.length || 0} slot(s)
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-col gap-2">
+                                    {payment.status === 'pending' && (
+                                      <Button
+                                        size="sm"
+                                        onClick={() => reconcilePayment(payment.razorpay_order_id, payment.razorpay_payment_id)}
+                                        disabled={isReconciling}
+                                        className="min-w-[120px]"
+                                      >
+                                        {isReconciling ? (
+                                          <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Reconciling...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                            Reconcile
+                                          </>
+                                        )}
+                                      </Button>
+                                    )}
+                                    {payment.status === 'success' && payment.verified_at && (
+                                      <div className="text-xs text-muted-foreground text-right">
+                                        Verified: {format(new Date(payment.verified_at), 'MMM d, h:mm a')}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
 

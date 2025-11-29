@@ -219,6 +219,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const order = await createRazorpayOrder(Number(amount), receipt, orderNotes);
 
+    // Store pending payment in database for reconciliation
+    // This allows us to verify payment and create booking even if customer doesn't return
+    if (bookingData) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabaseUrl = getEnv("VITE_SUPABASE_URL") || getEnv("SUPABASE_URL");
+        const supabaseKey = getEnv("VITE_SUPABASE_PUBLISHABLE_KEY") || getEnv("SUPABASE_ANON_KEY");
+        
+        if (supabaseUrl && supabaseKey) {
+          const supabase = createClient(supabaseUrl, supabaseKey);
+          
+          const { error: pendingError } = await supabase
+            .from("pending_payments")
+            .insert({
+              razorpay_order_id: order.id,
+              amount: Number(amount),
+              currency: order.currency || "INR",
+              status: "pending",
+              booking_data: bookingData,
+              customer_name: bookingData.customer?.name || notes?.customer_name || "",
+              customer_phone: bookingData.customer?.phone || notes?.customer_phone || "",
+              customer_email: bookingData.customer?.email || notes?.customer_email || null,
+              expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
+            });
+          
+          if (pendingError) {
+            console.error("⚠️ Failed to store pending payment:", pendingError);
+            // Don't fail the order creation - reconciliation will still work
+          } else {
+            console.log("✅ Pending payment stored for reconciliation:", order.id);
+          }
+        }
+      } catch (err) {
+        console.error("⚠️ Error storing pending payment:", err);
+        // Don't fail the order creation - reconciliation will still work
+      }
+    }
+
     return j(res, {
       ok: true,
       orderId: order.id,

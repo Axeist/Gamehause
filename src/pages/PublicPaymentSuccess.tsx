@@ -54,35 +54,40 @@ export default function PublicPaymentSuccess() {
         return;
       }
 
-      // 1) IMMEDIATELY try to create booking from payment (before verification)
-      // This ensures booking is created as soon as success page loads
+      // 1) RECONCILE PAYMENT - Check Razorpay API and create booking if payment succeeded
+      // This is the core solution: verify payment status directly from Razorpay API
+      // Works even if customer doesn't return to browser (can be called from anywhere)
       try {
-        console.log("🚀 Attempting to create booking immediately from payment...");
-        const createBookingRes = await fetch("/api/razorpay/create-booking-from-payment", {
+        console.log("🔍 Reconciling payment with Razorpay API...");
+        const reconcileRes = await fetch("/api/razorpay/reconcile-payment", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            payment_id: paymentId,
             order_id: orderId,
+            payment_id: paymentId,
           }),
         });
 
-        const createBookingData = await createBookingRes.json();
+        const reconcileData = await reconcileRes.json();
         
-        if (createBookingRes.ok && createBookingData?.success) {
-          console.log("✅ Booking created successfully:", createBookingData.bookingId);
+        if (reconcileRes.ok && reconcileData?.success) {
+          console.log("✅ Payment reconciled and booking created:", reconcileData.bookingId);
           // Clear pending booking from localStorage
           localStorage.removeItem("pendingBooking");
+          
+          // Booking is created, fetch details and show confirmation
+          // Continue to fetch booking details below
         } else {
-          console.warn("⚠️ Failed to create booking from payment endpoint:", createBookingData?.error);
-          // Continue to check if booking exists or create from localStorage
+          console.warn("⚠️ Reconciliation failed or payment not successful:", reconcileData?.error);
+          // Payment might not be successful yet, or already processed
+          // Continue to check if booking exists
         }
       } catch (err) {
-        console.error("❌ Error creating booking from payment:", err);
-        // Continue to check if booking exists or create from localStorage
+        console.error("❌ Error reconciling payment:", err);
+        // Continue to check if booking exists
       }
 
-      // 2) Verify payment with backend
+      // 2) Verify payment with backend (for UI confirmation)
       try {
         const verifyRes = await fetch("/api/razorpay/verify-payment", {
           method: "POST",
@@ -108,9 +113,8 @@ export default function PublicPaymentSuccess() {
         return;
       }
 
-      // 2) Check if booking already exists (created by webhook - PRIMARY METHOD)
-      // The webhook should have already created the booking automatically
-      // This page is just a fallback in case webhook didn't fire or customer wants to see confirmation
+      // 3) Check if booking exists (created by reconciliation or webhook)
+      // Reconciliation API should have created it, but check anyway
       const { data: existingBooking } = await supabase
         .from("bookings")
         .select("id, station_id, customer_id, booking_date, start_time, end_time")
