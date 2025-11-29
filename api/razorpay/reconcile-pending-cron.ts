@@ -33,27 +33,26 @@ function getEnv(name: string): string | undefined {
 async function createSupabaseClient() {
   const { createClient } = await import('@supabase/supabase-js');
   
-  // Try multiple environment variable names (Vercel might have them with or without VITE_ prefix)
-  const supabaseUrl = getEnv("VITE_SUPABASE_URL") || 
-                      getEnv("SUPABASE_URL") || 
-                      getEnv("NEXT_PUBLIC_SUPABASE_URL");
-  
-  const supabaseKey = getEnv("VITE_SUPABASE_PUBLISHABLE_KEY") || 
-                      getEnv("SUPABASE_ANON_KEY") || 
-                      getEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  // Use the same pattern as create-order.ts (which works)
+  const supabaseUrl = getEnv("VITE_SUPABASE_URL") || getEnv("SUPABASE_URL");
+  const supabaseKey = getEnv("VITE_SUPABASE_PUBLISHABLE_KEY") || getEnv("SUPABASE_ANON_KEY");
   
   if (!supabaseUrl || !supabaseKey) {
-    // Log which variables are missing for debugging
-    const missing = [];
-    if (!supabaseUrl) {
-      missing.push("VITE_SUPABASE_URL or SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL");
-    }
-    if (!supabaseKey) {
-      missing.push("VITE_SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY");
-    }
-    console.error("❌ Missing Supabase environment variables:", missing.join(", "));
-    console.error("Available env vars:", Object.keys(process.env || {}).filter(k => k.includes("SUPABASE")).join(", "));
-    throw new Error(`Missing Supabase environment variables: ${missing.join(", ")}`);
+    // Log available environment variables for debugging
+    const allEnvKeys = typeof process !== "undefined" && process.env 
+      ? Object.keys(process.env).sort() 
+      : [];
+    const supabaseKeys = allEnvKeys.filter(k => 
+      k.includes("SUPABASE") || k.includes("supabase")
+    );
+    
+    console.error("❌ Missing Supabase environment variables");
+    console.error("Looking for: VITE_SUPABASE_URL or SUPABASE_URL");
+    console.error("Looking for: VITE_SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY");
+    console.error("Available Supabase-related env vars:", supabaseKeys.length > 0 ? supabaseKeys.join(", ") : "NONE FOUND");
+    console.error("Total env vars available:", allEnvKeys.length);
+    
+    throw new Error("Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in Vercel.");
   }
   
   return createClient(supabaseUrl, supabaseKey);
