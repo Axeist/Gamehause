@@ -1124,7 +1124,35 @@ export default function PublicBooking() {
         name: "NerfTurf Gaming Lounge",
         description: `Booking for ${slotsToBook.length} slot(s)`,
         order_id: orderData.orderId,
-        handler: function (response: any) {
+        handler: async function (response: any) {
+          // CRITICAL: Create booking immediately when payment succeeds
+          // This ensures booking is created even if customer closes browser
+          try {
+            console.log("✅ Payment successful, creating booking immediately...");
+            const createBookingRes = await fetch("/api/razorpay/create-booking-from-payment", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                payment_id: response.razorpay_payment_id,
+                order_id: response.razorpay_order_id,
+              }),
+            });
+
+            const createBookingData = await createBookingRes.json();
+            
+            if (createBookingRes.ok && createBookingData?.success) {
+              console.log("✅ Booking created successfully:", createBookingData.bookingId);
+              // Clear pending booking from localStorage
+              localStorage.removeItem("pendingBooking");
+            } else {
+              console.error("❌ Failed to create booking:", createBookingData?.error);
+              // Don't block redirect - success page will try to create as fallback
+            }
+          } catch (err) {
+            console.error("❌ Error creating booking:", err);
+            // Don't block redirect - success page will try to create as fallback
+          }
+
           // Redirect to success page
           window.location.href = `/public/payment/success?payment_id=${encodeURIComponent(response.razorpay_payment_id)}&order_id=${encodeURIComponent(response.razorpay_order_id)}&signature=${encodeURIComponent(response.razorpay_signature)}`;
         },

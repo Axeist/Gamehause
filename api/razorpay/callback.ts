@@ -289,13 +289,21 @@ export default async function handler(req: Request) {
 
     // CREATE BOOKING HERE if payment is successful (before redirect)
     // This is a backup to webhook - ensures booking is created even if webhook hasn't fired yet
+    // IMPORTANT: We await this to ensure booking is created before redirect
     if (isSuccess && finalPaymentId && finalOrderId) {
-      console.log("🔄 Attempting to create booking in callback (backup to webhook)...");
-      // Create booking in background (don't await - let redirect happen immediately)
-      createBookingInCallback(finalPaymentId, finalOrderId).catch(err => {
-        console.error("❌ Background booking creation failed in callback:", err);
-        // Continue anyway - success page will create it as final fallback
-      });
+      console.log("🔄 Creating booking in callback (backup to webhook)...");
+      try {
+        const result = await createBookingInCallback(finalPaymentId, finalOrderId);
+        if (result.success) {
+          console.log("✅ Booking created in callback:", result.bookingId);
+        } else {
+          console.warn("⚠️ Booking creation in callback failed:", result.error);
+          // Continue anyway - success page will try as final fallback
+        }
+      } catch (err: any) {
+        console.error("❌ Error creating booking in callback:", err);
+        // Continue anyway - success page will try as final fallback
+      }
     }
 
     // Extract error message if available

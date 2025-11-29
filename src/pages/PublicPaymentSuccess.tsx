@@ -54,7 +54,35 @@ export default function PublicPaymentSuccess() {
         return;
       }
 
-      // 1) Verify payment with backend
+      // 1) IMMEDIATELY try to create booking from payment (before verification)
+      // This ensures booking is created as soon as success page loads
+      try {
+        console.log("🚀 Attempting to create booking immediately from payment...");
+        const createBookingRes = await fetch("/api/razorpay/create-booking-from-payment", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            payment_id: paymentId,
+            order_id: orderId,
+          }),
+        });
+
+        const createBookingData = await createBookingRes.json();
+        
+        if (createBookingRes.ok && createBookingData?.success) {
+          console.log("✅ Booking created successfully:", createBookingData.bookingId);
+          // Clear pending booking from localStorage
+          localStorage.removeItem("pendingBooking");
+        } else {
+          console.warn("⚠️ Failed to create booking from payment endpoint:", createBookingData?.error);
+          // Continue to check if booking exists or create from localStorage
+        }
+      } catch (err) {
+        console.error("❌ Error creating booking from payment:", err);
+        // Continue to check if booking exists or create from localStorage
+      }
+
+      // 2) Verify payment with backend
       try {
         const verifyRes = await fetch("/api/razorpay/verify-payment", {
           method: "POST",
