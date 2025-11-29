@@ -305,9 +305,10 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
   try {
     const order = await fetchRazorpayOrder(orderId);
     
-    // Check if order has payments
-    if (order.payments && order.payments.length > 0) {
-      const successfulPayment = order.payments.find(
+    // Check if order has payments (payments can be array or string)
+    const payments = Array.isArray(order.payments) ? order.payments : [];
+    if (payments.length > 0) {
+      const successfulPayment = payments.find(
         (p: any) => p.status === "captured" || p.status === "authorized"
       );
       
@@ -401,9 +402,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return j(res, {
       ok: result.success,
       success: result.success,
-      bookingId: result.bookingId,
-      alreadyExists: result.alreadyExists,
-      error: result.error,
+      bookingId: result.success ? (result as any).bookingId : undefined,
+      alreadyExists: result.success ? (result as any).alreadyExists : undefined,
+      error: result.success ? undefined : (result as any).error,
     });
   } catch (err: any) {
     console.error("❌ Reconciliation error:", err);

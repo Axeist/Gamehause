@@ -16,18 +16,14 @@ function j(res: VercelResponse, data: unknown, status = 200) {
 }
 
 // Helper functions - Get environment variable from multiple sources
+// Use exact same pattern as create-order.ts (which works)
 function getEnv(name: string): string | undefined {
-  // Try process.env first (Node.js runtime)
   if (typeof process !== "undefined" && process.env) {
-    const value = (process.env as any)[name];
-    if (value) return value;
+    return (process.env as any)[name];
   }
-  
-  // Try Deno.env (Edge runtime fallback)
+  // Fallback for Edge runtime
   const fromDeno = (globalThis as any)?.Deno?.env?.get?.(name);
-  if (fromDeno) return fromDeno;
-  
-  return undefined;
+  return fromDeno;
 }
 
 async function createSupabaseClient() {
@@ -43,14 +39,29 @@ async function createSupabaseClient() {
       ? Object.keys(process.env).sort() 
       : [];
     const supabaseKeys = allEnvKeys.filter(k => 
-      k.includes("SUPABASE") || k.includes("supabase")
+      k.includes("SUPABASE") || k.includes("supabase") || k.includes("SUPABASE")
     );
+    
+    // Log first 20 env var names to see what's available
+    const sampleKeys = allEnvKeys.slice(0, 20);
     
     console.error("❌ Missing Supabase environment variables");
     console.error("Looking for: VITE_SUPABASE_URL or SUPABASE_URL");
     console.error("Looking for: VITE_SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY");
     console.error("Available Supabase-related env vars:", supabaseKeys.length > 0 ? supabaseKeys.join(", ") : "NONE FOUND");
+    console.error("Sample env var names (first 20):", sampleKeys.join(", "));
     console.error("Total env vars available:", allEnvKeys.length);
+    
+    // Try to find any URL or KEY variables that might be Supabase
+    const urlVars = allEnvKeys.filter(k => k.includes("URL") && !k.includes("RAZORPAY"));
+    const keyVars = allEnvKeys.filter(k => (k.includes("KEY") || k.includes("SECRET")) && !k.includes("RAZORPAY"));
+    
+    if (urlVars.length > 0) {
+      console.error("Found URL variables:", urlVars.join(", "));
+    }
+    if (keyVars.length > 0) {
+      console.error("Found KEY/SECRET variables:", keyVars.join(", "));
+    }
     
     throw new Error("Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in Vercel.");
   }
@@ -294,9 +305,10 @@ async function reconcileSinglePayment(pendingPayment: any) {
     // If no payment ID, check order for payments
     const order = await fetchRazorpayOrder(pendingPayment.razorpay_order_id);
     
-    // Check if order has payments
-    if (order.payments && order.payments.length > 0) {
-      const successfulPayment = order.payments.find(
+    // Check if order has payments (payments can be array or string)
+    const payments = Array.isArray(order.payments) ? order.payments : [];
+    if (payments.length > 0) {
+      const successfulPayment = payments.find(
         (p: any) => p.status === "captured" || p.status === "authorized"
       );
       
@@ -453,14 +465,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           results.push({
             orderId: payment.razorpay_order_id,
             status: "success",
-            bookingId: result.bookingId,
+            bookingId: (result as any).bookingId,
           });
         } else {
           failed++;
           results.push({
             orderId: payment.razorpay_order_id,
             status: "failed",
-            error: result.error,
+            error: (result as any).error,
           });
         }
         
