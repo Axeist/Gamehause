@@ -339,10 +339,16 @@ async function reconcileSinglePayment(pendingPayment: any) {
 
 export default async function handler(req: Request) {
   // Verify this is a cron request (optional security)
+  // Vercel Cron sends authorization header
   const authHeader = req.headers.get("authorization");
   const cronSecret = getEnv("CRON_SECRET");
   
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // For Vercel Cron, check if it's a cron request
+  // Vercel automatically adds "x-vercel-cron" header for cron requests
+  const isCronRequest = req.headers.get("x-vercel-cron") === "1";
+  
+  // If CRON_SECRET is set, verify it
+  if (cronSecret && !isCronRequest && authHeader !== `Bearer ${cronSecret}`) {
     return j({ ok: false, error: "Unauthorized" }, 401);
   }
 
