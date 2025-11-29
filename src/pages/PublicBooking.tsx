@@ -1083,6 +1083,8 @@ export default function PublicBooking() {
       localStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
 
       // 3. Create order on server with full booking data
+      // IMPORTANT: bookingData is stored in order notes so webhook can create booking automatically
+      // This ensures bookings are created even if customer doesn't return to browser after payment
       const orderRes = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -1096,7 +1098,7 @@ export default function PublicBooking() {
             booking_date: format(selectedDate, "yyyy-MM-dd"),
             stations: selectedStations.join(","),
           },
-          bookingData: pendingBooking, // Send full booking data for webhook
+          bookingData: pendingBooking, // Send full booking data for webhook (PRIMARY METHOD)
         }),
       });
 

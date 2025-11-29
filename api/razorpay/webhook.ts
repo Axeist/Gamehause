@@ -251,24 +251,49 @@ function getEnv(name: string): string | undefined {
   return fromDeno;
 }
 
-// Verify webhook signature
+// Verify webhook signature using crypto
 function verifyWebhookSignature(
   payload: string,
   signature: string,
   secret: string
 ): boolean {
-  // Razorpay webhook signature verification
-  // Signature format: HMAC SHA256 of payload with webhook secret
-  // For edge runtime, we'll do basic validation
-  // Full verification should be implemented with proper crypto library
-
-  if (!signature || !payload) {
+  if (!signature || !payload || !secret) {
     return false;
   }
 
-  // Basic check - full verification requires crypto library
-  // In production, use a proper HMAC verification library
-  return true; // Simplified for edge runtime
+  try {
+    // Import crypto module (Node.js built-in)
+    const crypto = require('crypto');
+    
+    // Razorpay uses HMAC SHA256
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(payload)
+      .digest('hex');
+    
+    // Razorpay sends signature in format: "signature1=hash1,signature2=hash2"
+    // We need to check if our hash matches any of them
+    const signatures = signature.split(',');
+    for (const sig of signatures) {
+      const parts = sig.split('=');
+      if (parts.length === 2) {
+        const hash = parts[1];
+        if (hash === expectedSignature) {
+          return true;
+        }
+      }
+    }
+    
+    // Also check direct match (some webhook implementations send just the hash)
+    if (signature === expectedSignature) {
+      return true;
+    }
+    
+    return false;
+  } catch (err) {
+    console.error("❌ Signature verification error:", err);
+    return false;
+  }
 }
 
 export default async function handler(req: Request) {
@@ -313,81 +338,79 @@ export default async function handler(req: Request) {
       status: payment?.status,
     });
 
-    // Handle different webhook events
-    switch (event) {
-      case "payment.captured":
-        console.log("✅ Payment captured:", payment?.id);
-        try {
-          const orderId = payment?.order_id || order?.id;
-          if (!orderId) {
-            console.error("❌ No order ID found in webhook payload");
-            break;
-          }
+    // Handle payment success events - WEBHOOK IS PRIMARY METHOD
+    // This ensures bookings are created even if customer doesn't return to browser
+    const successEvents = ["payment.captured", "order.paid", "payment.authorized"];
+    const isPaymentSuccess = successEvents.includes(event) && 
+                            (payment?.status === "captured" || payment?.status === "authorized" || !payment?.status);
+
+    if (isPaymentSuccess) {
+      const paymentId = payment?.id;
+      const orderId = payment?.order_id || order?.id;
+      
+      if (!paymentId || !orderId) {
+        console.error("❌ Missing payment/order ID in webhook payload:", {
+          paymentId,
+          orderId,
+          event,
+        });
+        // Still return 200 to prevent Razorpay retries
+        return j({ ok: true, received: true, warning: "Missing payment/order ID" });
+      }
+
+      console.log("✅ Payment successful event received:", { paymentId, orderId, event });
+      
+      try {
+        // Fetch order to get booking data from notes
+        const razorpayOrder = await fetchRazorpayOrder(orderId);
+        const bookingData = extractBookingData(razorpayOrder.notes);
+        
+        if (bookingData) {
+          console.log("📦 Booking data found in order notes, creating booking via webhook (PRIMARY METHOD)...");
+          const result = await createBookingFromWebhook(paymentId, orderId, bookingData);
           
-          // Fetch order to get booking data from notes
-          const razorpayOrder = await fetchRazorpayOrder(orderId);
-          const bookingData = extractBookingData(razorpayOrder.notes);
-          
-          if (bookingData) {
-            console.log("📦 Booking data found in order notes, creating booking...");
-            const result = await createBookingFromWebhook(
-              payment.id,
-              orderId,
-              bookingData
-            );
-            console.log("✅ Booking creation result:", result);
+          if (result.success) {
+            console.log("✅ Booking created successfully via webhook:", {
+              bookingId: result.bookingId,
+              alreadyExists: result.alreadyExists,
+              paymentId,
+            });
           } else {
-            console.warn("⚠️ No booking data found in order notes. Booking will be created on success page.");
+            console.error("❌ Booking creation failed in webhook:", result);
+            // Log error but don't fail webhook - success page will try as fallback
           }
-        } catch (err: any) {
-          console.error("❌ Failed to create booking from webhook:", err);
-          // Don't fail the webhook - booking will be created on success page as fallback
+        } else {
+          console.warn("⚠️ No booking data found in order notes for payment:", paymentId);
+          console.warn("⚠️ Booking will be created on success page as fallback (if customer returns)");
         }
-        break;
-      case "payment.failed":
-        console.log("❌ Payment failed:", payment?.id);
-        // Handle failed payment
-        break;
-      case "order.paid":
-        console.log("✅ Order paid:", payment?.order_id || order?.id);
-        // Handle order payment (similar to payment.captured)
-        try {
-          const orderId = payment?.order_id || order?.id;
-          if (!orderId) {
-            console.error("❌ No order ID found in webhook payload");
-            break;
-          }
-          
-          // Fetch order to get booking data from notes
-          const razorpayOrder = await fetchRazorpayOrder(orderId);
-          const bookingData = extractBookingData(razorpayOrder.notes);
-          
-          if (bookingData) {
-            console.log("📦 Booking data found in order notes, creating booking...");
-            const result = await createBookingFromWebhook(
-              payment.id,
-              orderId,
-              bookingData
-            );
-            console.log("✅ Booking creation result:", result);
-          } else {
-            console.warn("⚠️ No booking data found in order notes. Booking will be created on success page.");
-          }
-        } catch (err: any) {
-          console.error("❌ Failed to create booking from webhook:", err);
-          // Don't fail the webhook - booking will be created on success page as fallback
-        }
-        break;
-      default:
-        console.log("ℹ️ Unhandled webhook event:", event);
+      } catch (err: any) {
+        console.error("❌ Failed to create booking from webhook:", {
+          error: err?.message || err,
+          paymentId,
+          orderId,
+          stack: err?.stack,
+        });
+        // Don't fail the webhook - always return 200 to prevent Razorpay retries
+        // Success page will create booking as fallback if customer returns
+      }
+    } else if (event === "payment.failed") {
+      console.log("❌ Payment failed:", payment?.id);
+      // Log failed payment for monitoring
+    } else {
+      console.log("ℹ️ Unhandled webhook event:", event);
     }
 
+    // Always return 200 to Razorpay (even if booking creation failed)
+    // This prevents Razorpay from retrying unnecessarily
+    // The success page will handle booking creation as fallback
     return j({ ok: true, received: true });
   } catch (err: any) {
-    console.error("💥 Webhook error:", err);
-    return j({
-      ok: false,
-      error: String(err?.message || err)
-    }, 500);
+    console.error("💥 Webhook error:", {
+      error: err?.message || err,
+      stack: err?.stack,
+    });
+    // Still return 200 to prevent Razorpay from retrying
+    // Logging the error is sufficient for monitoring
+    return j({ ok: true, received: true, error: String(err?.message || err) });
   }
 }

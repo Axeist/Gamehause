@@ -80,7 +80,9 @@ export default function PublicPaymentSuccess() {
         return;
       }
 
-      // 2) Check if booking already exists (created by webhook)
+      // 2) Check if booking already exists (created by webhook - PRIMARY METHOD)
+      // The webhook should have already created the booking automatically
+      // This page is just a fallback in case webhook didn't fire or customer wants to see confirmation
       const { data: existingBooking } = await supabase
         .from("bookings")
         .select("id, station_id, customer_id, booking_date, start_time, end_time")
@@ -88,8 +90,8 @@ export default function PublicPaymentSuccess() {
         .maybeSingle();
 
       if (existingBooking) {
-        // Booking already created by webhook - fetch full details
-        console.log("✅ Booking already exists (created by webhook):", existingBooking.id);
+        // Booking already created by webhook (PRIMARY METHOD) - fetch full details
+        console.log("✅ Booking already exists (created by webhook - PRIMARY METHOD):", existingBooking.id);
         
         // Get all bookings for this payment
         const { data: allBookings } = await supabase
@@ -152,18 +154,20 @@ export default function PublicPaymentSuccess() {
         }
       }
 
-      // 3) Get pending booking from localStorage (fallback if webhook didn't create it)
+      // 3) Get pending booking from localStorage (FALLBACK - only if webhook didn't create it)
+      // This is a safety net in case webhook failed or didn't fire
+      // In normal flow, webhook should have already created the booking
       const raw = localStorage.getItem("pendingBooking");
       if (!raw) {
         setStatus("failed");
-        setMsg("No booking data found. Please rebook.");
+        setMsg("No booking data found. If payment was successful, your booking may have been created. Please contact support.");
         return;
       }
 
       const pb: PendingBooking = JSON.parse(raw);
 
       setStatus("creating");
-      setMsg("Payment successful! Creating your booking…");
+      setMsg("Payment successful! Creating your booking (fallback method)…");
       setShowPaymentWarning(true);
 
       // 4) Ensure customer exists (by phone); create if needed
@@ -216,7 +220,9 @@ export default function PublicPaymentSuccess() {
         }
       }
 
-      // 5) Create bookings (one per station per slot) - fallback if webhook didn't create it
+      // 5) Create bookings (one per station per slot) - FALLBACK if webhook didn't create it
+      // This should rarely happen if webhook is properly configured
+      console.log("⚠️ Creating booking via success page (FALLBACK) - webhook should have created it");
       const rows: any[] = [];
       const totalBookings = pb.selectedStations.length * pb.slots.length;
       pb.selectedStations.forEach((station_id) => {
