@@ -297,6 +297,80 @@ export default function PublicPaymentSuccess() {
       // 5) Create bookings (one per station per slot) - FALLBACK if webhook didn't create it
       // This should rarely happen if webhook is properly configured
       console.log("⚠️ Creating booking via success page (FALLBACK) - webhook should have created it");
+      
+      // CRITICAL: Double-check if booking already exists before creating (prevent duplicates)
+      // This prevents race conditions where reconciliation created booking but check didn't find it
+      const finalBookingCheck = await supabase
+        .from("bookings")
+        .select("id, station_id, customer_id, booking_date, start_time, end_time")
+        .eq("payment_txn_id", paymentId)
+        .limit(1);
+      
+      if (finalBookingCheck?.data && finalBookingCheck.data.length > 0) {
+        // Booking already exists! Don't create duplicate
+        console.log("✅ Booking already exists (found in final check), skipping fallback creation:", finalBookingCheck.data[0].id);
+        
+        // Get all bookings for this payment
+        const { data: allBookings } = await supabase
+          .from("bookings")
+          .select("id, station_id, booking_date, start_time, end_time, final_price, coupon_code, discount_percentage")
+          .eq("payment_txn_id", paymentId);
+
+        if (allBookings && allBookings.length > 0) {
+          // Fetch customer and station details
+          const { data: customer } = await supabase
+            .from("customers")
+            .select("name")
+            .eq("id", finalBookingCheck.data[0].customer_id)
+            .single();
+
+          const stationIds = [...new Set(allBookings.map(b => b.station_id))];
+          const { data: stationsData } = await supabase
+            .from("stations")
+            .select("id, name")
+            .in("id", stationIds);
+
+          const stationNames = stationsData?.map(s => s.name) || [];
+          const totalAmount = allBookings.reduce((sum, b) => sum + (b.final_price || 0), 0);
+          const firstBooking = allBookings[0];
+          const lastBooking = allBookings[allBookings.length - 1];
+
+          const confirmationData = {
+            bookingId: finalBookingCheck.data[0].id.substring(0, 8).toUpperCase(),
+            customerName: customer?.name || "Customer",
+            stationNames: stationNames,
+            date: firstBooking.booking_date,
+            startTime: new Date(`2000-01-01T${firstBooking.start_time}`).toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            }),
+            endTime: new Date(`2000-01-01T${lastBooking.end_time}`).toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            }),
+            totalAmount: totalAmount,
+            couponCode: firstBooking.coupon_code || undefined,
+            discountAmount: firstBooking.discount_percentage ? (totalAmount * firstBooking.discount_percentage / 100) : undefined,
+            paymentMode: "razorpay",
+            paymentTxnId: paymentId,
+          };
+
+          localStorage.removeItem("pendingBooking");
+          
+          setBookingConfirmationData(confirmationData);
+          setStatus("done");
+          setMsg("Booking confirmed successfully!");
+          setShowPaymentWarning(false);
+          
+          setTimeout(() => {
+            setShowConfirmationDialog(true);
+          }, 500);
+          return;
+        }
+      }
+      
       const rows: any[] = [];
       const totalBookings = pb.selectedStations.length * pb.slots.length;
       pb.selectedStations.forEach((station_id) => {
@@ -326,6 +400,64 @@ export default function PublicPaymentSuccess() {
         .select("id, station_id");
 
       if (bErr) {
+        // Check if error is due to duplicate (race condition)
+        if (bErr.code === '23505' || bErr.message?.includes('duplicate') || bErr.message?.includes('unique')) {
+          console.log("⚠️ Duplicate booking detected in fallback, fetching existing booking...");
+          // Fetch existing booking and show confirmation
+          const { data: existingBookings } = await supabase
+            .from("bookings")
+            .select("id, station_id, booking_date, start_time, end_time, final_price, coupon_code, discount_percentage")
+            .eq("payment_txn_id", paymentId);
+          
+          if (existingBookings && existingBookings.length > 0) {
+            // Show confirmation with existing booking
+            const stationIds = [...new Set(existingBookings.map(b => b.station_id))];
+            const { data: stationsData } = await supabase
+              .from("stations")
+              .select("id, name")
+              .in("id", stationIds);
+
+            const stationNames = stationsData?.map(s => s.name) || [];
+            const totalAmount = existingBookings.reduce((sum, b) => sum + (b.final_price || 0), 0);
+            const firstBooking = existingBookings[0];
+            const lastBooking = existingBookings[existingBookings.length - 1];
+
+            const confirmationData = {
+              bookingId: existingBookings[0].id.substring(0, 8).toUpperCase(),
+              customerName: pb.customer.name,
+              stationNames: stationNames,
+              date: firstBooking.booking_date,
+              startTime: new Date(`2000-01-01T${firstBooking.start_time}`).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              }),
+              endTime: new Date(`2000-01-01T${lastBooking.end_time}`).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              }),
+              totalAmount: totalAmount,
+              couponCode: firstBooking.coupon_code || undefined,
+              discountAmount: firstBooking.discount_percentage ? (totalAmount * firstBooking.discount_percentage / 100) : undefined,
+              paymentMode: "razorpay",
+              paymentTxnId: paymentId,
+            };
+
+            localStorage.removeItem("pendingBooking");
+            
+            setBookingConfirmationData(confirmationData);
+            setStatus("done");
+            setMsg("Booking confirmed successfully!");
+            setShowPaymentWarning(false);
+            
+            setTimeout(() => {
+              setShowConfirmationDialog(true);
+            }, 500);
+            return;
+          }
+        }
+        
         setStatus("failed");
         setMsg(`Payment ok, but booking creation failed: ${bErr.message}`);
         return;
