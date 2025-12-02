@@ -177,6 +177,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 2. Manual API calls
   // Note: Vercel Cron would use Edge runtime, but we're not using it on Hobby plan
   
+  // Log immediately so it shows up in Vercel logs
+  console.log("📥 /api/bookings/cleanup-duplicates-cron called - method:", req.method || "unknown");
+  
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -186,6 +189,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method !== "POST") {
+    console.log("❌ Invalid method:", req.method);
     return j(res, { ok: false, error: "Method not allowed" }, 405);
   }
   
@@ -206,8 +210,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     const result = await cleanupDuplicateBookings();
     
-    // Log summary in same format as reconciliation endpoint for Vercel logs
-    console.log(`✅ Cleanup complete: ${result.processed} checked, ${result.duplicatesDeleted} deleted`);
+    // Always log summary in same format as reconciliation endpoint for Vercel logs visibility
+    // This ensures it shows up in Vercel logs even when no duplicates found
+    const summaryMessage = result.duplicatesDeleted > 0
+      ? `Cleanup complete: ${result.processed} checked, ${result.duplicatesDeleted} deleted`
+      : `Cleanup complete: ${result.processed} checked, 0 duplicates found`;
+    
+    console.log(`✅ ${summaryMessage}`);
     
     return j(res, {
       ok: true,
@@ -215,7 +224,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       duplicatesFound: result.duplicatesFound,
       duplicatesDeleted: result.duplicatesDeleted,
       duplicateGroups: result.duplicateGroups,
-      message: result.message,
+      message: summaryMessage,
     });
   } catch (err: any) {
     console.error("❌ Duplicate cleanup error:", err);

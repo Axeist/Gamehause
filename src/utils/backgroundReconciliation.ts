@@ -35,11 +35,14 @@ export function startBackgroundReconciliation() {
       }
       
       // 2. Call the duplicate cleanup endpoint to remove duplicate bookings
+      console.log('🔄 Calling duplicate cleanup endpoint...');
       try {
         const cleanupResponse = await fetch('/api/bookings/cleanup-duplicates-cron', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
+        
+        console.log('📡 Cleanup response status:', cleanupResponse.status);
 
         if (!cleanupResponse.ok) {
           const errorData = await cleanupResponse.json().catch(() => ({ error: 'Unknown error' }));
@@ -61,7 +64,7 @@ export function startBackgroundReconciliation() {
     } finally {
       isRunning = false;
     }
-  }, 60000); // Run every 60 seconds (1 minute)
+  }, 10000); // Run every 10 seconds
 }
 
 export function stopBackgroundReconciliation() {
