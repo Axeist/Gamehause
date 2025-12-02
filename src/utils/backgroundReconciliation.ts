@@ -35,15 +35,26 @@ export function startBackgroundReconciliation() {
       }
       
       // 2. Call the duplicate cleanup endpoint to remove duplicate bookings
-      const cleanupResponse = await fetch('/api/bookings/cleanup-duplicates-cron', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      try {
+        const cleanupResponse = await fetch('/api/bookings/cleanup-duplicates-cron', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
 
-      const cleanupData = await cleanupResponse.json();
-      
-      if (cleanupResponse.ok && cleanupData.duplicatesDeleted > 0) {
-        console.log(`✅ Duplicate cleanup: Deleted ${cleanupData.duplicatesDeleted} duplicate booking(s) from ${cleanupData.duplicateGroups} group(s)`);
+        if (!cleanupResponse.ok) {
+          const errorData = await cleanupResponse.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('❌ Duplicate cleanup failed:', errorData.error || cleanupResponse.statusText);
+        } else {
+          const cleanupData = await cleanupResponse.json();
+          
+          if (cleanupData.duplicatesDeleted > 0) {
+            console.log(`✅ Duplicate cleanup: Deleted ${cleanupData.duplicatesDeleted} duplicate booking(s) from ${cleanupData.duplicateGroups} group(s)`);
+          } else {
+            console.log(`✅ Duplicate cleanup: Checked ${cleanupData.processed || 0} booking(s), no duplicates found`);
+          }
+        }
+      } catch (cleanupErr) {
+        console.error('❌ Duplicate cleanup request failed:', cleanupErr);
       }
     } catch (err) {
       console.error('❌ Background reconciliation/cleanup error:', err);

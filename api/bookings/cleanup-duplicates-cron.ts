@@ -139,7 +139,11 @@ async function cleanupDuplicateBookings() {
     }
   }
   
-  console.log(`✅ Cleanup complete: Deleted ${totalDeleted} duplicate booking(s)`);
+  const summaryMessage = totalDeleted > 0 
+    ? `Cleanup complete: Deleted ${totalDeleted} duplicate booking(s) from ${duplicateGroups.length} group(s)`
+    : `Cleanup complete: Checked ${allBookings.length} booking(s), no duplicates found`;
+  
+  console.log(`✅ ${summaryMessage}`);
   
   return {
     processed: allBookings.length,
@@ -147,9 +151,7 @@ async function cleanupDuplicateBookings() {
     duplicatesDeleted: totalDeleted,
     duplicateGroups: duplicateGroups.length,
     deletedBookingIds: deletedBookings,
-    message: totalDeleted > 0 
-      ? `Deleted ${totalDeleted} duplicate booking(s) from ${duplicateGroups.length} group(s)`
-      : "No duplicates to delete",
+    message: summaryMessage,
   };
 }
 
@@ -204,9 +206,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     const result = await cleanupDuplicateBookings();
     
+    // Log summary in same format as reconciliation endpoint for Vercel logs
+    console.log(`✅ Cleanup complete: ${result.processed} checked, ${result.duplicatesDeleted} deleted`);
+    
     return j(res, {
       ok: true,
-      ...result,
+      processed: result.processed,
+      duplicatesFound: result.duplicatesFound,
+      duplicatesDeleted: result.duplicatesDeleted,
+      duplicateGroups: result.duplicateGroups,
+      message: result.message,
     });
   } catch (err: any) {
     console.error("❌ Duplicate cleanup error:", err);
