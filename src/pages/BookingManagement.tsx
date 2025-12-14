@@ -2901,6 +2901,20 @@ export default function BookingManagement() {
                           const isDeleting = deletingPayments.has(payment.id);
                           const isExpired = new Date(payment.expires_at) < new Date();
                           
+                          // Fallback to booking_data for old entries that don't have station_names/timeslots populated
+                          // For new entries: station_names is array of names, for old: booking_data.selectedStations is array of IDs
+                          const stationNames = payment.station_names || [];
+                          const stationIds = bookingData?.selectedStations || [];
+                          const hasStationNames = Array.isArray(stationNames) && stationNames.length > 0;
+                          const hasStationIds = Array.isArray(stationIds) && stationIds.length > 0;
+                          
+                          // Extract timeslots from either the new column or fallback to booking_data
+                          const timeslots = payment.timeslots || 
+                            (bookingData?.slots ? bookingData.slots.map((slot: any) => ({
+                              start_time: slot.start_time,
+                              end_time: slot.end_time,
+                            })) : []);
+                          
                           return (
                             <Card
                               key={payment.id}
@@ -2970,14 +2984,14 @@ export default function BookingManagement() {
                                     </div>
                                     
                                     {/* Station and Timeslot Details */}
-                                    {(payment.station_names || payment.timeslots) && (
+                                    {(hasStationNames || hasStationIds) || (timeslots && Array.isArray(timeslots) && timeslots.length > 0) ? (
                                       <div className="mt-3 pt-3 border-t border-border/50">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                          {payment.station_names && payment.station_names.length > 0 && (
+                                          {hasStationNames && (
                                             <div>
                                               <p className="text-muted-foreground font-medium mb-1">Stations</p>
                                               <div className="flex flex-wrap gap-1">
-                                                {payment.station_names.map((name: string, idx: number) => (
+                                                {stationNames.map((name: string, idx: number) => (
                                                   <span
                                                     key={idx}
                                                     className="inline-block px-2 py-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded text-xs font-medium"
@@ -2988,11 +3002,21 @@ export default function BookingManagement() {
                                               </div>
                                             </div>
                                           )}
-                                          {payment.timeslots && Array.isArray(payment.timeslots) && payment.timeslots.length > 0 && (
+                                          {!hasStationNames && hasStationIds && (
+                                            <div>
+                                              <p className="text-muted-foreground font-medium mb-1">Stations</p>
+                                              <div className="flex flex-wrap gap-1">
+                                                <span className="inline-block px-2 py-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded text-xs font-medium">
+                                                  {stationIds.length} station(s)
+                                                </span>
+                                              </div>
+                                            </div>
+                                          )}
+                                          {timeslots && Array.isArray(timeslots) && timeslots.length > 0 && (
                                             <div>
                                               <p className="text-muted-foreground font-medium mb-1">Time Slots</p>
                                               <div className="flex flex-wrap gap-1">
-                                                {payment.timeslots.map((slot: any, idx: number) => (
+                                                {timeslots.map((slot: any, idx: number) => (
                                                   <span
                                                     key={idx}
                                                     className="inline-block px-2 py-1 bg-green-500/20 text-green-600 dark:text-green-400 rounded text-xs font-medium"
@@ -3005,7 +3029,7 @@ export default function BookingManagement() {
                                           )}
                                         </div>
                                       </div>
-                                    )}
+                                    ) : null}
                                     
                                     {/* Failure Reason */}
                                     {payment.status === 'failed' && payment.failure_reason && (
