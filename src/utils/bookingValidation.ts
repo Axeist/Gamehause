@@ -35,42 +35,73 @@ export async function checkBookingConflicts(
 
   // Check each slot for conflicts
   for (const slot of slots) {
-    const { data: overlappingBookings, error } = await supabase
-      .from('bookings')
-      .select(`
-        id,
-        station_id,
-        start_time,
-        end_time,
-        stations!inner(name)
-      `)
-      .eq('station_id', slot.station_id)
-      .eq('booking_date', slot.booking_date)
-      .in('status', ['confirmed', 'in-progress'])
-      .or(
-        `and(start_time.lte.${slot.start_time},end_time.gt.${slot.start_time}),` + // Case 1: Existing starts during new
-        `and(start_time.lt.${slot.end_time},end_time.gte.${slot.end_time}),` + // Case 2: Existing ends during new
-        `and(start_time.gte.${slot.start_time},end_time.lte.${slot.end_time}),` + // Case 3: Existing contained in new
-        `and(start_time.lte.${slot.start_time},end_time.gte.${slot.end_time})` // Case 4: New contained in existing
-      );
+    // Use the database function which properly handles midnight (00:00:00)
+    // The direct query approach doesn't handle midnight correctly in Supabase PostgREST
+    const { data: hasOverlap, error: overlapError } = await (supabase as any).rpc('check_booking_overlap', {
+      p_station_id: slot.station_id,
+      p_booking_date: slot.booking_date,
+      p_start_time: slot.start_time,
+      p_end_time: slot.end_time,
+      p_exclude_booking_id: null,
+    });
 
-    if (error) {
-      console.error('Error checking booking conflicts:', error);
+    if (overlapError) {
+      console.error('Error checking booking conflicts:', overlapError);
       // On error, assume conflict to be safe
       return { hasConflict: true, conflicts: [] };
     }
 
-    if (overlappingBookings && overlappingBookings.length > 0) {
-      for (const booking of overlappingBookings) {
-        conflicts.push({
-          station_id: slot.station_id,
-          station_name: (booking.stations as any)?.name,
-          existing_booking_id: booking.id,
-          existing_start_time: booking.start_time,
-          existing_end_time: booking.end_time,
-        });
+    if (hasOverlap === true) {
+      // If overlap detected, get the conflicting booking details
+      // Fetch all active bookings and filter in JavaScript to handle midnight properly
+      const { data: allActiveBookings, error } = await supabase
+        .from('bookings')
+        .select(`
+          id,
+          station_id,
+          start_time,
+          end_time,
+          stations!inner(name)
+        `)
+        .eq('station_id', slot.station_id)
+        .eq('booking_date', slot.booking_date)
+        .in('status', ['confirmed', 'in-progress']);
+
+      if (error) {
+        console.error('Error checking booking conflicts:', error);
+        // On error, assume conflict to be safe
+        return { hasConflict: true, conflicts: [] };
       }
-    }
+
+      // Filter in JavaScript to properly handle midnight (00:00:00)
+      // When end_time is 00:00:00, treat it as 24:00:00 (end of day) for comparison
+      const slotStart = slot.start_time;
+      const slotEnd = slot.end_time === '00:00:00' ? '24:00:00' : slot.end_time;
+
+      const overlappingBookings = allActiveBookings?.filter(booking => {
+        const bStart = booking.start_time;
+        const bEnd = booking.end_time === '00:00:00' ? '24:00:00' : booking.end_time;
+        
+        // Standard overlap check (now that midnight is normalized to 24:00:00)
+        return (
+          (bStart <= slotStart && bEnd > slotStart) ||  // Case 1: Existing starts during new
+          (bStart < slotEnd && bEnd >= slotEnd) ||     // Case 2: Existing ends during new
+          (bStart >= slotStart && bEnd <= slotEnd) ||  // Case 3: Existing contained in new
+          (bStart <= slotStart && bEnd >= slotEnd)     // Case 4: New contained in existing
+        );
+      });
+
+      if (overlappingBookings && overlappingBookings.length > 0) {
+        for (const booking of overlappingBookings) {
+          conflicts.push({
+            station_id: slot.station_id,
+            station_name: (booking.stations as any)?.name,
+            existing_booking_id: booking.id,
+            existing_start_time: booking.start_time,
+            existing_end_time: booking.end_time,
+          });
+        }
+      }
   }
 
   return {

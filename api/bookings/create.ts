@@ -99,7 +99,8 @@ export default async function handler(req: Request) {
         // Continue - database trigger will catch it
       } else if (hasOverlap === true) {
         // Find the conflicting booking to provide better error message
-        const { data: conflictingBooking } = await supabase
+        // Fetch all active bookings and filter in JavaScript to handle midnight properly
+        const { data: allActiveBookings } = await supabase
           .from("bookings")
           .select(`
             id,
@@ -114,14 +115,25 @@ export default async function handler(req: Request) {
           .eq("station_id", stationId)
           .eq("booking_date", selectedDate)
           .in("status", ["confirmed", "in-progress"])
-          .or(
-            `and(start_time.lte.${selectedSlot.start_time},end_time.gt.${selectedSlot.start_time}),` +
-            `and(start_time.lt.${selectedSlot.end_time},end_time.gte.${selectedSlot.end_time}),` +
-            `and(start_time.gte.${selectedSlot.start_time},end_time.lte.${selectedSlot.end_time}),` +
-            `and(start_time.lte.${selectedSlot.start_time},end_time.gte.${selectedSlot.end_time})`
-          )
-          .limit(1)
-          .maybeSingle();
+          .order("created_at", { ascending: false });
+        
+        // Filter in JavaScript to properly handle midnight (00:00:00)
+        // When end_time is 00:00:00, treat it as 24:00:00 (end of day) for comparison
+        const slotStart = selectedSlot.start_time;
+        const slotEnd = selectedSlot.end_time === '00:00:00' ? '24:00:00' : selectedSlot.end_time;
+        
+        const conflictingBooking = allActiveBookings?.find(b => {
+          const bStart = b.start_time;
+          const bEnd = b.end_time === '00:00:00' ? '24:00:00' : b.end_time;
+          
+          // Standard overlap check (now that midnight is normalized to 24:00:00)
+          return (
+            (bStart <= slotStart && bEnd > slotStart) ||  // Case 1: Existing starts during new
+            (bStart < slotEnd && bEnd >= slotEnd) ||     // Case 2: Existing ends during new
+            (bStart >= slotStart && bEnd <= slotEnd) ||  // Case 3: Existing contained in new
+            (bStart <= slotStart && bEnd >= slotEnd)     // Case 4: New contained in existing
+          );
+        });
 
         const conflictDetails = conflictingBooking 
           ? `Conflicting booking: ID ${conflictingBooking.id}, Date: ${conflictingBooking.booking_date}, Time: ${conflictingBooking.start_time}-${conflictingBooking.end_time}, Status: ${conflictingBooking.status}, Station: ${(conflictingBooking.stations as any)?.name || 'Unknown'}`
