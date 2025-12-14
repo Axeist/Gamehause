@@ -280,7 +280,7 @@ export default function BookingManagement() {
   const [loadingPayments, setLoadingPayments] = useState(false);
   const [reconSearchQuery, setReconSearchQuery] = useState('');
   const [reconStatusFilter, setReconStatusFilter] = useState<string>('all');
-  const [reconDateFilter, setReconDateFilter] = useState<string>('all');
+  const [reconDateFilter, setReconDateFilter] = useState<string>('thismonth');
   const [deletingPayments, setDeletingPayments] = useState<Set<string>>(new Set());
   const [paymentDeleteDialogOpen, setPaymentDeleteDialogOpen] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
@@ -1707,6 +1707,10 @@ export default function BookingManagement() {
             return paymentDate >= subDays(now, 7);
           case 'last30days':
             return paymentDate >= subDays(now, 30);
+          case 'thismonth':
+            const monthStart = startOfMonth(now);
+            const monthEnd = endOfMonth(now);
+            return paymentDate >= monthStart && paymentDate <= monthEnd;
           default:
             return true;
         }
@@ -2998,13 +3002,14 @@ export default function BookingManagement() {
                             <SelectItem value="today">Today</SelectItem>
                             <SelectItem value="yesterday">Yesterday</SelectItem>
                             <SelectItem value="last7days">Last 7 Days</SelectItem>
+                            <SelectItem value="thismonth">This Month</SelectItem>
                             <SelectItem value="last30days">Last 30 Days</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       {/* Clear Filters */}
-                      {(reconSearchQuery || reconStatusFilter !== 'all' || reconDateFilter !== 'all') && (
+                      {(reconSearchQuery || reconStatusFilter !== 'all' || reconDateFilter !== 'thismonth') && (
                         <div className="flex justify-end">
                           <Button
                             variant="outline"
@@ -3012,11 +3017,11 @@ export default function BookingManagement() {
                             onClick={() => {
                               setReconSearchQuery('');
                               setReconStatusFilter('all');
-                              setReconDateFilter('all');
+                              setReconDateFilter('thismonth');
                             }}
                           >
                             <Filter className="h-4 w-4 mr-2" />
-                            Clear Filters
+                            Reset Filters
                           </Button>
                         </div>
                       )}
