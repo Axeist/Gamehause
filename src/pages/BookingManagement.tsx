@@ -2971,7 +2971,7 @@ export default function BookingManagement() {
                                   </div>
 
                                   <div className="flex flex-col gap-2">
-                                    {payment.status === 'pending' && (
+                                    {(payment.status === 'pending' || payment.status === 'failed') && (
                                       <Button
                                         size="sm"
                                         onClick={() => reconcilePayment(payment.razorpay_order_id, payment.razorpay_payment_id)}

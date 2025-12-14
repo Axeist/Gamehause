@@ -403,23 +403,23 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
           verified_at: new Date().toISOString(),
         })
         .eq("razorpay_order_id", orderId)
-        .eq("status", "pending");
+        .in("status", ["pending", "failed"]);
       
       return { success: true, bookingId: existingBookingCheck.id, alreadyExists: true };
     }
   }
 
-  // 1. Find pending payment
+  // 1. Find pending or failed payment
   const { data: pendingPayment, error: findError } = await supabase
     .from("pending_payments")
     .select("*")
     .eq("razorpay_order_id", orderId)
-    .eq("status", "pending")
+    .in("status", ["pending", "failed"])
     .maybeSingle();
   
   if (findError || !pendingPayment) {
-    console.log("ℹ️ No pending payment found for order:", orderId);
-    return { success: false, error: "No pending payment found" };
+    console.log("ℹ️ No pending or failed payment found for order:", orderId);
+    return { success: false, error: "No pending or failed payment found" };
   }
   
   // 2. If payment ID provided, verify it directly
