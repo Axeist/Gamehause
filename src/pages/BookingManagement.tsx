@@ -2737,7 +2737,7 @@ export default function BookingManagement() {
                         
                         {/* Pagination */}
                         {totalPages > 1 && (
-                          <div className="mt-6 flex items-center justify-between">
+                          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div className="text-sm text-muted-foreground">
                               Showing {startIndex + 1} to {Math.min(endIndex, filteredPayments.length)} of {filteredPayments.length} entries
                             </div>
@@ -2747,50 +2747,89 @@ export default function BookingManagement() {
                                 size="sm"
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
+                                className="gap-1"
                               >
-                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                <ChevronLeft className="h-4 w-4" />
                                 Previous
                               </Button>
+                              
+                              {/* Page Numbers */}
                               <div className="flex items-center gap-1">
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                                  // Show first page, last page, current page, and pages around current
-                                  if (
-                                    page === 1 ||
-                                    page === totalPages ||
-                                    (page >= currentPage - 1 && page <= currentPage + 1)
-                                  ) {
+                                {(() => {
+                                  const pages: (number | string)[] = [];
+                                  
+                                  // Always show first page
+                                  if (totalPages <= 7) {
+                                    // Show all pages if 7 or fewer
+                                    for (let i = 1; i <= totalPages; i++) {
+                                      pages.push(i);
+                                    }
+                                  } else {
+                                    // Show first page
+                                    pages.push(1);
+                                    
+                                    if (currentPage > 3) {
+                                      pages.push('...');
+                                    }
+                                    
+                                    // Show pages around current
+                                    const start = Math.max(2, currentPage - 1);
+                                    const end = Math.min(totalPages - 1, currentPage + 1);
+                                    
+                                    for (let i = start; i <= end; i++) {
+                                      if (i !== 1 && i !== totalPages) {
+                                        pages.push(i);
+                                      }
+                                    }
+                                    
+                                    if (currentPage < totalPages - 2) {
+                                      pages.push('...');
+                                    }
+                                    
+                                    // Always show last page
+                                    if (totalPages > 1) {
+                                      pages.push(totalPages);
+                                    }
+                                  }
+                                  
+                                  return pages.map((page, idx) => {
+                                    if (page === '...') {
+                                      return (
+                                        <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">
+                                          ...
+                                        </span>
+                                      );
+                                    }
+                                    
+                                    const pageNum = page as number;
                                     return (
                                       <Button
-                                        key={page}
-                                        variant={currentPage === page ? "default" : "outline"}
+                                        key={pageNum}
+                                        variant={currentPage === pageNum ? "default" : "outline"}
                                         size="sm"
-                                        onClick={() => setCurrentPage(page)}
-                                        className="min-w-[40px]"
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        className={`min-w-[40px] ${
+                                          currentPage === pageNum 
+                                            ? "bg-primary text-primary-foreground" 
+                                            : ""
+                                        }`}
                                       >
-                                        {page}
+                                        {pageNum}
                                       </Button>
                                     );
-                                  } else if (
-                                    page === currentPage - 2 ||
-                                    page === currentPage + 2
-                                  ) {
-                                    return (
-                                      <span key={page} className="px-2 text-muted-foreground">
-                                        ...
-                                      </span>
-                                    );
-                                  }
-                                  return null;
-                                })}
+                                  });
+                                })()}
                               </div>
+                              
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
+                                className="gap-1"
                               >
                                 Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
+                                <ChevronRight className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
