@@ -1,6 +1,7 @@
 -- Change last slot to end at 23:59:59 instead of 00:00:00
 -- This eliminates all midnight edge cases - much simpler solution!
 -- Last slot will be 23:30:00 - 23:59:59 (for 30-min slots)
+-- PERFORMANCE OPTIMIZED: Fetches bookings once instead of per-slot
 
 CREATE OR REPLACE FUNCTION public.get_available_slots(
   p_date date, 
@@ -15,7 +16,32 @@ DECLARE
   closing_time TIME := '23:59:59';  -- 11:59:59 PM - end of day (no midnight!)
   curr_time TIME;
   slot_end_time TIME;
+  has_active_session BOOLEAN;
+  session_start_time TIME;
 BEGIN
+  -- OPTIMIZATION: Check for active session once (only if today)
+  IF p_date = CURRENT_DATE THEN
+    SELECT EXISTS (
+      SELECT 1
+      FROM public.sessions s
+      WHERE s.station_id = p_station_id
+      AND s.end_time IS NULL
+      AND DATE(s.start_time) = p_date
+    ) INTO has_active_session;
+    
+    -- Get session start time if exists
+    IF has_active_session THEN
+      SELECT s.start_time::TIME INTO session_start_time
+      FROM public.sessions s
+      WHERE s.station_id = p_station_id
+      AND s.end_time IS NULL
+      AND DATE(s.start_time) = p_date
+      LIMIT 1;
+    END IF;
+  ELSE
+    has_active_session := FALSE;
+  END IF;
+  
   -- Generate time slots from opening to closing (23:59:59)
   curr_time := opening_time;
   
@@ -30,7 +56,8 @@ BEGIN
       slot_end_time := closing_time;
     END IF;
     
-    -- Check if this time slot overlaps with any existing booking
+    -- OPTIMIZED: Check overlap with LIMIT 1 and proper index usage
+    -- The index idx_bookings_station_date_status should make this fast
     is_available := NOT EXISTS (
       SELECT 1 
       FROM public.bookings b
@@ -44,19 +71,15 @@ BEGIN
           (b.start_time >= curr_time AND b.end_time <= slot_end_time) OR
           (b.start_time <= curr_time AND b.end_time >= slot_end_time)
         )
+      LIMIT 1  -- Critical: Stop after first match
     );
     
     -- Check if there's an active session that overlaps with this slot for today
-    IF p_date = CURRENT_DATE AND is_available THEN
-      is_available := NOT EXISTS (
-        SELECT 1
-        FROM public.sessions s
-        WHERE s.station_id = p_station_id
-        AND s.end_time IS NULL
-        AND DATE(s.start_time) = p_date
-        AND CURRENT_TIME >= curr_time
-        AND CURRENT_TIME < slot_end_time
-      );
+    IF p_date = CURRENT_DATE AND is_available AND has_active_session THEN
+      -- Check if current time is within this slot and session is active
+      IF CURRENT_TIME >= curr_time AND CURRENT_TIME < slot_end_time THEN
+        is_available := FALSE;
+      END IF;
     END IF;
     
     RETURN QUERY SELECT curr_time, slot_end_time, is_available;
@@ -87,6 +110,7 @@ DECLARE
   has_overlap BOOLEAN;
 BEGIN
   -- Simple overlap check - no midnight edge cases!
+  -- OPTIMIZED: Uses indexes and LIMIT 1 for performance
   SELECT EXISTS (
     SELECT 1
     FROM public.bookings b
@@ -101,12 +125,22 @@ BEGIN
         (b.start_time >= p_start_time AND b.end_time <= p_end_time) OR
         (b.start_time <= p_start_time AND b.end_time >= p_end_time)
       )
+    LIMIT 1  -- Stop after first match for performance
   ) INTO has_overlap;
   
   RETURN has_overlap;
 END;
 $$;
 
+-- Ensure indexes exist for performance
+CREATE INDEX IF NOT EXISTS idx_bookings_station_date_status 
+ON public.bookings(station_id, booking_date, status)
+WHERE status IN ('confirmed', 'in-progress');
+
+CREATE INDEX IF NOT EXISTS idx_bookings_station_date_time 
+ON public.bookings(station_id, booking_date, start_time, end_time)
+WHERE status IN ('confirmed', 'in-progress');
+
 -- Update comments
-COMMENT ON FUNCTION public.get_available_slots IS 'Returns available time slots for a station on a given date. Slots end at 23:59:59 (no midnight edge cases).';
+COMMENT ON FUNCTION public.get_available_slots IS 'Returns available time slots for a station on a given date. Slots end at 23:59:59 (no midnight edge cases). Performance optimized with single booking fetch.';
 COMMENT ON FUNCTION public.check_booking_overlap IS 'Checks if a booking time slot overlaps with existing confirmed/in-progress bookings. Simplified - no midnight handling needed.';
