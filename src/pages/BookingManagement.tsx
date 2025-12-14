@@ -20,7 +20,8 @@ import {
   Calendar, Search, Filter, Download, Phone, Mail, Plus, Clock, MapPin, ChevronDown, ChevronRight, Users,
   Trophy, Gift, Tag, Zap, Megaphone, DollarSign, Percent, Ticket, RefreshCw, TrendingUp, TrendingDown, Activity,
   CalendarDays, Target, UserCheck, Edit2, Trash2, Hash, BarChart3, Building2, Eye, Timer, Star, 
-  GamepadIcon, TrendingUp as TrendingUpIcon, CalendarIcon, Expand, Minimize2, CheckCircle2, XCircle, AlertCircle, Loader2
+  GamepadIcon, TrendingUp as TrendingUpIcon, CalendarIcon, Expand, Minimize2, CheckCircle2, XCircle, AlertCircle, Loader2,
+  ChevronLeft
 } from 'lucide-react';
 import {
   format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears, isToday, isYesterday, isTomorrow
@@ -283,6 +284,8 @@ export default function BookingManagement() {
   const [deletingPayments, setDeletingPayments] = useState<Set<string>>(new Set());
   const [paymentDeleteDialogOpen, setPaymentDeleteDialogOpen] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // NEW: Calendar view state
   const [calendarView, setCalendarView] = useState(false);
@@ -1699,6 +1702,17 @@ export default function BookingManagement() {
     return filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [pendingPayments, reconSearchQuery, reconStatusFilter, reconDateFilter]);
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPayments = filteredPayments.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [reconSearchQuery, reconStatusFilter, reconDateFilter]);
+
   const resetFilters = () => {
     const defaultDateRange = getDateRangeFromPreset('last7days')!;
     setFilters({
@@ -2720,6 +2734,67 @@ export default function BookingManagement() {
                             </div>
                           );
                         })}
+                        
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                          <div className="mt-6 flex items-center justify-between">
+                            <div className="text-sm text-muted-foreground">
+                              Showing {startIndex + 1} to {Math.min(endIndex, filteredPayments.length)} of {filteredPayments.length} entries
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                              >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Previous
+                              </Button>
+                              <div className="flex items-center gap-1">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                                  // Show first page, last page, current page, and pages around current
+                                  if (
+                                    page === 1 ||
+                                    page === totalPages ||
+                                    (page >= currentPage - 1 && page <= currentPage + 1)
+                                  ) {
+                                    return (
+                                      <Button
+                                        key={page}
+                                        variant={currentPage === page ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => setCurrentPage(page)}
+                                        className="min-w-[40px]"
+                                      >
+                                        {page}
+                                      </Button>
+                                    );
+                                  } else if (
+                                    page === currentPage - 2 ||
+                                    page === currentPage + 2
+                                  ) {
+                                    return (
+                                      <span key={page} className="px-2 text-muted-foreground">
+                                        ...
+                                      </span>
+                                    );
+                                  }
+                                  return null;
+                                })}
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                              >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                     </div>
                   </CardContent>
                 </Card>
@@ -2895,11 +2970,17 @@ export default function BookingManagement() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {filteredPayments.map((payment) => {
+                        {paginatedPayments.map((payment) => {
                           const bookingData = payment.booking_data;
                           const isReconciling = reconcilingPayments.has(payment.razorpay_order_id);
                           const isDeleting = deletingPayments.has(payment.id);
                           const isExpired = new Date(payment.expires_at) < new Date();
+                          
+                          // Extract booking date from booking_data
+                          const bookingDate = bookingData?.selectedDateISO || 
+                                            bookingData?.selectedDate || 
+                                            bookingData?.booking_date || 
+                                            null;
                           
                           // Fallback to booking_data for old entries that don't have station_names/timeslots populated
                           // For new entries: station_names is array of names, for old: booking_data.selectedStations is array of IDs
@@ -2951,7 +3032,7 @@ export default function BookingManagement() {
                                       )}
                                     </div>
 
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                                       <div>
                                         <p className="text-muted-foreground font-medium">Customer</p>
                                         <p className="font-semibold text-foreground">{payment.customer_name}</p>
@@ -2960,6 +3041,16 @@ export default function BookingManagement() {
                                       <div>
                                         <p className="text-muted-foreground font-medium">Amount</p>
                                         <p className="font-semibold text-foreground">₹{payment.amount}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-muted-foreground font-medium">Booking Date</p>
+                                        {bookingDate ? (
+                                          <p className="font-semibold text-foreground">
+                                            {format(new Date(bookingDate), 'MMM d, yyyy')}
+                                          </p>
+                                        ) : (
+                                          <p className="text-xs text-muted-foreground italic">Not available</p>
+                                        )}
                                       </div>
                                       <div>
                                         <p className="text-muted-foreground font-medium">Created</p>
