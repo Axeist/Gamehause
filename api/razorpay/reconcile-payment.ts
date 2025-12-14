@@ -517,9 +517,10 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
           ...pendingPayment,
           razorpay_payment_id: paymentId,
         });
-      } else {
-        const errorMessage = `Payment status: ${payment.status}`;
-        console.log("❌ Payment not successful:", payment.status);
+      } else if (payment.status === "failed") {
+        // Payment explicitly failed in Razorpay
+        const errorMessage = `Payment failed - Razorpay status: ${payment.status}`;
+        console.log("❌ Payment failed in Razorpay:", payment.status);
         await supabase
           .from("pending_payments")
           .update({ 
@@ -528,17 +529,33 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
           })
           .eq("id", pendingPayment.id);
         return { success: false, error: errorMessage };
+      } else {
+        // Payment is in a pending state (created, authorized, etc.) - keep as pending
+        console.log("⏳ Payment status is:", payment.status, "- keeping as pending");
+        // Don't update status - keep it as pending
+        return { success: false, error: `Payment is still processing - status: ${payment.status}` };
       }
     } catch (err: any) {
       console.error("❌ Error verifying payment:", err);
       const errorMessage = err.message || "Error verifying payment with Razorpay";
-      await supabase
-        .from("pending_payments")
-        .update({ 
-          status: "failed",
-          failure_reason: errorMessage
-        })
-        .eq("id", pendingPayment.id);
+      
+      // Check if payment has expired before marking as failed
+      const now = new Date();
+      const expiresAt = new Date(pendingPayment.expires_at);
+      
+      if (expiresAt < now) {
+        // Payment expired
+        await supabase
+          .from("pending_payments")
+          .update({ 
+            status: "expired",
+            failure_reason: "Payment expired - payment window has passed"
+          })
+          .eq("id", pendingPayment.id);
+      } else {
+        // Don't mark as failed if payment hasn't expired - keep as pending
+        console.log("⚠️ Error verifying payment, but payment is still within window - keeping as pending");
+      }
       return { success: false, error: errorMessage };
     }
   }
@@ -632,27 +649,73 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
       }
     }
     
-    const errorMessage = "No successful payment found";
-    await supabase
-      .from("pending_payments")
-      .update({ 
-        status: "failed",
-        failure_reason: errorMessage
-      })
-      .eq("id", pendingPayment.id);
-    return { success: false, error: errorMessage };
-  } catch (err: any) {
-    console.error("❌ Error fetching order:", err);
-    const errorMessage = err.message || "Error fetching order from Razorpay";
-    await supabase
-      .from("pending_payments")
-      .update({ 
-        status: "failed",
-        failure_reason: errorMessage
-      })
-      .eq("id", pendingPayment.id);
-    return { success: false, error: errorMessage };
-  }
+    // Check if order exists and its status
+    // If order status is "created", payment is still pending - don't mark as failed
+    if (order.status === "created") {
+      console.log("⏳ Order is still in 'created' status - payment is pending");
+      // Don't update status - keep it as pending
+      return { success: false, error: "Payment is still pending" };
+    }
+    
+    // Check if payment has expired
+    const now = new Date();
+    const expiresAt = new Date(pendingPayment.expires_at);
+    if (expiresAt < now) {
+      console.log("⏰ Payment has expired, marking as expired");
+      await supabase
+        .from("pending_payments")
+        .update({ 
+          status: "expired",
+          failure_reason: "Payment expired - payment window has passed"
+        })
+        .eq("id", pendingPayment.id);
+      return { success: false, error: "Payment has expired" };
+    }
+    
+    // Only mark as failed if order status indicates failure
+    // Check if there are any failed payment attempts
+    const payments = Array.isArray(order.payments) ? order.payments : [];
+    const failedPayments = payments.filter((p: any) => p.status === "failed");
+    
+    if (payments.length > 0 && failedPayments.length > 0 && payments.length === failedPayments.length) {
+      // All payment attempts failed - mark as failed
+      const errorMessage = "Payment failed - all payment attempts were unsuccessful";
+      await supabase
+        .from("pending_payments")
+        .update({ 
+          status: "failed",
+          failure_reason: errorMessage
+        })
+        .eq("id", pendingPayment.id);
+      return { success: false, error: errorMessage };
+    }
+    
+    // If we get here, payment is still pending - don't change status
+    console.log("ℹ️ No successful payment found, but payment is still pending");
+    return { success: false, error: "Payment is still pending - no successful payment found yet" };
+    } catch (err: any) {
+      console.error("❌ Error fetching order:", err);
+      const errorMessage = err.message || "Error fetching order from Razorpay";
+      
+      // Check if payment has expired before marking as failed
+      const now = new Date();
+      const expiresAt = new Date(pendingPayment.expires_at);
+      
+      if (expiresAt < now) {
+        // Payment expired
+        await supabase
+          .from("pending_payments")
+          .update({ 
+            status: "expired",
+            failure_reason: "Payment expired - payment window has passed"
+          })
+          .eq("id", pendingPayment.id);
+      } else {
+        // Don't mark as failed if payment hasn't expired - keep as pending
+        console.log("⚠️ Error fetching order, but payment is still within window - keeping as pending");
+      }
+      return { success: false, error: errorMessage };
+    }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
