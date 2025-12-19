@@ -703,9 +703,9 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
       });
       
       try {
-        const payments = await razorpay.orders.fetchPayments(orderId);
-        if (payments.items && payments.items.length > 0) {
-          const successfulPayment = payments.items.find(
+        const paymentsResponse = await razorpay.orders.fetchPayments(orderId);
+        if (paymentsResponse.items && paymentsResponse.items.length > 0) {
+          const successfulPayment = paymentsResponse.items.find(
             (p: any) => p.status === "captured" || p.status === "authorized"
           );
           
@@ -755,7 +755,7 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
     
     // Only mark as failed if order status indicates failure
     // Check if there are any failed payment attempts
-    const payments = Array.isArray(order.payments) ? order.payments : [];
+    // Reuse payments variable already declared above (line 647)
     const failedPayments = payments.filter((p: any) => p.status === "failed");
     
     if (payments.length > 0 && failedPayments.length > 0 && payments.length === failedPayments.length) {
