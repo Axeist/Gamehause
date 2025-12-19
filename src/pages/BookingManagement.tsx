@@ -1552,7 +1552,15 @@ export default function BookingManagement() {
         }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        // If response is not JSON, read as text for debugging
+        const text = await response.text();
+        console.error('Failed to parse response as JSON:', text);
+        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`);
+      }
 
       if (response.ok && data.success) {
         toast.success(`Payment reconciled successfully! Booking created: ${data.bookingId?.substring(0, 8)}`);
@@ -1564,7 +1572,7 @@ export default function BookingManagement() {
       }
     } catch (err: any) {
       console.error('Error reconciling payment:', err);
-      toast.error('Failed to reconcile payment');
+      toast.error(err.message || 'Failed to reconcile payment. Please try again.');
     } finally {
       setReconcilingPayments(prev => {
         const newSet = new Set(prev);
@@ -1596,13 +1604,23 @@ export default function BookingManagement() {
           }),
         });
 
-        const data = await response.json();
+        let data;
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          const text = await response.text();
+          console.error('Failed to parse response as JSON:', text);
+          failed++;
+          continue;
+        }
+
         if (response.ok && data.success) {
           successful++;
         } else {
           failed++;
         }
       } catch (err) {
+        console.error('Error reconciling payment:', err);
         failed++;
       }
       

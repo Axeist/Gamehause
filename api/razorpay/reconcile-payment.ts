@@ -461,17 +461,20 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
   }
 
   // Check if payment has expired - mark as expired if so
-  if (pendingPayment.status === "pending" && new Date(pendingPayment.expires_at) < new Date()) {
-    console.log("⏰ Payment has expired, marking as expired");
-    await supabase
-      .from("pending_payments")
-      .update({
-        status: "expired",
-        failure_reason: "Payment expired - payment window has passed",
-      })
-      .eq("id", pendingPayment.id);
-    
-    return { success: false, error: "Payment has expired" };
+  if (pendingPayment.status === "pending" && pendingPayment.expires_at) {
+    const expiresAt = new Date(pendingPayment.expires_at);
+    if (!isNaN(expiresAt.getTime()) && expiresAt < new Date()) {
+      console.log("⏰ Payment has expired, marking as expired");
+      await supabase
+        .from("pending_payments")
+        .update({
+          status: "expired",
+          failure_reason: "Payment expired - payment window has passed",
+        })
+        .eq("id", pendingPayment.id);
+      
+      return { success: false, error: "Payment has expired" };
+    }
   }
   
   // 2. If payment ID provided, verify it directly
@@ -540,21 +543,26 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
       const errorMessage = err.message || "Error verifying payment with Razorpay";
       
       // Check if payment has expired before marking as failed
-      const now = new Date();
-      const expiresAt = new Date(pendingPayment.expires_at);
-      
-      if (expiresAt < now) {
-        // Payment expired
-        await supabase
-          .from("pending_payments")
-          .update({ 
-            status: "expired",
-            failure_reason: "Payment expired - payment window has passed"
-          })
-          .eq("id", pendingPayment.id);
+      if (pendingPayment.expires_at) {
+        const now = new Date();
+        const expiresAt = new Date(pendingPayment.expires_at);
+        
+        if (!isNaN(expiresAt.getTime()) && expiresAt < now) {
+          // Payment expired
+          await supabase
+            .from("pending_payments")
+            .update({ 
+              status: "expired",
+              failure_reason: "Payment expired - payment window has passed"
+            })
+            .eq("id", pendingPayment.id);
+        } else {
+          // Don't mark as failed if payment hasn't expired - keep as pending
+          console.log("⚠️ Error verifying payment, but payment is still within window - keeping as pending");
+        }
       } else {
-        // Don't mark as failed if payment hasn't expired - keep as pending
-        console.log("⚠️ Error verifying payment, but payment is still within window - keeping as pending");
+        // No expiry date set - keep as pending
+        console.log("⚠️ Error verifying payment, but no expiry date set - keeping as pending");
       }
       return { success: false, error: errorMessage };
     }
@@ -658,9 +666,10 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
     }
     
     // Check if payment has expired
-    const now = new Date();
-    const expiresAt = new Date(pendingPayment.expires_at);
-    if (expiresAt < now) {
+    if (pendingPayment.expires_at) {
+      const now = new Date();
+      const expiresAt = new Date(pendingPayment.expires_at);
+      if (!isNaN(expiresAt.getTime()) && expiresAt < now) {
       console.log("⏰ Payment has expired, marking as expired");
       await supabase
         .from("pending_payments")
@@ -669,7 +678,8 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
           failure_reason: "Payment expired - payment window has passed"
         })
         .eq("id", pendingPayment.id);
-      return { success: false, error: "Payment has expired" };
+        return { success: false, error: "Payment has expired" };
+      }
     }
     
     // Only mark as failed if order status indicates failure
@@ -698,21 +708,26 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
       const errorMessage = err.message || "Error fetching order from Razorpay";
       
       // Check if payment has expired before marking as failed
-      const now = new Date();
-      const expiresAt = new Date(pendingPayment.expires_at);
-      
-      if (expiresAt < now) {
-        // Payment expired
-        await supabase
-          .from("pending_payments")
-          .update({ 
-            status: "expired",
-            failure_reason: "Payment expired - payment window has passed"
-          })
-          .eq("id", pendingPayment.id);
+      if (pendingPayment.expires_at) {
+        const now = new Date();
+        const expiresAt = new Date(pendingPayment.expires_at);
+        
+        if (!isNaN(expiresAt.getTime()) && expiresAt < now) {
+          // Payment expired
+          await supabase
+            .from("pending_payments")
+            .update({ 
+              status: "expired",
+              failure_reason: "Payment expired - payment window has passed"
+            })
+            .eq("id", pendingPayment.id);
+        } else {
+          // Don't mark as failed if payment hasn't expired - keep as pending
+          console.log("⚠️ Error fetching order, but payment is still within window - keeping as pending");
+        }
       } else {
-        // Don't mark as failed if payment hasn't expired - keep as pending
-        console.log("⚠️ Error fetching order, but payment is still within window - keeping as pending");
+        // No expiry date set - keep as pending
+        console.log("⚠️ Error fetching order, but no expiry date set - keeping as pending");
       }
       return { success: false, error: errorMessage };
     }
@@ -751,10 +766,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (err: any) {
     console.error("❌ Reconciliation error:", err);
-    return j(res, {
-      ok: false,
-      error: err?.message || String(err),
-    }, 500);
+    // Ensure we always return valid JSON, even on unexpected errors
+    try {
+      const errorMessage = err?.message || String(err) || "An unexpected error occurred";
+      return j(res, {
+        ok: false,
+        error: errorMessage,
+      }, 500);
+    } catch (jsonError) {
+      // Fallback: if even JSON serialization fails, return plain text error
+      console.error("❌ Failed to serialize error response:", jsonError);
+      setCorsHeaders(res);
+      res.status(500).json({
+        ok: false,
+        error: "An unexpected error occurred during reconciliation",
+      });
+      return;
+    }
   }
 }
 
