@@ -362,7 +362,8 @@ async function reconcileSinglePayment(pendingPayment: any) {
       if (existingBookingCheck) {
         console.log("✅ Booking already exists (early check in cron), skipping:", existingBookingCheck.id);
         
-        // Update pending payment status
+        // Update pending payment status - INCLUDING expired payments
+        // This fixes the issue where expired payments with successful bookings show as expired
         await supabase
           .from("pending_payments")
           .update({
@@ -370,7 +371,7 @@ async function reconcileSinglePayment(pendingPayment: any) {
             verified_at: new Date().toISOString(),
           })
           .eq("id", pendingPayment.id)
-          .eq("status", "pending");
+          .in("status", ["pending", "failed", "expired"]);
         
         return { success: true, bookingId: existingBookingCheck.id, alreadyExists: true };
       }
@@ -654,16 +655,70 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("⏰ Automatic reconciliation started (client-side call)");
     const supabase = await createSupabaseClient();
     
-    // First, mark expired pending payments as expired
+    // First, check expired pending payments for existing bookings
+    // If bookings exist, update to success instead of marking as expired
     const now = new Date().toISOString();
-    await supabase
+    const { data: expiredPendingPayments } = await supabase
       .from("pending_payments")
-      .update({
-        status: "expired",
-        failure_reason: "Payment expired - payment window has passed",
-      })
+      .select("id, razorpay_order_id, razorpay_payment_id")
       .eq("status", "pending")
-      .lt("expires_at", now);
+      .lt("expires_at", now)
+      .limit(100);
+    
+    if (expiredPendingPayments && expiredPendingPayments.length > 0) {
+      for (const payment of expiredPendingPayments) {
+        // Check if booking exists for this payment
+        let hasBooking = false;
+        
+        // Check by payment ID if available
+        if (payment.razorpay_payment_id) {
+          const { data: bookingByPaymentId } = await supabase
+            .from("bookings")
+            .select("id")
+            .eq("payment_txn_id", payment.razorpay_payment_id)
+            .limit(1)
+            .maybeSingle();
+          
+          if (bookingByPaymentId) {
+            hasBooking = true;
+          }
+        }
+        
+        // Also check by order ID in notes
+        if (!hasBooking) {
+          const { data: bookingByOrderId } = await supabase
+            .from("bookings")
+            .select("id")
+            .ilike("notes", `%Razorpay Order ID: ${payment.razorpay_order_id}%`)
+            .limit(1)
+            .maybeSingle();
+          
+          if (bookingByOrderId) {
+            hasBooking = true;
+          }
+        }
+        
+        if (hasBooking) {
+          // Booking exists, update to success instead of expired
+          await supabase
+            .from("pending_payments")
+            .update({
+              status: "success",
+              verified_at: now,
+            })
+            .eq("id", payment.id);
+        } else {
+          // No booking exists, mark as expired
+          await supabase
+            .from("pending_payments")
+            .update({
+              status: "expired",
+              failure_reason: "Payment expired - payment window has passed",
+            })
+            .eq("id", payment.id);
+        }
+      }
+    }
     
     // Fetch all pending payments (not expired, created in last 24 hours)
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();

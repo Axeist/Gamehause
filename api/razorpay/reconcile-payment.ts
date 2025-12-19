@@ -195,7 +195,8 @@ async function createBookingFromPayment(pendingPayment: any) {
   
   if (existingBooking) {
     console.log("✅ Booking already exists (idempotency check):", existingBooking.id);
-    // Update pending payment status if not already updated
+    // Update pending payment status - INCLUDING expired payments
+    // This fixes the issue where expired payments with successful bookings show as expired
     await supabase
       .from("pending_payments")
       .update({
@@ -203,7 +204,7 @@ async function createBookingFromPayment(pendingPayment: any) {
         verified_at: new Date().toISOString(),
       })
       .eq("razorpay_order_id", pendingPayment.razorpay_order_id)
-      .eq("status", "pending");
+      .in("status", ["pending", "failed", "expired"]);
     
     return { success: true, bookingId: existingBooking.id, alreadyExists: true };
   }
@@ -238,7 +239,8 @@ async function createBookingFromPayment(pendingPayment: any) {
 
         if (existingBooking && existingBooking.payment_txn_id === pendingPayment.razorpay_payment_id) {
           console.log("✅ Conflict is from same payment (already created), skipping...");
-          // Update pending payment status
+          // Update pending payment status - INCLUDING expired payments
+          // This fixes the issue where expired payments with successful bookings show as expired
           await supabase
             .from("pending_payments")
             .update({
@@ -246,7 +248,7 @@ async function createBookingFromPayment(pendingPayment: any) {
               verified_at: new Date().toISOString(),
             })
             .eq("razorpay_order_id", pendingPayment.razorpay_order_id)
-            .eq("status", "pending");
+            .in("status", ["pending", "failed", "expired"]);
           
           return { success: true, bookingId: existingBooking.id, alreadyExists: true };
         } else {
@@ -334,7 +336,8 @@ async function createBookingFromPayment(pendingPayment: any) {
   
   if (doubleCheck) {
     console.log("✅ Booking was created by another process (race condition prevented):", doubleCheck.id);
-    // Update pending payment status
+    // Update pending payment status - INCLUDING expired payments
+    // This fixes the issue where expired payments with successful bookings show as expired
     await supabase
       .from("pending_payments")
       .update({
@@ -342,7 +345,7 @@ async function createBookingFromPayment(pendingPayment: any) {
         verified_at: new Date().toISOString(),
       })
       .eq("razorpay_order_id", pendingPayment.razorpay_order_id)
-      .eq("status", "pending");
+      .in("status", ["pending", "failed", "expired"]);
     
     return { success: true, bookingId: doubleCheck.id, alreadyExists: true };
   }
@@ -421,29 +424,51 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
 
   // 0. CRITICAL: Check if booking already exists FIRST (idempotency)
   // This prevents duplicates if reconciliation already happened or customer returned
+  // Check by payment ID if provided, or by order ID notes
+  let existingBookingCheck = null;
+  
   if (paymentId) {
-    const { data: existingBookingCheck } = await supabase
+    const { data: bookingByPaymentId } = await supabase
       .from("bookings")
       .select("id")
       .eq("payment_txn_id", paymentId)
       .limit(1)
       .maybeSingle();
     
-    if (existingBookingCheck) {
-      console.log("✅ Booking already exists (early check), skipping reconciliation:", existingBookingCheck.id);
-      
-      // Update pending payment status if it exists (skip if expired)
-      await supabase
-        .from("pending_payments")
-        .update({
-          status: "success",
-          verified_at: new Date().toISOString(),
-        })
-        .eq("razorpay_order_id", orderId)
-        .in("status", ["pending", "failed"]);
-      
-      return { success: true, bookingId: existingBookingCheck.id, alreadyExists: true };
+    if (bookingByPaymentId) {
+      existingBookingCheck = bookingByPaymentId;
     }
+  }
+  
+  // Also check by order ID in notes (fallback for when payment ID not available)
+  if (!existingBookingCheck) {
+    const { data: bookingByOrderId } = await supabase
+      .from("bookings")
+      .select("id")
+      .ilike("notes", `%Razorpay Order ID: ${orderId}%`)
+      .limit(1)
+      .maybeSingle();
+    
+    if (bookingByOrderId) {
+      existingBookingCheck = bookingByOrderId;
+    }
+  }
+  
+  if (existingBookingCheck) {
+    console.log("✅ Booking already exists (early check), updating pending_payment status:", existingBookingCheck.id);
+    
+    // Update pending payment status to success - INCLUDING expired payments
+    // This fixes the issue where expired payments with successful bookings show as expired
+    await supabase
+      .from("pending_payments")
+      .update({
+        status: "success",
+        verified_at: new Date().toISOString(),
+      })
+      .eq("razorpay_order_id", orderId)
+      .in("status", ["pending", "failed", "expired"]);
+    
+    return { success: true, bookingId: existingBookingCheck.id, alreadyExists: true };
   }
 
   // 1. Find pending, failed, or expired payment
@@ -461,10 +486,56 @@ async function reconcilePayment(orderId: string, paymentId?: string) {
   }
 
   // Check if payment has expired - mark as expired if so
+  // BUT first check if a booking exists - if it does, update to success instead
   if (pendingPayment.status === "pending" && pendingPayment.expires_at) {
     const expiresAt = new Date(pendingPayment.expires_at);
     if (!isNaN(expiresAt.getTime()) && expiresAt < new Date()) {
-      console.log("⏰ Payment has expired, marking as expired");
+      // Double-check if booking exists before marking as expired
+      // This handles race condition where booking was created but status not updated
+      let lateBookingCheck = null;
+      
+      // Check by payment ID if available
+      if (pendingPayment.razorpay_payment_id) {
+        const { data: bookingByPaymentId } = await supabase
+          .from("bookings")
+          .select("id")
+          .eq("payment_txn_id", pendingPayment.razorpay_payment_id)
+          .limit(1)
+          .maybeSingle();
+        
+        if (bookingByPaymentId) {
+          lateBookingCheck = bookingByPaymentId;
+        }
+      }
+      
+      // Also check by order ID in notes (fallback)
+      if (!lateBookingCheck) {
+        const { data: bookingByOrderId } = await supabase
+          .from("bookings")
+          .select("id")
+          .ilike("notes", `%Razorpay Order ID: ${orderId}%`)
+          .limit(1)
+          .maybeSingle();
+        
+        if (bookingByOrderId) {
+          lateBookingCheck = bookingByOrderId;
+        }
+      }
+      
+      if (lateBookingCheck) {
+        console.log("✅ Found existing booking for expired payment, updating to success:", lateBookingCheck.id);
+        await supabase
+          .from("pending_payments")
+          .update({
+            status: "success",
+            verified_at: new Date().toISOString(),
+          })
+          .eq("id", pendingPayment.id);
+        
+        return { success: true, bookingId: lateBookingCheck.id, alreadyExists: true };
+      }
+      
+      console.log("⏰ Payment has expired and no booking found, marking as expired");
       await supabase
         .from("pending_payments")
         .update({
