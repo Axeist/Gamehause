@@ -17,11 +17,29 @@ import {
 } from "@/components/ui/dialog";
 import { UAParser } from 'ua-parser-js';
 import { supabase } from "@/integrations/supabase/client";
-import { LOGO_PATH } from "@/config/brand";
+import { BRAND_NAME } from "@/config/brand";
 
 interface LocationState {
   from?: string;
 }
+
+const BrandMark = ({ subtitle }: { subtitle: string }) => {
+  return (
+    <div className="relative inline-flex items-center gap-3">
+      <div className="relative">
+        <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-gamehaus-purple/25 to-gamehaus-magenta/25 blur-md opacity-70 animate-neon-pulse" />
+        <div className="relative h-12 w-12 rounded-2xl border border-gamehaus-purple/30 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="absolute inset-0 rounded-2xl bg-grid-pattern opacity-[0.07]" />
+          <ZapIcon className="relative h-5 w-5 text-gamehaus-lightpurple drop-shadow-[0_0_14px_rgba(255,74,26,0.35)]" />
+        </div>
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs tracking-[0.25em] text-gray-400 truncate">{BRAND_NAME.toUpperCase()}</p>
+        <p className="text-sm text-gray-300 truncate">{subtitle}</p>
+      </div>
+    </div>
+  );
+};
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -713,18 +731,13 @@ const Login = () => {
             <div className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/25 bg-black/30 backdrop-blur-xl p-8">
               <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
               <div className="absolute inset-0 bg-noise-soft opacity-[0.10] mix-blend-overlay" />
+              <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute inset-x-0 -top-[45%] h-[45%] bg-gradient-to-b from-transparent via-white/10 to-transparent blur-md opacity-40 animate-scanner" />
+              </div>
 
               <div className="relative">
                 <div className="flex items-center gap-4">
-                  <img
-                    src={LOGO_PATH}
-                    alt="Gamehaus"
-                    className="h-14 w-auto drop-shadow-[0_0_18px_rgba(255,74,26,0.35)]"
-                  />
-                  <div>
-                    <p className="text-xs tracking-[0.25em] text-gray-400">PORTAL ACCESS</p>
-                    <p className="text-lg font-semibold text-white">Admin & Staff Sign‑in</p>
-                  </div>
+                  <BrandMark subtitle="Admin & Staff Sign‑in" />
                 </div>
 
                 <h1 className="mt-8 text-4xl font-bold text-white leading-tight tracking-tight">
@@ -738,6 +751,30 @@ const Login = () => {
                   This portal is built for day‑to‑day operations—stations, bookings, billing, staff workflow, and customer flow.
                   Access is role‑based and designed to stay fast during peak hours.
                 </p>
+
+                <div className="mt-6 rounded-2xl border border-gamehaus-purple/20 bg-black/35 p-5">
+                  <p className="text-xs tracking-[0.25em] text-gray-400">CORE MODULES</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center rounded-full border border-gamehaus-purple/25 bg-black/40 px-3 py-1 text-xs text-gray-200 hover:border-gamehaus-purple/45 transition-colors">
+                      Stations
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-gamehaus-purple/25 bg-black/40 px-3 py-1 text-xs text-gray-200 hover:border-gamehaus-purple/45 transition-colors">
+                      Bookings
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-gamehaus-purple/25 bg-black/40 px-3 py-1 text-xs text-gray-200 hover:border-gamehaus-purple/45 transition-colors">
+                      Billing
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-gamehaus-purple/25 bg-black/40 px-3 py-1 text-xs text-gray-200 hover:border-gamehaus-purple/45 transition-colors">
+                      Staff
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-gamehaus-purple/25 bg-black/40 px-3 py-1 text-xs text-gray-200 hover:border-gamehaus-purple/45 transition-colors">
+                      Reports
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm text-gray-300 leading-relaxed">
+                    Tip: use <span className="font-semibold text-white">Staff</span> mode for floor operations, and <span className="font-semibold text-white">Admin</span> mode for management actions.
+                  </p>
+                </div>
 
                 <div className="mt-8 grid grid-cols-1 gap-4">
                   <div className="flex items-start gap-3">
@@ -779,13 +816,6 @@ const Login = () => {
                     </p>
                   </div>
                 </div>
-
-                <img
-                  src="/controller.svg"
-                  alt=""
-                  aria-hidden="true"
-                  className="pointer-events-none select-none absolute -right-8 -bottom-10 w-[420px] opacity-[0.16] rotate-[-8deg]"
-                />
               </div>
             </div>
           </div>
@@ -794,15 +824,7 @@ const Login = () => {
           <div className={`w-full lg:max-w-lg lg:ml-auto ${animationClass}`}>
             <div className="mb-6 text-center lg:text-left">
               <div className="flex items-center justify-center lg:justify-start gap-3">
-                <img 
-                  src={LOGO_PATH} 
-                  alt="Gamehaus – Premier Snooker & Gaming Lounge" 
-                  className="h-12 w-auto drop-shadow-[0_0_18px_rgba(255,74,26,0.30)]"
-                />
-                <div className="text-left">
-                  <p className="text-xs tracking-[0.25em] text-gray-400">SECURE SIGN‑IN</p>
-                  <p className="text-sm text-gray-300">Administrator & staff portal</p>
-                </div>
+                <BrandMark subtitle="Secure sign‑in • administrator & staff" />
               </div>
             </div>
 

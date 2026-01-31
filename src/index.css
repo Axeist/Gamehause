@@ -204,6 +204,15 @@
   }
 }
 
+@keyframes gamehaus-marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @keyframes scaleIn {
   from {
     transform: scale(0.9);
@@ -257,6 +266,21 @@
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease forwards;
+}
+
+.gamehaus-marquee {
+  overflow: hidden;
+}
+
+.gamehaus-marquee-track {
+  display: inline-flex;
+  width: max-content;
+  animation: gamehaus-marquee 26s linear infinite;
+  will-change: transform;
+}
+
+.gamehaus-marquee:hover .gamehaus-marquee-track {
+  animation-play-state: paused;
 }
 
 .animate-scale-in {

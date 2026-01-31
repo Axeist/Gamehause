@@ -13,6 +13,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BRAND_NAME, LOGO_PATH, PUBLIC_BOOKING_URL, SUPPORT_EMAIL } from '@/config/brand';
+import NeonMarquee from "@/components/marketing/NeonMarquee";
+import ExperienceShowcase from "@/components/marketing/ExperienceShowcase";
+import TestimonialsSection from "@/components/marketing/TestimonialsSection";
 
 interface Station {
   id: string;
@@ -36,6 +39,32 @@ const Index: React.FC = () => {
     }
   }, [user, navigate]);
 
+  // High-tech cursor glow (desktop-first, lightweight)
+  useEffect(() => {
+    const root = document.documentElement;
+    let raf = 0;
+    let latestX = 0;
+    let latestY = 0;
+
+    const apply = () => {
+      root.style.setProperty("--mx", `${latestX}px`);
+      root.style.setProperty("--my", `${latestY}px`);
+      raf = 0;
+    };
+
+    const onMove = (e: PointerEvent) => {
+      latestX = e.clientX;
+      latestY = e.clientY;
+      if (!raf) raf = window.requestAnimationFrame(apply);
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
   // Fetch live station data
   useEffect(() => {
     const fetchLiveStations = async () => {
@@ -46,7 +75,14 @@ const Index: React.FC = () => {
           .order('name');
         
         if (error) throw error;
-        setLiveStations(data || []);
+        const normalized: Station[] = (data || []).map((row: any) => ({
+          id: row.id,
+          name: row.name,
+          type: row.type === "ps5" || row.type === "8ball" || row.type === "vr" ? row.type : "ps5",
+          hourly_rate: row.hourly_rate,
+          is_occupied: row.is_occupied,
+        }));
+        setLiveStations(normalized);
         setStationsLoading(false);
       } catch (error) {
         console.error('Error fetching stations:', error);
@@ -82,6 +118,13 @@ const Index: React.FC = () => {
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.06] pointer-events-none" />
         <div className="absolute inset-0 bg-noise-soft opacity-[0.10] mix-blend-overlay pointer-events-none" />
         <div className="absolute inset-0 bg-scanlines opacity-[0.04] mix-blend-overlay pointer-events-none" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(650px circle at var(--mx, 50vw) var(--my, 30vh), rgba(255, 74, 26, 0.14), transparent 45%)",
+          }}
+        />
         
         {/* Elegant gradients */}
         <div className="absolute top-0 left-1/4 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-gamehaus-purple/10 to-transparent blur-[120px] animate-float opacity-30"></div>
@@ -178,6 +221,10 @@ const Index: React.FC = () => {
             <MapPin className="h-3 w-3 mr-1.5 text-gamehaus-magenta" />
             T. Nagar, Chennai
           </Badge>
+        </div>
+
+        <div className="mb-10 md:mb-14 w-full">
+          <NeonMarquee />
         </div>
         
         {/* Primary Booking CTA - Prominent */}
@@ -411,6 +458,10 @@ const Index: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className="w-full mb-16">
+          <ExperienceShowcase />
+        </div>
         
         {/* Features - Enhanced */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl mx-auto mb-20">
@@ -524,6 +575,10 @@ const Index: React.FC = () => {
         </div>
 
         <Separator className="w-full max-w-6xl mx-auto mb-12 bg-gamehaus-purple/20" />
+
+        <div className="w-full mb-20">
+          <TestimonialsSection />
+        </div>
 
         {/* How it works */}
         <div className="w-full max-w-6xl mx-auto mb-20 px-4">
