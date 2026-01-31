@@ -310,9 +310,18 @@ export default function SplashScreen({ variant, onDone }: Props) {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-[10px] text-gray-500">
-            Designed for smooth performance on mobile & desktop.
-          </p>
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <p className="text-center text-[10px] text-gray-500">
+              Designed for smooth performance on mobile & desktop.
+            </p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[10px] text-gray-300 backdrop-blur-md">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-gamehaus-cyan shadow-[0_0_18px_rgba(34,211,238,0.35)]" />
+              <span className="tracking-wide">Powered by</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-cyan font-semibold">
+                Cuephoria Tech
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
