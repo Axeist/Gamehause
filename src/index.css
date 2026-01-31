@@ -46,25 +46,20 @@
     --sidebar-border: 240 6% 16%;
     --sidebar-ring: 14 100% 55%; /* Flame */
 
-    /*
-      Gamehaus custom cursor set (served from /public).
-      Note: most browsers do NOT support animated .ani cursors; they will fall back
-      to the built-in cursor keyword (pointer/text/etc). For reliable custom cursors,
-      convert these files to .cur or .png and update the URLs below.
-    */
-    --gh-cursor-default: url("/Fire_Normal_right.ani");
-    --gh-cursor-pointer: url("/Fire_Link_Select.ani");
-    --gh-cursor-text: url("/Fire_Text_Select.ani");
-    --gh-cursor-busy: url("/Fire_Busy.ani");
-    --gh-cursor-working: url("/Fire_working_in_bk.ani");
-    --gh-cursor-help: url("/Fire_Help_Select.ani");
-    --gh-cursor-move: url("/Fire_move.ani");
-    --gh-cursor-precision: url("/Fire_Precision_Select.ani");
-    --gh-cursor-unavailable: url("/Fire_unavailable1.ani");
-    --gh-cursor-resize-ew: url("/Fire_res_horizontal.ani");
-    --gh-cursor-resize-ns: url("/Fire_res_vertical.ani");
-    --gh-cursor-resize-nesw: url("/Fire_res_diag1.ani");
-    --gh-cursor-resize-nwse: url("/Fire_res_diag2.ani");
+    /* Custom cursor set (served from /public) */
+    --gh-cursor-default: url("/Ruby_Normal.cur");
+    --gh-cursor-pointer: url("/Ruby_Normal.cur");
+    --gh-cursor-text: text;
+    --gh-cursor-busy: url("/Ruby_Busy.cur");
+    --gh-cursor-working: url("/Ruby_Busy.cur");
+    --gh-cursor-help: url("/Ruby_Help.cur");
+    --gh-cursor-move: url("/Ruby_Move.cur");
+    --gh-cursor-precision: url("/Ruby_Normal.cur");
+    --gh-cursor-unavailable: url("/Ruby_Exhausted.cur");
+    --gh-cursor-resize-ew: url("/Ruby_Resize_W.cur");
+    --gh-cursor-resize-ns: url("/Ruby_Resize_H.cur");
+    --gh-cursor-resize-nesw: url("/Ruby_Resize_1.cur");
+    --gh-cursor-resize-nwse: url("/Ruby_Resize_2.cur");
   }
 
   * {
