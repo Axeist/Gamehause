@@ -120,8 +120,11 @@ const AppSidebar: React.FC = () => {
                             <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_12px_rgba(34,197,94,0.55)]" />
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="truncate text-sm font-semibold font-quicksand text-white/95">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className="text-sm font-semibold font-quicksand text-white/95 leading-tight whitespace-normal break-all"
+                                title={user.username}
+                              >
                                 {user.username}
                               </span>
                               <span className="shrink-0 rounded-full border border-gamehaus-purple/30 bg-gamehaus-purple/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-gamehaus-lightpurple">
@@ -205,8 +208,11 @@ const AppSidebar: React.FC = () => {
                 <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_12px_rgba(34,197,94,0.55)]" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-semibold font-quicksand text-white/95">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className="text-sm font-semibold font-quicksand text-white/95 leading-tight whitespace-normal break-all"
+                    title={user.username}
+                  >
                     {user.username}
                   </span>
                   <span className="shrink-0 rounded-full border border-gamehaus-purple/30 bg-gamehaus-purple/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-gamehaus-lightpurple">
