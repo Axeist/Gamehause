@@ -37,7 +37,7 @@ export interface Customer {
 export interface Station {
   id: string;
   name: string;
-  type: 'ps5' | '8ball' | 'vr'; // UPDATED: Added 'vr'
+  type: 'ps5' | '8ball' | 'foosball';
   hourlyRate: number;
   isOccupied: boolean;
   currentSession: Session | null;

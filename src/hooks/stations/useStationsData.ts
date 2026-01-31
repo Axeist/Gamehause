@@ -74,7 +74,7 @@ export const useStationsData = () => {
           return {
             id: item.id,
             name: item.name,
-            type: item.type as 'ps5' | '8ball' | 'vr',
+            type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' ? item.type : 'ps5',
             hourlyRate: item.hourly_rate,
             isOccupied: item.is_occupied,
             currentSession: currentSession

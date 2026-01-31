@@ -110,7 +110,7 @@ const steps = [
             </h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Product Selection:</b> Browse by category (Food, Drinks, Tobacco, Challenges, Membership) or search by name</li>
-              <li><b>Gaming Sessions:</b> Add hourly sessions for PS5, Pool, or VR stations directly to bills</li>
+              <li><b>Gaming Sessions:</b> Add hourly sessions for PS5, Pool, or Foosball stations directly to bills</li>
               <li><b>Customer Linking:</b> Attach customer to bill for loyalty tracking and automatic discount application</li>
               <li><b>Quantity Management:</b> Adjust quantities, remove items, or edit before checkout</li>
               <li><b>Saved Carts:</b> Save incomplete bills and resume later for walk-in customers</li>
@@ -167,10 +167,10 @@ const steps = [
     detail: (
       <>
         <p className="mb-3 text-white/90 font-semibold">
-          Manage all gaming stations (PS5, Pool Tables, VR) and track active sessions in real-time.
+          Manage all gaming stations (PS5, Pool Tables, Foosball) and track active sessions in real-time.
         </p>
         <ul className="list-disc ml-5 space-y-2 text-white/80">
-          <li><b>Station Types:</b> Support for PlayStation 5, 8-Ball Pool Tables, and VR Gaming stations</li>
+          <li><b>Station Types:</b> Support for PlayStation 5, 8-Ball Pool Tables, and Foosball tables</li>
           <li><b>Live Status:</b> Visual indicators show Available (green) or Occupied (orange) status for each station</li>
           <li><b>Start Session:</b> Begin a gaming session by selecting station, customer, and hourly rate. Optional coupon codes can be applied</li>
           <li><b>End Session:</b> Stop sessions with automatic time calculation and billing integration</li>
@@ -393,7 +393,7 @@ const steps = [
           Organize and manage gaming tournaments, competitions, and special events.
         </p>
         <ul className="list-disc ml-5 space-y-2 text-white/80">
-          <li><b>Create Tournaments:</b> Set up tournaments with name, game type (Pool, PS5, VR), date, and format</li>
+          <li><b>Create Tournaments:</b> Set up tournaments with name, game type (Pool or PS5), date, and format</li>
           <li><b>Tournament Formats:</b> Support for Knockout, Round-Robin, and custom formats</li>
           <li><b>Player Registration:</b> Register participants with customer linking for history tracking</li>
           <li><b>Match Generation:</b> Automatic bracket and match generation based on tournament format</li>

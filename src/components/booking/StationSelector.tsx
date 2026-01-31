@@ -1,12 +1,12 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Monitor, GamepadIcon, Headset } from 'lucide-react';
+import { Monitor, GamepadIcon, Table2 } from 'lucide-react';
 
 interface Station {
   id: string;
   name: string;
-  type: 'ps5' | '8ball' | 'vr';
+  type: 'ps5' | '8ball' | 'foosball';
   hourly_rate: number;
 }
 
@@ -27,8 +27,8 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
     switch (type) {
       case 'ps5':
         return Monitor;
-      case 'vr':
-        return Headset;
+      case 'foosball':
+        return Table2;
       default:
         return GamepadIcon;
     }
@@ -38,8 +38,8 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
     switch (type) {
       case 'ps5':
         return 'PlayStation 5';
-      case 'vr':
-        return 'VR Gaming';
+      case 'foosball':
+        return 'Foosball Table';
       default:
         return '8-Ball Pool';
     }
@@ -49,17 +49,15 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
     switch (type) {
       case 'ps5':
         return 'bg-cuephoria-purple/15 text-cuephoria-purple border-cuephoria-purple/20';
-      case 'vr':
-        return 'bg-blue-400/15 text-blue-300 border-blue-400/20';
+      case 'foosball':
+        return 'bg-amber-400/15 text-amber-300 border-amber-400/20';
       default:
         return 'bg-emerald-400/15 text-emerald-300 border-emerald-400/20';
     }
   };
 
   const getPriceDisplay = (station: Station) => {
-    return station.type === 'vr' 
-      ? `₹${station.hourly_rate}/15mins`
-      : `₹${station.hourly_rate}/hour`;
+    return `₹${station.hourly_rate}/hour`;
   };
 
   if (loading) {

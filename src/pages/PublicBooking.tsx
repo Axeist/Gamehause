@@ -31,7 +31,7 @@ import {
   Lock,
   X,
   CreditCard,
-  Headset,
+  Table2,
 } from "lucide-react";
 import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL } from "@/config/brand";
 import {
@@ -47,7 +47,7 @@ import { format, parse, getDay } from "date-fns";
 /* =========================
    Types
    ========================= */
-type StationType = "ps5" | "8ball" | "vr";
+type StationType = "ps5" | "8ball" | "foosball";
 interface Station {
   id: string;
   name: string;
@@ -317,9 +317,9 @@ export default function PublicBooking() {
         .select("id, name, type, hourly_rate")
         .order("name");
       if (error) throw error;
-      // Sort stations: 8ball (Tables) first, then PS5, then VR
+      // Sort stations: 8ball (Tables) first, then PS5, then Foosball
       const sortedStations = (data || []).sort((a, b) => {
-        const typeOrder: Record<string, number> = { '8ball': 0, 'ps5': 1, 'vr': 2 };
+        const typeOrder: Record<string, number> = { '8ball': 0, 'ps5': 1, 'foosball': 2 };
         const aOrder = typeOrder[a.type] ?? 99;
         const bOrder = typeOrder[b.type] ?? 99;
         if (aOrder !== bOrder) {
@@ -330,7 +330,7 @@ export default function PublicBooking() {
       });
       setStations(sortedStations.map(station => ({
         ...station,
-        type: station.type as StationType
+        type: station.type === "ps5" || station.type === "8ball" || station.type === "foosball" ? station.type : "ps5"
       })));
     } catch (e) {
       console.error(e);
@@ -516,11 +516,6 @@ export default function PublicBooking() {
     const station = stations.find(s => s.id === id);
     if (!station) return;
     
-    // Don't allow VR stations to be selected
-    if (station.type === 'vr') {
-      return;
-    }
-    
     setSelectedStations((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
@@ -640,8 +635,8 @@ export default function PublicBooking() {
     const selectedHasPS5 = selectedStations.some(
       (id) => stations.find((s) => s.id === id && s.type === "ps5")
     );
-    const selectedHasVR = selectedStations.some(
-      (id) => stations.find((s) => s.id === id && s.type === "vr")
+    const selectedHasFoosball = selectedStations.some(
+      (id) => stations.find((s) => s.id === id && s.type === "foosball")
     );
     const happyHourActive = isHappyHour(selectedDate, selectedSlot);
 
@@ -677,12 +672,8 @@ export default function PublicBooking() {
     }
 
     if (code === "HH99") {
-      if (selectedHasVR) {
-        toast.error("⏰ HH99 is not applicable to VR gaming stations.");
-        return;
-      }
-      if (!(selectedHas8Ball || selectedHasPS5)) {
-        toast.error("⏰ HH99 applies to PS5 and 8-Ball stations during Happy Hours.");
+      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasFoosball)) {
+        toast.error("⏰ HH99 applies to PS5, Tables, and Foosball during Happy Hours.");
         return;
       }
       if (!happyHourActive) {
@@ -693,18 +684,19 @@ export default function PublicBooking() {
         let updated = { ...prev };
         if (selectedHas8Ball) updated["8ball"] = "HH99";
         if (selectedHasPS5) updated["ps5"] = "HH99";
+        if (selectedHasFoosball) updated["foosball"] = "HH99";
         return updated;
       });
       toast.success(
-        "⏰ HH99 applied! PS5 & 8-Ball stations at ₹99/hour during Happy Hours! ✨"
+        "⏰ HH99 applied! PS5, Tables & Foosball at ₹99/hour during Happy Hours! ✨"
       );
       return;
     }
 
     if (code === "NIT50") {
-      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasVR)) {
+      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasFoosball)) {
         toast.error(
-          "NIT50 can be applied to PS5, 8-Ball, or VR stations in your selection."
+          "NIT50 can be applied to PS5, Tables, or Foosball stations in your selection."
         );
         return;
       }
@@ -712,23 +704,23 @@ export default function PublicBooking() {
         let updated = { ...prev };
         if (selectedHasPS5) updated["ps5"] = "NIT50";
         if (selectedHas8Ball) updated["8ball"] = prev["8ball"] === "HH99" ? "HH99" : "NIT50";
-        if (selectedHasVR) updated["vr"] = "NIT50";
+        if (selectedHasFoosball) updated["foosball"] = "NIT50";
         return updated;
       });
       let msg = "🎓 NIT50 applied! 50% OFF for ";
       const types = [];
       if (selectedHasPS5) types.push("PS5");
       if (selectedHas8Ball) types.push("8-Ball");
-      if (selectedHasVR) types.push("VR");
+      if (selectedHasFoosball) types.push("Foosball");
       msg += types.join(" & ") + " stations!";
       toast.success(msg);
       return;
     }
 
     if (code === "ALMA50") {
-      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasVR)) {
+      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasFoosball)) {
         toast.error(
-          "ALMA50 can be applied to PS5, 8-Ball, or VR stations in your selection."
+          "ALMA50 can be applied to PS5, Tables, or Foosball stations in your selection."
         );
         return;
       }
@@ -736,14 +728,14 @@ export default function PublicBooking() {
         let updated = { ...prev };
         if (selectedHasPS5) updated["ps5"] = "ALMA50";
         if (selectedHas8Ball) updated["8ball"] = "ALMA50";
-        if (selectedHasVR) updated["vr"] = "ALMA50";
+        if (selectedHasFoosball) updated["foosball"] = "ALMA50";
         return updated;
       });
       let msg = "🏫 ALMA50 applied! 50% OFF for ";
       const types = [];
       if (selectedHasPS5) types.push("PS5");
       if (selectedHas8Ball) types.push("8-Ball");
-      if (selectedHasVR) types.push("VR");
+      if (selectedHasFoosball) types.push("Foosball");
       msg += types.join(" & ") + " stations!";
       toast.success(msg);
       return;
@@ -840,6 +832,18 @@ export default function PublicBooking() {
         }
       }
 
+      if (appliedCoupons["foosball"] === "HH99") {
+        const foosballs = stations.filter(
+          (s) => selectedStations.includes(s.id) && s.type === "foosball"
+        );
+        const sum = foosballs.reduce((x, s) => x + s.hourly_rate, 0);
+        const d = sum - foosballs.length * 99;
+        if (d > 0) {
+          totalDiscount += d;
+          breakdown["Foosball (HH99)"] = d;
+        }
+      }
+
       if (appliedCoupons["8ball"] === "NIT50" || appliedCoupons["8ball"] === "ALMA50") {
         const balls = stations.filter(
           (s) => selectedStations.includes(s.id) && s.type === "8ball"
@@ -860,14 +864,14 @@ export default function PublicBooking() {
         breakdown[`PS5 (${appliedCoupons["ps5"]})`] = d;
       }
 
-      if (appliedCoupons["vr"] === "NIT50" || appliedCoupons["vr"] === "ALMA50") {
-        const vrStations = stations.filter(
-          (s) => selectedStations.includes(s.id) && s.type === "vr"
+      if (appliedCoupons["foosball"] === "NIT50" || appliedCoupons["foosball"] === "ALMA50") {
+        const foosballs = stations.filter(
+          (s) => selectedStations.includes(s.id) && s.type === "foosball"
         );
-        const sum = vrStations.reduce((x, s) => x + s.hourly_rate, 0);
+        const sum = foosballs.reduce((x, s) => x + s.hourly_rate, 0);
         const d = sum * 0.5;
         totalDiscount += d;
-        breakdown[`VR (${appliedCoupons["vr"]})`] = d;
+        breakdown[`Foosball (${appliedCoupons["foosball"]})`] = d;
       }
     }
 
@@ -1550,13 +1554,13 @@ export default function PublicBooking() {
               Book Your Gaming Session
             </h1>
             <p className="mt-2 text-lg text-gray-300/90 max-w-2xl text-center">
-              Reserve PlayStation 5, Pool Table, or VR Gaming sessions at {BRAND_NAME}
+              Reserve PlayStation 5, Pool Table, or Foosball Table sessions at {BRAND_NAME}
             </p>
 
             <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-gray-300 backdrop-blur-md">
               <span className="font-semibold tracking-wide">Line of Business:</span>
               <span>
-                Amusement & Gaming Lounge Services (time-based PS5, 8-Ball & VR rentals)
+                Amusement & Gaming Lounge Services (time-based PS5, 8-Ball & Foosball rentals)
               </span>
             </div>
           </div>
@@ -1568,8 +1572,8 @@ export default function PublicBooking() {
           <h2 className="mb-1 text-base font-semibold text-white">About {BRAND_NAME}</h2>
           <p>
             {BRAND_NAME} offers <span className="font-medium">time-based rentals</span> of
-            PlayStation 5 stations, 8-Ball pool tables, and VR Gaming stations. Book 
-            60-minute sessions for PS5/Pool or 15-minute sessions for VR Gaming.
+            PlayStation 5 stations, 8-Ball pool tables, and foosball tables. Book
+            your session in convenient 30-minute slots.
           </p>
           <p className="mt-2 text-gray-400">
             <span className="font-medium text-gray-200">Pricing:</span> All prices are
@@ -1704,7 +1708,7 @@ export default function PublicBooking() {
               <CardContent className="relative pt-3">
                 <div
                   className={cn(
-                    "grid grid-cols-3 gap-2 sm:gap-3 mb-4",
+                    "grid grid-cols-4 gap-2 sm:gap-3 mb-4",
                     !isStationSelectionAvailable() && "pointer-events-none"
                   )}
                 >
@@ -1747,6 +1751,19 @@ export default function PublicBooking() {
                   >
                     Tables
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setStationType("foosball")}
+                    className={cn(
+                      "h-9 rounded-full border-white/15 text-[12px]",
+                      stationType === "foosball"
+                        ? "bg-amber-500/15 text-amber-200"
+                        : "bg-transparent text-amber-200"
+                    )}
+                  >
+                    Foosball
+                  </Button>
                 </div>
 
                 {!isStationSelectionAvailable() ? (
@@ -1761,8 +1778,8 @@ export default function PublicBooking() {
                     <StationSelector
                       stations={
                         stationType === "all"
-                          ? stations.filter((s) => s.type !== 'vr')
-                          : stations.filter((s) => s.type === stationType && s.type !== 'vr')
+                          ? stations
+                          : stations.filter((s) => s.type === stationType)
                       }
                       selectedStations={selectedStations}
                       onStationToggle={handleStationToggle}
@@ -1864,8 +1881,8 @@ export default function PublicBooking() {
                             <div className="w-5 h-5 rounded-md bg-gamehaus-purple/20 border border-white/10 flex items-center justify-center">
                               {s.type === "ps5" ? (
                                 <Gamepad2 className="h-3.5 w-3.5 text-gamehaus-purple" />
-                              ) : s.type === "vr" ? (
-                                <Headset className="h-3.5 w-3.5 text-blue-400" />
+                              ) : s.type === "foosball" ? (
+                                <Table2 className="h-3.5 w-3.5 text-amber-300" />
                               ) : (
                                 <Timer className="h-3.5 w-3.5 text-green-400" />
                               )}
@@ -2145,7 +2162,7 @@ export default function PublicBooking() {
               Terms & Conditions (Summary)
             </h3>
             <ul className="ml-5 list-disc text-sm text-gray-300 space-y-1.5">
-              <li>Bookings are for specified time slots (60 min for PS5/Pool, 15 min for VR); extensions subject to availability.</li>
+              <li>Bookings are for specified time slots; extensions are subject to availability.</li>
               <li>Arrive on time; late arrivals may reduce play time without fee adjustment.</li>
               <li>Damage to equipment may incur charges as per in-store policy.</li>
               <li>Management may refuse service in cases of misconduct or safety concerns.</li>

@@ -27,7 +27,7 @@ const StationActions: React.FC<StationActionsProps> = ({
   const [isStartDialogOpen, setIsStartDialogOpen] = useState(false);
   
   const isPoolTable = station.type === '8ball';
-  const isVR = station.type === 'vr';
+  const isFoosballTable = station.type === 'foosball';
 
   const handleStartSession = async (
     customerId: string,
@@ -104,8 +104,8 @@ const StationActions: React.FC<StationActionsProps> = ({
           w-full text-white font-bold py-3 text-lg transition-opacity rounded-lg
           ${isPoolTable
             ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800'
-            : isVR
-              ? 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700'
+            : isFoosballTable
+              ? 'bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700'
               : 'bg-gradient-to-r from-red-500 to-orange-500 hover:opacity-90'
           }
         `}
@@ -126,8 +126,8 @@ const StationActions: React.FC<StationActionsProps> = ({
           w-full py-3 text-lg font-bold transition-opacity rounded-lg
           ${isPoolTable
             ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
-            : isVR
-              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700'
+            : isFoosballTable
+              ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700'
               : 'bg-gradient-to-r from-cuephoria-purple to-cuephoria-lightpurple hover:opacity-90'
           }
           text-white shadow-lg

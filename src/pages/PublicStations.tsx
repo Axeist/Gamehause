@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Monitor, Clock, Timer, Wifi, Gamepad2, RefreshCcw, Headset } from 'lucide-react';
+import { Monitor, Clock, Timer, Gamepad2, RefreshCcw, Table2 } from 'lucide-react';
 import { Station, Session } from '@/types/pos.types';
 import Logo from '@/components/Logo';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -47,11 +47,11 @@ const PublicStations = () => {
         
         console.log('Fetched data:', { stations: stationsData?.length, sessions: sessionsData?.length });
         
-        // Transform data to match our types - Updated to include VR
+        // Transform data to match our types
         const transformedStations: Station[] = stationsData?.map(item => ({
           id: item.id,
           name: item.name,
-          type: item.type as 'ps5' | '8ball' | 'vr', // Added VR type
+          type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' ? item.type : 'ps5',
           hourlyRate: item.hourly_rate,
           isOccupied: item.is_occupied,
           currentSession: null
@@ -128,13 +128,10 @@ const PublicStations = () => {
     return `${hours}h ${mins}m`;
   };
 
-  // Feature flag to enable/disable VR stations section
-  const ENABLE_VR_STATIONS = false; // Set to true to show VR Gaming Stations section
-
-  // Separate stations by type - Added VR stations
+  // Separate stations by type
   const ps5Stations = stations.filter(station => station.type === 'ps5');
   const ballStations = stations.filter(station => station.type === '8ball');
-  const vrStations = stations.filter(station => station.type === 'vr');
+  const foosballStations = stations.filter(station => station.type === 'foosball');
 
   if (loading) {
     return <ImprovedLoadingView error={loadingError} />;
@@ -183,7 +180,7 @@ const PublicStations = () => {
             </div>
           </div>
           
-          {/* Stats summary - Reordered: Pool Table first, then PS5, VR hidden */}
+          {/* Stats summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 max-w-6xl mx-auto mb-10">
             <div className="bg-gradient-to-br from-green-900/30 to-green-900/5 backdrop-blur-md p-4 rounded-xl border border-green-800/20 animate-scale-in" style={{animationDelay: '100ms'}}>
               <div className="text-sm text-gray-400">Pool Tables</div>
@@ -204,12 +201,10 @@ const PublicStations = () => {
                 {stations.length > 0 ? Math.round(stations.filter(s => s.isOccupied).length / stations.length * 100) : 0}% occupancy
               </div>
             </div>
-            <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/10 backdrop-blur-md p-4 rounded-xl border border-gray-700/30 animate-scale-in" style={{animationDelay: '400ms'}}>
-              <div className="text-sm text-gray-400">Network Status</div>
-              <div className="text-md font-bold text-white mt-1 flex items-center">
-                <Wifi className="h-4 w-4 text-gamehaus-lightpurple mr-1.5 animate-pulse-soft" /> Online
-              </div>
-              <div className="text-xs text-gamehaus-lightpurple mt-1">Excellent connection</div>
+            <div className="bg-gradient-to-br from-amber-900/30 to-amber-900/5 backdrop-blur-md p-4 rounded-xl border border-amber-800/20 animate-scale-in" style={{animationDelay: '400ms'}}>
+              <div className="text-sm text-gray-400">Foosball Tables</div>
+              <div className="text-2xl font-bold text-white mt-1">{foosballStations.length}</div>
+              <div className="text-xs text-amber-300 mt-1">{foosballStations.filter(s => !s.isOccupied).length} available</div>
             </div>
           </div>
         </div>
@@ -273,33 +268,31 @@ const PublicStations = () => {
           </div>
         </section>
 
-        {/* VR Gaming Section - Hidden by default, can be enabled by setting ENABLE_VR_STATIONS to true */}
-        {ENABLE_VR_STATIONS && (
-          <section className="animate-slide-up" style={{ animationDelay: '600ms' }}>
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 rounded-xl bg-blue-900/30 flex items-center justify-center mr-3 animate-pulse-soft">
-                <Headset className="h-5 w-5 text-blue-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-white">VR Gaming Stations</h2>
+        {/* Foosball Section - Third */}
+        <section className="animate-slide-up" style={{ animationDelay: '600ms' }}>
+          <div className="flex items-center mb-6">
+            <div className="w-10 h-10 rounded-xl bg-amber-900/30 flex items-center justify-center mr-3 animate-pulse-soft">
+              <Table2 className="h-5 w-5 text-amber-400" />
             </div>
-            
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {vrStations.length === 0 ? (
-                <p className="text-gray-400 col-span-full text-center py-10">No VR gaming stations available at this location</p>
-              ) : (
-                vrStations.map((station, index) => (
-                  <div 
-                    key={station.id} 
-                    className="animate-scale-in"
-                    style={{ animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms` }}
-                  >
-                    <PublicStationCard station={station} />
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-        )}
+            <h2 className="text-2xl font-bold text-white">Foosball Tables</h2>
+          </div>
+          
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {foosballStations.length === 0 ? (
+              <p className="text-gray-400 col-span-full text-center py-10">No foosball tables available at this location</p>
+            ) : (
+              foosballStations.map((station, index) => (
+                <div 
+                  key={station.id} 
+                  className="animate-scale-in"
+                  style={{ animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms` }}
+                >
+                  <PublicStationCard station={station} />
+                </div>
+              ))
+            )}
+          </div>
+        </section>
       </main>
       
       {/* Footer */}
@@ -427,10 +420,10 @@ const NoStationsView = ({ error }: { error: string | null }) => {
   );
 };
 
-// Station Card Component with enhanced animations - Updated for VR support
+// Station Card Component with enhanced animations
 const PublicStationCard = ({ station }: { station: Station }) => {
   const isPoolTable = station.type === '8ball';
-  const isVRStation = station.type === 'vr';
+  const isFoosballTable = station.type === 'foosball';
   const sessionStartTime = station.currentSession?.startTime;
   
   const calculateDuration = () => {
@@ -467,13 +460,13 @@ const PublicStationCard = ({ station }: { station: Station }) => {
 
   // Get colors and styles based on station type
   const getStationStyles = () => {
-    if (isVRStation) {
+    if (isFoosballTable) {
       return {
-        gradient: 'bg-gradient-to-br from-blue-900/40 to-black border-blue-800/50',
-        iconBg: 'bg-blue-900/50',
-        textColor: 'text-blue-400',
-        hoverShadow: 'hover:shadow-blue-900/30',
-        progressBar: 'bg-blue-400'
+        gradient: 'bg-gradient-to-br from-amber-900/40 to-black border-amber-800/50',
+        iconBg: 'bg-amber-900/50',
+        textColor: 'text-amber-400',
+        hoverShadow: 'hover:shadow-amber-900/30',
+        progressBar: 'bg-amber-400'
       };
     } else if (isPoolTable) {
       return {
@@ -529,10 +522,10 @@ const PublicStationCard = ({ station }: { station: Station }) => {
             ${styles.iconBg}
             group-hover:scale-110 transition-transform duration-300
           `}>
-            {isVRStation ? (
-              <Headset className={`h-6 w-6 ${styles.textColor}`} />
-            ) : isPoolTable ? (
+            {isPoolTable ? (
               <Timer className={`h-6 w-6 ${styles.textColor}`} />
+            ) : isFoosballTable ? (
+              <Table2 className={`h-6 w-6 ${styles.textColor}`} />
             ) : (
               <Monitor className={`h-6 w-6 ${styles.textColor}`} />
             )}
@@ -555,12 +548,12 @@ const PublicStationCard = ({ station }: { station: Station }) => {
               {duration.formatted}
             </div>
             
-            {/* Visual progress bar - Different max time for VR (15 min vs 60 min for others) */}
+            {/* Visual progress bar */}
             <div className="mt-3 h-1 bg-gray-800/70 rounded-full overflow-hidden">
               <div 
                 className={`h-full ${styles.progressBar} rounded-full`}
                 style={{ 
-                  width: `${Math.min((duration.minutes / (isVRStation ? 15 : 60)) * 100, 100)}%`,
+                  width: `${Math.min((((duration.hours * 60) + duration.minutes) / 60) * 100, 100)}%`,
                   transition: 'width 1s linear'
                 }}
               ></div>
@@ -575,7 +568,7 @@ const PublicStationCard = ({ station }: { station: Station }) => {
               text-sm font-medium animate-pulse-soft
               ${styles.textColor}
             `}>
-              {isVRStation ? "Ready for VR experience!" : "Ready for next player!"}
+              {isFoosballTable ? "Ready for foosball!" : "Ready for next player!"}
             </p>
             
             {/* Availability indicator dots */}

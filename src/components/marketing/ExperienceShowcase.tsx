@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Calendar, Gamepad2, Headset, Radio, ShieldCheck, Sparkles, Trophy } from "lucide-react";
+import { Calendar, Gamepad2, Radio, ShieldCheck, Sparkles, Table2, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import Reveal from "@/components/motion/Reveal";
@@ -131,8 +131,8 @@ export default function ExperienceShowcase() {
 
                 <div className="mt-6 flex items-center gap-3 text-xs text-gray-400">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-1">
-                    <Headset className="h-3.5 w-3.5 text-gamehaus-lightpurple" />
-                    VR-ready
+                    <Table2 className="h-3.5 w-3.5 text-gamehaus-lightpurple" />
+                    Foosball table
                   </div>
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-1">
                     <Radio className="h-3.5 w-3.5 text-gamehaus-lightpurple" />

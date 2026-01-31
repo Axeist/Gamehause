@@ -1781,7 +1781,7 @@ export default function BookingManagement() {
     });
 
   const getStationTypeLabel = (type: string) => 
-    type === 'ps5' ? 'PlayStation 5' : type === '8ball' ? '8-Ball Pool' : type;
+    type === 'ps5' ? 'PlayStation 5' : type === '8ball' ? '8-Ball Pool' : type === 'foosball' ? 'Foosball Table' : type;
 
   const getDateLabel = (dateString: string) => {
     const date = new Date(dateString);

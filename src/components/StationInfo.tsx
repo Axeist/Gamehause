@@ -16,6 +16,7 @@ interface StationInfoProps {
 const StationInfo: React.FC<StationInfoProps> = ({ station, customerName, customerData }) => {
   // Different styling based on station type
   const isPoolTable = station.type === '8ball';
+  const isFoosballTable = station.type === 'foosball';
   
   // Check if customer is a member and membership is active
   const isMember = customerData ? isMembershipActive(customerData) : false;
@@ -23,7 +24,11 @@ const StationInfo: React.FC<StationInfoProps> = ({ station, customerName, custom
   
   // Extract station number for consistent display
   const stationNumber = parseInt(station.name.replace(/\D/g, '')) || 0;
-  const formattedName = isPoolTable ? `Table ${stationNumber}` : `Console ${stationNumber}`;
+  const formattedName = isPoolTable
+    ? `Table ${stationNumber}`
+    : isFoosballTable
+      ? `Foosball ${stationNumber}`
+      : `Console ${stationNumber}`;
   
   return (
     <>
@@ -35,6 +40,12 @@ const StationInfo: React.FC<StationInfoProps> = ({ station, customerName, custom
               <Table2 className="h-6 w-6 text-green-300 z-10" />
               <div className="absolute inset-0 border-2 border-green-700 rounded-md"></div>
             </div>
+          ) : isFoosballTable ? (
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-800 to-amber-950 rounded-md"></div>
+              <Table2 className="h-6 w-6 text-amber-200 z-10" />
+              <div className="absolute inset-0 border-2 border-amber-700 rounded-md"></div>
+            </div>
           ) : (
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black rounded-md"></div>
@@ -42,7 +53,7 @@ const StationInfo: React.FC<StationInfoProps> = ({ station, customerName, custom
               <div className="absolute bottom-0 h-1 w-8 mx-auto bg-cuephoria-purple rounded-t-lg"></div>
             </div>
           )}
-          <span className={`ml-2 font-bold ${isPoolTable ? 'text-green-500' : 'text-cuephoria-lightpurple'}`}>
+          <span className={`ml-2 font-bold ${isPoolTable ? 'text-green-500' : isFoosballTable ? 'text-amber-300' : 'text-cuephoria-lightpurple'}`}>
             {formattedName}
           </span>
         </div>
@@ -52,7 +63,9 @@ const StationInfo: React.FC<StationInfoProps> = ({ station, customerName, custom
               ? 'bg-cuephoria-orange text-white' 
               : isPoolTable 
                 ? 'bg-green-500 text-white' 
-                : 'bg-cuephoria-lightpurple text-white'
+                : isFoosballTable
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-cuephoria-lightpurple text-white'
             } 
             ${station.isOccupied ? 'animate-pulse' : ''}
           `}

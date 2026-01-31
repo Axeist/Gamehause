@@ -1,12 +1,12 @@
 import * as React from "react";
 
-import { Gamepad2, Headset, ShieldCheck, Sparkles, Timer, Trophy } from "lucide-react";
+import { Gamepad2, ShieldCheck, Sparkles, Table2, Timer, Trophy } from "lucide-react";
 
 const items = [
   { label: "Tournament-grade tables", Icon: Trophy },
   { label: "Next‑gen console sessions", Icon: Gamepad2 },
   { label: "Low‑friction booking flow", Icon: ShieldCheck },
-  { label: "Immersive VR vibes", Icon: Headset },
+  { label: "Foosball showdowns", Icon: Table2 },
   { label: "On‑time session handling", Icon: Timer },
   { label: "Premium lounge atmosphere", Icon: Sparkles },
 ];

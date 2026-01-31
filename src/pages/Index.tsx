@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
-import { Monitor, Trophy, Users, Star, ShieldCheck, Sparkles, Calendar, LogIn, Gamepad2, Timer, Headset, Radio, CheckCircle2, XCircle } from 'lucide-react';
+import { Monitor, Trophy, Users, Star, ShieldCheck, Sparkles, Calendar, LogIn, Gamepad2, Timer, Table2, Radio, CheckCircle2, XCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Mail, Phone, Clock, MapPin } from 'lucide-react';
@@ -20,7 +20,7 @@ import TestimonialsSection from "@/components/marketing/TestimonialsSection";
 interface Station {
   id: string;
   name: string;
-  type: 'ps5' | '8ball' | 'vr';
+  type: 'ps5' | '8ball' | 'foosball';
   hourly_rate: number;
   is_occupied: boolean;
 }
@@ -78,7 +78,7 @@ const Index: React.FC = () => {
         const normalized: Station[] = (data || []).map((row: any) => ({
           id: row.id,
           name: row.name,
-          type: row.type === "ps5" || row.type === "8ball" || row.type === "vr" ? row.type : "ps5",
+          type: row.type === "ps5" || row.type === "8ball" || row.type === "foosball" ? row.type : "ps5",
           hourly_rate: row.hourly_rate,
           is_occupied: row.is_occupied,
         }));
@@ -239,7 +239,7 @@ const Index: React.FC = () => {
             <span className="font-bold">Reserve a Slot</span>
           </Button>
           <p className="text-xs sm:text-sm text-gray-400 mt-3 md:mt-4 text-center max-w-md px-2">
-            Click above to book your snooker table, pool table, or PlayStation 5 gaming session
+            Click above to book your snooker table, pool table, PlayStation 5, or foosball session
           </p>
         </div>
         
@@ -308,7 +308,6 @@ const Index: React.FC = () => {
                   {liveStations.map((station) => {
                     const isPS5 = station.type === 'ps5';
                     const isPool = station.type === '8ball';
-                    const isVR = station.type === 'vr';
                     
                     return (
                       <div
@@ -326,20 +325,20 @@ const Index: React.FC = () => {
                             <div className="flex items-center gap-3">
                               <div className={`p-2.5 rounded-lg ${
                                 isPS5 ? 'bg-blue-500/20 border border-blue-500/30' :
-                                isPool ? 'bg-amber-500/20 border border-amber-500/30' :
-                                'bg-purple-500/20 border border-purple-500/30'
+                                isPool ? 'bg-green-500/20 border border-green-500/30' :
+                                'bg-amber-500/20 border border-amber-500/30'
                               }`}>
                                 {isPS5 ? (
                                   <Gamepad2 className={`h-5 w-5 ${isPS5 ? 'text-blue-400' : ''}`} />
                                 ) : isPool ? (
-                                  <Timer className="h-5 w-5 text-amber-400" />
+                                  <Timer className="h-5 w-5 text-green-400" />
                                 ) : (
-                                  <Headset className="h-5 w-5 text-purple-400" />
+                                  <Table2 className="h-5 w-5 text-amber-400" />
                                 )}
                               </div>
                               <div>
                                 <h3 className="text-lg font-bold text-white">{station.name}</h3>
-                                <p className="text-xs text-gray-400 capitalize">{station.type === '8ball' ? 'Pool Table' : station.type === 'ps5' ? 'PlayStation 5' : 'VR Station'}</p>
+                                <p className="text-xs text-gray-400 capitalize">{station.type === '8ball' ? 'Pool Table' : station.type === 'ps5' ? 'PlayStation 5' : 'Foosball Table'}</p>
                               </div>
                             </div>
                             <Badge className={
@@ -446,14 +445,14 @@ const Index: React.FC = () => {
               <div className="relative">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gamehaus-magenta/25 to-gamehaus-purple/15 flex items-center justify-center border border-gamehaus-purple/30">
-                    <Headset className="h-5 w-5 text-gamehaus-lightpurple" />
+                    <Table2 className="h-5 w-5 text-gamehaus-lightpurple" />
                   </div>
-                  <h3 className="text-lg font-bold text-white">VR Sessions</h3>
+                  <h3 className="text-lg font-bold text-white">Foosball Table</h3>
                 </div>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  Immersive experiences on select stations—great for first‑timers and groups looking for something different.
+                  Fast, competitive matches with friends—perfect for quick games, group hangouts, and bracket-style showdowns.
                 </p>
-                <p className="mt-3 text-xs text-gray-400">Best for: groups, special occasions, new experiences</p>
+                <p className="mt-3 text-xs text-gray-400">Best for: groups, quick matches, competitive vibes</p>
               </div>
             </div>
           </div>
@@ -478,11 +477,15 @@ const Index: React.FC = () => {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-400" />
-                  <span>3 Premium Snooker Tables</span>
+                  <span>1 Standard Snooker Table</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-400" />
                   <span>1 American Pool Table</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-400" />
+                  <span>2 Medium Tables (8‑Ball & Snooker)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-400" />
@@ -551,14 +554,14 @@ const Index: React.FC = () => {
         <div className="w-full max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
           <div className="text-center p-6 bg-gradient-to-br from-black/60 to-gamehaus-purple/30 backdrop-blur-md rounded-xl border border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300 hover:shadow-lg hover:shadow-gamehaus-purple/30">
             <Trophy className="h-8 w-8 text-gamehaus-lightpurple mx-auto mb-3" />
-            <div className="text-3xl font-bold text-white">3</div>
-            <div className="text-sm text-gray-300 mt-1">Snooker Tables</div>
+            <div className="text-3xl font-bold text-white">4</div>
+            <div className="text-sm text-gray-300 mt-1">Tables (8‑Ball & Snooker)</div>
           </div>
           
           <div className="text-center p-6 bg-gradient-to-br from-black/60 to-gamehaus-magenta/30 backdrop-blur-md rounded-xl border border-gamehaus-magenta/40 hover:border-gamehaus-magenta/60 transition-all duration-300 hover:shadow-lg hover:shadow-gamehaus-magenta/30">
-            <Star className="h-8 w-8 text-gamehaus-magenta mx-auto mb-3" />
+            <Table2 className="h-8 w-8 text-gamehaus-magenta mx-auto mb-3" />
             <div className="text-3xl font-bold text-white">1</div>
-            <div className="text-sm text-gray-300 mt-1">American Pool</div>
+            <div className="text-sm text-gray-300 mt-1">Foosball Table</div>
           </div>
           
           <div className="text-center p-6 bg-gradient-to-br from-black/60 to-gamehaus-purple/30 backdrop-blur-md rounded-xl border border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300 hover:shadow-lg hover:shadow-gamehaus-purple/30">

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { usePOS } from '@/context/POSContext';
 import StationCard from '@/components/StationCard';
 import { Card, CardContent } from '@/components/ui/card';
-import { Gamepad2, Plus, Table2, Headset } from 'lucide-react';
+import { Gamepad2, Plus, Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddStationDialog from '@/components/AddStationDialog';
 import PinVerificationDialog from '@/components/PinVerificationDialog';
@@ -11,19 +11,16 @@ const Stations = () => {
   const { stations } = usePOS();
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openPinDialog, setOpenPinDialog] = useState(false);
-  
-  // Feature flag to enable/disable VR stations section
-  const ENABLE_VR_STATIONS = false; // Set to true to show VR Gaming Stations section
 
   // Separate stations by type
   const ps5Stations = stations.filter(station => station.type === 'ps5');
   const ballStations = stations.filter(station => station.type === '8ball');
-  const vrStations = stations.filter(station => station.type === 'vr');
+  const foosballStations = stations.filter(station => station.type === 'foosball');
 
   // Count active stations
   const activePs5 = ps5Stations.filter(s => s.isOccupied).length;
   const activeBall = ballStations.filter(s => s.isOccupied).length;
-  const activeVr = vrStations.filter(s => s.isOccupied).length;
+  const activeFoosball = foosballStations.filter(s => s.isOccupied).length;
 
   const handleAddStationClick = () => {
     setOpenPinDialog(true);
@@ -62,7 +59,7 @@ const Stations = () => {
         onOpenChange={setOpenAddDialog} 
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-slide-up">
         <Card className="bg-gradient-to-r from-green-900/20 to-green-700/10 border-green-500/30 border animate-fade-in">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -86,21 +83,18 @@ const Stations = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* VR Gaming Card - Hidden by default */}
-        {ENABLE_VR_STATIONS && (
-          <Card className="bg-gradient-to-r from-blue-900/20 to-blue-700/10 border-blue-500/30 border animate-fade-in delay-200">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">VR Gaming</p>
-                <p className="text-2xl font-bold">{activeVr} / {vrStations.length} Active</p>
-              </div>
-              <div className="rounded-full bg-blue-900/30 p-3">
-                <Headset className="h-6 w-6 text-blue-400" />
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        
+        <Card className="bg-gradient-to-r from-amber-900/20 to-amber-700/10 border-amber-500/30 border animate-fade-in delay-200">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Foosball Tables</p>
+              <p className="text-2xl font-bold">{activeFoosball} / {foosballStations.length} Active</p>
+            </div>
+            <div className="rounded-full bg-amber-900/30 p-3">
+              <Table2 className="h-6 w-6 text-amber-400" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-6">
@@ -155,33 +149,31 @@ const Stations = () => {
           </div>
         </div>
 
-        {/* VR Gaming Section - Hidden by default, can be enabled by setting ENABLE_VR_STATIONS to true */}
-        {ENABLE_VR_STATIONS && (
-          <div className="animate-slide-up delay-400">
-            <div className="flex items-center mb-4">
-              <Headset className="h-5 w-5 text-blue-400 mr-2" />
-              <h3 className="text-xl font-semibold font-heading">VR Gaming Stations</h3>
-              <span className="ml-2 bg-blue-800/30 text-blue-400 text-xs px-2 py-1 rounded-full">
-                {activeVr} active
-              </span>
-            </div>
-            
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {vrStations
-                .sort((a, b) => {
-                  const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-                  const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-                  return numA - numB;
-                })
-                .map((station, index) => (
-                  <div key={station.id} className="animate-scale-in" style={{animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms`}}>
-                    <StationCard station={station} />
-                  </div>
-                ))
-              }
-            </div>
+        {/* Foosball Section - Third */}
+        <div className="animate-slide-up delay-400">
+          <div className="flex items-center mb-4">
+            <Table2 className="h-5 w-5 text-amber-400 mr-2" />
+            <h3 className="text-xl font-semibold font-heading">Foosball Tables</h3>
+            <span className="ml-2 bg-amber-800/30 text-amber-300 text-xs px-2 py-1 rounded-full">
+              {activeFoosball} active
+            </span>
           </div>
-        )}
+          
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {foosballStations
+              .sort((a, b) => {
+                const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
+                return numA - numB;
+              })
+              .map((station, index) => (
+                <div key={station.id} className="animate-scale-in" style={{animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms`}}>
+                  <StationCard station={station} />
+                </div>
+              ))
+            }
+          </div>
+        </div>
       </div>
     </div>
   );
