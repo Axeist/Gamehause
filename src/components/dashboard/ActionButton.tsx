@@ -41,9 +41,10 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     <Button 
       onClick={handleClick}
       variant="outline" 
-      className="h-16 sm:h-20 w-full bg-[#1A1F2C] border-gray-700 hover:bg-[#2A2F3C] hover:border-purple-500 
+      className="h-16 sm:h-20 w-full bg-[#1A1F2C] border-gamehaus-purple/35 hover:bg-[#232838] hover:border-gamehaus-lightpurple/70
       flex items-center justify-center text-center gap-2 p-2 sm:p-4 transition-all duration-300
-      overflow-hidden hover:shadow-[0_0_15px_rgba(155,135,245,0.5)] hover:scale-[1.02]
+      overflow-hidden shadow-[0_0_10px_rgba(255,74,26,0.10)] hover:shadow-[0_0_18px_rgba(255,74,26,0.55),0_0_44px_rgba(255,42,0,0.28)] hover:scale-[1.02]
+      focus-visible:ring-2 focus-visible:ring-gamehaus-purple/50 focus-visible:ring-offset-0
       group relative"
     >
       <Icon className={`h-6 w-6 ${iconColor} shrink-0 group-hover:scale-110 transition-transform`} />
