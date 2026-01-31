@@ -106,29 +106,41 @@ const AppSidebar: React.FC = () => {
                     </div>
                   </div>
                   <div className="p-4">
-                    <div className="group bg-cuephoria-dark rounded-lg p-4 shadow-lg border border-gamehaus-purple/20 hover:border-gamehaus-purple/60 hover:shadow-[0_0_20px_rgba(255, 74, 26, 0.25)] transition-all duration-300 ease-in-out">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          {isAdmin ? (
-                            <Shield className="h-6 w-6 text-gamehaus-lightpurple" />
-                          ) : (
-                            <User className="h-6 w-6 text-gamehaus-lightpurple" />
-                          )}
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium font-quicksand text-white">
-                              {user.username}
-                            </span>
-                            <span className="text-xs text-gamehaus-lightpurple font-quicksand">
-                              {isAdmin ? '(Administrator)' : '(Staff)'}
+                    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/35 p-4 shadow-xl shadow-black/40 backdrop-blur-xl transition-all duration-300 hover:border-gamehaus-purple/40 hover:bg-black/40">
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-gamehaus-purple/16 via-transparent to-gamehaus-magenta/14 opacity-90" />
+                      <div className="pointer-events-none absolute -left-10 -top-10 h-28 w-28 rounded-full bg-gamehaus-cyan/10 blur-2xl" />
+                      <div className="relative flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="relative grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5">
+                            {isAdmin ? (
+                              <Shield className="h-5 w-5 text-gamehaus-lightpurple" />
+                            ) : (
+                              <User className="h-5 w-5 text-gamehaus-lightpurple" />
+                            )}
+                            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_12px_rgba(34,197,94,0.55)]" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate text-sm font-semibold font-quicksand text-white/95">
+                                {user.username}
+                              </span>
+                              <span className="shrink-0 rounded-full border border-gamehaus-purple/30 bg-gamehaus-purple/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-gamehaus-lightpurple">
+                                {isAdmin ? "ADMIN" : "STAFF"}
+                              </span>
+                            </div>
+                            <span className="mt-0.5 block text-[11px] font-quicksand text-gray-400">
+                              Access level:{" "}
+                              <span className="text-gray-200">{isAdmin ? "Administrator" : "Staff"}</span>
                             </span>
                           </div>
                         </div>
-                        <button 
+                        <button
                           onClick={logout}
-                          className="p-2 rounded-md bg-cuephoria-darker hover:bg-red-500 transition-all duration-300 group-hover:shadow-lg"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
                           title="Logout"
+                          aria-label="Logout"
                         >
-                          <PowerOff className="h-4 w-4 text-white" />
+                          <PowerOff className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -179,29 +191,41 @@ const AppSidebar: React.FC = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <div className="group bg-cuephoria-dark rounded-lg p-4 shadow-lg border border-gamehaus-purple/20 hover:border-gamehaus-purple/60 hover:shadow-[0_0_20px_rgba(255, 74, 26, 0.25)] transition-all duration-300 ease-in-out">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {isAdmin ? (
-                <Shield className="h-6 w-6 text-gamehaus-lightpurple" />
-              ) : (
-                <User className="h-6 w-6 text-gamehaus-lightpurple" />
-              )}
-              <div className="flex flex-col">
-                <span className="text-sm font-medium font-quicksand text-white">
-                  {user.username}
-                </span>
-                <span className="text-xs text-gamehaus-lightpurple font-quicksand">
-                  {isAdmin ? '(Administrator)' : '(Staff)'}
+        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/35 p-4 shadow-xl shadow-black/40 backdrop-blur-xl transition-all duration-300 hover:border-gamehaus-purple/40 hover:bg-black/40">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-gamehaus-purple/16 via-transparent to-gamehaus-magenta/14 opacity-90" />
+          <div className="pointer-events-none absolute -left-10 -top-10 h-28 w-28 rounded-full bg-gamehaus-cyan/10 blur-2xl" />
+          <div className="relative flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="relative grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5">
+                {isAdmin ? (
+                  <Shield className="h-5 w-5 text-gamehaus-lightpurple" />
+                ) : (
+                  <User className="h-5 w-5 text-gamehaus-lightpurple" />
+                )}
+                <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_12px_rgba(34,197,94,0.55)]" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-semibold font-quicksand text-white/95">
+                    {user.username}
+                  </span>
+                  <span className="shrink-0 rounded-full border border-gamehaus-purple/30 bg-gamehaus-purple/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-gamehaus-lightpurple">
+                    {isAdmin ? "ADMIN" : "STAFF"}
+                  </span>
+                </div>
+                <span className="mt-0.5 block text-[11px] font-quicksand text-gray-400">
+                  Access level:{" "}
+                  <span className="text-gray-200">{isAdmin ? "Administrator" : "Staff"}</span>
                 </span>
               </div>
             </div>
-            <button 
+            <button
               onClick={logout}
-              className="p-2 rounded-md bg-cuephoria-darker hover:bg-red-500 transition-all duration-300 group-hover:shadow-lg"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
               title="Logout"
+              aria-label="Logout"
             >
-              <PowerOff className="h-4 w-4 text-white" />
+              <PowerOff className="h-4 w-4" />
             </button>
           </div>
         </div>
