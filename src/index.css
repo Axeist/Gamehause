@@ -240,6 +240,38 @@
   transform-origin: 50% 70%;
 }
 
+/* --- Splash screen animations (GPU-friendly) --- */
+@keyframes gh-splash-float {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.9; }
+  50% { transform: translate3d(0, -10px, 0) scale(1.03); opacity: 1; }
+}
+@keyframes gh-splash-float2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.8; }
+  50% { transform: translate3d(0, 12px, 0) scale(1.04); opacity: 1; }
+}
+@keyframes gh-splash-pop {
+  0% { transform: scale(0.94); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes gh-splash-shimmer {
+  0% { transform: translateX(-60%); opacity: 0; }
+  20% { opacity: 0.55; }
+  100% { transform: translateX(60%); opacity: 0; }
+}
+
+.gh-splash-float { animation: gh-splash-float 2.6s ease-in-out infinite; will-change: transform; }
+.gh-splash-float2 { animation: gh-splash-float2 3.2s ease-in-out infinite; will-change: transform; }
+.gh-splash-pop { animation: gh-splash-pop 240ms ease-out both; will-change: transform, opacity; }
+.gh-splash-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.10) 50%, transparent 100%);
+  animation: gh-splash-shimmer 1.6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.gh-splash-bar { will-change: width; }
+
 /* Custom styles */
 .indian-rupee::before {
   content: "₹";

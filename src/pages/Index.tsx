@@ -76,6 +76,12 @@ const Index: React.FC = () => {
 
   // High-tech cursor glow (desktop-first, lightweight)
   useEffect(() => {
+    // Avoid heavy pointer glow on touch / reduced-motion devices (helps jitter)
+    if (typeof window === "undefined") return;
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const finePointer = window.matchMedia?.("(pointer: fine)")?.matches;
+    if (reduceMotion || !finePointer) return;
+
     const root = document.documentElement;
     let raf = 0;
     let latestX = 0;

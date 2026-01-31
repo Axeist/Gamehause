@@ -336,6 +336,11 @@ const Login = () => {
       const success = await login(username, password, isAdminLogin, enhancedMetadata);
       
       if (success) {
+        try {
+          sessionStorage.setItem("gh_show_login_splash_v1", "1");
+        } catch {
+          // ignore
+        }
         if (videoRef.current && videoRef.current.srcObject) {
           const stream = videoRef.current.srcObject as MediaStream;
           stream.getTracks().forEach(track => track.stop());

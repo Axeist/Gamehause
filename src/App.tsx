@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +15,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import GlobalNotificationBell from "@/components/GlobalNotificationBell";
 import GameboyChatWidget from "@/components/chat/GameboyChatWidget";
+import SplashScreen from "@/components/SplashScreen";
 
 // Pages
 import Login from "./pages/Login";
@@ -112,6 +113,59 @@ const ProtectedRoute = ({
   );
 };
 
+const SplashController = () => {
+  const location = useLocation();
+  const { user } = useAuth();
+  const [show, setShow] = useState(false);
+  const [variant, setVariant] = useState<"first_visit" | "login_success">("first_visit");
+
+  const shouldShowFirstVisit = useMemo(() => {
+    try {
+      return localStorage.getItem("gh_seen_splash_v1") !== "1";
+    } catch {
+      return true;
+    }
+  }, []);
+
+  useEffect(() => {
+    // First-visit splash once ever
+    if (shouldShowFirstVisit) {
+      setVariant("first_visit");
+      setShow(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Post-login splash ONLY when explicitly flagged by Login page
+    if (!user) return;
+    try {
+      if (sessionStorage.getItem("gh_show_login_splash_v1") === "1") {
+        sessionStorage.removeItem("gh_show_login_splash_v1");
+        setVariant("login_success");
+        setShow(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, [user, location.pathname]);
+
+  if (!show) return null;
+  return (
+    <SplashScreen
+      variant={variant}
+      onDone={() => {
+        setShow(false);
+        try {
+          localStorage.setItem("gh_seen_splash_v1", "1");
+        } catch {
+          // ignore
+        }
+      }}
+    />
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -123,6 +177,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
+                  <SplashController />
                   <SubscriptionGuard>
                     <Routes>
                 <Route path="/" element={<Index />} />
