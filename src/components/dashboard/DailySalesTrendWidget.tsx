@@ -159,10 +159,10 @@ const DailySalesTrendWidget: React.FC<DailySalesTrendWidgetProps> = ({ startDate
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 hover:border-gray-600/50 transition-colors">
               <div className="flex items-center gap-2 mb-1">
-                <Calendar className="h-4 w-4 text-nerfturf-magenta" />
+                <Calendar className="h-4 w-4 text-gamehaus-magenta" />
                 <p className="text-xs text-gray-400">Total Sales</p>
               </div>
-              <p className="text-lg font-bold text-nerfturf-magenta">
+              <p className="text-lg font-bold text-gamehaus-magenta">
                 <CurrencyDisplay amount={metrics.totalSales} />
               </p>
             </div>

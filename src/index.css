@@ -6,44 +6,45 @@
 
 @layer base {
   :root {
-    --background: 225 20% 13%;
-    --foreground: 0 0% 100%;
+    /* Gamehaus dark premium neon ember theme */
+    --background: 0 0% 3%;
+    --foreground: 240 5% 96%;
 
-    --card: 225 20% 13%;
-    --card-foreground: 0 0% 100%;
+    --card: 240 6% 6%;
+    --card-foreground: 240 5% 96%;
 
-    --popover: 225 20% 13%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 240 6% 6%;
+    --popover-foreground: 240 5% 96%;
 
-    --primary: 280 65% 50%;  /* purple for NerfTurf */
+    --primary: 14 100% 55%; /* Flame */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 320 100% 50%;  /* magenta */
+    --secondary: 20 100% 58%; /* Tangerine */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 225 20% 20%;
-    --muted-foreground: 225 10% 70%;
+    --muted: 240 6% 10%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 180 100% 50%;  /* cyan accent */
+    --accent: 10 100% 50%; /* Ember */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 225 20% 25%;
-    --input: 225 20% 25%;
-    --ring: 280 65% 50%;  /* purple ring */
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 14 100% 55%; /* Flame */
 
     --radius: 0.75rem;
 
-    --sidebar-background: 225 20% 13%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 280 65% 50%;  /* purple */
+    --sidebar-background: 240 6% 6%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 14 100% 55%; /* Flame */
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 225 20% 18%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 225 20% 25%;
-    --sidebar-ring: 280 65% 50%;  /* purple */
+    --sidebar-accent: 240 6% 10%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 6% 16%;
+    --sidebar-ring: 14 100% 55%; /* Flame */
   }
 
   * {
@@ -68,14 +69,14 @@
   }
 }
 
-/* Custom styles for NerfTurf */
+/* Custom styles */
 .indian-rupee::before {
   content: "₹";
   display: inline-block;
   margin-right: 2px;
 }
 
-/* Custom scrollbar for dark theme with green accent */
+/* Custom scrollbar for dark theme (warm neon) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -87,28 +88,28 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(110, 89, 165, 0.5);  /* purple */
+  background: rgba(255, 74, 26, 0.45);  /* flame */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(110, 89, 165, 0.7);  /* purple hover */
+  background: rgba(255, 74, 26, 0.65);  /* flame hover */
 }
 
-/* Better outlines for focus - NerfTurf purple */
+/* Better outlines for focus - Gamehaus flame */
 :focus-visible {
-  outline: 2px solid #6E59A5;  /* purple */
+  outline: 2px solid #FF4A1A;  /* flame */
   outline-offset: 2px;
 }
 
-/* Gradient text for headings - NerfTurf purple/magenta gradient */
+/* Gradient text for headings - Gamehaus flame/ember/gold gradient */
 .gradient-text {
-  @apply bg-gradient-to-r from-nerfturf-purple via-nerfturf-magenta to-nerfturf-lightpurple bg-clip-text text-transparent;
+  @apply bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-pink bg-clip-text text-transparent;
 }
 
-/* Cards hover effects - NerfTurf purple glow */
+/* Cards hover effects - Gamehaus flame glow */
 .card-hover {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-purple/20 hover:translate-y-[-4px];
+  @apply transition-all duration-300 hover:shadow-lg hover:shadow-gamehaus-purple/20 hover:translate-y-[-4px];
 }
 
 /* Mobile optimizations */
@@ -377,13 +378,13 @@
   }
 }
 
-/* Custom animations for action buttons - NerfTurf purple glow */
+/* Custom animations for action buttons - warm glow */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(110, 89, 165, 0.3);  /* purple */
+    box-shadow: 0 0 6px rgba(255, 74, 26, 0.22);  /* flame */
   }
   50% {
-    box-shadow: 0 0 20px rgba(110, 89, 165, 0.8);  /* purple */
+    box-shadow: 0 0 24px rgba(255, 74, 26, 0.55);  /* flame */
   }
 }
 
@@ -393,17 +394,17 @@
 }
 
 /* --- Hide scrollbar elegantly for the product tags filter --- */
-.nerfturf-scrollbar-hide {
+.gamehaus-scrollbar-hide {
   overflow-x: auto;
   -ms-overflow-style: none;        /* IE and Edge */
   scrollbar-width: none;           /* Firefox */
 }
-.nerfturf-scrollbar-hide::-webkit-scrollbar {
+.gamehaus-scrollbar-hide::-webkit-scrollbar {
   display: none !important;        /* Chrome, Safari, Opera */
 }
 
-/* --- Product Filter Tag Custom Styling - NerfTurf Purple Theme --- */
-.nerfturf-filter-tag {
+/* --- Product Filter Tag Custom Styling - Gamehaus Theme --- */
+.gamehaus-filter-tag {
   background: transparent;
   border: none;
   outline: none;
@@ -426,22 +427,22 @@
   justify-content: center;
 }
 
-.nerfturf-filter-tag:last-child {
+.gamehaus-filter-tag:last-child {
   margin-right: 0;
 }
 
-.nerfturf-filter-tag:hover:not([data-state="active"]) {
-  background: rgba(110, 89, 165, 0.08);  /* purple hover */
-  color: #6E59A5;  /* purple */
+.gamehaus-filter-tag:hover:not([data-state="active"]) {
+  background: rgba(255, 74, 26, 0.08);  /* flame hover */
+  color: #FF4A1A;  /* flame */
 }
 
-.nerfturf-filter-tag[data-state="active"] {
-  background: #6E59A5;  /* purple */
+.gamehaus-filter-tag[data-state="active"] {
+  background: #FF4A1A;  /* flame */
   color: #fff;
-  box-shadow: 0 2px 10px 0 rgba(110, 89, 165, 0.15);  /* purple shadow */
+  box-shadow: 0 2px 10px 0 rgba(255, 74, 26, 0.18);  /* flame shadow */
 }
 
-.nerfturf-filter-tag[data-state="active"]::after {
+.gamehaus-filter-tag[data-state="active"]::after {
   content: "";
   display: block;
   position: absolute;
@@ -450,17 +451,17 @@
   bottom: 6px;
   height: 3px;
   border-radius: 2px;
-  background: linear-gradient(to right, #6E59A5 60%, #9b87f5 100%);  /* purple gradient */
+  background: linear-gradient(to right, #FF4A1A 60%, #FFC14A 100%);  /* flame -> gold */
   opacity: 0.9;
 }
 
-.nerfturf-filter-tag:focus-visible {
+.gamehaus-filter-tag:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(110, 89, 165, 0.7);  /* purple focus */
+  box-shadow: 0 0 0 2px rgba(255, 74, 26, 0.65);  /* flame focus */
 }
 
 @media (max-width: 600px) {
-  .nerfturf-filter-tag {
+  .gamehaus-filter-tag {
     padding: 0.5rem 0.7rem;
     font-size: 0.98rem;
     min-width: 68px;

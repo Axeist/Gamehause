@@ -26,6 +26,7 @@ import {
 import {
   format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears, isToday, isYesterday, isTomorrow
 } from 'date-fns';
+import { PUBLIC_BOOKING_URL } from '@/config/brand';
 
 interface BookingView {
   id: string;
@@ -1848,7 +1849,7 @@ export default function BookingManagement() {
           </Button>
           <Button
             className="flex items-center gap-2"
-            onClick={() => window.open('https://app.nerfturf.in/public/booking', '_blank', 'noopener,noreferrer')}
+            onClick={() => window.open(PUBLIC_BOOKING_URL, '_blank', 'noopener,noreferrer')}
           >
             <Plus className="h-4 w-4" />
             New Booking

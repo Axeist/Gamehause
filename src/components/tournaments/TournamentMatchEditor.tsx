@@ -68,7 +68,7 @@ const TournamentMatchEditor: React.FC<TournamentMatchEditorProps> = ({
           <Button
             size="sm"
             onClick={handleSave}
-            className="bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple hover:to-nerfturf-magenta text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition-all duration-200 hover:shadow-nerfturf-purple/25"
+            className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition-all duration-200 hover:shadow-gamehaus-purple/25"
           >
             <Check className="h-4 w-4 mr-2" />
             Save Changes

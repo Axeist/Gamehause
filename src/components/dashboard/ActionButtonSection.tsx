@@ -27,7 +27,7 @@ const ActionButtonSection: React.FC = () => {
         icon={User}
         label={isMobile ? "Customer" : "Add Customer"}
         path="/customers"
-        iconColor="text-nerfturf-magenta"
+        iconColor="text-gamehaus-magenta"
       />
       
       <ActionButton

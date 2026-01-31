@@ -17,6 +17,14 @@ import PublicTournamentHistory from '@/components/tournaments/PublicTournamentHi
 import PublicLeaderboard from '@/components/tournaments/PublicLeaderboard';
 import TournamentImageGallery from '@/components/tournaments/TournamentImageGallery';
 import PromotionalPopup from '@/components/PromotionalPopup';
+import {
+  BASE_URL,
+  BRAND_NAME,
+  LOGO_PATH,
+  PUBLIC_BOOKING_URL,
+  PUBLIC_STATIONS_URL,
+  SUPPORT_EMAIL,
+} from '@/config/brand';
 
 interface Tournament {
   id: string;
@@ -567,16 +575,16 @@ const PublicTournaments = () => {
     const [showHistory, setShowHistory] = useState(false);
 
     return (
-      <Card className="w-full bg-gradient-to-br from-black via-black to-blackpurple/20 border-nerfturf-lightpurple/30 hover:border-nerfturf-lightpurple/60 transition-all duration-500 hover:shadow-2xl hover:shadow-nerfturf-lightpurple/20 hover:-translate-y-2 hover:scale-[1.02] group overflow-hidden relative">
+      <Card className="w-full bg-gradient-to-br from-black via-black to-blackpurple/20 border-gamehaus-lightpurple/30 hover:border-gamehaus-lightpurple/60 transition-all duration-500 hover:shadow-2xl hover:shadow-gamehaus-lightpurple/20 hover:-translate-y-2 hover:scale-[1.02] group overflow-hidden relative">
         {/* Animated glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-nerfturf-lightpurple/10 to-transparent animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gamehaus-lightpurple/10 to-transparent animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity"></div>
         
         {/* Floating particles effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-nerfturf-lightpurple/30 rounded-full animate-float opacity-0 group-hover:opacity-100"
+              className="absolute w-1 h-1 bg-gamehaus-lightpurple/30 rounded-full animate-float opacity-0 group-hover:opacity-100"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -589,8 +597,8 @@ const PublicTournaments = () => {
 
         <CardHeader className="pb-3 relative z-10">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-bold text-nerfturf-lightpurple flex items-center gap-2 group-hover:text-white transition-colors">
-              <div className="p-2 rounded-lg bg-nerfturf-lightpurple/20 group-hover:bg-nerfturf-lightpurple/40 transition-all group-hover:scale-110">
+            <CardTitle className="text-lg font-bold text-gamehaus-lightpurple flex items-center gap-2 group-hover:text-white transition-colors">
+              <div className="p-2 rounded-lg bg-gamehaus-lightpurple/20 group-hover:bg-gamehaus-lightpurple/40 transition-all group-hover:scale-110">
                 {getGameIcon(tournament.game_type)}
               </div>
               {tournament.name}
@@ -601,12 +609,12 @@ const PublicTournaments = () => {
           </div>
           <div className="text-sm text-gray-300 flex items-center gap-2 mt-2">
             {tournament.game_type === 'Pool' && tournament.game_variant && (
-              <span className="bg-nerfturf-purple/20 px-2 py-1 rounded-full text-xs">{tournament.game_variant}</span>
+              <span className="bg-gamehaus-purple/20 px-2 py-1 rounded-full text-xs">{tournament.game_variant}</span>
             )}
             {tournament.game_type === 'PS5' && tournament.game_title && (
-              <span className="bg-nerfturf-cyan/20 px-2 py-1 rounded-full text-xs">{tournament.game_title}</span>
+              <span className="bg-gamehaus-cyan/20 px-2 py-1 rounded-full text-xs">{tournament.game_title}</span>
             )}
-            <div className="flex items-center gap-1 text-nerfturf-lightpurple">
+            <div className="flex items-center gap-1 text-gamehaus-lightpurple">
               <Calendar className="h-4 w-4" />
               {formatDate(tournament.date)}
             </div>
@@ -623,13 +631,13 @@ const PublicTournaments = () => {
                   {tournament.total_registrations}/{tournament.max_players} registered
                 </span>
               </div>
-              <div className="text-xs text-nerfturf-lightpurple font-semibold">
+              <div className="text-xs text-gamehaus-lightpurple font-semibold">
                 {Math.round((tournament.total_registrations / tournament.max_players) * 100)}%
               </div>
             </div>
             <div className="w-full bg-gray-300/20 rounded-full h-3 overflow-hidden">
               <div 
-                className="bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-cyan h-3 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                className="bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-cyan h-3 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                 style={{ 
                   width: `${Math.min((tournament.total_registrations / tournament.max_players) * 100, 100)}%` 
                 }}
@@ -682,7 +690,7 @@ const PublicTournaments = () => {
                 <CollapsibleTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="w-full border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
+                    className="w-full border-gamehaus-lightpurple/30 text-gamehaus-lightpurple hover:bg-gamehaus-lightpurple/10"
                   >
                     <History className="mr-2 h-4 w-4" />
                     {showHistory ? 'Hide' : 'View'} Tournament History
@@ -706,7 +714,7 @@ const PublicTournaments = () => {
                 <CollapsibleTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="w-full border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
+                    className="w-full border-gamehaus-lightpurple/30 text-gamehaus-lightpurple hover:bg-gamehaus-lightpurple/10"
                   >
                     <History className="mr-2 h-4 w-4" />
                     {showHistory ? 'Hide' : 'View'} Match Results
@@ -734,7 +742,7 @@ const PublicTournaments = () => {
           {/* Registration Button */}
           {canRegister(tournament) && (
             <Button 
-              className="w-full bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-cyan hover:from-nerfturf-lightpurple/90 hover:to-nerfturf-cyan/90 text-white font-semibold py-3 transition-all duration-300 hover:shadow-xl hover:shadow-nerfturf-lightpurple/30 hover:scale-[1.02] group"
+              className="w-full bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-cyan hover:from-gamehaus-lightpurple/90 hover:to-gamehaus-cyan/90 text-white font-semibold py-3 transition-all duration-300 hover:shadow-xl hover:shadow-gamehaus-lightpurple/30 hover:scale-[1.02] group"
               onClick={() => handleTournamentSelect(tournament)}
             >
               <Trophy className="mr-2 h-4 w-4 group-hover:animate-bounce" />
@@ -843,7 +851,7 @@ const PublicTournaments = () => {
       return (
         <div className="col-span-full text-center text-gray-300 py-16">
           <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 rounded-full bg-nerfturf-lightpurple/20 animate-ping"></div>
+            <div className="absolute inset-0 rounded-full bg-gamehaus-lightpurple/20 animate-ping"></div>
             <IconComponent className="h-20 w-20 mx-auto opacity-50 relative z-10" />
           </div>
           <p className="text-2xl font-semibold mb-2">{content?.title}</p>
@@ -858,21 +866,21 @@ const PublicTournaments = () => {
       <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] flex items-center justify-center overflow-hidden">
         <div className="w-full max-w-md flex flex-col items-center justify-center animate-fade-in">
           <div className="w-32 h-32 mb-8 flex items-center justify-center relative">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta opacity-20 animate-ping"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta opacity-20 animate-ping"></div>
               <img 
-                src="https://iili.io/KpfrAog.jpg" 
-                alt="NerfTurf Logo" 
+                src={LOGO_PATH} 
+                alt="Gamehaus – Premier Snooker & Gaming Lounge" 
                 className="animate-float z-10 relative"
               />
           </div>
           
           <div className="text-center space-y-4 animate-fade-in flex flex-col items-center">
             <div className="relative flex justify-center items-center">
-              <div className="w-20 h-20 border-t-4 border-nerfturf-purple border-solid rounded-full animate-spin"></div>
-              <div className="w-16 h-16 border-t-4 border-r-4 border-transparent border-solid rounded-full border-r-nerfturf-magenta absolute animate-spin-slow"></div>
+              <div className="w-20 h-20 border-t-4 border-gamehaus-purple border-solid rounded-full animate-spin"></div>
+              <div className="w-16 h-16 border-t-4 border-r-4 border-transparent border-solid rounded-full border-r-gamehaus-magenta absolute animate-spin-slow"></div>
             </div>
             
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta animate-text-gradient mt-4">
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta animate-text-gradient mt-4">
               Loading Tournaments...
             </h2>
             <p className="text-gray-300">Getting the latest tournament information</p>
@@ -895,7 +903,7 @@ const PublicTournaments = () => {
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-2 h-2 bg-nerfturf-purple/20 rounded-full animate-float"
+            className="absolute w-2 h-2 bg-gamehaus-purple/20 rounded-full animate-float"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -911,15 +919,15 @@ const PublicTournaments = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col items-center mb-12">
             <div className="mb-8 animate-float relative">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta opacity-30 blur-xl animate-pulse"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta opacity-30 blur-xl animate-pulse"></div>
               <img 
-                src="https://iili.io/KpfrAog.jpg" 
-                alt="NerfTurf Logo" 
-                className="h-32 relative z-10 shadow-2xl shadow-nerfturf-purple/40"
+                src={LOGO_PATH} 
+                alt="Gamehaus – Premier Snooker & Gaming Lounge" 
+                className="h-32 relative z-10 shadow-2xl shadow-gamehaus-purple/40"
               />
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-center font-heading bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple animate-text-gradient mb-4">
+            <h1 className="text-5xl md:text-7xl font-bold text-center font-heading bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple animate-text-gradient mb-4">
               Epic Tournaments
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl text-center leading-relaxed">
@@ -929,10 +937,10 @@ const PublicTournaments = () => {
           
           {/* Enhanced stats summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 max-w-5xl mx-auto mb-12">
-            <div className="bg-gradient-to-br from-nerfturf-purple/40 to-nerfturf-purple/10 backdrop-blur-md p-6 rounded-2xl border border-nerfturf-purple/30 animate-scale-in hover:scale-105 transition-all duration-300" style={{animationDelay: '100ms'}}>
+            <div className="bg-gradient-to-br from-gamehaus-purple/40 to-gamehaus-purple/10 backdrop-blur-md p-6 rounded-2xl border border-gamehaus-purple/30 animate-scale-in hover:scale-105 transition-all duration-300" style={{animationDelay: '100ms'}}>
               <div className="flex items-center justify-between mb-3">
                 <div className="text-sm text-gray-300">Total Tournaments</div>
-                <Trophy className="h-6 w-6 text-nerfturf-lightpurple" />
+                <Trophy className="h-6 w-6 text-gamehaus-lightpurple" />
               </div>
               <div className="text-3xl font-bold text-white">{tournaments.length}</div>
               <div className="text-xs text-green-400 mt-1">Active competitions</div>
@@ -972,38 +980,38 @@ const PublicTournaments = () => {
         {/* Desktop Tabs */}
         {!isMobile && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-black/80 backdrop-blur-md border border-nerfturf-lightpurple/30 rounded-xl p-1 mb-8">
+            <TabsList className="grid w-full grid-cols-5 bg-black/80 backdrop-blur-md border border-gamehaus-lightpurple/30 rounded-xl p-1 mb-8">
               <TabsTrigger 
                 value="upcoming" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-lightpurple data-[state=active]:to-gamehaus-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('upcoming')}
                 Upcoming ({filterTournaments('upcoming').length})
               </TabsTrigger>
               <TabsTrigger 
                 value="in-progress"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-lightpurple data-[state=active]:to-gamehaus-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('in-progress')}
                 Live ({filterTournaments('in-progress').length})
               </TabsTrigger>
               <TabsTrigger 
                 value="completed"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-lightpurple data-[state=active]:to-gamehaus-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('completed')}
                 Completed ({filterTournaments('completed').length})
               </TabsTrigger>
               <TabsTrigger 
                 value="gallery"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-lightpurple data-[state=active]:to-gamehaus-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('gallery')}
                 Gallery
               </TabsTrigger>
               <TabsTrigger 
                 value="leaderboard"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-lightpurple data-[state=active]:to-nerfturf-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-lightpurple data-[state=active]:to-gamehaus-cyan data-[state=active]:text-white rounded-lg transition-all duration-300"
               >
                 {getTabIcon('leaderboard')}
                 Leaderboard
@@ -1039,7 +1047,7 @@ const PublicTournaments = () => {
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-between bg-black/80 backdrop-blur-md border-nerfturf-lightpurple/30 text-white hover:bg-nerfturf-lightpurple/10 hover:border-nerfturf-lightpurple/60"
+                  className="w-full justify-between bg-black/80 backdrop-blur-md border-gamehaus-lightpurple/30 text-white hover:bg-gamehaus-lightpurple/10 hover:border-gamehaus-lightpurple/60"
                 >
                   <div className="flex items-center">
                     {getTabIcon(activeTab)}
@@ -1049,40 +1057,40 @@ const PublicTournaments = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-full bg-black border-nerfturf-lightpurple/30 backdrop-blur-md"
+                className="w-full bg-black border-gamehaus-lightpurple/30 backdrop-blur-md"
                 align="start"
               >
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('upcoming')}
-                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'upcoming' ? 'bg-nerfturf-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-gamehaus-lightpurple/20 ${activeTab === 'upcoming' ? 'bg-gamehaus-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('upcoming')}
                   {getTabLabel('upcoming')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('in-progress')}
-                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'in-progress' ? 'bg-nerfturf-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-gamehaus-lightpurple/20 ${activeTab === 'in-progress' ? 'bg-gamehaus-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('in-progress')}
                   {getTabLabel('in-progress')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('completed')}
-                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'completed' ? 'bg-nerfturf-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-gamehaus-lightpurple/20 ${activeTab === 'completed' ? 'bg-gamehaus-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('completed')}
                   {getTabLabel('completed')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('gallery')}
-                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'gallery' ? 'bg-nerfturf-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-gamehaus-lightpurple/20 ${activeTab === 'gallery' ? 'bg-gamehaus-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('gallery')}
                   {getTabLabel('gallery')}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setActiveTab('leaderboard')}
-                  className={`text-white hover:bg-nerfturf-lightpurple/20 ${activeTab === 'leaderboard' ? 'bg-nerfturf-lightpurple/10' : ''}`}
+                  className={`text-white hover:bg-gamehaus-lightpurple/20 ${activeTab === 'leaderboard' ? 'bg-gamehaus-lightpurple/10' : ''}`}
                 >
                   {getTabIcon('leaderboard')}
                   {getTabLabel('leaderboard')}
@@ -1099,16 +1107,16 @@ const PublicTournaments = () => {
       </main>
       
       {/* Enhanced Footer with contact details, legal links, and action buttons */}
-      <footer className="py-12 px-4 sm:px-6 md:px-8 border-t border-nerfturf-lightpurple/20 mt-12 backdrop-blur-md bg-black/50 relative z-10">
+      <footer className="py-12 px-4 sm:px-6 md:px-8 border-t border-gamehaus-lightpurple/20 mt-12 backdrop-blur-md bg-black/50 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Action Buttons Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Button
-              onClick={() => window.open('https://nerfturf.in/book', '_blank')}
-              className="bg-black/80 hover:bg-black border border-nerfturf-purple/20 hover:border-nerfturf-purple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-purple/10 group min-h-[80px]"
+              onClick={() => window.open(PUBLIC_BOOKING_URL, '_blank')}
+              className="bg-black/80 hover:bg-black border border-gamehaus-purple/20 hover:border-gamehaus-purple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-gamehaus-purple/10 group min-h-[80px]"
             >
               <div className="flex items-center w-full">
-                <CalendarDays className="mr-4 h-5 w-5 text-nerfturf-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
+                <CalendarDays className="mr-4 h-5 w-5 text-gamehaus-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-white">Book A Slot</div>
                   <div className="text-sm text-gray-300 mt-1">Reserve your gaming time</div>
@@ -1117,11 +1125,11 @@ const PublicTournaments = () => {
             </Button>
 
             <Button
-              onClick={() => window.open('https://nerfturf.in', '_blank')}
-              className="bg-black/80 hover:bg-black border border-nerfturf-cyan/20 hover:border-nerfturf-cyan/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-cyan/10 group min-h-[80px]"
+              onClick={() => window.open(BASE_URL, '_blank')}
+              className="bg-black/80 hover:bg-black border border-gamehaus-cyan/20 hover:border-gamehaus-cyan/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-gamehaus-cyan/10 group min-h-[80px]"
             >
               <div className="flex items-center w-full">
-                <Globe className="mr-4 h-5 w-5 text-nerfturf-cyan group-hover:text-white transition-colors flex-shrink-0" />
+                <Globe className="mr-4 h-5 w-5 text-gamehaus-cyan group-hover:text-white transition-colors flex-shrink-0" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-white">Official Website</div>
                   <div className="text-sm text-gray-300 mt-1">Visit our main site</div>
@@ -1130,11 +1138,11 @@ const PublicTournaments = () => {
             </Button>
 
             <Button
-              onClick={() => window.open('https://admin.nerfturf.in/public/stations', '_blank')}
-              className="bg-black/80 hover:bg-black border border-nerfturf-lightpurple/20 hover:border-nerfturf-lightpurple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-nerfturf-lightpurple/10 group min-h-[80px]"
+              onClick={() => window.open(PUBLIC_STATIONS_URL, '_blank')}
+              className="bg-black/80 hover:bg-black border border-gamehaus-lightpurple/20 hover:border-gamehaus-lightpurple/40 text-white font-medium py-6 px-6 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-gamehaus-lightpurple/10 group min-h-[80px]"
             >
               <div className="flex items-center w-full">
-                <Zap className="mr-4 h-5 w-5 text-nerfturf-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
+                <Zap className="mr-4 h-5 w-5 text-gamehaus-lightpurple group-hover:text-white transition-colors flex-shrink-0" />
                 <div className="text-left flex-1">
                   <div className="font-semibold text-white">Live Session Status</div>
                   <div className="text-sm text-gray-300 mt-1">Check station availability</div>
@@ -1147,8 +1155,8 @@ const PublicTournaments = () => {
             {/* Logo and description */}
             <div className="text-center md:text-left">
               <img 
-                src="https://iili.io/KpfrAog.jpg"
-                alt="NerfTurf Logo" 
+                src={LOGO_PATH}
+                alt="Gamehaus – Premier Snooker & Gaming Lounge" 
                 className="h-12 mb-4 mx-auto md:mx-0" 
               />
               <p className="text-gray-300 text-sm leading-relaxed mb-4">
@@ -1159,7 +1167,7 @@ const PublicTournaments = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setTermsDialogOpen(true)}
-                  className="border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
+                  className="border-gamehaus-lightpurple/30 text-gamehaus-lightpurple hover:bg-gamehaus-lightpurple/10"
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Terms & Conditions
@@ -1168,7 +1176,7 @@ const PublicTournaments = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setPrivacyDialogOpen(true)}
-                  className="border-nerfturf-lightpurple/30 text-nerfturf-lightpurple hover:bg-nerfturf-lightpurple/10"
+                  className="border-gamehaus-lightpurple/30 text-gamehaus-lightpurple hover:bg-gamehaus-lightpurple/10"
                 >
                   <Shield className="h-4 w-4 mr-2" />
                   Privacy Policy
@@ -1178,27 +1186,27 @@ const PublicTournaments = () => {
             
             {/* Contact Information */}
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-nerfturf-lightpurple mb-4">Contact Us</h3>
+              <h3 className="text-lg font-semibold text-gamehaus-lightpurple mb-4">Contact Us</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
-                  <Phone className="h-4 w-4 text-nerfturf-lightpurple" />
+                  <Phone className="h-4 w-4 text-gamehaus-lightpurple" />
                   <span className="text-sm">+91 93451 87098</span>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
-                  <Mail className="h-4 w-4 text-nerfturf-lightpurple" />
-                  <span className="text-sm">contact@nerfturf.in</span>
+                  <Mail className="h-4 w-4 text-gamehaus-lightpurple" />
+                  <span className="text-sm">{SUPPORT_EMAIL}</span>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
-                  <Clock className="h-4 w-4 text-nerfturf-lightpurple" />
+                  <Clock className="h-4 w-4 text-gamehaus-lightpurple" />
                   <span className="text-sm">11:00 AM - 11:00 PM</span>
                 </div>
                 <a
                   href="https://maps.app.goo.gl/oBUVebkaFMWa7EPk8"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 text-gray-300 hover:text-nerfturf-lightpurple transition-colors group"
+                  className="flex items-center justify-center gap-2 text-gray-300 hover:text-gamehaus-lightpurple transition-colors group"
                 >
-                  <MapPin className="h-4 w-4 text-nerfturf-lightpurple" />
+                  <MapPin className="h-4 w-4 text-gamehaus-lightpurple" />
                   <span className="text-sm group-hover:underline">Find Us on Maps</span>
                   <ExternalLink className="h-3 w-3" />
                 </a>
@@ -1207,7 +1215,7 @@ const PublicTournaments = () => {
             
             {/* Features */}
             <div className="text-center md:text-right">
-              <h3 className="text-lg font-semibold text-nerfturf-lightpurple mb-4">Features</h3>
+              <h3 className="text-lg font-semibold text-gamehaus-lightpurple mb-4">Features</h3>
               <div className="space-y-2 text-sm text-gray-300">
                 <div className="flex items-center justify-center md:justify-end gap-2">
                   <GamepadIcon className="h-4 w-4 text-green-400" />
@@ -1226,9 +1234,9 @@ const PublicTournaments = () => {
           </div>
           
           {/* Bottom footer */}
-          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-nerfturf-lightpurple/10">
+          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gamehaus-lightpurple/10">
             <p className="text-gray-300 text-sm mb-4 md:mb-0">
-              © {new Date().getFullYear()} NerfTurf. All rights reserved.
+              © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
             </p>
             <div className="flex items-center space-x-4 text-sm">
               <div className="flex items-center text-gray-300">
@@ -1242,9 +1250,9 @@ const PublicTournaments = () => {
 
       {/* Registration Dialog - Fixed to prevent page refresh */}
       <Dialog open={isDialogOpen && selectedTournament !== null} onOpenChange={handleDialogOpenChange}>
-        <DialogContent className="bg-black border-nerfturf-lightpurple/30 text-white max-w-md">
+        <DialogContent className="bg-black border-gamehaus-lightpurple/30 text-white max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-nerfturf-lightpurple flex items-center gap-2">
+            <DialogTitle className="text-gamehaus-lightpurple flex items-center gap-2">
               <Trophy className="h-5 w-5" />
               Register for {selectedTournament?.name}
             </DialogTitle>
@@ -1259,7 +1267,7 @@ const PublicTournaments = () => {
                 type="tel"
                 value={registrationForm.customer_phone}
                 onChange={handlePhoneChange}
-                className="bg-black border-gray-300/30 text-white focus:border-nerfturf-lightpurple"
+                className="bg-black border-gray-300/30 text-white focus:border-gamehaus-lightpurple"
                 placeholder="Enter your phone number"
                 autoComplete="tel"
               />
@@ -1292,7 +1300,7 @@ const PublicTournaments = () => {
                 type="text"
                 value={registrationForm.customer_name}
                 onChange={handleNameChange}
-                className="bg-black border-gray-300/30 text-white focus:border-nerfturf-lightpurple"
+                className="bg-black border-gray-300/30 text-white focus:border-gamehaus-lightpurple"
                 placeholder="Enter your full name"
                 autoComplete="name"
                 disabled={!!existingCustomer}
@@ -1307,7 +1315,7 @@ const PublicTournaments = () => {
                 type="email"
                 value={registrationForm.customer_email}
                 onChange={handleEmailChange}
-                className="bg-black border-gray-300/30 text-white focus:border-nerfturf-lightpurple"
+                className="bg-black border-gray-300/30 text-white focus:border-gamehaus-lightpurple"
                 placeholder="Enter your email address"
                 autoComplete="email"
                 disabled={!!existingCustomer}
@@ -1323,7 +1331,7 @@ const PublicTournaments = () => {
             <Button 
               type="submit"
               disabled={isRegistering || isCheckingCustomer}
-              className="w-full bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-cyan hover:from-nerfturf-lightpurple/90 hover:to-nerfturf-cyan/90"
+              className="w-full bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-cyan hover:from-gamehaus-lightpurple/90 hover:to-gamehaus-cyan/90"
             >
               {isRegistering ? 'Registering...' : 'Confirm Registration'}
             </Button>
@@ -1333,9 +1341,9 @@ const PublicTournaments = () => {
 
       {/* Terms & Conditions Dialog */}
       <Dialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen}>
-        <DialogContent className="bg-black border-nerfturf-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-black border-gamehaus-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-nerfturf-lightpurple flex items-center gap-2">
+            <DialogTitle className="text-gamehaus-lightpurple flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Terms & Conditions
             </DialogTitle>
@@ -1355,7 +1363,7 @@ const PublicTournaments = () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">4. Equipment Rules</h4>
-              <p>All gaming equipment will be provided by NerfTurf. Personal equipment is not permitted during tournaments.</p>
+              <p>All gaming equipment will be provided by {BRAND_NAME}. Personal equipment is not permitted during tournaments.</p>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">5. Dispute Resolution</h4>
@@ -1363,7 +1371,7 @@ const PublicTournaments = () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">6. Liability</h4>
-              <p>NerfTurf is not responsible for any personal injury or loss of personal items during events.</p>
+              <p>{BRAND_NAME} is not responsible for any personal injury or loss of personal items during events.</p>
             </div>
           </div>
         </DialogContent>
@@ -1371,9 +1379,9 @@ const PublicTournaments = () => {
 
       {/* Privacy Policy Dialog */}
       <Dialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen}>
-        <DialogContent className="bg-black border-nerfturf-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-black border-gamehaus-lightpurple/30 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-nerfturf-lightpurple flex items-center gap-2">
+            <DialogTitle className="text-gamehaus-lightpurple flex items-center gap-2">
               <Shield className="h-5 w-5" />
               Privacy Policy
             </DialogTitle>
@@ -1401,11 +1409,15 @@ const PublicTournaments = () => {
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">Your Rights</h4>
-              <p>You have the right to access, update, or delete your personal information. Contact us at contact@nerfturf.in for any requests.</p>
+              <p>
+                You have the right to access, update, or delete your personal information. Contact us at {SUPPORT_EMAIL} for any requests.
+              </p>
             </div>
             <div>
               <h4 className="text-white font-semibold mb-2">Contact Us</h4>
-              <p>If you have any questions about this Privacy Policy, please contact us at contact@nerfturf.in or +91 93451 87098.</p>
+              <p>
+                If you have any questions about this Privacy Policy, please contact us at {SUPPORT_EMAIL} or +91 93451 87098.
+              </p>
             </div>
           </div>
         </DialogContent>

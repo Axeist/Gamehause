@@ -48,7 +48,7 @@ const Subscription: React.FC = () => {
     return (
       <div className="flex-1 space-y-6 p-6 text-white bg-inherit">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin-slow h-10 w-10 rounded-full border-4 border-nerfturf-purple border-t-transparent shadow-lg shadow-nerfturf-purple/50"></div>
+          <div className="animate-spin-slow h-10 w-10 rounded-full border-4 border-gamehaus-purple border-t-transparent shadow-lg shadow-gamehaus-purple/50"></div>
         </div>
       </div>
     );
@@ -156,11 +156,11 @@ const Subscription: React.FC = () => {
   return (
     <div className="flex-1 space-y-6 p-6 text-white bg-inherit min-h-screen">
       {/* Enhanced Header Section */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-nerfturf-purple/20 via-nerfturf-magenta/10 to-nerfturf-purple/20 border border-nerfturf-purple/40 p-6 md:p-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-nerfturf-lightpurple/5 to-transparent opacity-50"></div>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gamehaus-purple/20 via-gamehaus-magenta/10 to-gamehaus-purple/20 border border-gamehaus-purple/40 p-6 md:p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gamehaus-lightpurple/5 to-transparent opacity-50"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple font-heading mb-2">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple font-heading mb-2">
               Subscription & Renewal
             </h2>
             <p className="text-gray-300 text-base md:text-lg">
@@ -180,17 +180,17 @@ const Subscription: React.FC = () => {
       {/* Current Subscription Details - Enhanced */}
       {subscription && (
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40 hover:border-nerfturf-purple/60 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="text-white flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
-                  <Calendar className="h-6 w-6 text-nerfturf-lightpurple" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30">
+                  <Calendar className="h-6 w-6 text-gamehaus-lightpurple" />
                 </div>
                 <span className="text-xl font-bold">Subscription Details</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-gamehaus-purple/20">
                 <span className="text-gray-300 font-medium flex items-center gap-2">
                   <Award className="h-4 w-4" />
                   Status:
@@ -208,14 +208,14 @@ const Subscription: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-gamehaus-purple/20">
                 <span className="text-gray-300 font-medium">Plan Name:</span>
-                <span className="text-white font-bold text-lg bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent">
+                <span className="text-white font-bold text-lg bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta bg-clip-text text-transparent">
                   {subscription.plan_name || 'Not Set'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-gamehaus-purple/20">
                 <span className="text-gray-300 font-medium">Billing Cycle:</span>
                 <span className="text-white font-semibold capitalize">
                   {(() => {
@@ -234,14 +234,14 @@ const Subscription: React.FC = () => {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-gamehaus-purple/20">
                 <span className="text-gray-300 font-medium">Start Date:</span>
                 <span className="text-white font-medium">
                   {format(new Date(subscription.start_date), 'MMM dd, yyyy')}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-nerfturf-purple/20">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-black/30 border border-gamehaus-purple/20">
                 <span className="text-gray-300 font-medium">Valid Till:</span>
                 <span className={`font-bold text-lg ${isSubscriptionValid ? 'text-green-400' : 'text-red-400'}`}>
                   {subscription.subscription_type === 'lifetime' 
@@ -256,9 +256,9 @@ const Subscription: React.FC = () => {
                     <span className="font-medium">Subscription Progress</span>
                     <span className="font-bold">{Math.round(subscriptionProgress)}%</span>
                   </div>
-                  <div className="h-3 bg-black/40 rounded-full overflow-hidden border border-nerfturf-purple/20">
+                  <div className="h-3 bg-black/40 rounded-full overflow-hidden border border-gamehaus-purple/20">
                     <div 
-                      className="h-full bg-gradient-to-r from-nerfturf-purple via-nerfturf-magenta to-nerfturf-lightpurple transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-lightpurple transition-all duration-500"
                       style={{ width: `${subscriptionProgress}%` }}
                     />
                   </div>
@@ -267,25 +267,25 @@ const Subscription: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40 hover:border-nerfturf-purple/60 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="text-white flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-nerfturf-magenta/30 to-nerfturf-purple/30">
-                  <DollarSign className="h-6 w-6 text-nerfturf-lightpurple" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-gamehaus-magenta/30 to-gamehaus-purple/30">
+                  <DollarSign className="h-6 w-6 text-gamehaus-lightpurple" />
                 </div>
                 <span className="text-xl font-bold">Payment & Features</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-5 rounded-xl bg-gradient-to-br from-nerfturf-purple/20 via-nerfturf-magenta/15 to-nerfturf-purple/20 border border-nerfturf-purple/30">
+              <div className="p-5 rounded-xl bg-gradient-to-br from-gamehaus-purple/20 via-gamehaus-magenta/15 to-gamehaus-purple/20 border border-gamehaus-purple/30">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-300 font-medium">Amount Paid:</span>
-                  <span className="text-white font-bold text-2xl bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent">
+                  <span className="text-white font-bold text-2xl bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta bg-clip-text text-transparent">
                     ₹{subscription.amount_paid.toLocaleString('en-IN')}
                   </span>
                 </div>
                 {currentPlan && (
-                  <div className="mt-3 pt-3 border-t border-nerfturf-purple/20">
+                  <div className="mt-3 pt-3 border-t border-gamehaus-purple/20">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-400">Plan Value:</span>
                       <span className="text-gray-300 font-semibold">
@@ -311,7 +311,7 @@ const Subscription: React.FC = () => {
                 <div className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
                   subscription.booking_access 
                     ? 'bg-green-500/10 border-green-500/30' 
-                    : 'bg-black/30 border-nerfturf-purple/20'
+                    : 'bg-black/30 border-gamehaus-purple/20'
                 }`}>
                   <span className="text-gray-300 font-medium flex items-center gap-2">
                     <Shield className="h-5 w-5" />
@@ -332,7 +332,7 @@ const Subscription: React.FC = () => {
                 <div className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
                   subscription.staff_management_access 
                     ? 'bg-green-500/10 border-green-500/30' 
-                    : 'bg-black/30 border-nerfturf-purple/20'
+                    : 'bg-black/30 border-gamehaus-purple/20'
                 }`}>
                   <span className="text-gray-300 font-medium flex items-center gap-2">
                     <Users className="h-5 w-5" />
@@ -371,11 +371,11 @@ const Subscription: React.FC = () => {
 
       {/* Current Plan Features - Enhanced */}
       {currentPlan && (
-        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40">
+        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
-                <Star className="h-5 w-5 text-nerfturf-lightpurple" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30">
+                <Star className="h-5 w-5 text-gamehaus-lightpurple" />
               </div>
               <span className="text-xl font-bold">Your Current Plan Benefits</span>
             </CardTitle>
@@ -384,7 +384,7 @@ const Subscription: React.FC = () => {
           <CardContent>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {getPlanBenefits(currentPlan).map((benefit, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-nerfturf-purple/20 hover:border-nerfturf-purple/40 transition-colors">
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-gamehaus-purple/20 hover:border-gamehaus-purple/40 transition-colors">
                   <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-200 text-sm leading-relaxed">{benefit}</span>
                 </div>
@@ -395,9 +395,9 @@ const Subscription: React.FC = () => {
       )}
 
       {/* Available Plans - Enhanced */}
-      <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/40">
+      <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40">
         <CardHeader className="pb-6">
-          <CardTitle className="text-white text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple mb-2">
+          <CardTitle className="text-white text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple mb-2">
             Available Subscription Plans
           </CardTitle>
           <p className="text-gray-400 text-base">Choose the perfect plan that fits your business requirements and budget</p>
@@ -419,7 +419,7 @@ const Subscription: React.FC = () => {
                   key={plan.id}
                   className={`group relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
                     isCurrentPlan
-                      ? 'bg-gradient-to-br from-nerfturf-purple/40 via-nerfturf-magenta/30 to-nerfturf-purple/40 border-nerfturf-purple/60 shadow-2xl shadow-nerfturf-purple/30 scale-105 ring-2 ring-nerfturf-purple/50'
+                      ? 'bg-gradient-to-br from-gamehaus-purple/40 via-gamehaus-magenta/30 to-gamehaus-purple/40 border-gamehaus-purple/60 shadow-2xl shadow-gamehaus-purple/30 scale-105 ring-2 ring-gamehaus-purple/50'
                       : isLifetime
                       ? 'bg-gradient-to-br from-yellow-500/15 via-orange-500/10 to-yellow-500/15 border-yellow-500/50 hover:border-yellow-500/70 hover:shadow-2xl hover:shadow-yellow-500/30'
                       : isDiamond
@@ -428,7 +428,7 @@ const Subscription: React.FC = () => {
                       ? 'bg-gradient-to-br from-purple-500/15 via-pink-500/10 to-purple-500/15 border-purple-500/40 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/20'
                       : isGold
                       ? 'bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-amber-500/15 border-amber-500/40 hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/20'
-                      : 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-nerfturf-purple/40 hover:border-nerfturf-purple/60'
+                      : 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-gamehaus-purple/40 hover:border-gamehaus-purple/60'
                   } hover:scale-[1.03] hover:shadow-xl`}
                 >
                   {/* Shimmer effect */}
@@ -474,7 +474,7 @@ const Subscription: React.FC = () => {
                           isDiamond ? 'text-cyan-400' : 
                           isPlatinum ? 'text-purple-400' : 
                           isGold ? 'text-amber-400' : 
-                          'bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent'
+                          'bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta bg-clip-text text-transparent'
                         }`}>
                           ₹{plan.finalPrice.toLocaleString('en-IN')}
                         </span>
@@ -523,7 +523,7 @@ const Subscription: React.FC = () => {
                     {/* Plan Benefits */}
                     <div className="mb-5">
                       <h4 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-                        <Award className="h-4 w-4 text-nerfturf-lightpurple" />
+                        <Award className="h-4 w-4 text-gamehaus-lightpurple" />
                         Key Benefits
                       </h4>
                       <div className="space-y-2">
@@ -569,11 +569,11 @@ const Subscription: React.FC = () => {
       </Card>
 
       {/* Enhanced Contact Information */}
-      <Card className="bg-gradient-to-r from-nerfturf-purple/15 via-nerfturf-magenta/15 to-nerfturf-purple/15 border-nerfturf-purple/40">
+      <Card className="bg-gradient-to-r from-gamehaus-purple/15 via-gamehaus-magenta/15 to-gamehaus-purple/15 border-gamehaus-purple/40">
         <CardContent className="p-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="p-4 rounded-xl bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30">
-              <HelpCircle className="h-8 w-8 text-nerfturf-lightpurple" />
+            <div className="p-4 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30">
+              <HelpCircle className="h-8 w-8 text-gamehaus-lightpurple" />
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold text-white mb-2">
@@ -585,14 +585,14 @@ const Subscription: React.FC = () => {
               <div className="flex flex-wrap gap-4">
                 <a
                   href="tel:+918667637565"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-nerfturf-purple/20 hover:bg-nerfturf-purple/30 border border-nerfturf-purple/40 text-nerfturf-lightpurple font-semibold transition-all hover:scale-105"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gamehaus-purple/20 hover:bg-gamehaus-purple/30 border border-gamehaus-purple/40 text-gamehaus-lightpurple font-semibold transition-all hover:scale-105"
                 >
                   <Phone className="h-4 w-4" />
                   +91 86676 37565
                 </a>
                 <a
                   href="mailto:contact@cuephoria.in"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-nerfturf-purple/20 hover:bg-nerfturf-purple/30 border border-nerfturf-purple/40 text-nerfturf-lightpurple font-semibold transition-all hover:scale-105"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gamehaus-purple/20 hover:bg-gamehaus-purple/30 border border-gamehaus-purple/40 text-gamehaus-lightpurple font-semibold transition-all hover:scale-105"
                 >
                   <Mail className="h-4 w-4" />
                   contact@cuephoria.in

@@ -45,7 +45,7 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
       case 'scheduled':
         return 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 border-blue-500/40';
       case 'completed':
-        return 'bg-gradient-to-r from-nerfturf-purple/20 to-nerfturf-magenta/20 text-nerfturf-lightpurple border-emerald-500/40';
+        return 'bg-gradient-to-r from-gamehaus-purple/20 to-gamehaus-magenta/20 text-gamehaus-lightpurple border-emerald-500/40';
       case 'cancelled':
         return 'bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-300 border-red-500/40';
       default:
@@ -304,7 +304,7 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
                       <div className="space-y-2">
                         <div className={`p-3 rounded-lg border transition-all duration-300 ${
                           match.winnerId === match.player1Id 
-                            ? 'bg-gradient-to-r from-nerfturf-purple/50 to-nerfturf-magenta/50 border-nerfturf-purple/60 shadow-md' 
+                            ? 'bg-gradient-to-r from-gamehaus-purple/50 to-gamehaus-magenta/50 border-gamehaus-purple/60 shadow-md' 
                             : 'bg-gradient-to-r from-gray-800/50 to-gray-700/50 border-gray-700/60 hover:bg-gray-800/70 hover:border-gray-600/70'
                         }`}>
                           <div className="flex items-center justify-between">
@@ -329,7 +329,7 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
                         
                         <div className={`p-3 rounded-lg border transition-all duration-300 ${
                           match.winnerId === match.player2Id 
-                            ? 'bg-gradient-to-r from-nerfturf-purple/50 to-nerfturf-magenta/50 border-nerfturf-purple/60 shadow-md' 
+                            ? 'bg-gradient-to-r from-gamehaus-purple/50 to-gamehaus-magenta/50 border-gamehaus-purple/60 shadow-md' 
                             : 'bg-gradient-to-r from-gray-800/50 to-gray-700/50 border-gray-700/60 hover:bg-gray-800/70 hover:border-gray-600/70'
                         }`}>
                           <div className="flex items-center justify-between">

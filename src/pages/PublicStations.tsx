@@ -4,6 +4,7 @@ import { Monitor, Clock, Timer, Wifi, Gamepad2, RefreshCcw, Headset } from 'luci
 import { Station, Session } from '@/types/pos.types';
 import Logo from '@/components/Logo';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { BRAND_NAME, LOGO_PATH } from '@/config/brand';
 
 const PublicStations = () => {
   const [stations, setStations] = useState<Station[]>([]);
@@ -151,12 +152,12 @@ const PublicStations = () => {
           <div className="flex flex-col items-center mb-8">
             <div className="mb-6 animate-float">
               <img 
-                src="https://iili.io/KpfrAog.jpg" 
-                alt="NerfTurf Logo" 
-                className="h-24 shadow-lg shadow-nerfturf-purple/30"
+                src={LOGO_PATH}
+                alt="Gamehaus – Premier Snooker & Gaming Lounge" 
+                className="h-24 shadow-lg shadow-gamehaus-purple/30"
               />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white font-heading bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-purple via-nerfturf-lightpurple to-nerfturf-magenta animate-text-gradient">
+            <h1 className="text-4xl md:text-5xl font-bold text-white font-heading bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-purple via-gamehaus-lightpurple to-gamehaus-magenta animate-text-gradient">
               Station Live Status
             </h1>
             <p className="mt-2 text-xl text-gray-300 max-w-2xl text-center">
@@ -165,7 +166,7 @@ const PublicStations = () => {
             
             {/* Animated data freshness indicator */}
             <div className="mt-4 bg-black/20 backdrop-blur-md rounded-full px-4 py-1.5 flex items-center space-x-2 border border-gray-800/50 shadow-inner">
-              <div className={`w-2 h-2 rounded-full ${refreshing ? 'bg-orange-400 animate-pulse' : 'bg-nerfturf-lightpurple'}`}></div>
+              <div className={`w-2 h-2 rounded-full ${refreshing ? 'bg-orange-400 animate-pulse' : 'bg-gamehaus-lightpurple'}`}></div>
               <div className="text-sm text-gray-300 flex items-center space-x-2">
                 {refreshing ? (
                   <span className="flex items-center">
@@ -187,12 +188,12 @@ const PublicStations = () => {
             <div className="bg-gradient-to-br from-green-900/30 to-green-900/5 backdrop-blur-md p-4 rounded-xl border border-green-800/20 animate-scale-in" style={{animationDelay: '100ms'}}>
               <div className="text-sm text-gray-400">Pool Tables</div>
               <div className="text-2xl font-bold text-white mt-1">{ballStations.length}</div>
-              <div className="text-xs text-nerfturf-lightpurple mt-1">{ballStations.filter(s => !s.isOccupied).length} available</div>
+              <div className="text-xs text-gamehaus-lightpurple mt-1">{ballStations.filter(s => !s.isOccupied).length} available</div>
             </div>
-            <div className="bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-purple/5 backdrop-blur-md p-4 rounded-xl border border-nerfturf-purple/20 animate-scale-in" style={{animationDelay: '200ms'}}>
+            <div className="bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-purple/5 backdrop-blur-md p-4 rounded-xl border border-gamehaus-purple/20 animate-scale-in" style={{animationDelay: '200ms'}}>
               <div className="text-sm text-gray-400">PS5 Consoles</div>
               <div className="text-2xl font-bold text-white mt-1">{ps5Stations.length}</div>
-              <div className="text-xs text-nerfturf-lightpurple mt-1">{ps5Stations.filter(s => !s.isOccupied).length} available</div>
+              <div className="text-xs text-gamehaus-lightpurple mt-1">{ps5Stations.filter(s => !s.isOccupied).length} available</div>
             </div>
             <div className="bg-gradient-to-br from-orange-900/30 to-orange-900/5 backdrop-blur-md p-4 rounded-xl border border-orange-800/20 animate-scale-in" style={{animationDelay: '300ms'}}>
               <div className="text-sm text-gray-400">In Use</div>
@@ -206,9 +207,9 @@ const PublicStations = () => {
             <div className="bg-gradient-to-br from-gray-800/50 to-gray-800/10 backdrop-blur-md p-4 rounded-xl border border-gray-700/30 animate-scale-in" style={{animationDelay: '400ms'}}>
               <div className="text-sm text-gray-400">Network Status</div>
               <div className="text-md font-bold text-white mt-1 flex items-center">
-                <Wifi className="h-4 w-4 text-nerfturf-lightpurple mr-1.5 animate-pulse-soft" /> Online
+                <Wifi className="h-4 w-4 text-gamehaus-lightpurple mr-1.5 animate-pulse-soft" /> Online
               </div>
-              <div className="text-xs text-nerfturf-lightpurple mt-1">Excellent connection</div>
+              <div className="text-xs text-gamehaus-lightpurple mt-1">Excellent connection</div>
             </div>
           </div>
         </div>
@@ -249,8 +250,8 @@ const PublicStations = () => {
         {/* PlayStation Section - Second */}
         <section className="mb-12 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center mb-6">
-            <div className="w-10 h-10 rounded-xl bg-nerfturf-purple/20 flex items-center justify-center mr-3 animate-pulse-soft">
-              <Gamepad2 className="h-5 w-5 text-nerfturf-lightpurple" />
+            <div className="w-10 h-10 rounded-xl bg-gamehaus-purple/20 flex items-center justify-center mr-3 animate-pulse-soft">
+              <Gamepad2 className="h-5 w-5 text-gamehaus-lightpurple" />
             </div>
             <h2 className="text-2xl font-bold text-white">PlayStation 5 Consoles</h2>
           </div>
@@ -302,16 +303,16 @@ const PublicStations = () => {
       </main>
       
       {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 md:px-8 border-t border-nerfturf-purple/30 mt-6 backdrop-blur-md bg-black/30">
+      <footer className="py-8 px-4 sm:px-6 md:px-8 border-t border-gamehaus-purple/30 mt-6 backdrop-blur-md bg-black/30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
             <img 
-              src="https://iili.io/KpfrAog.jpg"
-              alt="NerfTurf Logo" 
+              src={LOGO_PATH}
+              alt="Gamehaus – Premier Snooker & Gaming Lounge" 
               className="h-8 mr-3" 
             />
             <p className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} NerfTurf. All rights reserved.
+              © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -348,8 +349,8 @@ const ImprovedLoadingView = ({ error }: { error: string | null }) => {
       <div className="w-full max-w-md flex flex-col items-center justify-center animate-fade-in">
         <div className="w-32 h-32 mb-8 flex items-center justify-center">
           <img 
-            src="https://iili.io/KpfrAog.jpg" 
-            alt="NerfTurf Logo" 
+            src={LOGO_PATH} 
+            alt="Gamehaus – Premier Snooker & Gaming Lounge" 
             className="animate-flip-in"
           />
         </div>
@@ -363,7 +364,7 @@ const ImprovedLoadingView = ({ error }: { error: string | null }) => {
             <p className="text-gray-400">Please try again or contact support</p>
             <button 
               onClick={() => window.location.reload()}
-              className="mt-6 px-4 py-2 bg-nerfturf-purple text-white rounded-lg hover:bg-nerfturf-purple/90 transition-all flex items-center justify-center"
+              className="mt-6 px-4 py-2 bg-gamehaus-purple text-white rounded-lg hover:bg-gamehaus-purple/90 transition-all flex items-center justify-center"
             >
               <RefreshCcw className="mr-2 h-4 w-4" /> Retry
             </button>
@@ -371,18 +372,18 @@ const ImprovedLoadingView = ({ error }: { error: string | null }) => {
         ) : (
           <div className="text-center space-y-4 animate-fade-in flex flex-col items-center">
             <div className="relative flex justify-center items-center">
-              <div className="w-20 h-20 border-t-4 border-nerfturf-lightpurple border-solid rounded-full animate-spin"></div>
-              <div className="w-16 h-16 border-t-4 border-r-4 border-transparent border-solid rounded-full border-r-nerfturf-purple absolute animate-spin-slow"></div>
+              <div className="w-20 h-20 border-t-4 border-gamehaus-lightpurple border-solid rounded-full animate-spin"></div>
+              <div className="w-16 h-16 border-t-4 border-r-4 border-transparent border-solid rounded-full border-r-gamehaus-purple absolute animate-spin-slow"></div>
               <div className="absolute">
                 <img 
-                  src="https://iili.io/KpfrAog.jpg" 
-                  alt="NerfTurf Logo" 
+                  src={LOGO_PATH} 
+                  alt="Gamehaus – Premier Snooker & Gaming Lounge" 
                   className="h-10 w-12 animate-pulse-soft"
                 />
               </div>
             </div>
             
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-purple animate-text-gradient mt-4">
+            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-purple animate-text-gradient mt-4">
               Loading stations...
             </h2>
             <p className="text-gray-400">Getting real-time information</p>
@@ -400,8 +401,8 @@ const NoStationsView = ({ error }: { error: string | null }) => {
       <div className="w-full max-w-md py-12 px-6 flex flex-col items-center justify-center animate-fade-in">
         <div className="w-32 h-32 mb-8 flex items-center justify-center">
           <img 
-            src="https://iili.io/KpfrAog.jpg" 
-            alt="NerfTurf Logo"
+            src={LOGO_PATH} 
+            alt="Gamehaus – Premier Snooker & Gaming Lounge"
             className="animate-float" 
           />
         </div>
@@ -416,7 +417,7 @@ const NoStationsView = ({ error }: { error: string | null }) => {
           </p>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-6 px-4 py-2 bg-nerfturf-purple text-white rounded-lg hover:bg-nerfturf-purple/90 transition-all flex items-center justify-center"
+            className="mt-6 px-4 py-2 bg-gamehaus-purple text-white rounded-lg hover:bg-gamehaus-purple/90 transition-all flex items-center justify-center"
           >
             <RefreshCcw className="mr-2 h-4 w-4" /> Refresh
           </button>
@@ -484,11 +485,11 @@ const PublicStationCard = ({ station }: { station: Station }) => {
       };
     } else {
       return {
-        gradient: 'bg-gradient-to-br from-nerfturf-purple/30 to-black border-nerfturf-purple/40',
-        iconBg: 'bg-nerfturf-purple/40',
-        textColor: 'text-nerfturf-lightpurple',
-        hoverShadow: 'hover:shadow-nerfturf-purple/20',
-        progressBar: 'bg-nerfturf-lightpurple'
+        gradient: 'bg-gradient-to-br from-gamehaus-purple/30 to-black border-gamehaus-purple/40',
+        iconBg: 'bg-gamehaus-purple/40',
+        textColor: 'text-gamehaus-lightpurple',
+        hoverShadow: 'hover:shadow-gamehaus-purple/20',
+        progressBar: 'bg-gamehaus-lightpurple'
       };
     }
   };

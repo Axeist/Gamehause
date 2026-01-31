@@ -21,7 +21,7 @@ Your webhook endpoint is:
 https://your-domain.com/api/razorpay/webhook
 ```
 
-Replace `your-domain.com` with your actual domain (e.g., `app.nerfturf.in`).
+Replace `your-domain.com` with your actual domain (e.g., `gamehaus.co.in`).
 
 ### 2. Configure in Razorpay Dashboard
 

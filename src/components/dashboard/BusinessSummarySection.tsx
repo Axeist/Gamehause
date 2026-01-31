@@ -41,10 +41,10 @@ const BusinessSummarySection: React.FC<BusinessSummarySectionProps> = ({ filtere
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-      <Card className="bg-gray-800 border-gray-700 hover:shadow-nerfturf-purple/20 hover:border-nerfturf-purple/30 transition-all">
+      <Card className="bg-gray-800 border-gray-700 hover:shadow-gamehaus-purple/20 hover:border-gamehaus-purple/30 transition-all">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-gray-200">Gross Income</CardTitle>
-          <DollarSign className="h-4 w-4 text-nerfturf-purple" />
+          <DollarSign className="h-4 w-4 text-gamehaus-purple" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white"><CurrencyDisplay amount={grossIncome} /></div>
@@ -63,10 +63,10 @@ const BusinessSummarySection: React.FC<BusinessSummarySectionProps> = ({ filtere
         </CardContent>
       </Card>
 
-      <Card className={`bg-gray-800 border-gray-700 transition-all ${netProfit >= 0 ? 'hover:shadow-nerfturf-purple/20 hover:border-nerfturf-purple/30' : 'hover:shadow-red-500/20 hover:border-red-500/30'}`}>
+      <Card className={`bg-gray-800 border-gray-700 transition-all ${netProfit >= 0 ? 'hover:shadow-gamehaus-purple/20 hover:border-gamehaus-purple/30' : 'hover:shadow-red-500/20 hover:border-red-500/30'}`}>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-gray-200">Net Profit</CardTitle>
-          {netProfit >= 0 ? <ArrowUpRight className="h-4 w-4 text-nerfturf-purple" /> : <ArrowDownRight className="h-4 w-4 text-red-500" />}
+          {netProfit >= 0 ? <ArrowUpRight className="h-4 w-4 text-gamehaus-purple" /> : <ArrowDownRight className="h-4 w-4 text-red-500" />}
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white"><CurrencyDisplay amount={netProfit} /></div>

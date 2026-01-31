@@ -29,7 +29,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   },
   global: {
     headers: {
-      'x-application-name': 'cuephoria' // You can keep this or change to 'nerfturf'
+      'x-application-name': 'gamehaus'
     }
   }
 });

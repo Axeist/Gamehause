@@ -33,6 +33,7 @@ import {
   CreditCard,
   Headset,
 } from "lucide-react";
+import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL } from "@/config/brand";
 import {
   Dialog,
   DialogContent,
@@ -604,8 +605,8 @@ export default function PublicBooking() {
 
   const allowedCoupons = [
     "TES1342",
-    "NerfTurf25",
-    "NerfTurf50",
+    "GAMEHAUS25",
+    "GAMEHAUS50",
     "HH99",
     "NIT50",
     "ALMA50",
@@ -614,7 +615,7 @@ export default function PublicBooking() {
 
   function validateStudentID() {
     return window.confirm(
-      "🎓 NerfTurf50 is for other college & school students ONLY.\nShow a valid student ID card during your visit for this discount. Apply?"
+      "🎓 GAMEHAUS50 is for other college & school students ONLY.\nShow a valid student ID card during your visit for this discount. Apply?"
     );
   }
 
@@ -650,11 +651,11 @@ export default function PublicBooking() {
       return;
     }
 
-    if (code === "NerfTurf50") {
+    if (code === "GAMEHAUS50") {
       if (!validateStudentID()) return;
-      setAppliedCoupons({ all: "NerfTurf50" });
+      setAppliedCoupons({ all: "GAMEHAUS50" });
       toast.success(
-        "📚 NerfTurf50 applied: 50% OFF for students with valid ID!\nShow your student ID when you visit! 🤝"
+        "📚 GAMEHAUS50 applied: 50% OFF for students with valid ID!\nShow your student ID when you visit! 🤝"
       );
       return;
     }
@@ -669,9 +670,9 @@ export default function PublicBooking() {
       return;
     }
 
-    if (code === "NerfTurf25") {
-      setAppliedCoupons({ all: "NerfTurf25" });
-      toast.success("🎉 NerfTurf25 applied: 25% OFF! Book more, play more! 🕹️");
+    if (code === "GAMEHAUS25") {
+      setAppliedCoupons({ all: "GAMEHAUS25" });
+      toast.success("🎉 GAMEHAUS25 applied: 25% OFF! Book more, play more! 🕹️");
       return;
     }
 
@@ -780,11 +781,11 @@ export default function PublicBooking() {
         const disc = Math.max(original - 1, 0);
         return { total: disc, breakdown: { all: disc } };
       }
-      if (appliedCoupons["all"] === "NerfTurf25") {
+      if (appliedCoupons["all"] === "GAMEHAUS25") {
         const disc = original * 0.25;
         return { total: disc, breakdown: { all: disc } };
       }
-      if (appliedCoupons["all"] === "NerfTurf50") {
+      if (appliedCoupons["all"] === "GAMEHAUS50") {
         const disc = original * 0.5;
         return { total: disc, breakdown: { all: disc } };
       }
@@ -1206,7 +1207,7 @@ export default function PublicBooking() {
         key: keyData.keyId,
         amount: orderData.amount,
         currency: orderData.currency || "INR",
-        name: "NerfTurf Gaming Lounge",
+          name: `${BRAND_NAME} – Premier Snooker & Gaming Lounge`,
         description: `Booking for ${slotsToBook.length} slot(s)`,
         order_id: orderData.orderId,
         handler: async function (response: any) {
@@ -1235,7 +1236,7 @@ export default function PublicBooking() {
           contact: customerInfo.phone,
         },
         theme: {
-          color: "#8B5CF6", // Your brand color
+          color: "#FF4A1A", // Gamehaus Flame
         },
         modal: {
           ondismiss: function() {
@@ -1441,7 +1442,7 @@ export default function PublicBooking() {
           <span
             className={cn(
               base,
-              "bg-nerfturf-purple/15 text-nerfturf-lightpurple border border-nerfturf-purple/20"
+              "bg-gamehaus-purple/15 text-gamehaus-lightpurple border border-gamehaus-purple/20"
             )}
           >
             completed
@@ -1519,9 +1520,9 @@ export default function PublicBooking() {
 
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a]">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-nerfturf-purple/20 blur-3xl" />
-        <div className="absolute top-1/3 -right-24 h-64 w-64 rounded-full bg-nerfturf-cyan/20 blur-3xl" />
-        <div className="absolute bottom-10 left-1/3 h-56 w-56 rounded-full bg-nerfturf-magenta/20 blur-3xl" />
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gamehaus-purple/20 blur-3xl" />
+        <div className="absolute top-1/3 -right-24 h-64 w-64 rounded-full bg-gamehaus-cyan/20 blur-3xl" />
+        <div className="absolute bottom-10 left-1/3 h-56 w-56 rounded-full bg-gamehaus-magenta/20 blur-3xl" />
       </div>
 
       {/* Coupon Promotional Popup - Hidden for now */}
@@ -1532,8 +1533,8 @@ export default function PublicBooking() {
           <div className="flex flex-col items-center mb-8">
             <div className="mb-6">
               <img
-                src="https://iili.io/KpfrAog.jpg"
-                alt="NerfTurf Logo"
+                src={LOGO_PATH}
+                alt="Gamehaus – Premier Snooker & Gaming Lounge"
                 className="h-24 drop-shadow-[0_0_25px_rgba(168,85,247,0.15)] cursor-pointer transition-transform hover:scale-105"
                 onClick={() => setShowPinDialog(true)}
                 title="Click for secret feature"
@@ -1541,7 +1542,7 @@ export default function PublicBooking() {
             </div>
 
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs tracking-widest uppercase text-gray-300 backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5 text-nerfturf-magenta" />
+              <Sparkles className="h-3.5 w-3.5 text-gamehaus-magenta" />
               Premium Gaming Lounge
             </span>
 
@@ -1549,7 +1550,7 @@ export default function PublicBooking() {
               Book Your Gaming Session
             </h1>
             <p className="mt-2 text-lg text-gray-300/90 max-w-2xl text-center">
-              Reserve PlayStation 5, Pool Table, or VR Gaming sessions at NerfTurf
+              Reserve PlayStation 5, Pool Table, or VR Gaming sessions at {BRAND_NAME}
             </p>
 
             <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-gray-300 backdrop-blur-md">
@@ -1564,9 +1565,9 @@ export default function PublicBooking() {
 
       <main className="px-4 sm:px-6 md:px-8 max-w-7xl mx-auto pb-14 relative z-10">
         <section className="mb-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-gray-300">
-          <h2 className="mb-1 text-base font-semibold text-white">About NerfTurf</h2>
+          <h2 className="mb-1 text-base font-semibold text-white">About {BRAND_NAME}</h2>
           <p>
-            NerfTurf offers <span className="font-medium">time-based rentals</span> of
+            {BRAND_NAME} offers <span className="font-medium">time-based rentals</span> of
             PlayStation 5 stations, 8-Ball pool tables, and VR Gaming stations. Book 
             60-minute sessions for PS5/Pool or 15-minute sessions for VR Gaming.
           </p>
@@ -1581,8 +1582,8 @@ export default function PublicBooking() {
             <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <div className="w-8 h-8 rounded-lg bg-nerfturf-purple/20 ring-1 ring-white/10 flex items-center justify-center">
-                    <User className="h-4 w-4 text-nerfturf-purple" />
+                  <div className="w-8 h-8 rounded-lg bg-gamehaus-purple/20 ring-1 ring-white/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-gamehaus-purple" />
                   </div>
                   Step 1: Customer Information
                   {isCustomerInfoComplete() && (
@@ -1591,8 +1592,8 @@ export default function PublicBooking() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-nerfturf-purple/10 border border-nerfturf-purple/20 rounded-xl p-3">
-                  <p className="text-sm text-nerfturf-purple/90 font-medium flex items-center gap-2">
+                <div className="bg-gamehaus-purple/10 border border-gamehaus-purple/20 rounded-xl p-3">
+                  <p className="text-sm text-gamehaus-purple/90 font-medium flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" /> Please complete customer
                     information to proceed with booking
                   </p>
@@ -1624,7 +1625,7 @@ export default function PublicBooking() {
                   <Button
                     onClick={searchCustomer}
                     disabled={searchingCustomer}
-                    className="rounded-xl bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta"
+                    className="rounded-xl bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta"
                   >
                     {searchingCustomer ? "Searching..." : "Search"}
                   </Button>
@@ -1680,11 +1681,11 @@ export default function PublicBooking() {
               <CardHeader className="relative pb-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-white/10 bg-gradient-to-br from-nerfturf-cyan/25 to-transparent">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-white/10 bg-gradient-to-br from-gamehaus-cyan/25 to-transparent">
                       {!isStationSelectionAvailable() ? (
                         <Lock className="h-4 w-4 text-gray-500" />
                       ) : (
-                        <MapPin className="h-4 w-4 text-nerfturf-cyan" />
+                        <MapPin className="h-4 w-4 text-gamehaus-cyan" />
                       )}
                     </div>
                     <CardTitle className="m-0 p-0 text-white">
@@ -1692,7 +1693,7 @@ export default function PublicBooking() {
                     </CardTitle>
                   </div>
                   {isStationSelectionAvailable() && selectedStations.length > 0 && (
-                    <div className="inline-flex items-center gap-2 rounded-full border border-nerfturf-purple/20 bg-nerfturf-purple/10 px-2.5 py-1 text-xs text-nerfturf-lightpurple">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-gamehaus-purple/20 bg-gamehaus-purple/10 px-2.5 py-1 text-xs text-gamehaus-lightpurple">
                       <CheckCircle className="h-3.5 w-3.5" />
                       {selectedStations.length} selected
                     </div>
@@ -1727,8 +1728,8 @@ export default function PublicBooking() {
                     className={cn(
                       "h-9 rounded-full border-white/15 text-[12px]",
                       stationType === "ps5"
-                        ? "bg-nerfturf-purple/15 text-nerfturf-purple"
-                        : "bg-transparent text-nerfturf-purple"
+                        ? "bg-gamehaus-purple/15 text-gamehaus-purple"
+                        : "bg-transparent text-gamehaus-purple"
                     )}
                   >
                     PS5
@@ -1740,8 +1741,8 @@ export default function PublicBooking() {
                     className={cn(
                       "h-9 rounded-full border-white/15 text-[12px]",
                       stationType === "8ball"
-                        ? "bg-nerfturf-purple/15 text-nerfturf-lightpurple"
-                        : "bg-transparent text-nerfturf-lightpurple"
+                        ? "bg-gamehaus-purple/15 text-gamehaus-lightpurple"
+                        : "bg-transparent text-gamehaus-lightpurple"
                     )}
                   >
                     Tables
@@ -1774,11 +1775,11 @@ export default function PublicBooking() {
             <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <div className="w-8 h-8 rounded-lg bg-nerfturf-magenta/20 ring-1 ring-white/10 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-gamehaus-magenta/20 ring-1 ring-white/10 flex items-center justify-center">
                     {!isTimeSelectionAvailable() ? (
                       <Lock className="h-4 w-4 text-gray-500" />
                     ) : (
-                      <CalendarIcon className="h-4 w-4 text-nerfturf-magenta" />
+                      <CalendarIcon className="h-4 w-4 text-gamehaus-magenta" />
                     )}
                   </div>
                   Step 3: Choose Date & Time
@@ -1860,9 +1861,9 @@ export default function PublicBooking() {
                         if (!s) return null;
                         return (
                           <div key={id} className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-md bg-nerfturf-purple/20 border border-white/10 flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-md bg-gamehaus-purple/20 border border-white/10 flex items-center justify-center">
                               {s.type === "ps5" ? (
-                                <Gamepad2 className="h-3.5 w-3.5 text-nerfturf-purple" />
+                                <Gamepad2 className="h-3.5 w-3.5 text-gamehaus-purple" />
                               ) : s.type === "vr" ? (
                                 <Headset className="h-3.5 w-3.5 text-blue-400" />
                               ) : (
@@ -1951,8 +1952,8 @@ export default function PublicBooking() {
                         let emoji = "🏷️";
                         if (val === "HH99") emoji = "⏰";
                         else if (val === "NIT50") emoji = "🎓";
-                        else if (val === "NerfTurf25") emoji = "🎉";
-                        else if (val === "NerfTurf50") emoji = "📚";
+                        else if (val === "GAMEHAUS25") emoji = "🎉";
+                        else if (val === "GAMEHAUS50") emoji = "📚";
                         else if (val === "ALMA50") emoji = "🏫";
                         else if (val === "AXEIST") emoji = "🥷";
                         return (
@@ -2094,7 +2095,7 @@ export default function PublicBooking() {
                         <Label className="text-base font-semibold text-gray-100">
                           Total Amount
                         </Label>
-                        <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta">
+                        <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta">
                           {INR(finalPrice)}
                         </span>
                       </div>
@@ -2107,7 +2108,7 @@ export default function PublicBooking() {
                   disabled={
                     !selectedSlot || selectedStations.length === 0 || !customerNumber || !hasMinimumSlots || loading
                   }
-                  className="w-full rounded-xl bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta"
+                  className="w-full rounded-xl bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta"
                   size="lg"
                 >
                   {loading
@@ -2155,7 +2156,7 @@ export default function PublicBooking() {
                 setLegalDialogType("terms");
                 setShowLegalDialog(true);
               }}
-              className="mt-3 text-sm text-nerfturf-magenta hover:underline"
+              className="mt-3 text-sm text-gamehaus-magenta hover:underline"
             >
               View full Terms & Conditions
             </button>
@@ -2173,7 +2174,7 @@ export default function PublicBooking() {
                 setLegalDialogType("privacy");
                 setShowLegalDialog(true);
               }}
-              className="mt-3 text-sm text-nerfturf-magenta hover:underline"
+              className="mt-3 text-sm text-gamehaus-magenta hover:underline"
             >
               View full Privacy Policy
             </button>
@@ -2184,7 +2185,7 @@ export default function PublicBooking() {
           <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-white flex items-center gap-2">
-                <Clock className="h-5 w-5 text-nerfturf-magenta" />
+                <Clock className="h-5 w-5 text-gamehaus-magenta" />
                 Today's Bookings
               </CardTitle>
               <span className="text-xs text-gray-300 rounded-full border border-white/10 px-2 py-0.5">
@@ -2204,7 +2205,7 @@ export default function PublicBooking() {
                   >
                     <summary className="list-none cursor-pointer select-none px-3 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-gray-200">
-                        <Clock className="h-4 w-4 text-nerfturf-magenta" />
+                        <Clock className="h-4 w-4 text-gamehaus-magenta" />
                         <span className="font-medium">{timeLabel}</span>
                       </div>
                       <span className="text-xs text-gray-300 rounded-full border border-white/10 px-2 py-0.5">
@@ -2251,14 +2252,14 @@ export default function PublicBooking() {
           <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center mb-4 md:mb-0">
               <img
-                src="https://iili.io/KpfrAog.jpg"
-                alt="NerfTurf Logo"
+                src={LOGO_PATH}
+                alt="Gamehaus – Premier Snooker & Gaming Lounge"
                 className="h-8 mr-3 cursor-pointer transition-transform hover:scale-105"
                 onClick={() => setShowPinDialog(true)}
                 title="Click for secret feature"
               />
               <p className="text-gray-400 text-sm">
-                © {new Date().getFullYear()} NerfTurf. All rights reserved.
+                © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -2315,8 +2316,8 @@ export default function PublicBooking() {
               </div>
               <div className="flex items-center gap-1">
                 <Mail className="h-4 w-4" />
-                <a href="mailto:contact@nerfturf.in" className="hover:text-white transition-colors">
-                  contact@nerfturf.in
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-white transition-colors">
+                  {SUPPORT_EMAIL}
                 </a>
               </div>
             </div>
@@ -2384,8 +2385,8 @@ export default function PublicBooking() {
                   +91 93451 87098
                 </a>{' '}
                 or email{' '}
-                <a className="ml-1 underline hover:text-white" href="mailto:contact@nerfturf.in">
-                  contact@nerfturf.in
+                <a className="ml-1 underline hover:text-white" href={`mailto:${SUPPORT_EMAIL}`}>
+                  {SUPPORT_EMAIL}
                 </a>
                 .
               </p>
@@ -2473,7 +2474,7 @@ export default function PublicBooking() {
                     }
                   }}
                   disabled={pinInput.length !== 4}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta"
                 >
                   Verify
                 </Button>

@@ -37,7 +37,7 @@ const steps = [
         </p>
         <div className="space-y-4">
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Overview Tab
             </h4>
@@ -49,7 +49,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <BarChart2 className="h-4 w-4" />
               Analytics Tab
             </h4>
@@ -62,7 +62,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Expenses Tab
             </h4>
@@ -75,7 +75,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <Wallet className="h-4 w-4" />
               Vault Tab
             </h4>
@@ -87,8 +87,8 @@ const steps = [
             </ul>
           </div>
         </div>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Pro Tip:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Pro Tip:</b>
           <span className="ml-2 text-white/80">Use the Analytics tab to identify peak hours and optimize your operations. Export reports regularly for financial audits.</span>
         </div>
       </>
@@ -104,7 +104,7 @@ const steps = [
         </p>
         <div className="space-y-4">
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
               Creating Bills
             </h4>
@@ -117,7 +117,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
               Payment Options
             </h4>
@@ -130,7 +130,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <Receipt className="h-4 w-4" />
               Discounts & Loyalty
             </h4>
@@ -142,7 +142,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2 flex items-center gap-2">
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2 flex items-center gap-2">
               <Receipt className="h-4 w-4" />
               Receipt Management
             </h4>
@@ -154,8 +154,8 @@ const steps = [
             </ul>
           </div>
         </div>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Admin Note:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Admin Note:</b>
           <span className="ml-2 text-white/80">Only admins can modify prices mid-sale or override discount limits. Staff can apply standard discounts and process payments.</span>
         </div>
       </>
@@ -180,8 +180,8 @@ const steps = [
           <li><b>Real-time Timers:</b> Live countdown timers show remaining time for active sessions</li>
           <li><b>Auto-billing:</b> Sessions automatically convert to billable items in POS when ended</li>
         </ul>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Tip:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Tip:</b>
           <span className="ml-2 text-white/80">Use the Dashboard to see all active sessions at a glance. Session extensions appear as shortcuts while a station is active.</span>
         </div>
       </>
@@ -197,7 +197,7 @@ const steps = [
         </p>
         <div className="space-y-4">
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Product Management</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Product Management</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Add Products:</b> Create items with name, price, category, stock level, and optional images</li>
               <li><b>Edit Products:</b> Update prices, stock, descriptions, and product details anytime</li>
@@ -206,7 +206,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Categories & Organization</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Categories & Organization</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Product Categories:</b> Organize into Food, Drinks, Tobacco, Challenges, Membership, and custom categories</li>
               <li><b>Category Management:</b> Add, rename, or remove categories as needed</li>
@@ -214,7 +214,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Stock Management</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Stock Management</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Stock Tracking:</b> Real-time inventory levels with automatic deduction on sales</li>
               <li><b>Low Stock Alerts:</b> Automatic notifications when products fall below threshold (default: 5 units)</li>
@@ -223,7 +223,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Advanced Features</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Advanced Features</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Product Images:</b> Upload images for visual catalog and better POS identification</li>
               <li><b>Pricing Options:</b> Set buying cost and selling price for profit margin tracking</li>
@@ -232,8 +232,8 @@ const steps = [
             </ul>
           </div>
         </div>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Important:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Important:</b>
           <span className="ml-2 text-white/80">Only Admins can delete products or modify membership products. Keep stock levels updated for accurate inventory tracking.</span>
         </div>
       </>
@@ -249,7 +249,7 @@ const steps = [
         </p>
         <div className="space-y-4">
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Customer Registration</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Customer Registration</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Add Customers:</b> Register new customers with name, phone, email, and customer type</li>
               <li><b>Customer Types:</b> Classify as Member, Regular, or Guest for different service levels</li>
@@ -257,7 +257,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Customer Profiles</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Customer Profiles</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Purchase History:</b> Complete transaction history with all bills and receipts</li>
               <li><b>Session History:</b> Track all gaming sessions played by the customer</li>
@@ -267,7 +267,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Membership Management</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Membership Management</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Membership Plans:</b> Create weekly or monthly membership plans with allocated hours</li>
               <li><b>Membership Activation:</b> Activate memberships with start date and duration</li>
@@ -277,7 +277,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Loyalty Program</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Loyalty Program</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Points Accumulation:</b> Customers earn points on purchases (configurable rate)</li>
               <li><b>Points Redemption:</b> Customers can redeem points for discounts during checkout</li>
@@ -285,7 +285,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Customer Management</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Customer Management</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Edit Information:</b> Update customer details, contact information, and preferences</li>
               <li><b>Delete Customers:</b> Remove customer records (permanent - cannot be restored)</li>
@@ -294,8 +294,8 @@ const steps = [
             </ul>
           </div>
         </div>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Warning:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Warning:</b>
           <span className="ml-2 text-white/80">Deleted customers cannot be restored. Always verify before deletion. Customer data is linked to all their transactions and sessions.</span>
         </div>
       </>
@@ -311,7 +311,7 @@ const steps = [
         </p>
         <div className="space-y-4">
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Sales Reports</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Sales Reports</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Date Range Filtering:</b> Analyze sales for specific periods (daily, weekly, monthly, custom)</li>
               <li><b>Payment Method Breakdown:</b> View sales by Cash, UPI, Card, or Split payments</li>
@@ -321,7 +321,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Bill Details</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Bill Details</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Bill Drilldown:</b> Click any bill to view complete details, items, and payment information</li>
               <li><b>Receipt Reprint:</b> Reprint any receipt directly from the reports page</li>
@@ -330,7 +330,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Session Reports</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Session Reports</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Station Activity:</b> Track usage and revenue by gaming station</li>
               <li><b>Peak Hours Analysis:</b> Identify busiest times for each station type</li>
@@ -339,7 +339,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Export & Sharing</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Export & Sharing</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Excel Export:</b> Download reports as Excel files for accounting and analysis</li>
               <li><b>PDF Reports:</b> Generate PDF reports for official records</li>
@@ -348,8 +348,8 @@ const steps = [
             </ul>
           </div>
         </div>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Pro Tip:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Pro Tip:</b>
           <span className="ml-2 text-white/80">Export reports regularly for backup. Use date filters to compare performance across different periods. Admin users can access detailed profit/loss figures.</span>
         </div>
       </>
@@ -377,8 +377,8 @@ const steps = [
           <li><b>Payment Integration:</b> Online payment options via PhonePe for advance bookings</li>
           <li><b>Confirmation System:</b> Send booking confirmations via SMS or WhatsApp</li>
         </ul>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Tip:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Tip:</b>
           <span className="ml-2 text-white/80">Use the "New Booking" button to open the public booking page. Set booking policies and deposit requirements in Settings.</span>
         </div>
       </>
@@ -403,8 +403,8 @@ const steps = [
           <li><b>Tournament Images:</b> Upload promotional images for tournaments</li>
           <li><b>Status Tracking:</b> Manage tournament status (Upcoming, In-Progress, Completed, Cancelled)</li>
         </ul>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Note:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Note:</b>
           <span className="ml-2 text-white/80">Tournaments can be managed from the Settings page. Public tournament listings help promote events to customers.</span>
         </div>
       </>
@@ -420,7 +420,7 @@ const steps = [
         </p>
         <div className="space-y-4">
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Expense Categories</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Expense Categories</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Inventory:</b> Stock purchases and supplies</li>
               <li><b>Salary:</b> Payroll, bonuses, and staff advances</li>
@@ -437,7 +437,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Expense Management</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Expense Management</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Add Expenses:</b> Record expenses with amount, category, date, and notes</li>
               <li><b>Recurring Expenses:</b> Mark expenses as one-time, monthly, quarterly, or yearly</li>
@@ -447,7 +447,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Reports & Analysis</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Reports & Analysis</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Expense Summary:</b> Total expenses, category-wise breakdown, and trends</li>
               <li><b>Profit & Loss:</b> Compare expenses with revenue for net profit calculation</li>
@@ -456,8 +456,8 @@ const steps = [
             </ul>
           </div>
         </div>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Tip:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Tip:</b>
           <span className="ml-2 text-white/80">Be diligent with expense categorization. Well-organized expenses make monthly summaries and tax filing much easier. Regular expense tracking helps identify cost-saving opportunities.</span>
         </div>
       </>
@@ -481,8 +481,8 @@ const steps = [
           <li><b>Reconciliation:</b> Match vault balance with expected cash from sales</li>
           <li><b>Dashboard Integration:</b> Access vault management from Dashboard Vault tab</li>
         </ul>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Important:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Important:</b>
           <span className="ml-2 text-white/80">Regular vault reconciliation ensures cash accuracy. Record all cash movements immediately to maintain accurate records. Bank deposits should match actual bank statements.</span>
         </div>
       </>
@@ -505,8 +505,8 @@ const steps = [
           <li><b>Staff Activity:</b> Track staff performance and sales (Admin only)</li>
           <li><b>Login Management:</b> Monitor staff logins and session activity</li>
         </ul>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Admin Only:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Admin Only:</b>
           <span className="ml-2 text-white/80">Only administrators can access Staff Management. Staff members see "My Portal" instead for their personal dashboard and statistics.</span>
         </div>
       </>
@@ -526,8 +526,8 @@ const steps = [
           <li><b>Today's Activity:</b> Quick summary of your work for the current day</li>
           <li><b>Performance Trends:</b> Track your performance over time</li>
         </ul>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Note:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Note:</b>
           <span className="ml-2 text-white/80">Staff Portal is only visible to non-admin users. Admins use the main Dashboard for comprehensive business overview.</span>
         </div>
       </>
@@ -543,7 +543,7 @@ const steps = [
         </p>
         <div className="space-y-4">
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Business Settings</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Business Settings</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Club Information:</b> Set business name, address, contact details, and GSTIN</li>
               <li><b>Branding:</b> Upload logo, customize colors, and set theme preferences</li>
@@ -551,7 +551,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Tournament Management</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Tournament Management</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Create Tournaments:</b> Set up new tournaments with all details</li>
               <li><b>Tournament Images:</b> Upload and manage promotional images</li>
@@ -559,7 +559,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Security & Access</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Security & Access</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>PIN Management:</b> Update admin PIN and configure PIN requirements</li>
               <li><b>Auto-logout:</b> Configure automatic logout after inactivity (default: 5 hours)</li>
@@ -567,7 +567,7 @@ const steps = [
             </ul>
           </div>
           <div>
-            <h4 className="text-nerfturf-lightpurple font-semibold mb-2">Data Management</h4>
+            <h4 className="text-gamehaus-lightpurple font-semibold mb-2">Data Management</h4>
             <ul className="list-disc ml-5 space-y-1 text-white/80">
               <li><b>Backup Data:</b> Download complete data backup for safekeeping</li>
               <li><b>Restore Data:</b> Restore from backup if needed</li>
@@ -575,8 +575,8 @@ const steps = [
             </ul>
           </div>
         </div>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Admin Only:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Admin Only:</b>
           <span className="ml-2 text-white/80">Only administrators can access and modify Settings. Staff members have restricted access based on their role permissions.</span>
         </div>
       </>
@@ -595,12 +595,12 @@ const steps = [
           <li><b>Tooltips & Hints:</b> Hover over buttons and icons throughout the app for quick explanations</li>
           <li><b>In-App Help:</b> Contextual help available on most pages</li>
           <li><b>Training Resources:</b> Use this guide for staff training and onboarding</li>
-          <li><b>Support Contact:</b> For any issues or questions, contact <b className="text-nerfturf-lightpurple">Cuephoria Tech Support Line: <a href="tel:+918667637565" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">+91 86676 37565</a></b></li>
-          <li><b>Email Support:</b> Reach out via <a href="mailto:contact@cuephoria.in" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">contact@cuephoria.in</a></li>
+          <li><b>Support Contact:</b> For any issues or questions, contact <b className="text-gamehaus-lightpurple">Cuephoria Tech Support Line: <a href="tel:+918667637565" className="underline text-gamehaus-magenta hover:text-gamehaus-lightpurple">+91 86676 37565</a></b></li>
+          <li><b>Email Support:</b> Reach out via <a href="mailto:contact@cuephoria.in" className="underline text-gamehaus-magenta hover:text-gamehaus-lightpurple">contact@cuephoria.in</a></li>
           <li><b>Feature Updates:</b> New features and improvements are documented in this guide</li>
         </ul>
-        <div className="block mt-4 p-3 rounded-lg bg-nerfturf-purple/10 border border-nerfturf-purple/30">
-          <b className="text-nerfturf-lightpurple">Remember:</b>
+        <div className="block mt-4 p-3 rounded-lg bg-gamehaus-purple/10 border border-gamehaus-purple/30">
+          <b className="text-gamehaus-lightpurple">Remember:</b>
           <span className="ml-2 text-white/80">You can revisit this guide anytime from the sidebar. Share it with new staff members for training. For urgent issues, contact Cuephoria Tech Support Line immediately.</span>
         </div>
       </>
@@ -609,11 +609,11 @@ const steps = [
 ];
 
 const HowToAccordion: React.FC = () => (
-  <Accordion type="multiple" className="rounded-lg overflow-hidden shadow-inner border border-nerfturf-purple/30 bg-black/80">
+  <Accordion type="multiple" className="rounded-lg overflow-hidden shadow-inner border border-gamehaus-purple/30 bg-black/80">
     {steps.map((step, idx) => (
-      <AccordionItem key={step.title} value={`item-${idx}`} className="border-nerfturf-purple/20">
-        <AccordionTrigger className="flex gap-2 items-center px-4 py-3 text-lg font-semibold rounded-sm hover:bg-nerfturf-purple/10 focus:bg-nerfturf-purple/15 transition-all text-white">
-          <step.icon className="h-5 w-5 text-nerfturf-lightpurple flex-shrink-0" />
+      <AccordionItem key={step.title} value={`item-${idx}`} className="border-gamehaus-purple/20">
+        <AccordionTrigger className="flex gap-2 items-center px-4 py-3 text-lg font-semibold rounded-sm hover:bg-gamehaus-purple/10 focus:bg-gamehaus-purple/15 transition-all text-white">
+          <step.icon className="h-5 w-5 text-gamehaus-lightpurple flex-shrink-0" />
           <span>{step.title}</span>
         </AccordionTrigger>
         <AccordionContent className="px-6 pb-5 text-base text-white/90 leading-normal">

@@ -123,10 +123,10 @@ const GamingRevenueWidget: React.FC<GamingRevenueWidgetProps> = ({ startDate, en
               </div>
             </div>
             
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 hover:border-nerfturf-purple/30 transition-colors">
+            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 hover:border-gamehaus-purple/30 transition-colors">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-300 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-nerfturf-magenta"></div>
+                  <div className="w-2 h-2 rounded-full bg-gamehaus-magenta"></div>
                   Challenges
                 </span>
                 <span className="text-sm font-medium text-white">
@@ -152,10 +152,10 @@ const GamingRevenueWidget: React.FC<GamingRevenueWidgetProps> = ({ startDate, en
           <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-gray-200 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-nerfturf-magenta" />
+                <TrendingUp className="h-4 w-4 text-gamehaus-magenta" />
                 Total Revenue
               </span>
-              <span className="text-lg font-bold text-nerfturf-magenta">
+              <span className="text-lg font-bold text-gamehaus-magenta">
                 <CurrencyDisplay amount={gamingData.totalRevenue} />
               </span>
             </div>
@@ -164,7 +164,7 @@ const GamingRevenueWidget: React.FC<GamingRevenueWidgetProps> = ({ startDate, en
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
                 <span className="text-gray-400">Target: ₹{gamingData.targetRevenue.toLocaleString()}</span>
-                <span className={`font-medium ${gamingData.variance >= 0 ? 'text-nerfturf-magenta' : 'text-red-400'}`}>
+                <span className={`font-medium ${gamingData.variance >= 0 ? 'text-gamehaus-magenta' : 'text-red-400'}`}>
                   {gamingData.variance >= 0 ? '+' : ''}
                   <CurrencyDisplay amount={gamingData.variance} />
                 </span>
@@ -174,7 +174,7 @@ const GamingRevenueWidget: React.FC<GamingRevenueWidgetProps> = ({ startDate, en
                 <div 
                   className={`h-2 rounded-full transition-all duration-500 ease-out shadow-lg ${
                     gamingData.targetProgress >= 100 
-                      ? 'bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta shadow-nerfturf-purple/30' 
+                      ? 'bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta shadow-gamehaus-purple/30' 
                       : gamingData.targetProgress >= 75 
                         ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 shadow-yellow-500/30'
                         : 'bg-gradient-to-r from-purple-500 to-purple-400 shadow-purple-500/30'

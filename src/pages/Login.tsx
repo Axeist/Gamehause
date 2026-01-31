@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { UAParser } from 'ua-parser-js';
 import { supabase } from "@/integrations/supabase/client";
+import { LOGO_PATH } from "@/config/brand";
 
 interface LocationState {
   from?: string;
@@ -469,7 +470,7 @@ const Login = () => {
         <>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <KeyRound size={16} className="text-nerfturf-purple" />
+              <KeyRound size={16} className="text-gamehaus-purple" />
               Staff Password Reset
             </DialogTitle>
             <DialogDescription>
@@ -485,7 +486,7 @@ const Login = () => {
           <DialogFooter>
             <Button 
               onClick={() => setForgotDialogOpen(false)}
-              className="w-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple hover:to-nerfturf-magenta"
+              className="w-full bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta"
             >
               Close
             </Button>
@@ -499,7 +500,7 @@ const Login = () => {
         <>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <KeyRound size={16} className="text-nerfturf-purple" />
+              <KeyRound size={16} className="text-gamehaus-purple" />
               Admin Password Reset
             </DialogTitle>
             <DialogDescription>
@@ -516,7 +517,7 @@ const Login = () => {
                   placeholder="Enter your username"
                   value={forgotUsername}
                   onChange={(e) => setForgotUsername(e.target.value)}
-                  className="bg-background/50 border-nerfturf-purple/30"
+                  className="bg-background/50 border-gamehaus-purple/30"
                 />
               </div>
             </div>
@@ -526,7 +527,7 @@ const Login = () => {
             <Button 
               onClick={handleNextStep} 
               disabled={!forgotUsername}
-              className="bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple hover:to-nerfturf-magenta"
+              className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta"
             >
               Next
             </Button>
@@ -540,7 +541,7 @@ const Login = () => {
         <>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Shield size={16} className="text-nerfturf-purple" />
+              <Shield size={16} className="text-gamehaus-purple" />
               Master Key Verification
             </DialogTitle>
             <DialogDescription>
@@ -558,12 +559,12 @@ const Login = () => {
                     placeholder="Enter master key"
                     value={masterKey}
                     onChange={(e) => setMasterKey(e.target.value)}
-                    className="bg-background/50 border-nerfturf-purple/30 pr-10"
+                    className="bg-background/50 border-gamehaus-purple/30 pr-10"
                   />
                   <button
                     type="button"
                     onClick={toggleMasterKeyVisibility}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-nerfturf-purple hover:text-nerfturf-magenta focus:outline-none"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gamehaus-purple hover:text-gamehaus-magenta focus:outline-none"
                     aria-label={showMasterKey ? "Hide master key" : "Show master key"}
                   >
                     {showMasterKey ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -577,7 +578,7 @@ const Login = () => {
             <Button 
               onClick={handleNextStep} 
               disabled={!masterKey}
-              className="bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple hover:to-nerfturf-magenta"
+              className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta"
             >
               Verify
             </Button>
@@ -590,7 +591,7 @@ const Login = () => {
       <>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Lock size={16} className="text-nerfturf-purple" />
+            <Lock size={16} className="text-gamehaus-purple" />
             Set New Password
           </DialogTitle>
           <DialogDescription>
@@ -608,12 +609,12 @@ const Login = () => {
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-background/50 border-nerfturf-purple/30 pr-10"
+                  className="bg-background/50 border-gamehaus-purple/30 pr-10"
                 />
                 <button
                   type="button"
                   onClick={toggleNewPasswordVisibility}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-nerfturf-purple hover:text-nerfturf-magenta focus:outline-none"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gamehaus-purple hover:text-gamehaus-magenta focus:outline-none"
                   aria-label={showNewPassword ? "Hide new password" : "Show new password"}
                 >
                   {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -629,12 +630,12 @@ const Login = () => {
                   placeholder="Confirm new password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-background/50 border-nerfturf-purple/30 pr-10"
+                  className="bg-background/50 border-gamehaus-purple/30 pr-10"
                 />
                 <button
                   type="button"
                   onClick={toggleConfirmPasswordVisibility}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-nerfturf-purple hover:text-nerfturf-magenta focus:outline-none"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gamehaus-purple hover:text-gamehaus-magenta focus:outline-none"
                   aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                 >
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -648,7 +649,7 @@ const Login = () => {
           <Button 
             onClick={handleResetPassword} 
             disabled={!newPassword || !confirmPassword || resetLoading}
-            className="bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple hover:to-nerfturf-magenta"
+            className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta"
           >
             {resetLoading ? "Resetting..." : "Reset Password"}
           </Button>
@@ -672,7 +673,7 @@ const Login = () => {
         <Button 
           variant="ghost" 
           size="sm"
-          className="flex items-center gap-2 text-gray-300 hover:text-nerfturf-lightpurple hover:bg-nerfturf-purple/20"
+          className="flex items-center gap-2 text-gray-300 hover:text-gamehaus-lightpurple hover:bg-gamehaus-purple/20"
           onClick={() => navigate('/')}
         >
           <ArrowLeft size={16} />
@@ -682,7 +683,7 @@ const Login = () => {
         <Button 
           variant="ghost" 
           size="sm"
-          className="flex items-center gap-2 text-gray-300 hover:text-nerfturf-magenta hover:bg-nerfturf-magenta/20"
+          className="flex items-center gap-2 text-gray-300 hover:text-gamehaus-magenta hover:bg-gamehaus-magenta/20"
           onClick={handleViewLogsClick}
         >
           <FileText size={16} />
@@ -691,37 +692,37 @@ const Login = () => {
       </div>
       
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-nerfturf-purple/20 via-transparent to-transparent"></div>
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-nerfturf-magenta/20 via-transparent to-transparent"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gamehaus-purple/20 via-transparent to-transparent"></div>
+        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-gamehaus-magenta/20 via-transparent to-transparent"></div>
         
-        <div className="absolute top-1/3 right-1/4 w-48 h-64 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-nerfturf-lightpurple/10 via-transparent to-transparent rounded-tr-[50%]"></div>
+        <div className="absolute top-1/3 right-1/4 w-48 h-64 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-gamehaus-lightpurple/10 via-transparent to-transparent rounded-tr-[50%]"></div>
         
-        <div className="absolute top-[8%] left-[12%] text-nerfturf-lightpurple opacity-20 animate-float">
+        <div className="absolute top-[8%] left-[12%] text-gamehaus-lightpurple opacity-20 animate-float">
           <Trophy size={isMobile ? 24 : 36} className="animate-wiggle" />
         </div>
-        <div className="absolute bottom-[15%] right-[15%] text-nerfturf-magenta opacity-20 animate-float delay-300">
+        <div className="absolute bottom-[15%] right-[15%] text-gamehaus-magenta opacity-20 animate-float delay-300">
           <Sparkles size={isMobile ? 24 : 36} className="animate-pulse-soft" />
         </div>
-        <div className="absolute top-[30%] right-[30%] text-nerfturf-lightpurple opacity-20 animate-float delay-150">
+        <div className="absolute top-[30%] right-[30%] text-gamehaus-lightpurple opacity-20 animate-float delay-150">
           <Stars size={isMobile ? 18 : 24} className="animate-pulse-soft" />
         </div>
-        <div className="absolute top-[15%] right-[12%] text-nerfturf-magenta opacity-20 animate-float delay-250">
+        <div className="absolute top-[15%] right-[12%] text-gamehaus-magenta opacity-20 animate-float delay-250">
           <Target size={isMobile ? 20 : 28} className="animate-wiggle" />
         </div>
-        <div className="absolute bottom-[25%] left-[25%] text-nerfturf-purple opacity-20 animate-float delay-200">
+        <div className="absolute bottom-[25%] left-[25%] text-gamehaus-purple opacity-20 animate-float delay-200">
           <Award size={isMobile ? 22 : 30} className="animate-pulse-soft" />
         </div>
-        <div className="absolute top-[50%] left-[15%] text-nerfturf-magenta opacity-20 animate-float delay-150">
+        <div className="absolute top-[50%] left-[15%] text-gamehaus-magenta opacity-20 animate-float delay-150">
           <Trophy size={isMobile ? 24 : 32} className="animate-wiggle" />
         </div>
-        <div className="absolute bottom-[10%] left-[10%] text-nerfturf-lightpurple opacity-20 animate-float delay-300">
+        <div className="absolute bottom-[10%] left-[10%] text-gamehaus-lightpurple opacity-20 animate-float delay-300">
           <Sparkles size={isMobile ? 24 : 34} className="animate-pulse-soft" />
         </div>
         
-        <div className="absolute top-1/2 left-0 h-px w-full bg-gradient-to-r from-transparent via-nerfturf-purple/30 to-transparent"></div>
-        <div className="absolute top-0 left-1/2 h-full w-px bg-gradient-to-b from-transparent via-nerfturf-magenta/30 to-transparent"></div>
-        <div className="absolute top-1/3 left-0 h-px w-full bg-gradient-to-r from-transparent via-nerfturf-lightpurple/20 to-transparent"></div>
-        <div className="absolute top-2/3 left-0 h-px w-full bg-gradient-to-r from-transparent via-nerfturf-magenta/20 to-transparent"></div>
+        <div className="absolute top-1/2 left-0 h-px w-full bg-gradient-to-r from-transparent via-gamehaus-purple/30 to-transparent"></div>
+        <div className="absolute top-0 left-1/2 h-full w-px bg-gradient-to-b from-transparent via-gamehaus-magenta/30 to-transparent"></div>
+        <div className="absolute top-1/3 left-0 h-px w-full bg-gradient-to-r from-transparent via-gamehaus-lightpurple/20 to-transparent"></div>
+        <div className="absolute top-2/3 left-0 h-px w-full bg-gradient-to-r from-transparent via-gamehaus-magenta/20 to-transparent"></div>
         
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, rgba(110, 89, 165, 0.15) 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
       </div>
@@ -729,22 +730,22 @@ const Login = () => {
       <div className={`w-full max-w-md z-10 ${animationClass}`}>
         <div className="mb-8 text-center">
           <div className="relative mx-auto w-full max-w-[220px] h-auto sm:w-64 sm:h-64">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-nerfturf-purple/20 to-nerfturf-magenta/10 blur-lg"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gamehaus-purple/20 to-gamehaus-magenta/10 blur-lg"></div>
             <img 
-              src="https://iili.io/KpfrAog.jpg" 
-              alt="NerfTurf - Premier Snooker & 8-Ball" 
-              className="relative w-full h-auto mx-auto drop-shadow-[0_0_15px_rgba(110, 89, 165, 0.4)]"
+              src={LOGO_PATH} 
+              alt="Gamehaus – Premier Snooker & Gaming Lounge" 
+              className="relative w-full h-auto mx-auto drop-shadow-[0_0_15px_rgba(255,74,26,0.35)]"
             />
           </div>
-          <p className="mt-3 text-muted-foreground/70 font-semibold tracking-widest animate-fade-in bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-lightpurple bg-clip-text text-transparent text-xs sm:text-sm uppercase">ADMINISTRATOR PORTAL</p>
+          <p className="mt-3 text-muted-foreground/70 font-semibold tracking-widest animate-fade-in bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-lightpurple bg-clip-text text-transparent text-xs sm:text-sm uppercase">ADMINISTRATOR PORTAL</p>
         </div>
         
-        <Card className="bg-black/80 border border-nerfturf-purple/30 shadow-xl shadow-nerfturf-purple/40 backdrop-blur-lg animate-fade-in delay-100 rounded-xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-nerfturf-purple/5 to-nerfturf-magenta/5 opacity-50 rounded-xl"></div>
+        <Card className="bg-black/80 border border-gamehaus-purple/30 shadow-xl shadow-gamehaus-purple/40 backdrop-blur-lg animate-fade-in delay-100 rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gamehaus-purple/5 to-gamehaus-magenta/5 opacity-50 rounded-xl"></div>
           <div className="absolute w-full h-full bg-grid-pattern opacity-5"></div>
           
           <CardHeader className="text-center relative z-10 p-4 sm:p-6">
-            <CardTitle className="text-xl sm:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta font-bold">Club Manager Login</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta font-bold">Club Manager Login</CardTitle>
             <CardDescription className="text-muted-foreground font-medium text-xs sm:text-sm">Enter your credentials to access the control panel</CardDescription>
           </CardHeader>
           
@@ -752,12 +753,12 @@ const Login = () => {
             <CardContent className="space-y-4 relative z-10 p-4 sm:p-6 pt-0 sm:pt-0">
               <div className="flex justify-center mb-4">
                 <Tabs defaultValue="admin" value={loginType} onValueChange={setLoginType} className="w-full max-w-xs">
-                  <TabsList className="grid w-full grid-cols-2 bg-nerfturf-purple/30">
-                    <TabsTrigger value="admin" className="flex items-center gap-2 data-[state=active]:bg-nerfturf-purple">
+                  <TabsList className="grid w-full grid-cols-2 bg-gamehaus-purple/30">
+                    <TabsTrigger value="admin" className="flex items-center gap-2 data-[state=active]:bg-gamehaus-purple">
                       <Shield size={14} />
                       Admin
                     </TabsTrigger>
-                    <TabsTrigger value="staff" className="flex items-center gap-2 data-[state=active]:bg-nerfturf-magenta">
+                    <TabsTrigger value="staff" className="flex items-center gap-2 data-[state=active]:bg-gamehaus-magenta">
                       <Users size={14} />
                       Staff
                     </TabsTrigger>
@@ -766,10 +767,10 @@ const Login = () => {
               </div>
 
               <div className="space-y-2 group">
-                <label htmlFor="username" className="text-xs sm:text-sm font-medium flex items-center gap-2 text-nerfturf-lightpurple group-hover:text-nerfturf-magenta transition-colors duration-300">
+                <label htmlFor="username" className="text-xs sm:text-sm font-medium flex items-center gap-2 text-gamehaus-lightpurple group-hover:text-gamehaus-magenta transition-colors duration-300">
                   <User size={14} className="inline-block" />
                   Username
-                  <div className="h-px flex-grow bg-gradient-to-r from-nerfturf-purple/50 to-transparent group-hover:from-nerfturf-magenta/50 transition-colors duration-300"></div>
+                  <div className="h-px flex-grow bg-gradient-to-r from-gamehaus-purple/50 to-transparent group-hover:from-gamehaus-magenta/50 transition-colors duration-300"></div>
                 </label>
                 <Input
                   id="username"
@@ -777,15 +778,15 @@ const Login = () => {
                   placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-background/50 border-nerfturf-purple/30 focus-visible:ring-nerfturf-purple transition-all duration-300 hover:border-nerfturf-purple/60 placeholder:text-muted-foreground/50 focus-within:shadow-sm focus-within:shadow-nerfturf-purple/30 text-sm"
+                  className="bg-background/50 border-gamehaus-purple/30 focus-visible:ring-gamehaus-purple transition-all duration-300 hover:border-gamehaus-purple/60 placeholder:text-muted-foreground/50 focus-within:shadow-sm focus-within:shadow-gamehaus-purple/30 text-sm"
                 />
               </div>
               
               <div className="space-y-2 group">
-                <label htmlFor="password" className="text-xs sm:text-sm font-medium flex items-center gap-2 text-nerfturf-lightpurple group-hover:text-nerfturf-magenta transition-colors duration-300">
+                <label htmlFor="password" className="text-xs sm:text-sm font-medium flex items-center gap-2 text-gamehaus-lightpurple group-hover:text-gamehaus-magenta transition-colors duration-300">
                   <ZapIcon size={14} className="inline-block" />
                   Password
-                  <div className="h-px flex-grow bg-gradient-to-r from-nerfturf-purple/50 to-transparent group-hover:from-nerfturf-magenta/50 transition-colors duration-300"></div>
+                  <div className="h-px flex-grow bg-gradient-to-r from-gamehaus-purple/50 to-transparent group-hover:from-gamehaus-magenta/50 transition-colors duration-300"></div>
                 </label>
                 <div className="relative">
                   <Input
@@ -794,12 +795,12 @@ const Login = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-background/50 border-nerfturf-purple/30 focus-visible:ring-nerfturf-purple transition-all duration-300 hover:border-nerfturf-purple/60 placeholder:text-muted-foreground/50 focus-within:shadow-sm focus-within:shadow-nerfturf-purple/30 text-sm pr-10"
+                    className="bg-background/50 border-gamehaus-purple/30 focus-visible:ring-gamehaus-purple transition-all duration-300 hover:border-gamehaus-purple/60 placeholder:text-muted-foreground/50 focus-within:shadow-sm focus-within:shadow-gamehaus-purple/30 text-sm pr-10"
                   />
                   <button
                     type="button"
                     onClick={togglePasswordVisibility}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-nerfturf-purple hover:text-nerfturf-magenta focus:outline-none transition-colors duration-200"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gamehaus-purple hover:text-gamehaus-magenta focus:outline-none transition-colors duration-200"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -811,7 +812,7 @@ const Login = () => {
                 <Button 
                   type="button" 
                   variant="link" 
-                  className="text-nerfturf-lightpurple hover:text-nerfturf-magenta p-0 h-auto text-xs"
+                  className="text-gamehaus-lightpurple hover:text-gamehaus-magenta p-0 h-auto text-xs"
                   onClick={() => handleForgotPasswordClick(loginType)}
                 >
                   Forgot password?
@@ -822,7 +823,7 @@ const Login = () => {
             <CardFooter className="relative z-10 p-4 sm:p-6 pt-0 sm:pt-0">
               <Button 
                 type="submit" 
-                className="w-full relative overflow-hidden bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple hover:to-nerfturf-magenta hover:shadow-lg hover:shadow-nerfturf-purple/40 hover:scale-[1.02] transition-all duration-300 btn-hover-effect font-medium text-sm sm:text-base" 
+                className="w-full relative overflow-hidden bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta hover:shadow-lg hover:shadow-gamehaus-purple/40 hover:scale-[1.02] transition-all duration-300 btn-hover-effect font-medium text-sm sm:text-base" 
                 disabled={isLoading}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
@@ -848,10 +849,10 @@ const Login = () => {
       </div>
 
       <Dialog open={pinDialogOpen} onOpenChange={setPinDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-background border-nerfturf-purple/40">
+        <DialogContent className="sm:max-w-md bg-background border-gamehaus-purple/40">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Lock size={16} className="text-nerfturf-purple" />
+              <Lock size={16} className="text-gamehaus-purple" />
               Enter PIN to Access Logs
             </DialogTitle>
             <DialogDescription>
@@ -874,12 +875,12 @@ const Login = () => {
                     }
                   }}
                   maxLength={4}
-                  className="bg-background/50 border-nerfturf-purple/30 pr-10 text-center text-2xl tracking-widest"
+                  className="bg-background/50 border-gamehaus-purple/30 pr-10 text-center text-2xl tracking-widest"
                 />
                 <button
                   type="button"
                   onClick={togglePinVisibility}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-nerfturf-purple hover:text-nerfturf-magenta focus:outline-none"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gamehaus-purple hover:text-gamehaus-magenta focus:outline-none"
                   aria-label={showPin ? "Hide PIN" : "Show PIN"}
                 >
                   {showPin ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -892,7 +893,7 @@ const Login = () => {
             <Button 
               onClick={handlePinSubmit}
               disabled={pinInput.length !== 4}
-              className="bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple hover:to-nerfturf-magenta"
+              className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta"
             >
               Access Logs
             </Button>
@@ -901,7 +902,7 @@ const Login = () => {
       </Dialog>
 
       <Dialog open={forgotDialogOpen} onOpenChange={setForgotDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-background border-nerfturf-purple/40">
+        <DialogContent className="sm:max-w-md bg-background border-gamehaus-purple/40">
           {renderForgotPasswordContent()}
         </DialogContent>
       </Dialog>

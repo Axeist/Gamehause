@@ -30,7 +30,7 @@ const toastVariants = cva(
       variant: {
         default: "border-cuephoria-lightpurple/20 bg-gradient-to-r from-cuephoria-purple/20 via-black/90 to-cuephoria-lightpurple/20 text-white shadow-[0_0_15px_rgba(155,135,245,0.2)] hover:shadow-[0_0_25px_rgba(155,135,245,0.3)]",
         destructive: "border-red-500/20 bg-gradient-to-r from-red-500/20 via-black/90 to-red-600/20 text-white shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.3)]",
-        success: "border-nerfturf-purple/20 bg-gradient-to-r from-nerfturf-purple/20 via-black/90 to-nerfturf-magenta/20 text-white shadow-[0_0_15px_rgba(110,89,165,0.2)] hover:shadow-[0_0_25px_rgba(110,89,165,0.3)]",
+        success: "border-gamehaus-purple/20 bg-gradient-to-r from-gamehaus-purple/20 via-black/90 to-gamehaus-magenta/20 text-white shadow-[0_0_15px_rgba(255,74,26,0.18)] hover:shadow-[0_0_25px_rgba(255,74,26,0.28)]",
       },
     },
     defaultVariants: {

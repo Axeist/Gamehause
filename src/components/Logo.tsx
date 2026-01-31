@@ -1,15 +1,16 @@
 import React from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { BRAND_NAME, LOGO_PATH } from '@/config/brand';
 
 /**
- * This custom logo component renders the NerfTurf logo for all use cases.
+ * This custom logo component renders the Gamehaus logo for all use cases.
  */
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   /**
-   * Use the NerfTurf brand graphic with green theme styling
-   * for all logo purposes, scaling with prop or parent container
+   * Use the Gamehaus brand graphic for all logo purposes,
+   * scaling with prop or parent container.
    */
 }
 
@@ -28,11 +29,11 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className }) => {
   return (
     <div className="relative inline-flex items-center gap-2 group">
       <div className="relative">
-        {/* Green glow effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-nerfturf-purple/20 to-nerfturf-magenta/20 rounded-full opacity-60 blur-md group-hover:opacity-90 transition-opacity duration-300"></div>
+        {/* Warm neon glow effect */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-gamehaus-purple/20 to-gamehaus-magenta/20 rounded-full opacity-60 blur-md group-hover:opacity-90 transition-opacity duration-300"></div>
         <img
-          src="https://iili.io/KpfrAog.jpg"
-          alt="NerfTurf - Premier Snooker & 8-Ball"
+          src={LOGO_PATH}
+          alt="Gamehaus – Premier Snooker & Gaming Lounge"
           height={height}
           width={width}
           style={{
@@ -40,16 +41,16 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', className }) => {
             background: "transparent",
             maxHeight: height, 
             maxWidth: width,
-            filter: "drop-shadow(0 0 8px rgba(110, 89, 165, 0.4))",
+            filter: "drop-shadow(0 0 10px rgba(255, 74, 26, 0.35))",
           }}
-            className={`select-none relative z-10 group-hover:drop-shadow-[0_0_12px_rgba(110,89,165,0.6)] transition-all duration-300 ${className || ""}`}
+            className={`select-none relative z-10 group-hover:drop-shadow-[0_0_14px_rgba(255,74,26,0.55)] transition-all duration-300 ${className || ""}`}
           draggable={false}
           loading="lazy"
         />
       </div>
       {!isMobile && size !== 'sm' && (
-        <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta font-heading group-hover:from-nerfturf-lightpurple group-hover:to-nerfturf-magenta transition-all duration-300">
-          NerfTurf
+        <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta font-heading group-hover:from-gamehaus-lightpurple group-hover:to-gamehaus-magenta transition-all duration-300">
+          {BRAND_NAME}
         </span>
       )}
     </div>

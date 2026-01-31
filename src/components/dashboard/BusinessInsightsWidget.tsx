@@ -485,7 +485,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-400">Today's Sales</span>
-                <span className="font-bold text-nerfturf-magenta">
+                <span className="font-bold text-gamehaus-magenta">
                   <CurrencyDisplay amount={insights.todaysSales} />
                 </span>
               </div>
@@ -501,7 +501,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
                 <span className="text-sm text-gray-400">Growth vs Yesterday</span>
                 <span className={`font-medium text-xs px-2 py-1 rounded-full ${
                   insights.growthPercentage >= 0 
-                    ? 'text-nerfturf-magenta bg-nerfturf-purple/20' 
+                    ? 'text-gamehaus-magenta bg-gamehaus-purple/20' 
                     : 'text-red-400 bg-red-500/20'
                 }`}>
                   {insights.growthPercentage >= 0 ? '+' : ''}{insights.growthPercentage.toFixed(1)}%
@@ -533,7 +533,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
               
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-400">Net Profit</span>
-                <span className={`font-bold ${insights.netProfit >= 0 ? 'text-nerfturf-magenta' : 'text-red-400'}`}>
+                <span className={`font-bold ${insights.netProfit >= 0 ? 'text-gamehaus-magenta' : 'text-red-400'}`}>
                   <CurrencyDisplay amount={insights.netProfit} />
                 </span>
               </div>
@@ -542,7 +542,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
                 <span className="text-sm text-gray-400">Profit Margin</span>
                 <span className={`font-medium px-2 py-1 rounded-full text-xs ${
                   insights.profitMargin >= 20 
-                    ? 'text-nerfturf-magenta bg-nerfturf-purple/20' 
+                    ? 'text-gamehaus-magenta bg-gamehaus-purple/20' 
                     : insights.profitMargin >= 10 
                       ? 'text-yellow-400 bg-yellow-500/20'
                       : 'text-red-400 bg-red-500/20'
@@ -571,7 +571,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
                 <span className="text-sm text-gray-400">Model Confidence</span>
                 <span className={`font-medium text-xs px-2 py-1 rounded-full ${
                   insights.predictionConfidence >= 70 
-                    ? 'text-nerfturf-magenta bg-nerfturf-purple/20' 
+                    ? 'text-gamehaus-magenta bg-gamehaus-purple/20' 
                     : insights.predictionConfidence >= 50 
                       ? 'text-yellow-400 bg-yellow-500/20'
                       : 'text-orange-400 bg-orange-500/20'
@@ -606,7 +606,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
                 <span className="text-sm text-gray-400">Trend Direction</span>
                 <span className={`font-medium text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
                   insights.trendDirection === 'up' 
-                    ? 'text-nerfturf-magenta bg-nerfturf-purple/20' 
+                    ? 'text-gamehaus-magenta bg-gamehaus-purple/20' 
                     : insights.trendDirection === 'down'
                       ? 'text-red-400 bg-red-500/20'
                       : 'text-gray-400 bg-gray-500/20'
@@ -622,7 +622,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
                 <span className="text-sm text-gray-400">Market Momentum</span>
                 <span className={`font-medium text-xs px-2 py-1 rounded-full ${
                   insights.macdTrend === 'bullish' 
-                    ? 'text-nerfturf-magenta bg-nerfturf-purple/20' 
+                    ? 'text-gamehaus-magenta bg-gamehaus-purple/20' 
                     : insights.macdTrend === 'bearish'
                       ? 'text-red-400 bg-red-500/20'
                       : 'text-gray-400 bg-gray-500/20'
@@ -677,7 +677,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
                     ? 'text-red-400 bg-red-500/20' 
                     : insights.expenseToRevenueRatio > 50 
                       ? 'text-yellow-400 bg-yellow-500/20' 
-                      : 'text-nerfturf-magenta bg-nerfturf-purple/20'
+                      : 'text-gamehaus-magenta bg-gamehaus-purple/20'
                 }`}>
                   {insights.expenseToRevenueRatio.toFixed(1)}%
                 </span>
@@ -721,7 +721,7 @@ const BusinessInsightsWidget: React.FC<BusinessInsightsWidgetProps> = ({ startDa
                   <div 
                     className={`h-2 rounded-full transition-all duration-500 ease-out shadow-lg ${
                       insights.monthlyProgress >= 100 
-                        ? 'bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta shadow-nerfturf-purple/30' 
+                        ? 'bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta shadow-gamehaus-purple/30' 
                         : insights.monthlyProgress >= 75 
                           ? 'bg-gradient-to-r from-yellow-500 to-yellow-400 shadow-yellow-500/30'
                           : 'bg-gradient-to-r from-cyan-500 to-cyan-400 shadow-cyan-500/30'

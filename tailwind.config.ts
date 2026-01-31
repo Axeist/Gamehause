@@ -77,17 +77,22 @@ export default {
           darker: '#161b27',
           light: '#F1F0FB',
         },
-        nerfturf: {
-          purple: '#6E59A5',
-          lightpurple: '#9b87f5',
-          magenta: '#FF1493',
-          pink: '#FF00FF',
-          cyan: '#00CED1',
-          blue: '#00FFFF',
-          dark: '#000000',
-          darker: '#0a0a0a',
-          light: '#F1F0FB',
-        }
+        // Gamehaus palette (warm neon ember/orange/gold)
+        gamehaus: {
+          // Mapped to preserve the existing class-name intent:
+          // purple -> Flame, lightpurple -> Tangerine, magenta -> Ember, pink -> Gold highlight
+          purple: '#FF4A1A', // Flame (primary)
+          lightpurple: '#FF7A2A', // Tangerine (highlight)
+          magenta: '#FF2A00', // Ember (deep accent)
+          pink: '#FFC14A', // Gold (soft highlight)
+          // Warm highlight variants (avoid cool cyan/blue)
+          cyan: '#FF9A3A',
+          blue: '#FFD07A',
+          // Dark surfaces
+          dark: '#050505', // Night background
+          darker: '#0B0B0C', // Surface
+          light: '#F5F5F7', // Text
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -141,10 +146,10 @@ export default {
         },
         'glow': {
           '0%, 100%': { 
-            boxShadow: '0 0 5px rgba(155, 135, 245, 0.5), 0 0 10px rgba(155, 135, 245, 0.3)' 
+            boxShadow: '0 0 6px rgba(255, 74, 26, 0.45), 0 0 12px rgba(255, 42, 0, 0.22)' 
           },
           '50%': { 
-            boxShadow: '0 0 20px rgba(155, 135, 245, 0.8), 0 0 40px rgba(155, 135, 245, 0.5)' 
+            boxShadow: '0 0 22px rgba(255, 74, 26, 0.65), 0 0 44px rgba(255, 42, 0, 0.35)' 
           }
         },
         'shimmer': {
@@ -217,10 +222,10 @@ export default {
         },
         'neon-pulse': {
           '0%, 100%': {
-            boxShadow: '0 0 5px rgba(155, 135, 245, 0.7), 0 0 10px rgba(155, 135, 245, 0.5), 0 0 15px rgba(155, 135, 245, 0.3)'
+            boxShadow: '0 0 6px rgba(255, 74, 26, 0.55), 0 0 12px rgba(255, 74, 26, 0.35), 0 0 18px rgba(255, 42, 0, 0.22)'
           },
           '50%': {
-            boxShadow: '0 0 10px rgba(155, 135, 245, 0.9), 0 0 20px rgba(155, 135, 245, 0.7), 0 0 30px rgba(155, 135, 245, 0.5)'
+            boxShadow: '0 0 12px rgba(255, 74, 26, 0.75), 0 0 24px rgba(255, 74, 26, 0.5), 0 0 36px rgba(255, 42, 0, 0.35)'
           }
         },
         'pulse-ring': {

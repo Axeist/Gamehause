@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, Download, Share2, Copy, Calendar, Clock, MapPin, Tag, CreditCard, Hash } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { BASE_URL, BRAND_NAME } from '@/config/brand';
 
 interface BookingConfirmationDialogProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ export default function BookingConfirmationDialog({
   };
 
   const handleShare = async () => {
-    const shareText = `🎮 Booking Confirmed at NerfTurf! 
+    const shareText = `🎮 Booking Confirmed at ${BRAND_NAME}! 
 
 Booking ID: ${bookingData.bookingId}
 Customer: ${bookingData.customerName}
@@ -49,16 +50,16 @@ ${bookingData.paymentTxnId ? `Transaction ID: ${bookingData.paymentTxnId}` : ''}
 ${bookingData.couponCode ? `Coupon Applied: ${bookingData.couponCode}` : ''}
 ${bookingData.discountAmount ? `Discount: ₹${bookingData.discountAmount}` : ''}
 
-📍 NerfTurf - Chennai's Premier Snooker & Gaming Lounge
+📍 ${BRAND_NAME} – Chennai's Premier Snooker & Gaming Lounge
 📞 Contact: +91 93451 87098
-🌐 Visit: https://app.nerfturf.in
+🌐 Visit: ${BASE_URL}
 
 Please arrive on time and show this confirmation at reception.`;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'NerfTurf Booking Confirmation',
+          title: `${BRAND_NAME} Booking Confirmation`,
           text: shareText,
         });
         toast.success('Booking details shared successfully!');

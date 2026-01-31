@@ -20,18 +20,18 @@ const HowToUse: React.FC = () => (
       <HowToFAQ />
 
       <div className="w-full flex justify-center mt-10">
-        <div className="text-xs text-nerfturf-lightpurple/70 px-4 py-3 text-center font-quicksand bg-nerfturf-purple/5 rounded-lg border border-nerfturf-purple/20 max-w-2xl">
+        <div className="text-xs text-gamehaus-lightpurple/70 px-4 py-3 text-center font-quicksand bg-gamehaus-purple/5 rounded-lg border border-gamehaus-purple/20 max-w-2xl">
           <p className="mb-2">
-            <b className="text-nerfturf-lightpurple">Security Note:</b> You will be automatically logged out after 5 hours of inactivity for security. Always save your work and log in daily for best results.
+            <b className="text-gamehaus-lightpurple">Security Note:</b> You will be automatically logged out after 5 hours of inactivity for security. Always save your work and log in daily for best results.
           </p>
           <p>
-            <b className="text-nerfturf-lightpurple">Need Help?</b> Contact your administrator or reach out to{" "}
-            <b className="text-nerfturf-magenta">Cuephoria Tech Support Line</b> at{" "}
-            <a href="tel:+918667637565" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">
+            <b className="text-gamehaus-lightpurple">Need Help?</b> Contact your administrator or reach out to{" "}
+            <b className="text-gamehaus-magenta">Cuephoria Tech Support Line</b> at{" "}
+            <a href="tel:+918667637565" className="underline text-gamehaus-magenta hover:text-gamehaus-lightpurple">
               +91 86676 37565
             </a>
             {" "}or email{" "}
-            <a href="mailto:contact@cuephoria.in" className="underline text-nerfturf-magenta hover:text-nerfturf-lightpurple">
+            <a href="mailto:contact@cuephoria.in" className="underline text-gamehaus-magenta hover:text-gamehaus-lightpurple">
               contact@cuephoria.in
             </a>.
           </p>

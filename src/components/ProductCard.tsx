@@ -44,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       'food': 'border-l-4 border-l-cuephoria-orange hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)] bg-gradient-to-r from-cuephoria-orange/5 via-transparent to-transparent',
       'drinks': 'border-l-4 border-l-cuephoria-blue hover:shadow-[0_0_15px_rgba(14,165,233,0.3)] hover:shadow-[0_0_25px_rgba(14,165,233,0.5)] bg-gradient-to-r from-cuephoria-blue/5 via-transparent to-transparent',
       'tobacco': 'border-l-4 border-l-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_25px_rgba(239,68,68,0.5)] bg-gradient-to-r from-red-500/5 via-transparent to-transparent',
-      'challenges': 'border-l-4 border-l-nerfturf-purple hover:shadow-[0_0_15px_rgba(110,89,165,0.3)] hover:shadow-[0_0_25px_rgba(110,89,165,0.5)] bg-gradient-to-r from-nerfturf-purple/5 via-transparent to-transparent',
+      'challenges': 'border-l-4 border-l-gamehaus-purple hover:shadow-[0_0_15px_rgba(255,74,26,0.22)] hover:shadow-[0_0_25px_rgba(255,74,26,0.35)] bg-gradient-to-r from-gamehaus-purple/5 via-transparent to-transparent',
       'membership': 'border-l-4 border-l-violet-600 hover:shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] bg-gradient-to-r from-violet-600/8 via-indigo-600/5 to-transparent',
     };
     

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bill } from '@/types/pos.types';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { BRAND_NAME_UPPER, SUPPORT_EMAIL } from '@/config/brand';
 
 interface ReceiptHeaderProps {
   bill: Bill;
@@ -14,8 +15,8 @@ const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill }) => {
     <div className="border-b-2 border-dashed border-gray-400 pb-4 mb-4">
       {/* Company Logo/Name */}
       <div className="text-center mb-4">
-        <h1 className="text-4xl font-bold text-nerfturf-purple mb-1" style={{ fontFamily: 'Arial Black, sans-serif' }}>
-          NERFTURF
+        <h1 className="text-4xl font-bold text-gamehaus-purple mb-1" style={{ fontFamily: 'Arial Black, sans-serif' }}>
+          {BRAND_NAME_UPPER}
         </h1>
         <p className="text-sm text-gray-600 uppercase tracking-wider">
           Premier Snooker & Gaming Lounge
@@ -25,7 +26,7 @@ const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill }) => {
       {/* Contact Information */}
       <div className="text-center space-y-1 text-xs text-gray-700 mb-4">
         <div className="flex items-center justify-center gap-1">
-          <MapPin className="h-3 w-3 text-nerfturf-purple" />
+          <MapPin className="h-3 w-3 text-gamehaus-purple" />
           <p>
             40, S W Boag Rd, CIT Nagar West,<br />
             T. Nagar, Chennai, Tamil Nadu 600035
@@ -34,18 +35,18 @@ const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill }) => {
         
         <div className="flex items-center justify-center gap-3 mt-2">
           <div className="flex items-center gap-1">
-            <Phone className="h-3 w-3 text-nerfturf-purple" />
+            <Phone className="h-3 w-3 text-gamehaus-purple" />
             <span>+91 93451 87098</span>
           </div>
         </div>
         
         <div className="flex items-center justify-center gap-1">
-          <Mail className="h-3 w-3 text-nerfturf-purple" />
-          <span>contact@nerfturf.in</span>
+          <Mail className="h-3 w-3 text-gamehaus-purple" />
+          <span>{SUPPORT_EMAIL}</span>
         </div>
         
         <div className="flex items-center justify-center gap-1">
-          <Clock className="h-3 w-3 text-nerfturf-purple" />
+          <Clock className="h-3 w-3 text-gamehaus-purple" />
           <span>11:00 AM - 11:00 PM, Every day</span>
         </div>
       </div>

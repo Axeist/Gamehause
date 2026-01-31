@@ -48,7 +48,7 @@ const StatCard: React.FC<StatCardProps> = ({
           <p className="text-xs text-muted-foreground">{description}</p>
         )}
         {typeof change !== 'undefined' && (
-          <div className={`text-xs ${change >= 0 ? 'text-nerfturf-magenta' : 'text-red-500'} mt-1`}>
+          <div className={`text-xs ${change >= 0 ? 'text-gamehaus-magenta' : 'text-red-500'} mt-1`}>
             {change >= 0 ? '↑' : '↓'} {Math.abs(change)}% from last period
           </div>
         )}

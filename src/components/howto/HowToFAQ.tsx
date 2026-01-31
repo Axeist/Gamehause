@@ -55,15 +55,15 @@ const faqs = [
 ];
 
 const HowToFAQ: React.FC = () => (
-  <div className="bg-black/80 rounded-lg mt-8 border border-nerfturf-purple/30 shadow-lg shadow-nerfturf-purple/10 p-6">
-    <h3 className="flex items-center gap-2 text-xl font-bold text-nerfturf-lightpurple mb-4">
+  <div className="bg-black/80 rounded-lg mt-8 border border-gamehaus-purple/30 shadow-lg shadow-gamehaus-purple/10 p-6">
+    <h3 className="flex items-center gap-2 text-xl font-bold text-gamehaus-lightpurple mb-4">
       <HelpCircle className="h-5 w-5" />
       Frequently Asked Questions
     </h3>
     <Accordion type="single" collapsible className="space-y-2">
       {faqs.map((faq, idx) => (
-        <AccordionItem key={faq.q} value={`faq-${idx}`} className="border-nerfturf-purple/20">
-          <AccordionTrigger className="text-lg text-nerfturf-lightpurple py-3 hover:text-nerfturf-magenta transition-colors hover:bg-nerfturf-purple/5 rounded-lg px-3">
+        <AccordionItem key={faq.q} value={`faq-${idx}`} className="border-gamehaus-purple/20">
+          <AccordionTrigger className="text-lg text-gamehaus-lightpurple py-3 hover:text-gamehaus-magenta transition-colors hover:bg-gamehaus-purple/5 rounded-lg px-3">
             {faq.q}
           </AccordionTrigger>
           <AccordionContent className="text-base px-3 py-2 text-white/90 leading-relaxed">

@@ -1,4 +1,4 @@
-# Cuephoria Tech - NerfTurf Management Portal
+# Cuephoria Tech - Gamehaus Management Portal
 
 <div align="center">
 

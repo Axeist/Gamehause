@@ -47,7 +47,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={handleCloseAttempt} modal={true}>
       <DialogContent 
-        className="sm:max-w-[600px] bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-nerfturf-purple/30 text-white [&>button]:hidden" 
+        className="sm:max-w-[600px] bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/30 text-white [&>button]:hidden" 
         onPointerDownOutside={(e) => {
           e.preventDefault();
           handleCloseAttempt();
@@ -60,10 +60,10 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
       >
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-nerfturf-purple/30 to-nerfturf-magenta/30 flex items-center justify-center border border-nerfturf-purple/30">
-              <Lock className="h-6 w-6 text-nerfturf-lightpurple" />
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30 flex items-center justify-center border border-gamehaus-purple/30">
+              <Lock className="h-6 w-6 text-gamehaus-lightpurple" />
             </div>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-nerfturf-lightpurple to-nerfturf-magenta bg-clip-text text-transparent">
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta bg-clip-text text-transparent">
               Upgrade Required
             </DialogTitle>
           </div>
@@ -71,13 +71,13 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
         
         <div className="space-y-4 py-4">
           <p className="text-gray-300 text-base leading-relaxed">
-            Your current subscription plan doesn't include access to <span className="font-semibold text-nerfturf-lightpurple">{featureName}</span>. 
+            Your current subscription plan doesn't include access to <span className="font-semibold text-gamehaus-lightpurple">{featureName}</span>. 
             Please upgrade to a plan that includes this feature.
           </p>
 
-          <div className="bg-gradient-to-br from-nerfturf-purple/10 via-nerfturf-magenta/5 to-nerfturf-purple/10 border border-nerfturf-purple/30 rounded-lg p-5 space-y-4">
+          <div className="bg-gradient-to-br from-gamehaus-purple/10 via-gamehaus-magenta/5 to-gamehaus-purple/10 border border-gamehaus-purple/30 rounded-lg p-5 space-y-4">
             <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-nerfturf-lightpurple" />
+              <Sparkles className="h-5 w-5 text-gamehaus-lightpurple" />
               Available Plans
             </h3>
             <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -94,7 +94,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-nerfturf-lightpurple font-bold">₹{plan.finalPrice.toLocaleString('en-IN')}</p>
+                    <p className="text-gamehaus-lightpurple font-bold">₹{plan.finalPrice.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
               ))}
@@ -121,7 +121,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
           <div className="pt-2">
             <Button
               onClick={handleViewPlans}
-              className="w-full bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple/90 hover:to-nerfturf-magenta/90 shadow-lg shadow-nerfturf-purple/20"
+              className="w-full bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple/90 hover:to-gamehaus-magenta/90 shadow-lg shadow-gamehaus-purple/20"
               size="lg"
             >
               <CreditCard className="h-4 w-4 mr-2" />

@@ -1032,7 +1032,7 @@ const POS = () => {
               Your transaction has been completed successfully.
             </DialogDescription>
             
-            <div className="bg-gradient-to-r from-nerfturf-purple/10 to-nerfturf-magenta/10 dark:from-nerfturf-purple/20 dark:to-nerfturf-magenta/20 p-4 rounded-lg w-full mb-4">
+            <div className="bg-gradient-to-r from-gamehaus-purple/10 to-gamehaus-magenta/10 dark:from-gamehaus-purple/20 dark:to-gamehaus-magenta/20 p-4 rounded-lg w-full mb-4">
               <p className="font-bold text-3xl mb-2 text-green-600">
                 <CurrencyDisplay amount={lastCompletedBill?.total || 0} />
               </p>

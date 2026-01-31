@@ -317,7 +317,7 @@ const TournamentManagement: React.FC<TournamentManagementProps> = ({
             )}
             
             {isCompleted && (
-              <div className="text-center p-4 bg-gradient-to-r from-nerfturf-purple/20 to-nerfturf-magenta/20 border border-nerfturf-purple/30 rounded-xl">
+              <div className="text-center p-4 bg-gradient-to-r from-gamehaus-purple/20 to-gamehaus-magenta/20 border border-gamehaus-purple/30 rounded-xl">
                 <div className="flex items-center justify-center gap-3 text-green-300">
                   <Trophy className="h-5 w-5" />
                   <span className="font-medium">Tournament completed - fixtures are locked.</span>

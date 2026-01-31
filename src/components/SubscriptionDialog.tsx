@@ -56,19 +56,19 @@ const SubscriptionDialog: React.FC<SubscriptionDialogProps> = ({ open }) => {
 
           <div className="bg-gradient-to-br from-red-500/10 via-orange-500/5 to-red-500/10 border border-red-500/30 rounded-lg p-5 space-y-4 backdrop-blur-sm">
             <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-              <Phone className="h-5 w-5 text-nerfturf-lightpurple" />
+              <Phone className="h-5 w-5 text-gamehaus-lightpurple" />
               Contact Administrator
             </h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-black/20 hover:bg-black/30 transition-colors">
-                <div className="p-2 rounded-lg bg-nerfturf-purple/20">
-                  <Phone className="h-5 w-5 text-nerfturf-lightpurple" />
+                <div className="p-2 rounded-lg bg-gamehaus-purple/20">
+                  <Phone className="h-5 w-5 text-gamehaus-lightpurple" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-400">Cuephoria Tech Support</p>
                   <a
                     href="tel:+918667637565"
-                    className="text-nerfturf-lightpurple hover:text-nerfturf-magenta font-semibold underline transition-colors"
+                    className="text-gamehaus-lightpurple hover:text-gamehaus-magenta font-semibold underline transition-colors"
                   >
                     Ranjith - +91 86676 37565
                   </a>
@@ -76,14 +76,14 @@ const SubscriptionDialog: React.FC<SubscriptionDialogProps> = ({ open }) => {
               </div>
               
               <div className="flex items-center gap-3 p-3 rounded-lg bg-black/20 hover:bg-black/30 transition-colors">
-                <div className="p-2 rounded-lg bg-nerfturf-purple/20">
-                  <Mail className="h-5 w-5 text-nerfturf-lightpurple" />
+                <div className="p-2 rounded-lg bg-gamehaus-purple/20">
+                  <Mail className="h-5 w-5 text-gamehaus-lightpurple" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-400">Email</p>
                   <a
                     href="mailto:contact@cuephoria.in"
-                    className="text-nerfturf-lightpurple hover:text-nerfturf-magenta font-semibold underline transition-colors"
+                    className="text-gamehaus-lightpurple hover:text-gamehaus-magenta font-semibold underline transition-colors"
                   >
                     contact@cuephoria.in
                   </a>
@@ -96,7 +96,7 @@ const SubscriptionDialog: React.FC<SubscriptionDialogProps> = ({ open }) => {
             <Button
               onClick={handleClose}
               variant="outline"
-              className="flex-1 border-nerfturf-purple/30 hover:bg-nerfturf-purple/10"
+              className="flex-1 border-gamehaus-purple/30 hover:bg-gamehaus-purple/10"
             >
               <CreditCard className="h-4 w-4 mr-2" />
               View Subscription
@@ -105,7 +105,7 @@ const SubscriptionDialog: React.FC<SubscriptionDialogProps> = ({ open }) => {
               onClick={() => {
                 window.open(`tel:+918667637565`, '_self');
               }}
-              className="flex-1 bg-gradient-to-r from-nerfturf-purple to-nerfturf-magenta hover:from-nerfturf-purple/90 hover:to-nerfturf-magenta/90"
+              className="flex-1 bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple/90 hover:to-gamehaus-magenta/90"
               size="lg"
             >
               <Phone className="h-4 w-4 mr-2" />

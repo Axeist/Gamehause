@@ -169,12 +169,12 @@ const CanteenSalesProfitWidget: React.FC<CanteenSalesProfitWidgetProps> = ({ sta
                 <CurrencyDisplay amount={canteenData.totalSales} />
               </p>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30 hover:border-nerfturf-purple/30 transition-colors">
+            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30 hover:border-gamehaus-purple/30 transition-colors">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-nerfturf-magenta" />
+                <TrendingUp className="h-4 w-4 text-gamehaus-magenta" />
                 <p className="text-xs text-gray-400 font-medium">Total Profit</p>
               </div>
-              <p className="text-xl font-bold text-nerfturf-magenta">
+              <p className="text-xl font-bold text-gamehaus-magenta">
                 <CurrencyDisplay amount={canteenData.totalProfit} />
               </p>
             </div>
@@ -236,7 +236,7 @@ const CanteenSalesProfitWidget: React.FC<CanteenSalesProfitWidgetProps> = ({ sta
                           <p className="text-sm font-bold text-white">
                             <CurrencyDisplay amount={product.sales} />
                           </p>
-                          <p className="text-xs text-nerfturf-magenta flex items-center gap-1">
+                          <p className="text-xs text-gamehaus-magenta flex items-center gap-1">
                             <TrendingUp className="h-3 w-3" />
                             <CurrencyDisplay amount={product.profit} />
                           </p>

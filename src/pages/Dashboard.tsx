@@ -283,7 +283,7 @@ const Dashboard = () => {
   return (
     <div className="flex-1 space-y-6 p-6 text-white bg-inherit">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-nerfturf-lightpurple via-nerfturf-magenta to-nerfturf-purple font-heading">
+        <h2 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple font-heading">
           Dashboard
         </h2>
       </div>
@@ -295,28 +295,28 @@ const Dashboard = () => {
         className="w-full"
       >
         <div className="flex items-center justify-between mb-6">
-          <TabsList className="w-auto bg-nerfturf-purple/30 border border-nerfturf-purple/40">
+          <TabsList className="w-auto bg-gamehaus-purple/30 border border-gamehaus-purple/40">
             <TabsTrigger
               value="overview"
-              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-purple data-[state=active]:to-nerfturf-magenta data-[state=active]:text-white transition-all duration-300"
+              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-purple data-[state=active]:to-gamehaus-magenta data-[state=active]:text-white transition-all duration-300"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-purple data-[state=active]:to-nerfturf-magenta data-[state=active]:text-white transition-all duration-300"
+              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-purple data-[state=active]:to-gamehaus-magenta data-[state=active]:text-white transition-all duration-300"
             >
               Analytics
             </TabsTrigger>
             <TabsTrigger
               value="expenses"
-              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-purple data-[state=active]:to-nerfturf-magenta data-[state=active]:text-white transition-all duration-300"
+              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-purple data-[state=active]:to-gamehaus-magenta data-[state=active]:text-white transition-all duration-300"
             >
               Expenses
             </TabsTrigger>
             <TabsTrigger 
               value="cash" 
-              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-nerfturf-purple data-[state=active]:to-nerfturf-magenta data-[state=active]:text-white transition-all duration-300"
+              className="flex-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-purple data-[state=active]:to-gamehaus-magenta data-[state=active]:text-white transition-all duration-300"
             >
               Vault
             </TabsTrigger>

@@ -323,8 +323,8 @@ export default async function handler(req: Request) {
       hasSignature: !!finalSignature,
     });
 
-    // Frontend base URL
-    const base = "https://app.nerfturf.in";
+    // Redirect base URL (single canonical domain, serverless-safe)
+    const base = (getEnv("PAYMENTS_REDIRECT_BASE_URL") || "https://gamehaus.co.in").replace(/\/$/, "");
 
     // Determine if payment was successful
     // Razorpay typically returns success when payment_id is present and status is not failed/cancelled
@@ -404,7 +404,8 @@ export default async function handler(req: Request) {
   } catch (error) {
     console.error("❌ Razorpay callback error:", error);
 
-    const fallbackUrl = "https://app.nerfturf.in/public/payment/failed";
+    const fallbackBase = (getEnv("PAYMENTS_REDIRECT_BASE_URL") || "https://gamehaus.co.in").replace(/\/$/, "");
+    const fallbackUrl = `${fallbackBase}/public/payment/failed`;
     const fallbackHtml = `<!DOCTYPE html><html><head>
     <meta charset="utf-8">
     <title>Payment Error</title>
