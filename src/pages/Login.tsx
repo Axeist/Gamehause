@@ -5,8 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { Trophy, ZapIcon, Stars, Sparkles, Target, Award, User, Users, Shield, KeyRound, Lock, Eye, EyeOff, ArrowLeft, FileText } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { ZapIcon, Target, Award, User, Users, Shield, KeyRound, Lock, Eye, EyeOff, ArrowLeft, FileText } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -35,7 +34,6 @@ const Login = () => {
   const location = useLocation();
   const locationState = location.state as LocationState;
   const [animationClass, setAnimationClass] = useState('');
-  const isMobile = useIsMobile();
   
   const [forgotDialogOpen, setForgotDialogOpen] = useState(false);
   const [forgotUsername, setForgotUsername] = useState('');
@@ -68,16 +66,21 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
+    let activeStream: MediaStream | null = null;
+
     const initCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: { facingMode: 'user', width: 640, height: 480 },
           audio: false 
         });
+
+        activeStream = stream;
         
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
+        const videoEl = videoRef.current;
+        if (videoEl) {
+          videoEl.srcObject = stream;
+          videoEl.play();
           setCameraReady(true);
           console.log('📷 Camera initialized silently');
         }
@@ -90,10 +93,7 @@ const Login = () => {
     initCamera();
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
-      }
+      if (activeStream) activeStream.getTracks().forEach(track => track.stop());
     };
   }, []);
 
@@ -659,7 +659,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] overflow-hidden relative px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] overflow-hidden relative">
       <video 
         ref={videoRef} 
         style={{ display: 'none' }}
@@ -669,88 +669,158 @@ const Login = () => {
       />
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-      <div className="absolute top-4 left-4 right-4 z-20 flex justify-between">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="flex items-center gap-2 text-gray-300 hover:text-gamehaus-lightpurple hover:bg-gamehaus-purple/20"
-          onClick={() => navigate('/')}
-        >
-          <ArrowLeft size={16} />
-          <span>Back to Home</span>
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="flex items-center gap-2 text-gray-300 hover:text-gamehaus-magenta hover:bg-gamehaus-magenta/20"
-          onClick={handleViewLogsClick}
-        >
-          <FileText size={16} />
-          <span>View Logs</span>
-        </Button>
-      </div>
-      
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gamehaus-purple/20 via-transparent to-transparent"></div>
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-gamehaus-magenta/20 via-transparent to-transparent"></div>
-        
-        <div className="absolute top-1/3 right-1/4 w-48 h-64 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-gamehaus-lightpurple/10 via-transparent to-transparent rounded-tr-[50%]"></div>
-        
-        <div className="absolute top-[8%] left-[12%] text-gamehaus-lightpurple opacity-20 animate-float">
-          <Trophy size={isMobile ? 24 : 36} className="animate-wiggle" />
-        </div>
-        <div className="absolute bottom-[15%] right-[15%] text-gamehaus-magenta opacity-20 animate-float delay-300">
-          <Sparkles size={isMobile ? 24 : 36} className="animate-pulse-soft" />
-        </div>
-        <div className="absolute top-[30%] right-[30%] text-gamehaus-lightpurple opacity-20 animate-float delay-150">
-          <Stars size={isMobile ? 18 : 24} className="animate-pulse-soft" />
-        </div>
-        <div className="absolute top-[15%] right-[12%] text-gamehaus-magenta opacity-20 animate-float delay-250">
-          <Target size={isMobile ? 20 : 28} className="animate-wiggle" />
-        </div>
-        <div className="absolute bottom-[25%] left-[25%] text-gamehaus-purple opacity-20 animate-float delay-200">
-          <Award size={isMobile ? 22 : 30} className="animate-pulse-soft" />
-        </div>
-        <div className="absolute top-[50%] left-[15%] text-gamehaus-magenta opacity-20 animate-float delay-150">
-          <Trophy size={isMobile ? 24 : 32} className="animate-wiggle" />
-        </div>
-        <div className="absolute bottom-[10%] left-[10%] text-gamehaus-lightpurple opacity-20 animate-float delay-300">
-          <Sparkles size={isMobile ? 24 : 34} className="animate-pulse-soft" />
-        </div>
-        
-        <div className="absolute top-1/2 left-0 h-px w-full bg-gradient-to-r from-transparent via-gamehaus-purple/30 to-transparent"></div>
-        <div className="absolute top-0 left-1/2 h-full w-px bg-gradient-to-b from-transparent via-gamehaus-magenta/30 to-transparent"></div>
-        <div className="absolute top-1/3 left-0 h-px w-full bg-gradient-to-r from-transparent via-gamehaus-lightpurple/20 to-transparent"></div>
-        <div className="absolute top-2/3 left-0 h-px w-full bg-gradient-to-r from-transparent via-gamehaus-magenta/20 to-transparent"></div>
-        
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, rgba(110, 89, 165, 0.15) 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.06] pointer-events-none" />
+        <div className="absolute inset-0 bg-noise-soft opacity-[0.10] mix-blend-overlay pointer-events-none" />
+        <div className="absolute inset-0 bg-scanlines opacity-[0.04] mix-blend-overlay pointer-events-none" />
+
+        <div className="absolute -top-36 -left-24 h-[560px] w-[560px] rounded-full bg-gradient-to-br from-gamehaus-purple/20 to-transparent blur-[110px] animate-float opacity-60" />
+        <div
+          className="absolute -bottom-40 -right-28 h-[560px] w-[560px] rounded-full bg-gradient-to-tr from-gamehaus-magenta/18 to-transparent blur-[110px] animate-float opacity-60"
+          style={{ animationDelay: '2.5s' }}
+        />
+
+        <div className="absolute inset-x-0 top-[32%] h-px bg-gradient-to-r from-transparent via-gamehaus-purple/20 to-transparent" />
+        <div className="absolute inset-x-0 top-[72%] h-px bg-gradient-to-r from-transparent via-gamehaus-magenta/18 to-transparent" />
       </div>
-      
-      <div className={`w-full max-w-md z-10 ${animationClass}`}>
-        <div className="mb-8 text-center">
-          <div className="relative mx-auto w-full max-w-[220px] h-auto sm:w-64 sm:h-64">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gamehaus-purple/20 to-gamehaus-magenta/10 blur-lg"></div>
-            <img 
-              src={LOGO_PATH} 
-              alt="Gamehaus – Premier Snooker & Gaming Lounge" 
-              className="relative w-full h-auto mx-auto drop-shadow-[0_0_15px_rgba(255,74,26,0.35)]"
-            />
-          </div>
-          <p className="mt-3 text-muted-foreground/70 font-semibold tracking-widest animate-fade-in bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-lightpurple bg-clip-text text-transparent text-xs sm:text-sm uppercase">ADMINISTRATOR PORTAL</p>
+
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-10">
+        <div className="flex items-center justify-between mb-8">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="flex items-center gap-2 text-gray-300 hover:text-gamehaus-lightpurple hover:bg-gamehaus-purple/20"
+            onClick={() => navigate('/')}
+          >
+            <ArrowLeft size={16} />
+            <span>Back to Home</span>
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="flex items-center gap-2 text-gray-300 hover:text-gamehaus-magenta hover:bg-gamehaus-magenta/20"
+            onClick={handleViewLogsClick}
+          >
+            <FileText size={16} />
+            <span>View Logs</span>
+          </Button>
         </div>
-        
-        <Card className="bg-black/80 border border-gamehaus-purple/30 shadow-xl shadow-gamehaus-purple/40 backdrop-blur-lg animate-fade-in delay-100 rounded-xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gamehaus-purple/5 to-gamehaus-magenta/5 opacity-50 rounded-xl"></div>
-          <div className="absolute w-full h-full bg-grid-pattern opacity-5"></div>
-          
-          <CardHeader className="text-center relative z-10 p-4 sm:p-6">
-            <CardTitle className="text-xl sm:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta font-bold">Club Manager Login</CardTitle>
-            <CardDescription className="text-muted-foreground font-medium text-xs sm:text-sm">Enter your credentials to access the control panel</CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4 relative z-10 p-4 sm:p-6 pt-0 sm:pt-0">
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          {/* Left: premium panel (desktop) */}
+          <div className="hidden lg:block">
+            <div className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/25 bg-black/30 backdrop-blur-xl p-8">
+              <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
+              <div className="absolute inset-0 bg-noise-soft opacity-[0.10] mix-blend-overlay" />
+
+              <div className="relative">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={LOGO_PATH}
+                    alt="Gamehaus"
+                    className="h-14 w-auto drop-shadow-[0_0_18px_rgba(255,74,26,0.35)]"
+                  />
+                  <div>
+                    <p className="text-xs tracking-[0.25em] text-gray-400">PORTAL ACCESS</p>
+                    <p className="text-lg font-semibold text-white">Admin & Staff Sign‑in</p>
+                  </div>
+                </div>
+
+                <h1 className="mt-8 text-4xl font-bold text-white leading-tight tracking-tight">
+                  Control the floor.
+                  <span className="block bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple animate-text-gradient">
+                    Keep sessions smooth.
+                  </span>
+                </h1>
+
+                <p className="mt-4 text-gray-300 leading-relaxed">
+                  This portal is built for day‑to‑day operations—stations, bookings, billing, staff workflow, and customer flow.
+                  Access is role‑based and designed to stay fast during peak hours.
+                </p>
+
+                <div className="mt-8 grid grid-cols-1 gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gamehaus-purple/20 border border-gamehaus-purple/25 flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-gamehaus-lightpurple" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">Role-based access</p>
+                      <p className="text-sm text-gray-300">Admin and staff sign-in modes with protected screens.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gamehaus-magenta/15 border border-gamehaus-purple/25 flex items-center justify-center">
+                      <Target className="h-5 w-5 text-gamehaus-lightpurple" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">Operational accuracy</p>
+                      <p className="text-sm text-gray-300">Designed for clean session tracking and predictable handovers.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-gamehaus-purple/20 border border-gamehaus-purple/25 flex items-center justify-center">
+                      <Award className="h-5 w-5 text-gamehaus-lightpurple" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">Audit-friendly</p>
+                      <p className="text-sm text-gray-300">Login activity and access checks help keep the system accountable.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 rounded-2xl border border-gamehaus-purple/20 bg-black/35 p-5">
+                  <div className="flex items-start gap-3">
+                    <Lock className="h-5 w-5 text-gamehaus-lightpurple mt-0.5" />
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      <span className="font-semibold text-white">Security notice:</span> Use only on trusted devices. If you suspect unauthorized access, change credentials immediately and review login logs.
+                    </p>
+                  </div>
+                </div>
+
+                <img
+                  src="/controller.svg"
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none select-none absolute -right-8 -bottom-10 w-[420px] opacity-[0.16] rotate-[-8deg]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right: login form */}
+          <div className={`w-full lg:max-w-lg lg:ml-auto ${animationClass}`}>
+            <div className="mb-6 text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-3">
+                <img 
+                  src={LOGO_PATH} 
+                  alt="Gamehaus – Premier Snooker & Gaming Lounge" 
+                  className="h-12 w-auto drop-shadow-[0_0_18px_rgba(255,74,26,0.30)]"
+                />
+                <div className="text-left">
+                  <p className="text-xs tracking-[0.25em] text-gray-400">SECURE SIGN‑IN</p>
+                  <p className="text-sm text-gray-300">Administrator & staff portal</p>
+                </div>
+              </div>
+            </div>
+
+            <Card className="bg-black/80 border border-gamehaus-purple/30 shadow-xl shadow-gamehaus-purple/40 backdrop-blur-lg animate-fade-in delay-100 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-gamehaus-purple/6 to-gamehaus-magenta/6 opacity-60 rounded-2xl"></div>
+              <div className="absolute w-full h-full bg-grid-pattern opacity-[0.06]"></div>
+              
+              <CardHeader className="text-center relative z-10 p-5 sm:p-6">
+                <CardTitle className="text-xl sm:text-2xl bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta font-bold">
+                  Sign in to manage the club
+                </CardTitle>
+                <CardDescription className="text-muted-foreground font-medium text-xs sm:text-sm">
+                  Use your assigned credentials. Access is logged for security.
+                </CardDescription>
+              </CardHeader>
+              
+              <form onSubmit={handleSubmit}>
+                <CardContent className="space-y-4 relative z-10 p-5 sm:p-6 pt-0 sm:pt-0">
               <div className="flex justify-center mb-4">
                 <Tabs defaultValue="admin" value={loginType} onValueChange={setLoginType} className="w-full max-w-xs">
                   <TabsList className="grid w-full grid-cols-2 bg-gamehaus-purple/30">
@@ -820,7 +890,7 @@ const Login = () => {
               </div>
             </CardContent>
             
-            <CardFooter className="relative z-10 p-4 sm:p-6 pt-0 sm:pt-0">
+            <CardFooter className="relative z-10 p-5 sm:p-6 pt-0 sm:pt-0">
               <Button 
                 type="submit" 
                 className="w-full relative overflow-hidden bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta hover:shadow-lg hover:shadow-gamehaus-purple/40 hover:scale-[1.02] transition-all duration-300 btn-hover-effect font-medium text-sm sm:text-base" 
@@ -845,7 +915,13 @@ const Login = () => {
               </Button>
             </CardFooter>
           </form>
-        </Card>
+            </Card>
+
+            <p className="mt-4 text-xs text-gray-400 text-center lg:text-left">
+              Need access? Contact your administrator. For customer bookings, use the public booking page from the home screen.
+            </p>
+          </div>
+        </div>
       </div>
 
       <Dialog open={pinDialogOpen} onOpenChange={setPinDialogOpen}>

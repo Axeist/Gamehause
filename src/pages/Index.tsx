@@ -9,6 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Mail, Phone, Clock, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BRAND_NAME, LOGO_PATH, PUBLIC_BOOKING_URL, SUPPORT_EMAIL } from '@/config/brand';
 
@@ -76,14 +78,10 @@ const Index: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] flex flex-col relative overflow-hidden">
       {/* Elegant animated background */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* Luxury grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-5"
-          style={{ 
-            backgroundImage: 'linear-gradient(to right, rgb(110, 89, 165) 1px, transparent 1px), linear-gradient(to bottom, rgb(110, 89, 165) 1px, transparent 1px)',
-            backgroundSize: '60px 60px' 
-          }}>
-        </div>
+        {/* Premium grid + texture */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.06] pointer-events-none" />
+        <div className="absolute inset-0 bg-noise-soft opacity-[0.10] mix-blend-overlay pointer-events-none" />
+        <div className="absolute inset-0 bg-scanlines opacity-[0.04] mix-blend-overlay pointer-events-none" />
         
         {/* Elegant gradients */}
         <div className="absolute top-0 left-1/4 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-gamehaus-purple/10 to-transparent blur-[120px] animate-float opacity-30"></div>
@@ -152,8 +150,35 @@ const Index: React.FC = () => {
         </p>
         
         <p className="text-base sm:text-lg text-center text-gray-300 max-w-2xl mb-6 md:mb-8 px-4">
-          Experience the elegance of professional snooker, pool tables, and PlayStation 5 gaming in a sophisticated, world-class setting.
+          A premium lounge for tournament-grade snooker & pool, next‑gen console sessions, and competitive community nights — designed for comfort, focus, and serious play.
         </p>
+
+        <p className="text-sm sm:text-base text-center text-gray-400 max-w-2xl mb-6 px-4 leading-relaxed">
+          Reserve in minutes, check live availability, and walk in with confidence. We keep pricing transparent, equipment maintained, and the experience smooth from booking to break-off.
+        </p>
+
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-8 px-4">
+          <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+            <Radio className="h-3 w-3 mr-1.5 text-green-400" />
+            Live availability
+          </Badge>
+          <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+            <ShieldCheck className="h-3 w-3 mr-1.5 text-gamehaus-lightpurple" />
+            Secure booking flow
+          </Badge>
+          <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+            <Trophy className="h-3 w-3 mr-1.5 text-gamehaus-magenta" />
+            Tournament-ready tables
+          </Badge>
+          <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+            <Gamepad2 className="h-3 w-3 mr-1.5 text-gamehaus-lightpurple" />
+            Console & lounge sessions
+          </Badge>
+          <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+            <MapPin className="h-3 w-3 mr-1.5 text-gamehaus-magenta" />
+            T. Nagar, Chennai
+          </Badge>
+        </div>
         
         {/* Primary Booking CTA - Prominent */}
         <div className="mb-12 md:mb-16 flex flex-col items-center px-4">
@@ -182,6 +207,17 @@ const Index: React.FC = () => {
             <div className="absolute inset-0 w-full bg-gradient-to-r from-gamehaus-purple/0 via-gamehaus-lightpurple/20 to-gamehaus-purple/0 animate-shimmer pointer-events-none"></div>
             <Monitor className="mr-2 h-5 w-5 animate-pulse-soft" />
             <span>View Table Availability</span>
+          </Button>
+
+          <Button
+            size="lg"
+            variant="outline"
+            className="text-gamehaus-lightpurple border-gamehaus-purple/60 hover:bg-gamehaus-purple/30 hover:border-gamehaus-lightpurple/80 group relative overflow-hidden transition-all duration-300 text-lg px-8"
+            onClick={() => navigate('/public/tournaments')}
+          >
+            <div className="absolute inset-0 w-full bg-gradient-to-r from-gamehaus-magenta/0 via-gamehaus-lightpurple/15 to-gamehaus-magenta/0 animate-shimmer pointer-events-none"></div>
+            <Trophy className="mr-2 h-5 w-5 animate-pulse-soft" />
+            <span>Explore Tournaments</span>
           </Button>
         </div>
 
@@ -294,6 +330,87 @@ const Index: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <Separator className="w-full max-w-6xl mx-auto mb-12 bg-gamehaus-purple/20" />
+
+        {/* Experience Overview */}
+        <div className="w-full max-w-6xl mx-auto mb-16 px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              Inside <span className="bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple animate-text-gradient">{BRAND_NAME}</span>
+            </h2>
+            <p className="mt-4 text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              Built like a modern arena and run like a professional club. Whether you're here to practice quietly, compete with friends, or host a weekend tournament,
+              our space is tuned for serious play—clean tables, comfortable seating, and a staff-led flow that keeps sessions on time.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="relative overflow-hidden rounded-2xl border border-gamehaus-purple/30 bg-gradient-to-br from-black/60 via-gamehaus-purple/10 to-black/60 p-6 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+              <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/20 flex items-center justify-center border border-gamehaus-purple/30">
+                    <Trophy className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Snooker</h3>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Tournament-caliber tables and consistent playing conditions—ideal for technique work, match practice, and competitive frames.
+                </p>
+                <p className="mt-3 text-xs text-gray-400">Best for: practice sessions, coaching, league nights</p>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-2xl border border-gamehaus-purple/30 bg-gradient-to-br from-black/60 via-gamehaus-magenta/10 to-black/60 p-6 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+              <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gamehaus-magenta/25 to-gamehaus-purple/15 flex items-center justify-center border border-gamehaus-purple/30">
+                    <Timer className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Pool</h3>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Fast games, clean pockets, and a great vibe for groups. Perfect for casual sets or a quick competitive run.
+                </p>
+                <p className="mt-3 text-xs text-gray-400">Best for: friends & groups, quick matches, weekends</p>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-2xl border border-gamehaus-purple/30 bg-gradient-to-br from-black/60 via-gamehaus-purple/10 to-black/60 p-6 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+              <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/20 flex items-center justify-center border border-gamehaus-purple/30">
+                    <Gamepad2 className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">PlayStation 5</h3>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  A comfortable console setup for competitive titles or chill co‑op. Bring your squad and keep the sessions flowing.
+                </p>
+                <p className="mt-3 text-xs text-gray-400">Best for: competitive gaming, co‑op nights, teams</p>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-2xl border border-gamehaus-purple/30 bg-gradient-to-br from-black/60 via-gamehaus-magenta/10 to-black/60 p-6 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+              <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gamehaus-magenta/25 to-gamehaus-purple/15 flex items-center justify-center border border-gamehaus-purple/30">
+                    <Headset className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">VR Sessions</h3>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Immersive experiences on select stations—great for first‑timers and groups looking for something different.
+                </p>
+                <p className="mt-3 text-xs text-gray-400">Best for: groups, special occasions, new experiences</p>
+              </div>
+            </div>
+          </div>
+        </div>
         
         {/* Features - Enhanced */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl mx-auto mb-20">
@@ -403,6 +520,143 @@ const Index: React.FC = () => {
             <Sparkles className="h-8 w-8 text-gamehaus-magenta mx-auto mb-3" />
             <div className="text-3xl font-bold text-white">Premium</div>
             <div className="text-sm text-gray-300 mt-1">Experience</div>
+          </div>
+        </div>
+
+        <Separator className="w-full max-w-6xl mx-auto mb-12 bg-gamehaus-purple/20" />
+
+        {/* How it works */}
+        <div className="w-full max-w-6xl mx-auto mb-20 px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                A smooth booking flow—built for <span className="text-gamehaus-lightpurple">players</span>
+              </h2>
+              <p className="mt-4 text-gray-300 leading-relaxed">
+                We designed the experience to feel premium: clear availability, simple selection, and quick confirmation.
+                Whether you’re booking a quiet practice slot or coordinating a group, the flow stays fast and predictable.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-gray-300">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 shrink-0" />
+                  <span><span className="font-semibold text-white">Real-time station view</span> so you can plan without guessing.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 shrink-0" />
+                  <span><span className="font-semibold text-white">Transparent hourly pricing</span> shown directly on stations.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5 shrink-0" />
+                  <span><span className="font-semibold text-white">On-floor support</span> to keep games running smoothly and on time.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-gamehaus-purple/30 bg-black/50 p-5 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-9 w-9 rounded-xl bg-gamehaus-purple/20 border border-gamehaus-purple/30 flex items-center justify-center">
+                    <Monitor className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <p className="font-semibold text-white">1. Check availability</p>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">See what’s free right now and pick the station that fits your vibe.</p>
+              </div>
+
+              <div className="rounded-2xl border border-gamehaus-purple/30 bg-black/50 p-5 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-9 w-9 rounded-xl bg-gamehaus-magenta/15 border border-gamehaus-purple/30 flex items-center justify-center">
+                    <Calendar className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <p className="font-semibold text-white">2. Reserve your slot</p>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">Choose your timing and confirm in a few taps.</p>
+              </div>
+
+              <div className="rounded-2xl border border-gamehaus-purple/30 bg-black/50 p-5 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-9 w-9 rounded-xl bg-gamehaus-purple/20 border border-gamehaus-purple/30 flex items-center justify-center">
+                    <ShieldCheck className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <p className="font-semibold text-white">3. Get confirmed</p>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">You’ll see a clear confirmation and can plan your arrival.</p>
+              </div>
+
+              <div className="rounded-2xl border border-gamehaus-purple/30 bg-black/50 p-5 backdrop-blur-sm hover:border-gamehaus-purple/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-9 w-9 rounded-xl bg-gamehaus-magenta/15 border border-gamehaus-purple/30 flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-gamehaus-lightpurple" />
+                  </div>
+                  <p className="font-semibold text-white">4. Play in comfort</p>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">Walk in, settle in, and enjoy a premium lounge atmosphere.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Separator className="w-full max-w-6xl mx-auto mb-12 bg-gamehaus-purple/20" />
+
+        {/* FAQ */}
+        <div className="w-full max-w-6xl mx-auto mb-20 px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Frequently asked questions</h2>
+            <p className="mt-4 text-gray-300 max-w-2xl mx-auto leading-relaxed">
+              Quick clarity on bookings, walk-ins, timing, and what to expect when you arrive.
+            </p>
+          </div>
+
+          <div className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/30 bg-gradient-to-br from-black/60 via-gamehaus-purple/10 to-black/60 backdrop-blur-md p-5 sm:p-8">
+            <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
+            <div className="relative">
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1" className="border-gamehaus-purple/20">
+                  <AccordionTrigger className="text-left text-white hover:no-underline">
+                    How do bookings work?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-gray-300">
+                    Use “Reserve a Slot” to pick your station and time. You’ll get a clear confirmation, and you can also view live station status anytime before arriving.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-2" className="border-gamehaus-purple/20">
+                  <AccordionTrigger className="text-left text-white hover:no-underline">
+                    Can I walk in without a booking?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-gray-300">
+                    Yes—walk-ins are welcome when stations are available. For peak hours and weekends, we recommend booking to lock your preferred slot.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-3" className="border-gamehaus-purple/20">
+                  <AccordionTrigger className="text-left text-white hover:no-underline">
+                    What’s your cancellation policy?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-gray-300">
+                    Please refer to the Terms in the footer for full details. As a general rule, earlier changes are easier to accommodate; late cancellations and no-shows may incur a fee.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-4" className="border-gamehaus-purple/20">
+                  <AccordionTrigger className="text-left text-white hover:no-underline">
+                    Do you host tournaments or group sessions?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-gray-300">
+                    Absolutely. We regularly run events and competitive formats. Check the tournaments page for upcoming listings and registration details.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-5" className="border-gamehaus-purple/20">
+                  <AccordionTrigger className="text-left text-white hover:no-underline">
+                    I’m staff/admin—where do I sign in?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-gray-300">
+                    Use “Management Login” at the top-right. The portal is for internal operations like bookings, billing, and station management.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
           </div>
         </div>
         
