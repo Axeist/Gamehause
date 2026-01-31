@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { LOGO_PATH, BRAND_NAME } from "@/config/brand";
 
 type Props = {
-  variant: "first_visit" | "login_success";
+  variant: "boot" | "login_success";
   onDone: () => void;
 };
 
@@ -12,21 +12,22 @@ function clamp(n: number, min: number, max: number) {
 
 export default function SplashScreen({ variant, onDone }: Props) {
   const [progress, setProgress] = useState(0);
+  const [lines, setLines] = useState<string[]>([]);
 
   const headline = useMemo(() => {
     if (variant === "login_success") return "Access granted.";
-    return "Welcome to the arena.";
+    return "GAMEHAUS OS";
   }, [variant]);
 
   const subline = useMemo(() => {
     if (variant === "login_success") return "Booting control systems • syncing dashboards";
-    return "Neon nights • clean tables • smooth booking";
+    return "Luxury gaming lounge • neon grid • hacker‑mode ambience";
   }, [variant]);
 
   useEffect(() => {
     let raf = 0;
     const start = performance.now();
-    const duration = variant === "login_success" ? 1450 : 1650;
+    const duration = variant === "login_success" ? 1450 : 1550;
 
     const tick = (t: number) => {
       const p = clamp((t - start) / duration, 0, 1);
@@ -44,6 +45,32 @@ export default function SplashScreen({ variant, onDone }: Props) {
     return () => cancelAnimationFrame(raf);
   }, [onDone, variant]);
 
+  useEffect(() => {
+    const base =
+      variant === "login_success"
+        ? [
+            "AUTH OK  •  SESSION VALID",
+            "LOADING DASHBOARD MODULES…",
+            "SYNCING STATIONS • BOOKINGS • POS",
+            "READY.",
+          ]
+        : [
+            "NEON GRID ONLINE",
+            "FIREWALL: ARMED (POLITE MODE)",
+            "SCANNING SLOTS • OPTIMIZING FLOW",
+            "READY.",
+          ];
+
+    setLines([]);
+    let i = 0;
+    const t = window.setInterval(() => {
+      i++;
+      setLines(base.slice(0, i));
+      if (i >= base.length) window.clearInterval(t);
+    }, 240);
+    return () => window.clearInterval(t);
+  }, [variant]);
+
   return (
     <div
       className="fixed inset-0 z-[999] overflow-hidden bg-gradient-to-br from-[#050507] via-[#120816] to-[#050507]"
@@ -53,6 +80,8 @@ export default function SplashScreen({ variant, onDone }: Props) {
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.08]" />
       <div className="absolute inset-0 bg-noise-soft opacity-[0.12] mix-blend-overlay" />
       <div className="absolute inset-0 bg-scanlines opacity-[0.06] mix-blend-overlay" />
+      <div className="absolute inset-0 gh-matrix opacity-[0.22]" />
+      <div className="absolute inset-0 gh-scanline opacity-[0.9]" />
 
       {/* glow blobs */}
       <div className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full bg-gamehaus-purple/18 blur-[120px] gh-splash-float" />
@@ -85,12 +114,33 @@ export default function SplashScreen({ variant, onDone }: Props) {
                 <p className="text-[11px] tracking-[0.28em] text-gray-400">
                   {BRAND_NAME.toUpperCase()}
                 </p>
-                <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                <h1
+                  className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-white gh-glitch"
+                  data-text={headline}
+                >
                   {headline}
                 </h1>
                 <p className="mt-2 text-sm text-gray-300 leading-relaxed">
                   {subline}
                 </p>
+              </div>
+
+              {/* terminal lines */}
+              <div className="mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 text-left">
+                <p className="text-[10px] tracking-[0.26em] text-gray-400">BOOT SEQUENCE</p>
+                <div className="mt-3 space-y-1 font-mono text-[12px] leading-relaxed">
+                  {lines.map((l) => (
+                    <div key={l} className="flex items-center gap-2 text-gray-200">
+                      <span className="text-green-400">▸</span>
+                      <span>{l}</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <span className="text-gamehaus-magenta">▸</span>
+                    <span className="opacity-80">Loading</span>
+                    <span className="gh-blink-cursor">█</span>
+                  </div>
+                </div>
               </div>
 
               {/* progress */}
@@ -115,7 +165,7 @@ export default function SplashScreen({ variant, onDone }: Props) {
                 className="mt-6 w-full rounded-2xl border border-white/10 bg-black/30 hover:bg-black/40 text-gray-200 text-xs py-2.5 transition-colors"
                 onClick={onDone}
               >
-                Tap to continue
+                Enter the lounge
               </button>
             </div>
           </div>

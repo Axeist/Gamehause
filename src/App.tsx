@@ -117,23 +117,12 @@ const SplashController = () => {
   const location = useLocation();
   const { user } = useAuth();
   const [show, setShow] = useState(false);
-  const [variant, setVariant] = useState<"first_visit" | "login_success">("first_visit");
-
-  const shouldShowFirstVisit = useMemo(() => {
-    try {
-      return localStorage.getItem("gh_seen_splash_v1") !== "1";
-    } catch {
-      return true;
-    }
-  }, []);
+  const [variant, setVariant] = useState<"boot" | "login_success">("boot");
 
   useEffect(() => {
-    // First-visit splash once ever
-    if (shouldShowFirstVisit) {
-      setVariant("first_visit");
-      setShow(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Always show on full page load/refresh
+    setVariant("boot");
+    setShow(true);
   }, []);
 
   useEffect(() => {
@@ -156,11 +145,6 @@ const SplashController = () => {
       variant={variant}
       onDone={() => {
         setShow(false);
-        try {
-          localStorage.setItem("gh_seen_splash_v1", "1");
-        } catch {
-          // ignore
-        }
       }}
     />
   );
