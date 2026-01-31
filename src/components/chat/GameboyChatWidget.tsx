@@ -87,6 +87,8 @@ export default function GameboyChatWidget() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [booking, setBooking] = useState<BookingFlow>({ active: false });
+  const [unreadCount, setUnreadCount] = useState(0);
+  const pendingNudgeRef = useRef(false);
 
   // Booking UI state (matches PublicBooking flow: type filter -> station select -> date -> time slot)
   const [stationTypeFilter, setStationTypeFilter] = useState<StationType | "all">("all");
@@ -205,6 +207,8 @@ export default function GameboyChatWidget() {
     setMinimized(false);
     setIsTyping(false);
     setBooking({ active: false });
+    setUnreadCount(0);
+    pendingNudgeRef.current = false;
     setStations([]);
     setStationsLoading(false);
     setStationsError(null);
@@ -218,6 +222,51 @@ export default function GameboyChatWidget() {
   }, [location.pathname]);
 
   if (!shouldRender) return null;
+
+  // Unread “nudge” after 10 seconds on public pages (once per session)
+  useEffect(() => {
+    const KEY = "gh_gameboy_unread_nudge_v1";
+    try {
+      if (sessionStorage.getItem(KEY) === "1") return;
+    } catch {
+      // ignore storage errors
+    }
+
+    const t = window.setTimeout(() => {
+      // If chat is open, just deliver the nudge as a message.
+      // If closed/minimized, show unread badge and deliver when opened.
+      const nudgeText =
+        "Psst. Your future self called.\n\nType **book** and I’ll lock a slot in under a minute.\n(Yes, I’m annoyingly efficient.)";
+
+      if (open && !minimized) {
+        animateBotReply(nudgeText);
+      } else {
+        pendingNudgeRef.current = true;
+        setUnreadCount(1);
+      }
+
+      try {
+        sessionStorage.setItem(KEY, "1");
+      } catch {
+        // ignore
+      }
+    }, 10000);
+
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const deliverPendingNudgeIfAny = () => {
+    if (!pendingNudgeRef.current && unreadCount === 0) return;
+    pendingNudgeRef.current = false;
+    setUnreadCount(0);
+    // Wait a tick so viewport refs are ready
+    window.setTimeout(() => {
+      animateBotReply(
+        "I left you a tiny unread message.\n\nType **book** and I’ll do the booking wizard right here — stations, date, time, pricing… the whole thing."
+      );
+    }, 180);
+  };
 
   const maybeStartBooking = (raw: string) => {
     const t = raw.toLowerCase();
@@ -456,6 +505,7 @@ export default function GameboyChatWidget() {
       onClick={() => {
         setOpen(true);
         setMinimized(false);
+        deliverPendingNudgeIfAny();
       }}
       className="fixed bottom-5 right-5 z-[60] h-14 w-14 rounded-2xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/70 via-gamehaus-purple/25 to-black/70 backdrop-blur-md shadow-2xl shadow-gamehaus-purple/25 hover:shadow-gamehaus-magenta/20 transition-all duration-300 group"
       aria-label="Open Gameboy chat"
@@ -466,6 +516,14 @@ export default function GameboyChatWidget() {
           <Gamepad2 className="h-5 w-5 text-white/90" />
         </div>
       </div>
+      {unreadCount > 0 && (
+        <div className="absolute -top-1.5 -right-1.5">
+          <span className="absolute inline-flex h-5 w-5 rounded-full bg-gamehaus-magenta/40 animate-ping" />
+          <span className="relative inline-flex h-5 w-5 rounded-full bg-gamehaus-magenta text-white text-[10px] font-bold items-center justify-center border border-white/20 shadow-lg">
+            {unreadCount}
+          </span>
+        </div>
+      )}
     </button>
   );
 
@@ -485,7 +543,10 @@ export default function GameboyChatWidget() {
               <button
                 type="button"
                 className="pointer-events-auto text-xs text-gamehaus-lightpurple hover:text-white"
-                onClick={() => setMinimized(false)}
+                onClick={() => {
+                  setMinimized(false);
+                  deliverPendingNudgeIfAny();
+                }}
               >
                 Open
               </button>
@@ -510,21 +571,22 @@ export default function GameboyChatWidget() {
         <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-gamehaus-magenta/15 blur-3xl" />
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]" />
 
+        <div className="relative z-10 flex flex-col h-full">
         {/* header */}
-        <div className="relative z-10 flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10 bg-black/25">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10 bg-black/25 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-gamehaus-purple/35 to-gamehaus-magenta/20 border border-white/10 flex items-center justify-center shrink-0">
               <Gamepad2 className="h-5 w-5 text-white/90" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-bold text-white truncate">Gameboy</p>
+                <p className="text-sm font-bold text-white whitespace-nowrap">Gameboy</p>
                 <Badge className="bg-green-500/15 text-green-200 border-green-500/25 text-[10px] px-2 py-0.5">
                   online
                 </Badge>
               </div>
-              <p className="text-xs text-gray-300/80 truncate">
-                Quirky concierge • fast replies • zero judgement
+              <p className="text-[11px] text-gray-300/80 whitespace-normal break-words leading-tight max-w-[240px]">
+                Quirky concierge • fast replies • zero judgement • heavy “book now” energy
               </p>
             </div>
           </div>
@@ -554,7 +616,7 @@ export default function GameboyChatWidget() {
         </div>
 
         {/* content */}
-        <div className="relative z-10 h-[calc(100%-56px-78px)]">
+        <div className="relative z-10 flex-1 min-h-0">
           <ScrollArea ref={scrollAreaRootRef} className="h-full">
             <div className="p-4 space-y-3">
               {/* quick tiles */}
@@ -726,131 +788,136 @@ export default function GameboyChatWidget() {
                     )}
                   </div>
 
-                  {/* Date picker */}
-                  <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-gamehaus-lightpurple" />
-                        <p className="text-xs font-semibold text-gray-200">Pick date</p>
-                      </div>
-                      <Badge className="bg-white/10 text-gray-200 border-white/10 text-[10px] px-2 py-0.5">
-                        {dateStr}
-                      </Badge>
+                  {/* Step 2 is station-first: unlock date/time only after stations are selected */}
+                  {selectedStationIds.length === 0 ? (
+                    <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3 text-xs text-gray-300">
+                      Select stations to unlock the date & time picker.
                     </div>
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(d) => {
-                        if (!d) return;
-                        setSelectedSlotTimes([]);
-                        setSlotHint(null);
-                        setSelectedDate(d);
-                      }}
-                      disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-                      className="rounded-xl border border-white/10 bg-black/10"
-                    />
-                  </div>
-
-                  {/* Time slot picker */}
-                  <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-gamehaus-lightpurple" />
-                        <p className="text-xs font-semibold text-gray-200">Pick time</p>
-                      </div>
-                      <p className="text-[10px] text-gray-400">
-                        {selectedStationIds.length === 0 ? "Select stations first" : slotsLoading ? "Checking slots…" : `${slots.filter((s) => s.is_available).length} open`}
-                      </p>
-                    </div>
-
-                    {selectedStationIds.length === 0 ? (
-                      <p className="text-xs text-gray-400">Select one or more stations to load available time slots.</p>
-                    ) : (
-                      <div className="grid grid-cols-3 gap-2 max-h-[160px] overflow-auto pr-1">
-                        {slots.map((s) => {
-                          const isSelected = selectedSlotTimes.includes(s.start_time);
-                          const disabled = !s.is_available || s.status === "elapsed";
-                          return (
-                            <button
-                              key={s.start_time}
-                              type="button"
-                              disabled={disabled}
-                              onClick={() => {
-                                setSlotHint(null);
-                                const idx = slots.findIndex((x) => x.start_time === s.start_time);
-                                if (idx < 0) return;
-                                const available = slots[idx]?.is_available && slots[idx]?.status !== "elapsed";
-                                if (!available) return;
-
-                                if (selectedSlotTimes.length === 0) {
-                                  setSelectedSlotTimes([s.start_time]);
-                                  return;
-                                }
-
-                                const anchor = selectedSlotTimes[0]!;
-                                const aIdx = slots.findIndex((x) => x.start_time === anchor);
-                                if (aIdx < 0) {
-                                  setSelectedSlotTimes([s.start_time]);
-                                  return;
-                                }
-
-                                const lo = Math.min(aIdx, idx);
-                                const hi = Math.max(aIdx, idx);
-                                const range = slots.slice(lo, hi + 1);
-                                const ok = range.every((x) => x.is_available && x.status !== "elapsed");
-                                if (!ok) {
-                                  setSlotHint("Pick a continuous range of available slots (no gaps).");
-                                  return;
-                                }
-                                setSelectedSlotTimes(range.map((x) => x.start_time));
-                              }}
-                              className={`text-[11px] px-2 py-2 rounded-xl border transition-colors ${
-                                disabled
-                                  ? "border-white/5 bg-black/20 text-gray-600 cursor-not-allowed"
-                                  : isSelected
-                                    ? "border-gamehaus-magenta/55 bg-gamehaus-magenta/20 text-white"
-                                    : "border-white/10 bg-black/25 text-gray-100 hover:border-gamehaus-purple/35"
-                              }`}
-                              title={disabled ? "Not available" : "Select"}
-                            >
-                              {formatSlotLabel(s.start_time)}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    <div className="mt-2 space-y-1">
-                      <p className="text-[10px] text-gray-400">
-                        Tip: pick a start time, then click an end time to select multiple slots.
-                      </p>
-                      {slotHint && <p className="text-[10px] text-red-300">{slotHint}</p>}
-
-                      {selectedSlotTimes.length > 0 && (
-                        <div className="mt-2 rounded-xl border border-white/10 bg-black/25 p-2">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <div className="text-[11px] text-gray-200">
-                              <span className="font-semibold text-white">Selected:</span>{" "}
-                              {formatSlotLabel(selectedSlotTimes[0]!)}{" "}
-                              {selectedSlotTimes.length > 1 ? `→ ${formatSlotLabel(selectedSlotTimes[selectedSlotTimes.length - 1]!)}` : ""}
-                            </div>
-                            <Badge className="bg-white/10 text-gray-200 border-white/10 text-[10px] px-2 py-0.5">
-                              {selectedDurationMinutes} min
-                            </Badge>
+                  ) : (
+                    <>
+                      {/* Date picker */}
+                      <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            <CalendarIcon className="h-4 w-4 text-gamehaus-lightpurple" />
+                            <p className="text-xs font-semibold text-gray-200">Pick date</p>
                           </div>
-                          {selectedStations.length > 0 && (
-                            <div className="mt-2 text-[11px] text-gray-200">
-                              <span className="text-gray-400">Estimate:</span>{" "}
-                              <span className="font-semibold text-white">₹{Math.round(estimatedTotal)}</span>{" "}
-                              <span className="text-gray-400">
-                                ({selectedStations.length} station{selectedStations.length > 1 ? "s" : ""} × {selectedDurationMinutes} min)
-                              </span>
+                          <Badge className="bg-white/10 text-gray-200 border-white/10 text-[10px] px-2 py-0.5">
+                            {dateStr}
+                          </Badge>
+                        </div>
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={(d) => {
+                            if (!d) return;
+                            setSelectedSlotTimes([]);
+                            setSlotHint(null);
+                            setSelectedDate(d);
+                          }}
+                          disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                          className="rounded-xl border border-white/10 bg-black/10"
+                        />
+                      </div>
+
+                      {/* Time slot picker */}
+                      <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-gamehaus-lightpurple" />
+                            <p className="text-xs font-semibold text-gray-200">Pick time</p>
+                          </div>
+                          <p className="text-[10px] text-gray-400">
+                            {slotsLoading ? "Checking slots…" : `${slots.filter((s) => s.is_available).length} open`}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 max-h-[160px] overflow-auto pr-1">
+                          {slots.map((s) => {
+                            const isSelected = selectedSlotTimes.includes(s.start_time);
+                            const disabled = !s.is_available || s.status === "elapsed";
+                            return (
+                              <button
+                                key={s.start_time}
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => {
+                                  setSlotHint(null);
+                                  const idx = slots.findIndex((x) => x.start_time === s.start_time);
+                                  if (idx < 0) return;
+                                  const available = slots[idx]?.is_available && slots[idx]?.status !== "elapsed";
+                                  if (!available) return;
+
+                                  if (selectedSlotTimes.length === 0) {
+                                    setSelectedSlotTimes([s.start_time]);
+                                    return;
+                                  }
+
+                                  const anchor = selectedSlotTimes[0]!;
+                                  const aIdx = slots.findIndex((x) => x.start_time === anchor);
+                                  if (aIdx < 0) {
+                                    setSelectedSlotTimes([s.start_time]);
+                                    return;
+                                  }
+
+                                  const lo = Math.min(aIdx, idx);
+                                  const hi = Math.max(aIdx, idx);
+                                  const range = slots.slice(lo, hi + 1);
+                                  const ok = range.every((x) => x.is_available && x.status !== "elapsed");
+                                  if (!ok) {
+                                    setSlotHint("Pick a continuous range of available slots (no gaps).");
+                                    return;
+                                  }
+                                  setSelectedSlotTimes(range.map((x) => x.start_time));
+                                }}
+                                className={`text-[11px] px-2 py-2 rounded-xl border transition-colors ${
+                                  disabled
+                                    ? "border-white/5 bg-black/20 text-gray-600 cursor-not-allowed"
+                                    : isSelected
+                                      ? "border-gamehaus-magenta/55 bg-gamehaus-magenta/20 text-white"
+                                      : "border-white/10 bg-black/25 text-gray-100 hover:border-gamehaus-purple/35"
+                                }`}
+                                title={disabled ? "Not available" : "Select"}
+                              >
+                                {formatSlotLabel(s.start_time)}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div className="mt-2 space-y-1">
+                          <p className="text-[10px] text-gray-400">
+                            Tip: pick a start time, then click an end time to select multiple slots.
+                          </p>
+                          {slotHint && <p className="text-[10px] text-red-300">{slotHint}</p>}
+
+                          {selectedSlotTimes.length > 0 && (
+                            <div className="mt-2 rounded-xl border border-white/10 bg-black/25 p-2">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="text-[11px] text-gray-200">
+                                  <span className="font-semibold text-white">Selected:</span>{" "}
+                                  {formatSlotLabel(selectedSlotTimes[0]!)}{" "}
+                                  {selectedSlotTimes.length > 1 ? `→ ${formatSlotLabel(selectedSlotTimes[selectedSlotTimes.length - 1]!)}` : ""}
+                                </div>
+                                <Badge className="bg-white/10 text-gray-200 border-white/10 text-[10px] px-2 py-0.5">
+                                  {selectedDurationMinutes} min
+                                </Badge>
+                              </div>
+                              {selectedStations.length > 0 && (
+                                <div className="mt-2 text-[11px] text-gray-200">
+                                  <span className="text-gray-400">Estimate:</span>{" "}
+                                  <span className="font-semibold text-white">₹{Math.round(estimatedTotal)}</span>{" "}
+                                  <span className="text-gray-400">
+                                    ({selectedStations.length} station{selectedStations.length > 1 ? "s" : ""} × {selectedDurationMinutes} min)
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <Button
@@ -892,7 +959,7 @@ export default function GameboyChatWidget() {
         </div>
 
         {/* input */}
-        <div className="relative z-10 border-t border-white/10 bg-black/25 px-3 py-3">
+        <div className="border-t border-white/10 bg-black/25 px-3 py-3 shrink-0">
           <form
             className="flex items-center gap-2"
             onSubmit={(e) => {
@@ -917,9 +984,10 @@ export default function GameboyChatWidget() {
               <Send className="h-4 w-4" />
             </Button>
           </form>
-          <p className="mt-2 text-[10px] text-gray-400 px-1">
-            Be nice. Gameboy gets extra helpful.
+          <p className="mt-2 text-[10px] text-gray-400 px-1 leading-tight">
+            Be nice. Gameboy gets extra helpful. Be chaotic and he’ll still help… just with judgement.
           </p>
+        </div>
         </div>
       </div>
     </div>
