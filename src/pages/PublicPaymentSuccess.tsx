@@ -631,11 +631,11 @@ export default function PublicPaymentSuccess() {
         </DialogContent>
       </Dialog>
 
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] p-6 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker p-6 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gamehaus-purple/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gamehaus-magenta/10 rounded-full blur-3xl animate-pulse delay-1000" />
         </div>
 
         <div className="max-w-md w-full relative z-10">
@@ -672,7 +672,7 @@ export default function PublicPaymentSuccess() {
                 </div>
                 <button
                   onClick={() => navigate("/public/booking")}
-                  className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-6 py-3 text-white font-semibold transition-all transform hover:scale-105 shadow-lg shadow-purple-500/50"
+                  className="w-full rounded-lg bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple/90 hover:to-gamehaus-magenta/90 px-6 py-3 text-white font-semibold transition-all transform hover:scale-105 shadow-lg shadow-gamehaus-purple/40"
                 >
                   Back to Booking
                 </button>

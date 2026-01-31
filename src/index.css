@@ -10,10 +10,11 @@
     --background: 0 0% 3%;
     --foreground: 240 5% 96%;
 
-    --card: 240 6% 6%;
+    /* Neutral (avoid blue/purple tint on surfaces) */
+    --card: 0 0% 6%;
     --card-foreground: 240 5% 96%;
 
-    --popover: 240 6% 6%;
+    --popover: 0 0% 6%;
     --popover-foreground: 240 5% 96%;
 
     --primary: 14 100% 55%; /* Flame */
@@ -22,7 +23,7 @@
     --secondary: 20 100% 58%; /* Tangerine */
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 6% 10%;
+    --muted: 0 0% 10%;
     --muted-foreground: 240 5% 65%;
 
     --accent: 10 100% 50%; /* Ember */
@@ -31,19 +32,19 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 6% 16%;
-    --input: 240 6% 16%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
     --ring: 14 100% 55%; /* Flame */
 
     --radius: 0.75rem;
 
-    --sidebar-background: 240 6% 6%;
+    --sidebar-background: 0 0% 6%;
     --sidebar-foreground: 240 5% 96%;
     --sidebar-primary: 14 100% 55%; /* Flame */
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 6% 10%;
+    --sidebar-accent: 0 0% 10%;
     --sidebar-accent-foreground: 240 5% 96%;
-    --sidebar-border: 240 6% 16%;
+    --sidebar-border: 0 0% 16%;
     --sidebar-ring: 14 100% 55%; /* Flame */
 
     /* Custom cursor set (served from /public) */

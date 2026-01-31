@@ -61,7 +61,7 @@ const ProductPerformance: React.FC = () => {
   const productData = generateProductData();
   
   return (
-    <Card className="bg-[#1A1F2C] border-gray-700 shadow-xl">
+    <Card className="bg-gamehaus-darker border-gamehaus-purple/20 shadow-xl">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>

@@ -27,6 +27,7 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const { customers, startSession, endSession, deleteStation, updateStation } = usePOS();
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
+  const isPs5 = station.type === 'ps5';
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const getCustomer = (id: string) => {
@@ -70,7 +71,9 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
               ? 'border-green-500 bg-gradient-to-b from-green-900/30 to-green-950/40' 
               : isFoosballTable
                 ? 'border-amber-500 bg-gradient-to-b from-amber-900/30 to-amber-950/40'
-                : 'border-cuephoria-purple bg-gradient-to-b from-cuephoria-purple/20 to-black/50'
+                : isPs5
+                  ? 'border-[#9b87f5] bg-gradient-to-b from-[#6E59A5]/25 to-black/55'
+                  : 'border-gamehaus-purple bg-gradient-to-b from-gamehaus-purple/15 to-black/55'
           }
           ${isPoolTable || isFoosballTable ? 'rounded-xl' : 'rounded-lg'}
         `}
@@ -98,12 +101,12 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
         )}
         
         {/* PS5 Visual Elements */}
-        {!isPoolTable && !isFoosballTable && (
+        {isPs5 && (
           <>
-            <div className="absolute right-0 top-0 w-8 h-3 bg-cuephoria-lightpurple/20 rounded-bl-lg"></div>
-            <div className="absolute w-full h-[1px] top-10 bg-gradient-to-r from-transparent via-cuephoria-lightpurple/30 to-transparent"></div>
+            <div className="absolute right-0 top-0 w-8 h-3 bg-[#9b87f5]/18 rounded-bl-lg"></div>
+            <div className="absolute w-full h-[1px] top-10 bg-gradient-to-r from-transparent via-[#9b87f5]/30 to-transparent"></div>
             <div className="absolute left-4 bottom-3 w-1 h-1 rounded-full bg-cuephoria-orange animate-pulse-soft"></div>
-            <div className="absolute left-7 bottom-3 w-1 h-1 rounded-full bg-cuephoria-lightpurple animate-pulse-soft delay-100"></div>
+            <div className="absolute left-7 bottom-3 w-1 h-1 rounded-full bg-[#9b87f5] animate-pulse-soft delay-100"></div>
           </>
         )}
 
@@ -137,7 +140,7 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                     ? 'text-green-300 hover:text-blue-500 hover:bg-green-950/50' 
                     : isFoosballTable
                       ? 'text-amber-300 hover:text-amber-200 hover:bg-amber-950/40'
-                      : 'text-cuephoria-lightpurple hover:text-blue-500 hover:bg-cuephoria-purple/20'
+                      : 'text-[#9b87f5] hover:text-[#c4b5fd] hover:bg-[#6E59A5]/20'
                   }
                 `}
                 disabled={station.isOccupied}
@@ -156,7 +159,7 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                         ? 'text-green-300 hover:text-red-500 hover:bg-green-950/50' 
                         : isFoosballTable
                           ? 'text-amber-300 hover:text-red-500 hover:bg-amber-950/40'
-                          : 'text-cuephoria-lightpurple hover:text-destructive hover:bg-cuephoria-purple/20'
+                          : 'text-[#9b87f5] hover:text-destructive hover:bg-[#6E59A5]/20'
                       }
                     `}
                     disabled={station.isOccupied}
@@ -164,7 +167,7 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className={isPoolTable ? 'border-green-500' : isFoosballTable ? 'border-amber-500' : 'border-cuephoria-purple'}>
+                <AlertDialogContent className={isPoolTable ? 'border-green-500' : isFoosballTable ? 'border-amber-500' : 'border-[#9b87f5]'}>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Station</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -221,9 +224,9 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                 
                 {/* ✅ Show regular rate if no coupon */}
                 {!isDiscounted && (
-                  <div className="mt-2 p-2 bg-cuephoria-purple/10 border border-cuephoria-purple/30 rounded-md">
+                  <div className={`mt-2 p-2 rounded-md ${isPs5 ? 'bg-[#6E59A5]/12 border border-[#9b87f5]/25' : 'bg-gamehaus-purple/10 border border-gamehaus-purple/25'}`}>
                     <div className="text-xs text-gray-400">Current Rate</div>
-                    <div className="text-lg font-bold text-cuephoria-lightpurple indian-rupee">
+                    <div className={`text-lg font-bold indian-rupee ${isPs5 ? 'text-[#9b87f5]' : 'text-gamehaus-lightpurple'}`}>
                       {station.hourlyRate}/hr
                     </div>
                   </div>

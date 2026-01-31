@@ -64,7 +64,7 @@ const AppSidebar: React.FC = () => {
   if (isMobile) {
     return (
       <>
-        <div className="fixed top-0 left-0 w-full z-30 bg-[#1A1F2C] p-4 flex justify-between items-center shadow-md">
+        <div className="fixed top-0 left-0 w-full z-30 bg-gamehaus-darker p-4 flex justify-between items-center shadow-md">
           <div className="flex items-center gap-2">
             <GlobalNotificationBell />
             <Sheet>
@@ -73,7 +73,7 @@ const AppSidebar: React.FC = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-[80%] max-w-[280px] bg-[#1A1F2C] border-r-0">
+              <SheetContent side="left" className="p-0 w-[80%] max-w-[280px] bg-gamehaus-darker border-r-0">
                 <div className="h-full flex flex-col">
                   <div className="p-4 flex items-center gap-3">
                     <img
@@ -171,7 +171,7 @@ const AppSidebar: React.FC = () => {
 
   // Desktop version with Sidebar
   return (
-    <Sidebar className="border-r-0 bg-[#1A1F2C] text-white w-[250px]">
+    <Sidebar className="border-r-0 bg-gamehaus-darker text-white w-[250px]">
       <SidebarHeader className="p-4 flex items-center gap-3">
         <img
           src={LOGO_PATH}

@@ -15,7 +15,7 @@ export default function PublicPaymentFailed() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] p-6 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker p-6 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
@@ -83,7 +83,7 @@ export default function PublicPaymentFailed() {
           <div className="space-y-3">
             <button
               onClick={() => navigate("/public/booking")}
-              className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-6 py-3 text-white font-semibold transition-all transform hover:scale-105 shadow-lg shadow-purple-500/50 flex items-center justify-center gap-2"
+              className="w-full rounded-lg bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple/90 hover:to-gamehaus-magenta/90 px-6 py-3 text-white font-semibold transition-all transform hover:scale-105 shadow-lg shadow-gamehaus-purple/40 flex items-center justify-center gap-2"
             >
               <RefreshCw className="h-4 w-4" />
               Try Again

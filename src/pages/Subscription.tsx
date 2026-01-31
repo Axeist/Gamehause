@@ -180,7 +180,7 @@ const Subscription: React.FC = () => {
       {/* Current Subscription Details - Enhanced */}
       {subscription && (
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="text-white flex items-center gap-3">
                 <div className="p-3 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30">
@@ -267,7 +267,7 @@ const Subscription: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/40 hover:border-gamehaus-purple/60 transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="text-white flex items-center gap-3">
                 <div className="p-3 rounded-xl bg-gradient-to-br from-gamehaus-magenta/30 to-gamehaus-purple/30">
@@ -371,7 +371,7 @@ const Subscription: React.FC = () => {
 
       {/* Current Plan Features - Enhanced */}
       {currentPlan && (
-        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40">
+        <Card className="bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/40">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30">
@@ -395,7 +395,7 @@ const Subscription: React.FC = () => {
       )}
 
       {/* Available Plans - Enhanced */}
-      <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40">
+      <Card className="bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/40">
         <CardHeader className="pb-6">
           <CardTitle className="text-white text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple mb-2">
             Available Subscription Plans

@@ -53,7 +53,7 @@ const GlobalNotificationBell: React.FC = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[420px] max-w-[calc(100vw-2rem)] p-0 bg-[#1A1F2C] border-gamehaus-purple/20 text-white" align="end">
+      <PopoverContent className="w-[420px] max-w-[calc(100vw-2rem)] p-0 bg-gamehaus-darker border-gamehaus-purple/20 text-white" align="end">
         <div className="flex flex-col max-h-[600px]">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gamehaus-purple/20">

@@ -27,7 +27,7 @@ const SubscriptionDialog: React.FC<SubscriptionDialogProps> = ({ open }) => {
       }
     }} modal={true}>
       <DialogContent 
-        className="sm:max-w-[500px] bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-red-500/30 text-white" 
+        className="sm:max-w-[500px] bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-red-500/30 text-white" 
         onPointerDownOutside={(e) => {
           e.preventDefault();
           handleClose();

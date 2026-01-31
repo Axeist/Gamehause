@@ -734,7 +734,7 @@ const ReportsPage: React.FC = () => {
   const renderBillsTab = () => (
     <div className="space-y-4">
       <SalesWidgets filteredBills={filteredData.filteredBills} />
-      <div className="bg-[#1A1F2C] border border-gray-800 rounded-lg overflow-hidden">
+      <div className="bg-gamehaus-darker border border-gamehaus-purple/20 rounded-lg overflow-hidden">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-1">Transaction History</h2>
           <p className="text-gray-400">
@@ -936,7 +936,7 @@ const ReportsPage: React.FC = () => {
   );
 
   const renderCustomersTab = () => (
-    <div className="bg-[#1A1F2C] border border-gray-800 rounded-lg overflow-hidden">
+    <div className="bg-gamehaus-darker border border-gamehaus-purple/20 rounded-lg overflow-hidden">
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-1">Customer Activity</h2>
         <p className="text-gray-400">
@@ -1014,7 +1014,7 @@ const ReportsPage: React.FC = () => {
   );
 
   const renderSessionsTab = () => (
-    <div className="bg-[#1A1F2C] border border-gray-800 rounded-lg overflow-hidden">
+    <div className="bg-gamehaus-darker border border-gamehaus-purple/20 rounded-lg overflow-hidden">
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-1">Session History</h2>
         <p className="text-gray-400">

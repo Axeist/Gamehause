@@ -47,7 +47,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={handleCloseAttempt} modal={true}>
       <DialogContent 
-        className="sm:max-w-[600px] bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/30 text-white [&>button]:hidden" 
+        className="sm:max-w-[600px] bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/30 text-white [&>button]:hidden" 
         onPointerDownOutside={(e) => {
           e.preventDefault();
           handleCloseAttempt();

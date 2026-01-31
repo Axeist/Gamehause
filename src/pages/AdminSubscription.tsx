@@ -136,7 +136,7 @@ const AdminSubscription: React.FC = () => {
       <div className="flex-1 space-y-6 p-6 text-white bg-inherit">
         <Dialog open={showPinDialog} onOpenChange={handlePinCancel} modal={true}>
           <DialogContent 
-            className="sm:max-w-[400px] bg-[#1A1F2C] border-gamehaus-purple/30 text-white" 
+            className="sm:max-w-[400px] bg-gamehaus-darker border-gamehaus-purple/30 text-white" 
             onPointerDownOutside={(e) => e.preventDefault()}
           >
             <DialogHeader>
@@ -205,7 +205,7 @@ const AdminSubscription: React.FC = () => {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Subscription Configuration */}
-        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/30 hover:border-gamehaus-purple/50 transition-all duration-300">
+        <Card className="bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/30 hover:border-gamehaus-purple/50 transition-all duration-300">
           <CardHeader className="pb-4">
             <CardTitle className="text-white flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30">
@@ -224,7 +224,7 @@ const AdminSubscription: React.FC = () => {
                 <SelectTrigger className="bg-black/40 border-gamehaus-purple/40 text-white hover:border-gamehaus-purple/60 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1A1F2C] border-gamehaus-purple/30">
+                <SelectContent className="bg-gamehaus-darker border-gamehaus-purple/30">
                   {SUBSCRIPTION_PLANS.map((plan) => (
                     <SelectItem 
                       key={plan.id} 
@@ -355,7 +355,7 @@ const AdminSubscription: React.FC = () => {
         </Card>
 
         {/* Feature Access */}
-        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/30 hover:border-gamehaus-purple/50 transition-all duration-300">
+        <Card className="bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/30 hover:border-gamehaus-purple/50 transition-all duration-300">
           <CardHeader className="pb-4">
             <CardTitle className="text-white flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gradient-to-br from-gamehaus-magenta/30 to-gamehaus-purple/30">
@@ -456,7 +456,7 @@ const AdminSubscription: React.FC = () => {
       </Card>
 
       {subscription && (
-        <Card className="bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/30">
+        <Card className="bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/30">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-3">
               <div className="p-2 rounded-lg bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30">

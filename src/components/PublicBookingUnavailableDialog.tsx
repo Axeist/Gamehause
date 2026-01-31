@@ -29,7 +29,7 @@ const PublicBookingUnavailableDialog: React.FC<PublicBookingUnavailableDialogPro
       modal={true}
     >
       <DialogContent 
-        className="sm:max-w-[500px] bg-gradient-to-br from-[#1A1F2C] via-[#1a1a2e] to-[#1A1F2C] border-gamehaus-purple/40 text-white [&>button]:hidden" 
+        className="sm:max-w-[500px] bg-gradient-to-br from-gamehaus-darker via-black/85 to-gamehaus-darker border-gamehaus-purple/40 text-white [&>button]:hidden" 
         onPointerDownOutside={(e) => e.preventDefault()} 
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
