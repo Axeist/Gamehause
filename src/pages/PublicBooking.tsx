@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -188,6 +188,10 @@ export default function PublicBooking() {
   const [todayLoading, setTodayLoading] = useState(false);
   
   const [searchParams, setSearchParams] = useSearchParams();
+  const prefillAppliedRef = useRef(false);
+  const prefillTypeRef = useRef<"all" | StationType>("all");
+  const prefillDateRef = useRef<string | null>(null);
+  const prefillTimeRef = useRef<string | null>(null);
 
   // Load Razorpay script on mount (since razorpay is the default payment method)
   useEffect(() => {
@@ -204,10 +208,68 @@ export default function PublicBooking() {
     }
   }, []); // Load once on mount
 
+  // Prefill from query params (used by Gameboy chatbot)
+  useEffect(() => {
+    if (prefillAppliedRef.current) return;
+
+    const phone = searchParams.get("phone");
+    const type = searchParams.get("type") as StationType | null;
+    const date = searchParams.get("date"); // yyyy-mm-dd
+    const time = searchParams.get("time"); // HH:mm or HH:mm:ss
+
+    if (phone) {
+      setCustomerNumber(phone);
+    }
+
+    if (type === "ps5" || type === "8ball" || type === "foosball") {
+      prefillTypeRef.current = type;
+      setStationType(type);
+    }
+
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      prefillDateRef.current = date;
+      // Parse as local date
+      const parsed = parse(date, "yyyy-MM-dd", new Date());
+      setSelectedDate(parsed);
+    }
+
+    if (time) {
+      prefillTimeRef.current = time.length === 5 ? `${time}:00` : time; // normalize to HH:mm:ss
+    }
+
+    prefillAppliedRef.current = true;
+  }, [searchParams]);
+
   useEffect(() => {
     fetchStations();
     fetchTodaysBookings();
   }, []);
+
+  // After stations load, preselect stations matching the prefilled type (to power slot availability)
+  useEffect(() => {
+    const t = prefillTypeRef.current;
+    if (!stations.length) return;
+    if (t === "all") return;
+    // Only apply if user hasn't already selected stations
+    if (selectedStations.length > 0) return;
+    const ids = stations.filter((s) => s.type === t).map((s) => s.id);
+    if (ids.length) setSelectedStations(ids);
+  }, [stations, selectedStations.length]);
+
+  // After slots load, auto-select the prefilled time if it exists and is available
+  useEffect(() => {
+    const t = prefillTimeRef.current;
+    if (!t) return;
+    if (!availableSlots.length) return;
+    if (selectedSlot) return;
+
+    const match = availableSlots.find((s) => s.start_time === t && s.is_available);
+    if (match) {
+      void handleSlotSelect(match);
+      // consume the prefill time so user changes don't get overridden
+      prefillTimeRef.current = null;
+    }
+  }, [availableSlots, selectedSlot]);
 
   useEffect(() => {
     if (appliedCoupons["8ball"] === "HH99" && !isHappyHour(selectedDate, selectedSlot)) {

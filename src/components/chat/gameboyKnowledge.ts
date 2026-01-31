@@ -16,6 +16,7 @@ export const GAMEHAUS_ADDRESS =
 export const GAMEHAUS_PHONE = "+91 93451 87098";
 
 export const QUICK_TILES: Array<{ id: string; label: string; prompt: string }> = [
+  { id: "start", label: "Start booking", prompt: "book" },
   { id: "book", label: "Book a slot", prompt: "How do I book a slot?" },
   { id: "walkin", label: "Walk-ins?", prompt: "Can I walk in without booking?" },
   { id: "pricing", label: "Pricing", prompt: "What are your rates / pricing?" },

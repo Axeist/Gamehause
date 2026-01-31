@@ -24,7 +24,6 @@ const PROFANITY_STEMS: string[] = [
   "wtf",
   "stfu",
   "motherfucker",
-  "mf",
   "bullshit",
   "crap",
   "damn",
@@ -36,7 +35,6 @@ const PROFANITY_STEMS: string[] = [
   "f**k",
   "sh*t",
   "bi*ch",
-  "a**",
   "fuq",
 
   // Local-ish romanized (kept minimal)
@@ -45,6 +43,8 @@ const PROFANITY_STEMS: string[] = [
   "loosu",
   "poda",
 ];
+
+const MIN_STEM_LEN = 3;
 
 function normalizeForMatch(input: string): string {
   const lower = input.toLowerCase();
@@ -70,14 +70,21 @@ function stemNormalize(stem: string): string {
 export function checkProfanity(input: string): ProfanityHit {
   const norm = normalizeForMatch(input);
   const compact = norm.replace(/\s+/g, "");
+  const tokens = norm.split(" ").filter(Boolean);
 
   const hits = new Set<string>();
 
   for (const rawStem of PROFANITY_STEMS) {
     const stem = stemNormalize(rawStem);
-    if (!stem) continue;
+    if (!stem || stem.length < MIN_STEM_LEN) continue;
 
-    // Match on compact string to catch spaced-out profanity: "f u c k"
+    // Prefer token matches to avoid false positives like "class" containing "ass"
+    if (tokens.includes(stem)) {
+      hits.add(rawStem);
+      continue;
+    }
+
+    // Also match on compact string to catch spaced-out profanity: "f u c k"
     if (compact.includes(stem)) hits.add(rawStem);
   }
 
