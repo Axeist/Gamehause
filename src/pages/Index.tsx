@@ -257,10 +257,6 @@ const Index: React.FC = () => {
           A premium lounge for tournament-grade snooker & pool, next‑gen console sessions, and competitive community nights — designed for comfort, focus, and serious play.
         </p>
 
-        <p className="text-sm sm:text-base text-center text-gray-400 max-w-2xl mb-6 px-4 leading-relaxed">
-          Reserve in minutes, check live availability, and walk in with confidence. We keep pricing transparent, equipment maintained, and the experience smooth from booking to break-off.
-        </p>
-
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-8 px-4">
           <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
             <Radio className="h-3 w-3 mr-1.5 text-green-400" />
