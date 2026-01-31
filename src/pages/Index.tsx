@@ -25,6 +25,41 @@ interface Station {
   is_occupied: boolean;
 }
 
+const STATION_TYPE_ORDER: Station["type"][] = ["8ball", "foosball", "ps5"];
+
+const STATION_TYPE_META: Record<
+  Station["type"],
+  {
+    title: string;
+    subtitle: string;
+    Icon: typeof Gamepad2;
+    accentClass: string;
+    chipClass: string;
+  }
+> = {
+  "8ball": {
+    title: "Pool Tables",
+    subtitle: "8-ball tables",
+    Icon: Timer,
+    accentClass: "from-emerald-500/18 via-emerald-500/8 to-emerald-500/18 border-emerald-500/35",
+    chipClass: "bg-emerald-500/12 text-emerald-200 border-emerald-500/25",
+  },
+  foosball: {
+    title: "Foosball",
+    subtitle: "Foosball tables",
+    Icon: Table2,
+    accentClass: "from-amber-500/18 via-amber-500/8 to-amber-500/18 border-amber-500/35",
+    chipClass: "bg-amber-500/12 text-amber-200 border-amber-500/25",
+  },
+  ps5: {
+    title: "PlayStation 5",
+    subtitle: "PS5 stations",
+    Icon: Gamepad2,
+    accentClass: "from-sky-500/18 via-sky-500/8 to-sky-500/18 border-sky-500/35",
+    chipClass: "bg-sky-500/12 text-sky-200 border-sky-500/25",
+  },
+};
+
 const Index: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -109,6 +144,31 @@ const Index: React.FC = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const totalStations = liveStations.length;
+  const availableStations = liveStations.filter((s) => !s.is_occupied).length;
+  const occupiedStations = totalStations - availableStations;
+
+  const groupedStations = (() => {
+    const groups = new Map<Station["type"], Station[]>();
+    for (const t of STATION_TYPE_ORDER) groups.set(t, []);
+
+    for (const s of liveStations) {
+      const list = groups.get(s.type);
+      if (list) list.push(s);
+    }
+
+    const byAvailabilityThenName = (a: Station, b: Station) => {
+      if (a.is_occupied !== b.is_occupied) return a.is_occupied ? 1 : -1; // available first
+      return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+    };
+
+    return STATION_TYPE_ORDER.map((type) => {
+      const stations = groups.get(type) ?? [];
+      stations.sort(byAvailabilityThenName);
+      return { type, stations };
+    }).filter((g) => g.stations.length > 0);
+  })();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] flex flex-col relative overflow-hidden">
@@ -300,71 +360,132 @@ const Index: React.FC = () => {
               </div>
 
               {stationsLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin-slow h-8 w-8 rounded-full border-4 border-gamehaus-purple border-t-transparent"></div>
-                </div>
-              ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {liveStations.map((station) => {
-                    const isPS5 = station.type === 'ps5';
-                    const isPool = station.type === '8ball';
-                    
-                    return (
-                      <div
-                        key={station.id}
-                        className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 ${
-                          station.is_occupied
-                            ? 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-red-500/10 border-red-500/40'
-                            : 'bg-gradient-to-br from-green-500/10 via-green-500/5 to-green-500/10 border-green-500/40'
-                        } hover:scale-[1.02] hover:shadow-xl`}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                        
-                        <div className="p-5 relative z-10">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2.5 rounded-lg ${
-                                isPS5 ? 'bg-blue-500/20 border border-blue-500/30' :
-                                isPool ? 'bg-green-500/20 border border-green-500/30' :
-                                'bg-amber-500/20 border border-amber-500/30'
-                              }`}>
-                                {isPS5 ? (
-                                  <Gamepad2 className={`h-5 w-5 ${isPS5 ? 'text-blue-400' : ''}`} />
-                                ) : isPool ? (
-                                  <Timer className="h-5 w-5 text-green-400" />
-                                ) : (
-                                  <Table2 className="h-5 w-5 text-amber-400" />
-                                )}
-                              </div>
-                              <div>
-                                <h3 className="text-lg font-bold text-white">{station.name}</h3>
-                                <p className="text-xs text-gray-400 capitalize">{station.type === '8ball' ? 'Pool Table' : station.type === 'ps5' ? 'PlayStation 5' : 'Foosball Table'}</p>
-                              </div>
-                            </div>
-                            <Badge className={
-                              station.is_occupied
-                                ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                                : 'bg-green-500/20 text-green-300 border-green-500/30 animate-pulse-soft'
-                            }>
-                              {station.is_occupied ? (
-                                <XCircle className="h-3 w-3 mr-1" />
-                              ) : (
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                              )}
-                              {station.is_occupied ? 'Occupied' : 'Available'}
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                            <span className="text-gray-400 text-sm">Rate:</span>
-                            <span className="text-white font-bold text-lg">
-                              ₹{station.hourly_rate}/hr
-                            </span>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-2xl border border-white/10 bg-black/30 backdrop-blur-sm p-5 animate-pulse"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-11 w-11 rounded-xl bg-white/10" />
+                          <div className="min-w-0">
+                            <div className="h-4 w-40 max-w-[60vw] bg-white/10 rounded" />
+                            <div className="mt-2 h-3 w-24 bg-white/10 rounded" />
                           </div>
                         </div>
+                        <div className="h-6 w-24 bg-white/10 rounded-full" />
                       </div>
-                    );
-                  })}
+                      <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div className="h-3 w-14 bg-white/10 rounded" />
+                        <div className="h-5 w-20 bg-white/10 rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  {/* Quick summary */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className="bg-green-500/15 text-green-200 border-green-500/25">
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                      {availableStations} Available
+                    </Badge>
+                    <Badge className="bg-red-500/15 text-red-200 border-red-500/25">
+                      <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                      {occupiedStations} Occupied
+                    </Badge>
+                    <Badge className="bg-white/10 text-gray-200 border-white/15">
+                      <Monitor className="h-3.5 w-3.5 mr-1.5" />
+                      {totalStations} Total
+                    </Badge>
+                    <span className="text-xs text-gray-400 ml-1">Grouped by category • Available first</span>
+                  </div>
+
+                  {/* Grouped sections */}
+                  <div className="space-y-4">
+                    {groupedStations.map(({ type, stations }) => {
+                      const meta = STATION_TYPE_META[type];
+                      const availableInGroup = stations.filter((s) => !s.is_occupied).length;
+                      const totalInGroup = stations.length;
+                      const Icon = meta.Icon;
+
+                      return (
+                        <div
+                          key={type}
+                          className={`rounded-2xl border bg-gradient-to-br ${meta.accentClass} overflow-hidden`}
+                        >
+                          <div className="p-4 sm:p-5 border-b border-white/10 bg-black/20 backdrop-blur-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className={`h-11 w-11 rounded-xl border border-white/10 bg-black/30 flex items-center justify-center shrink-0`}>
+                                  <Icon className="h-5 w-5 text-white/85" />
+                                </div>
+                                <div className="min-w-0">
+                                  <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">{meta.title}</h3>
+                                  <p className="text-xs sm:text-sm text-gray-300/80 truncate">{meta.subtitle}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge className={meta.chipClass}>
+                                  {availableInGroup}/{totalInGroup} available
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-4 sm:p-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {stations.map((station) => (
+                                <div
+                                  key={station.id}
+                                  className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+                                    station.is_occupied
+                                      ? "border-red-500/25 bg-red-500/5"
+                                      : "border-emerald-500/25 bg-emerald-500/5"
+                                  } hover:translate-y-[-2px] hover:shadow-2xl hover:shadow-black/30`}
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/6 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                                  <div className="p-5 relative z-10">
+                                    <div className="flex items-start justify-between gap-4 mb-4">
+                                      <div className="min-w-0">
+                                        <h4 className="text-base sm:text-lg font-bold text-white truncate">{station.name}</h4>
+                                        <p className="mt-1 text-xs text-gray-400">
+                                          ₹{station.hourly_rate}/hr
+                                        </p>
+                                      </div>
+                                      <Badge
+                                        className={
+                                          station.is_occupied
+                                            ? "bg-red-500/15 text-red-200 border-red-500/25"
+                                            : "bg-emerald-500/15 text-emerald-200 border-emerald-500/25 animate-pulse-soft"
+                                        }
+                                      >
+                                        {station.is_occupied ? (
+                                          <XCircle className="h-3 w-3 mr-1" />
+                                        ) : (
+                                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                                        )}
+                                        {station.is_occupied ? "Occupied" : "Available"}
+                                      </Badge>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                                      <span className="text-xs text-gray-400">Category</span>
+                                      <span className={`text-xs font-medium px-2 py-1 rounded-full border ${meta.chipClass}`}>
+                                        {meta.title}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
