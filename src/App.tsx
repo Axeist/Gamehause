@@ -14,6 +14,7 @@ import SubscriptionGuard from "@/components/SubscriptionGuard";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import GlobalNotificationBell from "@/components/GlobalNotificationBell";
+import GameboyChatWidget from "@/components/chat/GameboyChatWidget";
 
 // Pages
 import Login from "./pages/Login";
@@ -265,6 +266,7 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
                   </Routes>
+                  <GameboyChatWidget />
                 </SubscriptionGuard>
               </BrowserRouter>
             </TooltipProvider>
