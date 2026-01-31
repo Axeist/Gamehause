@@ -75,8 +75,9 @@ export default {
           orange: '#F97316',
           blue: '#0EA5E9',
           green: '#10B981',
-          dark: '#1A1F2C',
-          darker: '#161b27',
+          // Legacy dark surfaces mapped to Gamehaus dark surfaces
+          dark: '#0B0B0C', // Surface
+          darker: '#050505', // Background
           light: '#F1F0FB',
         },
         // Gamehaus palette (warm neon ember/orange/gold)
