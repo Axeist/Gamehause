@@ -4,8 +4,29 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+function getEnv(name: string): string | undefined {
+  if (typeof process !== 'undefined' && process.env) {
+    return (process.env as any)[name];
+  }
+  return undefined;
+}
+
+const supabaseUrl =
+  getEnv('NEXT_PUBLIC_SUPABASE_URL') || getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL');
+
+// Server-only key. Do NOT use anon/publishable key here.
+const supabaseServiceKey =
+  getEnv('SUPABASE_SERVICE_ROLE_KEY') ||
+  getEnv('SUPABASE_SERVICE_KEY') ||
+  getEnv('SUPABASE_ADMIN_KEY');
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error(
+    'Missing Supabase environment variables for verify-migration. ' +
+      'Set NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY.'
+  );
+}
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(req: NextRequest) {
