@@ -143,15 +143,15 @@ export default function SplashScreen({ variant, onDone }: Props) {
   }, [variant]);
 
   const subline = useMemo(() => {
-    if (variant === "login_success") return "Booting control systems • syncing dashboards";
-    return "Luxury gaming lounge • neon grid • hacker‑mode ambience";
+    if (variant === "login_success") return "Session established • policy checks • state sync";
+    return "Kernel boot • module load • integrity checks";
   }, [variant]);
 
   useEffect(() => {
     let raf = 0;
     const start = performance.now();
-    // Longer boot so it feels premium + readable.
-    const duration = variant === "login_success" ? 2800 : 3050;
+    // Keep it slow + cinematic (home + login).
+    const duration = 3500;
 
     const tick = (t: number) => {
       const p = clamp((t - start) / duration, 0, 1);
@@ -173,29 +173,21 @@ export default function SplashScreen({ variant, onDone }: Props) {
     const base =
       variant === "login_success"
         ? [
-            "AUTH OK  •  SESSION VALID",
-            "VERIFYING ADMIN TOKENS…",
-            "DECRYPTING CONFIG • KEYS",
-            "LOADING DASHBOARD MODULES…",
-            "SYNCING STATIONS • BOOKINGS • POS",
-            "WARMING GPU • PRELOADING UI",
-            "PATCHING PERMISSIONS MATRIX…",
-            "CHECKING PAYMENT WEBHOOKS…",
-            "RUNNING SANITY CHECKS…",
-            "READY FOR INPUT.",
+            "AUTH OK • MFA VERIFIED",
+            "ISSUING SESSION • ROTATING TOKENS",
+            "POLICY CHECK • RBAC PASS",
+            "DECRYPTING SECRETS • ENV OK",
+            "SYNCING DATA • STATIONS/BOOKINGS",
+            "LOADING ADMIN UI • HOTPATH READY",
             "READY.",
           ]
         : [
-            "NEON GRID ONLINE",
-            "FIREWALL: ARMED (POLITE MODE)",
-            "COMMS ONLINE • PINGING NODES",
-            "SPINNING UP LOUNGE SYSTEMS…",
-            "SCANNING SLOTS • OPTIMIZING FLOW",
-            "CALIBRATING LIGHTS • AUDIO • VIBES",
-            "SPAWNING GAMEBOY ASSISTANT…",
-            "LOADING COSMETICS • CURSORS…",
-            "PATCHING LAG • BOOSTING FPS…",
-            "WELCOME TO THE GRID.",
+            "INIT KERNEL: GH-OS v1.9",
+            "MOUNT FS: /mnt/arcade (rw)",
+            "NETLINK UP • DHCP ACK",
+            "TLS HANDSHAKE • EDGE OK",
+            "LOAD MODULES: booking, status, chat",
+            "VERIFY ASSETS • CACHE WARM",
             "READY.",
           ];
 
