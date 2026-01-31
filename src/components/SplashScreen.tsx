@@ -123,6 +123,19 @@ function MatrixRainCanvas({ intensity = 1 }: { intensity?: number }) {
 export default function SplashScreen({ variant, onDone }: Props) {
   const [progress, setProgress] = useState(0);
   const [lines, setLines] = useState<string[]>([]);
+  const [exiting, setExiting] = useState(false);
+  const doneRef = useRef(false);
+
+  const beginExit = (reason: "auto" | "click") => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setExiting(true);
+
+    // Let the fade-out complete before unmounting.
+    window.setTimeout(() => {
+      onDone();
+    }, reason === "click" ? 650 : 750);
+  };
 
   const headline = useMemo(() => {
     if (variant === "login_success") return "Access granted.";
@@ -137,7 +150,8 @@ export default function SplashScreen({ variant, onDone }: Props) {
   useEffect(() => {
     let raf = 0;
     const start = performance.now();
-    const duration = variant === "login_success" ? 1450 : 1550;
+    // Longer boot so it feels premium + readable.
+    const duration = variant === "login_success" ? 2800 : 3050;
 
     const tick = (t: number) => {
       const p = clamp((t - start) / duration, 0, 1);
@@ -145,7 +159,7 @@ export default function SplashScreen({ variant, onDone }: Props) {
       const eased = 1 - Math.pow(1 - p, 3);
       setProgress(eased);
       if (p >= 1) {
-        onDone();
+        beginExit("auto");
         return;
       }
       raf = requestAnimationFrame(tick);
@@ -153,7 +167,7 @@ export default function SplashScreen({ variant, onDone }: Props) {
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [onDone, variant]);
+  }, [variant]);
 
   useEffect(() => {
     const base =
@@ -165,6 +179,10 @@ export default function SplashScreen({ variant, onDone }: Props) {
             "LOADING DASHBOARD MODULES…",
             "SYNCING STATIONS • BOOKINGS • POS",
             "WARMING GPU • PRELOADING UI",
+            "PATCHING PERMISSIONS MATRIX…",
+            "CHECKING PAYMENT WEBHOOKS…",
+            "RUNNING SANITY CHECKS…",
+            "READY FOR INPUT.",
             "READY.",
           ]
         : [
@@ -174,6 +192,10 @@ export default function SplashScreen({ variant, onDone }: Props) {
             "SPINNING UP LOUNGE SYSTEMS…",
             "SCANNING SLOTS • OPTIMIZING FLOW",
             "CALIBRATING LIGHTS • AUDIO • VIBES",
+            "SPAWNING GAMEBOY ASSISTANT…",
+            "LOADING COSMETICS • CURSORS…",
+            "PATCHING LAG • BOOSTING FPS…",
+            "WELCOME TO THE GRID.",
             "READY.",
           ];
 
@@ -183,13 +205,17 @@ export default function SplashScreen({ variant, onDone }: Props) {
       i++;
       setLines(base.slice(0, i));
       if (i >= base.length) window.clearInterval(t);
-    }, 240);
+    }, 260);
     return () => window.clearInterval(t);
   }, [variant]);
 
   return (
     <div
-      className="fixed inset-0 z-[999] overflow-hidden bg-gradient-to-br from-[#050507] via-[#120816] to-[#050507]"
+      className={[
+        "fixed inset-0 z-[999] overflow-hidden bg-gradient-to-br from-[#050507] via-[#120816] to-[#050507]",
+        "transition-opacity duration-700 ease-out",
+        exiting ? "opacity-0" : "opacity-100",
+      ].join(" ")}
       role="dialog"
       aria-label="Loading"
     >
@@ -206,7 +232,13 @@ export default function SplashScreen({ variant, onDone }: Props) {
       <div className="absolute inset-0 flex items-center justify-center p-6">
         <div className="relative w-full max-w-md">
           {/* card */}
-          <div className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/30 bg-black/45 backdrop-blur-xl shadow-2xl shadow-black/60">
+          <div
+            className={[
+              "relative overflow-hidden rounded-3xl border border-gamehaus-purple/30 bg-black/45 backdrop-blur-xl shadow-2xl shadow-black/60",
+              "transition-all duration-700 ease-out will-change-[transform,opacity,filter]",
+              exiting ? "opacity-0 translate-y-2 scale-[0.985] blur-[1px]" : "opacity-100 translate-y-0 scale-100 blur-0",
+            ].join(" ")}
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-gamehaus-purple/10 via-transparent to-gamehaus-magenta/10" />
             <div className="absolute inset-0 gh-splash-shimmer opacity-40" />
 
@@ -279,7 +311,7 @@ export default function SplashScreen({ variant, onDone }: Props) {
               <button
                 type="button"
                 className="mt-6 w-full rounded-2xl border border-white/10 bg-black/30 hover:bg-black/40 text-gray-200 text-xs py-2.5 transition-colors"
-                onClick={onDone}
+                onClick={() => beginExit("click")}
               >
                 Enter the lounge
               </button>
