@@ -206,6 +206,7 @@ export function buildPublicBookingUrl(params: {
   stationIds?: string[];
   dateStr: string;
   startTime?: string; // "HH:mm:ss"
+  span?: number; // number of 30-min slots
 }): string {
   const qp = new URLSearchParams();
   qp.set("phone", normalizePhoneNumber(params.phone));
@@ -213,6 +214,7 @@ export function buildPublicBookingUrl(params: {
   if (params.stationIds && params.stationIds.length > 0) qp.set("stations", params.stationIds.join(","));
   qp.set("date", params.dateStr);
   if (params.startTime) qp.set("time", params.startTime);
+  if (params.span && Number.isFinite(params.span) && params.span > 1) qp.set("span", String(Math.floor(params.span)));
   return `/public/booking?${qp.toString()}`;
 }
 

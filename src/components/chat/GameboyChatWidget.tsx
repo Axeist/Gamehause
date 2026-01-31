@@ -29,6 +29,7 @@ type ChatMessage = {
   role: Role;
   text: string;
   ts: number;
+  isStreaming?: boolean;
 };
 
 type BookingFlow =
@@ -53,17 +54,6 @@ function formatTime(ts: number): string {
 
 function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
-}
-
-function useAutoScroll(deps: unknown[]) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-  return ref;
 }
 
 function TypingDots() {
@@ -107,7 +97,8 @@ export default function GameboyChatWidget() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
-  const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null);
+  const [selectedSlotTimes, setSelectedSlotTimes] = useState<string[]>([]);
+  const [slotHint, setSlotHint] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const greet = getGameboyReply("hi", { firstMessage: true });
     return [
@@ -120,11 +111,93 @@ export default function GameboyChatWidget() {
     ];
   });
 
-  const panelWidth = 380;
-  const panelHeight = 560;
+  const panelWidth = 420;
+  const panelHeight = 640;
   const mobileWidth = "calc(100vw - 24px)";
 
-  const scrollRef = useAutoScroll([messages.length, isTyping]);
+  const scrollAreaRootRef = useRef<React.ElementRef<typeof ScrollArea> | null>(null);
+  const scrollViewportRef = useRef<HTMLDivElement | null>(null);
+  const [stickToBottom, setStickToBottom] = useState(true);
+  const [streamTick, setStreamTick] = useState(0);
+  const botDelayTimeoutRef = useRef<number | null>(null);
+  const botStreamIntervalRef = useRef<number | null>(null);
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    const vp = scrollViewportRef.current;
+    if (!vp) return;
+    vp.scrollTo({ top: vp.scrollHeight, behavior });
+  };
+
+  const clearBotTimers = () => {
+    if (botDelayTimeoutRef.current) {
+      window.clearTimeout(botDelayTimeoutRef.current);
+      botDelayTimeoutRef.current = null;
+    }
+    if (botStreamIntervalRef.current) {
+      window.clearInterval(botStreamIntervalRef.current);
+      botStreamIntervalRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => clearBotTimers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const animateBotReply = (fullText: string) => {
+    clearBotTimers();
+    setIsTyping(true);
+    scrollToBottom("auto");
+
+    const delay = clamp(420 + Math.min(fullText.length, 220) * 6, 650, 1550);
+    botDelayTimeoutRef.current = window.setTimeout(() => {
+      setIsTyping(false);
+      const id = uid();
+      const ts = Date.now();
+      setMessages((prev) => [...prev, { id, role: "bot", text: "", ts, isStreaming: true }]);
+
+      let i = 0;
+      const step = 10; // chars per tick
+      const intervalMs = 24;
+
+      botStreamIntervalRef.current = window.setInterval(() => {
+        i = Math.min(fullText.length, i + step);
+        const next = fullText.slice(0, i);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, text: next, isStreaming: i < fullText.length } : m))
+        );
+        setStreamTick((t) => t + 1);
+        if (i >= fullText.length) {
+          clearBotTimers();
+        }
+      }, intervalMs);
+    }, delay);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const root = scrollAreaRootRef.current;
+    if (!root) return;
+    const vp = root.querySelector("[data-radix-scroll-area-viewport]") as HTMLDivElement | null;
+    scrollViewportRef.current = vp;
+    if (!vp) return;
+
+    const onScroll = () => {
+      const distance = vp.scrollHeight - vp.scrollTop - vp.clientHeight;
+      setStickToBottom(distance < 140);
+    };
+    vp.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      vp.removeEventListener("scroll", onScroll);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!stickToBottom) return;
+    scrollToBottom(isTyping ? "auto" : "smooth");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, isTyping, streamTick, stickToBottom]);
 
   useEffect(() => {
     // If route changes, keep it closed to reduce distraction
@@ -140,7 +213,8 @@ export default function GameboyChatWidget() {
     setSelectedDate(new Date());
     setSlots([]);
     setSlotsLoading(false);
-    setSelectedStartTime(null);
+    setSelectedSlotTimes([]);
+    setSlotHint(null);
   }, [location.pathname]);
 
   if (!shouldRender) return null;
@@ -157,19 +231,14 @@ export default function GameboyChatWidget() {
     if (booking.active) return false;
 
     setBooking({ active: true, step: "phone" });
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: uid(),
-        role: "bot",
-        ts: Date.now(),
-        text: [
-          "Perfect. Let’s lock your slot in under a minute.",
-          "",
-          "Step 1/4: Send your **10‑digit mobile number** (no spaces).",
-        ].join("\n"),
-      },
-    ]);
+    animateBotReply(
+      [
+        "Ohhh yes. Booking mode activated.",
+        "",
+        "Step 1/4: Drop your **10‑digit mobile number** (no spaces).",
+        "I’ll pull your details and speed-run the rest.",
+      ].join("\n")
+    );
     return true;
   };
 
@@ -213,29 +282,73 @@ export default function GameboyChatWidget() {
       setSelectedStationIds([]);
       setSelectedDate(new Date());
       setSlots([]);
-      setSelectedStartTime(null);
+      setSelectedSlotTimes([]);
+      setSlotHint(null);
       void ensureStationsLoaded();
 
       if (customerName) {
         return [
-          `Welcome back, **${customerName}**. Gameboy remembers champions.`,
+          `Welcome back, **${customerName}**. I’m legally obligated to say “nice shot” now.`,
           "",
-          "Step 2/4: Pick stations + date + time below. I’ll only show slots that are actually free.",
+          "Step 2/4: Pick stations + date + time below. I’ll only show slots that are actually free (no fake hope).",
         ].join("\n");
       }
 
       return [
-        "Nice — fresh entry unlocked.",
+        "New player spotted. Welcome to the arena.",
         "",
-        "Step 2/4: Pick stations + date + time below. I’ll only show slots that are actually free.",
+        "Step 2/4: Pick stations + date + time below. I’ll only show slots that are actually free (no fake hope).",
       ].join("\n");
     }
 
     if (booking.step === "details") {
-      return "Use the station tiles + date picker + time slots below. When you’re ready, hit **Continue to booking**.";
+      return "Use the station tiles + date picker + time slots below. When you’re ready, smash **Continue to booking**.";
     }
 
     return null;
+  };
+
+  const tryPricingReply = async (raw: string): Promise<string | null> => {
+    const t = raw.toLowerCase();
+    const looksLikePricing =
+      t.includes("price") ||
+      t.includes("pricing") ||
+      t.includes("rate") ||
+      t.includes("rates") ||
+      t.includes("cost") ||
+      t.includes("how much") ||
+      t.includes("₹") ||
+      t.includes("rupee");
+    if (!looksLikePricing) return null;
+
+    const st = stations.length > 0 ? stations : await fetchStations();
+    if (stations.length === 0) setStations(st);
+
+    const byType: Record<string, StationLite[]> = { "8ball": [], ps5: [], foosball: [] };
+    for (const s of st) byType[s.type]?.push(s);
+
+    const fmtGroup = (label: string, list: StationLite[]) => {
+      if (!list.length) return "";
+      const lines = list
+        .slice(0, 20)
+        .map((x) => `- ${x.name}: ₹${x.hourly_rate}/hr`)
+        .join("\n");
+      return `**${label}**\n${lines}`;
+    };
+
+    return [
+      "Alright, here are the **current station rates** (live from our system):",
+      "",
+      fmtGroup("Pool / Snooker (8-ball)", byType["8ball"] || []),
+      "",
+      fmtGroup("PlayStation 5", byType.ps5 || []),
+      "",
+      fmtGroup("Foosball", byType.foosball || []),
+      "",
+      "Want me to lock a slot? Type **book** — I’ll do the fast booking wizard.",
+    ]
+      .filter(Boolean)
+      .join("\n");
   };
 
   const dateStr = useMemo(() => format(selectedDate, "yyyy-MM-dd"), [selectedDate]);
@@ -246,11 +359,25 @@ export default function GameboyChatWidget() {
     return list.filter((s) => s.type === stationTypeFilter);
   }, [stations, stationTypeFilter]);
 
+  const selectedStations = useMemo(
+    () => stations.filter((s) => selectedStationIds.includes(s.id)),
+    [stations, selectedStationIds.join(",")]
+  );
+
+  const selectedDurationMinutes = selectedSlotTimes.length * 30;
+  const selectedDurationHours = selectedSlotTimes.length * 0.5;
+  const estimatedTotal = useMemo(() => {
+    if (selectedStations.length === 0) return 0;
+    if (selectedSlotTimes.length === 0) return 0;
+    return selectedStations.reduce((sum, s) => sum + s.hourly_rate * selectedDurationHours, 0);
+  }, [selectedStations, selectedSlotTimes.length, selectedDurationHours]);
+
   useEffect(() => {
     if (!(booking.active && booking.step === "details")) return;
     if (selectedStationIds.length === 0) {
       setSlots([]);
-      setSelectedStartTime(null);
+      setSelectedSlotTimes([]);
+      setSlotHint(null);
       return;
     }
 
@@ -262,8 +389,12 @@ export default function GameboyChatWidget() {
         const data = await getAvailableSlotsUnion(dateStr, selectedStationIds);
         if (cancelled) return;
         setSlots(data);
-        if (selectedStartTime && !data.some((s) => s.start_time === selectedStartTime && s.is_available)) {
-          setSelectedStartTime(null);
+        if (
+          selectedSlotTimes.length > 0 &&
+          !selectedSlotTimes.every((t) => data.some((s) => s.start_time === t && s.is_available))
+        ) {
+          setSelectedSlotTimes([]);
+          setSlotHint(null);
         }
       } catch (e: any) {
         if (cancelled) return;
@@ -277,11 +408,7 @@ export default function GameboyChatWidget() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [booking.active, booking.step, dateStr, selectedStationIds.join(","), selectedStartTime]);
-
-  const tryDirectAvailabilityQuestion = async (_raw: string): Promise<string | null> => {
-    return null;
-  };
+  }, [booking.active, booking.step, dateStr, selectedStationIds.join(","), selectedSlotTimes.join(",")]);
 
   const sendUserMessage = async (text: string) => {
     const trimmed = text.trim();
@@ -292,51 +419,34 @@ export default function GameboyChatWidget() {
       { id: uid(), role: "user", text: trimmed, ts: Date.now() },
     ]);
     setInput("");
+    setStickToBottom(true);
+    scrollToBottom("auto");
 
     // If user intent is booking, start flow immediately without consuming their message
     if (maybeStartBooking(trimmed)) return;
 
-    setIsTyping(true);
-    const minDelay = clamp(520 + trimmed.length * 12, 650, 1300);
-    const startedAt = Date.now();
-
     try {
-      const direct = await tryDirectAvailabilityQuestion(trimmed);
-      if (direct) {
-        const remaining = Math.max(0, minDelay - (Date.now() - startedAt));
-        window.setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            { id: uid(), role: "bot", text: direct, ts: Date.now() },
-          ]);
-          setIsTyping(false);
-        }, remaining);
+      const bookingReply = await handleBookingFlow(trimmed);
+      if (bookingReply) {
+        animateBotReply(bookingReply);
         return;
       }
 
-      const bookingReply = await handleBookingFlow(trimmed);
-      const replyText = bookingReply ?? getGameboyReply(trimmed).text + "\n\nWant me to **set up a booking** for you? Type **book**.";
+      const pricingReply = await tryPricingReply(trimmed);
+      if (pricingReply) {
+        animateBotReply(pricingReply);
+        return;
+      }
 
-      const remaining = Math.max(0, minDelay - (Date.now() - startedAt));
-      window.setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { id: uid(), role: "bot", text: replyText, ts: Date.now() },
-        ]);
-        setIsTyping(false);
-      }, remaining);
+      animateBotReply(
+        getGameboyReply(trimmed).text +
+          "\n\nIf you want me to **book it for you** inside chat, just type **book**."
+      );
     } catch (e: any) {
       const msg = e?.message ? String(e.message) : "Something went wrong while checking availability.";
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: uid(),
-          role: "bot",
-          ts: Date.now(),
-          text: `I hit a snag while checking slots: ${msg}\n\nTry again, or open booking directly: /public/booking`,
-        },
-      ]);
-      setIsTyping(false);
+      animateBotReply(
+        `I hit a snag while checking slots: ${msg}\n\nTry again — or open booking directly: /public/booking`
+      );
     }
   };
 
@@ -389,7 +499,7 @@ export default function GameboyChatWidget() {
   return (
     <div className="fixed bottom-5 right-5 z-[70]">
       <div
-        className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/75 via-gamehaus-purple/20 to-black/75 backdrop-blur-xl shadow-2xl shadow-black/50"
+        className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/75 via-gamehaus-purple/20 to-black/75 backdrop-blur-xl shadow-2xl shadow-black/50 animate-slide-up"
         style={{
           width: `min(${panelWidth}px, ${mobileWidth})`,
           height: `min(${panelHeight}px, calc(100vh - 120px))`,
@@ -445,8 +555,8 @@ export default function GameboyChatWidget() {
 
         {/* content */}
         <div className="relative z-10 h-[calc(100%-56px-78px)]">
-          <ScrollArea className="h-full">
-            <div ref={scrollRef} className="p-4 space-y-3">
+          <ScrollArea ref={scrollAreaRootRef} className="h-full">
+            <div className="p-4 space-y-3">
               {/* quick tiles */}
               <div className="rounded-2xl border border-white/10 bg-black/25 backdrop-blur-sm p-3">
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -472,13 +582,13 @@ export default function GameboyChatWidget() {
                 return (
                   <div key={m.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[86%] rounded-2xl px-4 py-3 border shadow-sm ${
+                      className={`max-w-[90%] rounded-2xl px-4 py-3 border shadow-sm gh-chat-pop ${
                         isUser
                           ? "bg-gradient-to-br from-gamehaus-magenta/25 to-gamehaus-purple/20 border-gamehaus-magenta/30 text-white"
                           : "bg-black/35 border-white/10 text-gray-100"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                      <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
                         {m.text}
                       </div>
                       <div className={`mt-2 text-[10px] ${isUser ? "text-gray-200/70" : "text-gray-400"}`}>
@@ -588,7 +698,8 @@ export default function GameboyChatWidget() {
                               key={s.id}
                               type="button"
                               onClick={() => {
-                                setSelectedStartTime(null);
+                                setSelectedSlotTimes([]);
+                                setSlotHint(null);
                                 setSelectedStationIds((prev) =>
                                   prev.includes(s.id) ? prev.filter((x) => x !== s.id) : [...prev, s.id]
                                 );
@@ -631,7 +742,8 @@ export default function GameboyChatWidget() {
                       selected={selectedDate}
                       onSelect={(d) => {
                         if (!d) return;
-                        setSelectedStartTime(null);
+                        setSelectedSlotTimes([]);
+                        setSlotHint(null);
                         setSelectedDate(d);
                       }}
                       disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
@@ -656,14 +768,42 @@ export default function GameboyChatWidget() {
                     ) : (
                       <div className="grid grid-cols-3 gap-2 max-h-[160px] overflow-auto pr-1">
                         {slots.map((s) => {
-                          const isSelected = selectedStartTime === s.start_time;
+                          const isSelected = selectedSlotTimes.includes(s.start_time);
                           const disabled = !s.is_available || s.status === "elapsed";
                           return (
                             <button
                               key={s.start_time}
                               type="button"
                               disabled={disabled}
-                              onClick={() => setSelectedStartTime(s.start_time)}
+                              onClick={() => {
+                                setSlotHint(null);
+                                const idx = slots.findIndex((x) => x.start_time === s.start_time);
+                                if (idx < 0) return;
+                                const available = slots[idx]?.is_available && slots[idx]?.status !== "elapsed";
+                                if (!available) return;
+
+                                if (selectedSlotTimes.length === 0) {
+                                  setSelectedSlotTimes([s.start_time]);
+                                  return;
+                                }
+
+                                const anchor = selectedSlotTimes[0]!;
+                                const aIdx = slots.findIndex((x) => x.start_time === anchor);
+                                if (aIdx < 0) {
+                                  setSelectedSlotTimes([s.start_time]);
+                                  return;
+                                }
+
+                                const lo = Math.min(aIdx, idx);
+                                const hi = Math.max(aIdx, idx);
+                                const range = slots.slice(lo, hi + 1);
+                                const ok = range.every((x) => x.is_available && x.status !== "elapsed");
+                                if (!ok) {
+                                  setSlotHint("Pick a continuous range of available slots (no gaps).");
+                                  return;
+                                }
+                                setSelectedSlotTimes(range.map((x) => x.start_time));
+                              }}
                               className={`text-[11px] px-2 py-2 rounded-xl border transition-colors ${
                                 disabled
                                   ? "border-white/5 bg-black/20 text-gray-600 cursor-not-allowed"
@@ -679,19 +819,53 @@ export default function GameboyChatWidget() {
                         })}
                       </div>
                     )}
+
+                    <div className="mt-2 space-y-1">
+                      <p className="text-[10px] text-gray-400">
+                        Tip: pick a start time, then click an end time to select multiple slots.
+                      </p>
+                      {slotHint && <p className="text-[10px] text-red-300">{slotHint}</p>}
+
+                      {selectedSlotTimes.length > 0 && (
+                        <div className="mt-2 rounded-xl border border-white/10 bg-black/25 p-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="text-[11px] text-gray-200">
+                              <span className="font-semibold text-white">Selected:</span>{" "}
+                              {formatSlotLabel(selectedSlotTimes[0]!)}{" "}
+                              {selectedSlotTimes.length > 1 ? `→ ${formatSlotLabel(selectedSlotTimes[selectedSlotTimes.length - 1]!)}` : ""}
+                            </div>
+                            <Badge className="bg-white/10 text-gray-200 border-white/10 text-[10px] px-2 py-0.5">
+                              {selectedDurationMinutes} min
+                            </Badge>
+                          </div>
+                          {selectedStations.length > 0 && (
+                            <div className="mt-2 text-[11px] text-gray-200">
+                              <span className="text-gray-400">Estimate:</span>{" "}
+                              <span className="font-semibold text-white">₹{Math.round(estimatedTotal)}</span>{" "}
+                              <span className="text-gray-400">
+                                ({selectedStations.length} station{selectedStations.length > 1 ? "s" : ""} × {selectedDurationMinutes} min)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <Button
                       type="button"
                       className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta shadow-lg shadow-gamehaus-purple/25"
-                      disabled={selectedStationIds.length === 0 || !selectedStartTime}
+                      disabled={selectedStationIds.length === 0 || selectedSlotTimes.length === 0}
                       onClick={() => {
+                        const startTime = selectedSlotTimes[0];
+                        if (!startTime) return;
                         const url = buildPublicBookingUrl({
                           phone: booking.phone,
                           stationIds: selectedStationIds,
                           dateStr,
-                          startTime: selectedStartTime ?? undefined,
+                          startTime,
+                          span: selectedSlotTimes.length,
                         });
                         navigate(url);
                       }}
@@ -705,10 +879,7 @@ export default function GameboyChatWidget() {
                       className="border-white/10 bg-black/20 text-gray-200 hover:bg-white/10"
                       onClick={() => {
                         setBooking({ active: false });
-                        setMessages((prev) => [
-                          ...prev,
-                          { id: uid(), role: "bot", ts: Date.now(), text: "Booking flow paused. If you want it again, type **book**." },
-                        ]);
+                        animateBotReply("Booking flow paused. If you want it again, type **book**.");
                       }}
                     >
                       Stop

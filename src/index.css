@@ -205,6 +205,21 @@
 .gh-typing-dot--2 { animation-delay: 0.12s; opacity: 0.75; }
 .gh-typing-dot--3 { animation-delay: 0.24s; opacity: 0.65; }
 
+@keyframes gh-chat-pop {
+  0% {
+    transform: translateY(6px) scale(0.98);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.gh-chat-pop {
+  animation: gh-chat-pop 220ms ease-out both;
+}
+
 /* Custom styles */
 .indian-rupee::before {
   content: "₹";

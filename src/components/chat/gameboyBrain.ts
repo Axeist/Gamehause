@@ -73,10 +73,14 @@ function scoreArticle(query: string, article: (typeof KNOWLEDGE_BASE)[number]): 
 
 function pickQuirkyPreface(): string {
   const variants = [
-    "Gameboy here.",
-    "Yo — Gameboy reporting in.",
-    "Gameboy online. Brain warmed up.",
-    "Alright boss, Gameboy got you.",
+    "Gameboy here — powered by caffeine and cue‑sports ambition.",
+    "Yo. Gameboy online. I came. I saw. I booked.",
+    "Gameboy reporting in — Chennai traffic trained my patience, bookings didn’t.",
+    "Alright boss. I’ll keep it crisp and slightly dramatic.",
+    "Gameboy here. I don’t judge… I just optimise your slot.",
+    "Gameboy online. I speak fluent: snooker, PS5, and ‘available slots’.",
+    "Okay listen. Two minutes from now you could be *booked*. Let’s do it.",
+    "Gameboy here — your friendly ‘book now’ conscience in a chat bubble.",
   ];
   return variants[Math.floor(Math.random() * variants.length)]!;
 }
@@ -86,7 +90,7 @@ export function getGameboyReply(inputRaw: string, opts?: { firstMessage?: boolea
   if (!input) {
     return {
       kind: "fallback",
-      text: "Drop me a question — booking, pricing, availability, location, or tournaments. I’ll be fast.",
+      text: "Ask me anything — availability, pricing, location, tournaments… or just type **book** and I’ll drive.",
       suggestedTiles: QUICK_TILES,
     };
   }
@@ -95,7 +99,9 @@ export function getGameboyReply(inputRaw: string, opts?: { firstMessage?: boolea
     return {
       kind: "greeting",
       text: [
-        `${pickQuirkyPreface()} I can help with anything Gamehaus.`,
+        `${pickQuirkyPreface()}`,
+        "",
+        "I’m **Gameboy** — the Gamehaus concierge who *really* wants you to leave this page with a confirmed slot.",
         "",
         "Try one of these to start, or type your own question:",
       ].join("\n"),
@@ -125,7 +131,14 @@ export function getGameboyReply(inputRaw: string, opts?: { firstMessage?: boolea
     return {
       kind: "greeting",
       text: [
-        `${pickQuirkyPreface()} Want to book a slot, check availability, or get pricing?`,
+        `${pickQuirkyPreface()}`,
+        "",
+        "Want me to:",
+        "- check a specific time slot, or",
+        "- show prices, or",
+        "- just book it end‑to‑end?",
+        "",
+        "If you want the fastest path: type **book**.",
       ].join("\n"),
       suggestedTiles: QUICK_TILES,
     };
@@ -152,16 +165,18 @@ export function getGameboyReply(inputRaw: string, opts?: { firstMessage?: boolea
   return {
     kind: "fallback",
     text: [
-      `${pickQuirkyPreface()} I *think* I get what you mean, but I don’t want to guess wrong.`,
+      `${pickQuirkyPreface()}`,
+      "",
+      "I *think* I get what you mean, but I don’t want to hallucinate details.",
       "",
       "I’m best at:",
       "- Booking & slots",
       "- Live station availability",
-      "- Pricing/rates (where to see the correct number)",
+      "- Pricing/rates (I can show them here)",
       "- Location & contact",
       "- Refund/cancellation policy",
       "",
-      "Pick one below or rephrase your question in 6–10 words and I’ll nail it.",
+      "Pick a quick tile below, or type **book** and I’ll do the whole flow.",
     ].join("\n"),
     suggestedTiles: QUICK_TILES,
   };

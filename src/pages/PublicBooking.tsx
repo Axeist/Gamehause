@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format, parse, getDay } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /* =========================
    Types
@@ -140,6 +141,7 @@ const getBookingDuration = (stationIds: string[], stations: Station[]) => {
    Component
    ========================= */
 export default function PublicBooking() {
+  const isMobile = useIsMobile();
   const { hasBookingAccess, isLoading: subscriptionLoading } = useSubscription();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
@@ -193,6 +195,9 @@ export default function PublicBooking() {
   const prefillDateRef = useRef<string | null>(null);
   const prefillTimeRef = useRef<string | null>(null);
   const prefillStationIdsRef = useRef<string[] | null>(null);
+  const prefillSpanRef = useRef<number | null>(null);
+  const bookingSummaryRef = useRef<HTMLDivElement | null>(null);
+  const didAutoScrollRef = useRef(false);
 
   // Load Razorpay script on mount (since razorpay is the default payment method)
   useEffect(() => {
@@ -218,6 +223,7 @@ export default function PublicBooking() {
     const stationsParam = searchParams.get("stations");
     const date = searchParams.get("date"); // yyyy-mm-dd
     const time = searchParams.get("time"); // HH:mm or HH:mm:ss
+    const spanParam = searchParams.get("span"); // number of 30-min slots
 
     if (phone) {
       setCustomerNumber(phone);
@@ -246,6 +252,10 @@ export default function PublicBooking() {
 
     if (time) {
       prefillTimeRef.current = time.length === 5 ? `${time}:00` : time; // normalize to HH:mm:ss
+    }
+    if (spanParam) {
+      const n = Number.parseInt(spanParam, 10);
+      if (Number.isFinite(n) && n >= 1 && n <= 12) prefillSpanRef.current = n;
     }
 
     prefillAppliedRef.current = true;
@@ -285,13 +295,38 @@ export default function PublicBooking() {
     if (!availableSlots.length) return;
     if (selectedSlot) return;
 
-    const match = availableSlots.find((s) => s.start_time === t && s.is_available);
-    if (match) {
-      void handleSlotSelect(match);
+    const matchIndex = availableSlots.findIndex((s) => s.start_time === t && s.is_available);
+    if (matchIndex >= 0) {
+      const match = availableSlots[matchIndex]!;
+      const span = prefillSpanRef.current ?? 1;
+      if (span > 1) {
+        const range = availableSlots.slice(matchIndex, matchIndex + span);
+        const allOk = range.length === span && range.every((s) => s.is_available);
+        if (allOk) {
+          void handleSlotSelect(match, range);
+        } else {
+          void handleSlotSelect(match);
+        }
+      } else {
+        void handleSlotSelect(match);
+      }
       // consume the prefill time so user changes don't get overridden
       prefillTimeRef.current = null;
+      prefillSpanRef.current = null;
     }
   }, [availableSlots, selectedSlot]);
+
+  // If coming from chatbot on mobile, scroll to Booking Summary once slot is selected
+  useEffect(() => {
+    if (!isMobile) return;
+    if (!prefillAppliedRef.current) return;
+    if (didAutoScrollRef.current) return;
+    if (!selectedSlot) return;
+    didAutoScrollRef.current = true;
+    window.setTimeout(() => {
+      bookingSummaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 250);
+  }, [isMobile, selectedSlot]);
 
   useEffect(() => {
     if (appliedCoupons["8ball"] === "HH99" && !isHappyHour(selectedDate, selectedSlot)) {
@@ -1946,7 +1981,7 @@ export default function PublicBooking() {
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="sticky top-4 bg-white/10 backdrop-blur-xl border-white/10 rounded-2xl">
+            <Card ref={bookingSummaryRef} className="sticky top-4 bg-white/10 backdrop-blur-xl border-white/10 rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-white">Booking Summary</CardTitle>
               </CardHeader>
