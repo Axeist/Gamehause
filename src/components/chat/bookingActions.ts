@@ -202,6 +202,7 @@ export function formatSlotLabel(slotStart: string): string {
 
 export function buildPublicBookingUrl(params: {
   phone: string;
+  customerName?: string;
   stationType?: StationType | "all";
   stationIds?: string[];
   dateStr: string;
@@ -210,6 +211,7 @@ export function buildPublicBookingUrl(params: {
 }): string {
   const qp = new URLSearchParams();
   qp.set("phone", normalizePhoneNumber(params.phone));
+  if (params.customerName && params.customerName.trim()) qp.set("name", params.customerName.trim());
   if (params.stationType && params.stationType !== "all") qp.set("type", params.stationType);
   if (params.stationIds && params.stationIds.length > 0) qp.set("stations", params.stationIds.join(","));
   qp.set("date", params.dateStr);

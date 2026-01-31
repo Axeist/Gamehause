@@ -35,6 +35,7 @@ type ChatMessage = {
 type BookingFlow =
   | { active: false }
   | { active: true; step: "phone" }
+  | { active: true; step: "name"; phone: string }
   | { active: true; step: "details"; phone: string; customerName?: string };
 
 function uid(): string {
@@ -326,6 +327,15 @@ export default function GameboyChatWidget() {
         // non-fatal: continue
       }
 
+      if (!customerName) {
+        setBooking({ active: true, step: "name", phone });
+        return [
+          "New player spotted. Welcome to the arena.",
+          "",
+          "Quick one — what should I call you? (Your name)",
+        ].join("\n");
+      }
+
       setBooking({ active: true, step: "details", phone, customerName });
       setStationTypeFilter("all");
       setSelectedStationIds([]);
@@ -343,10 +353,26 @@ export default function GameboyChatWidget() {
         ].join("\n");
       }
 
+      return null;
+    }
+
+    if (booking.step === "name") {
+      const name = t.replace(/\s+/g, " ").trim();
+      if (name.length < 2) return "That’s a bit too stealthy. Send your name (at least 2 characters).";
+
+      setBooking({ active: true, step: "details", phone: booking.phone, customerName: name });
+      setStationTypeFilter("all");
+      setSelectedStationIds([]);
+      setSelectedDate(new Date());
+      setSlots([]);
+      setSelectedSlotTimes([]);
+      setSlotHint(null);
+      void ensureStationsLoaded();
+
       return [
-        "New player spotted. Welcome to the arena.",
+        `Perfect, **${name}**. Now let’s get you booked.`,
         "",
-        "Step 2/4: Pick stations + date + time below. I’ll only show slots that are actually free (no fake hope).",
+        "Step 2/4: Pick stations + date + time below.",
       ].join("\n");
     }
 
@@ -929,6 +955,7 @@ export default function GameboyChatWidget() {
                         if (!startTime) return;
                         const url = buildPublicBookingUrl({
                           phone: booking.phone,
+                          customerName: booking.customerName,
                           stationIds: selectedStationIds,
                           dateStr,
                           startTime,

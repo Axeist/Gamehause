@@ -196,6 +196,7 @@ export default function PublicBooking() {
   const prefillTimeRef = useRef<string | null>(null);
   const prefillStationIdsRef = useRef<string[] | null>(null);
   const prefillSpanRef = useRef<number | null>(null);
+  const prefillNameRef = useRef<string | null>(null);
   const bookingSummaryRef = useRef<HTMLDivElement | null>(null);
   const didAutoScrollRef = useRef(false);
 
@@ -219,6 +220,7 @@ export default function PublicBooking() {
     if (prefillAppliedRef.current) return;
 
     const phone = searchParams.get("phone");
+    const name = searchParams.get("name");
     const type = searchParams.get("type") as StationType | null;
     const stationsParam = searchParams.get("stations");
     const date = searchParams.get("date"); // yyyy-mm-dd
@@ -227,6 +229,10 @@ export default function PublicBooking() {
 
     if (phone) {
       setCustomerNumber(phone);
+    }
+    if (name && name.trim()) {
+      prefillNameRef.current = name.trim();
+      setCustomerInfo((prev) => ({ ...prev, name: prev.name || name.trim() }));
     }
 
     if (stationsParam) {
@@ -410,11 +416,11 @@ export default function PublicBooking() {
             toast.success(`Welcome back, ${data.name}! 🎮`);
           } else {
             setIsReturningCustomer(false);
-            setCustomerInfo({ 
-              name: "", 
+            setCustomerInfo((prev) => ({
+              name: prev.name || prefillNameRef.current || "",
               phone: normalizedPhone,
-              email: "" 
-            });
+              email: prev.email || "",
+            }));
             toast.info("New customer! Please fill in your details below.");
           }
           setHasSearched(true);
@@ -615,11 +621,11 @@ export default function PublicBooking() {
         toast.success(`Welcome back, ${data.name}! 🎮`);
       } else {
         setIsReturningCustomer(false);
-        setCustomerInfo({ 
-          name: "", 
+        setCustomerInfo((prev) => ({
+          name: prev.name || prefillNameRef.current || "",
           phone: normalizedPhone,
-          email: "" 
-        });
+          email: prev.email || "",
+        }));
         toast.info("New customer! Please fill in your details below.");
       }
       setHasSearched(true);
