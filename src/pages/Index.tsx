@@ -756,228 +756,281 @@ const Index: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 border-t border-gamehaus-purple/30 relative z-10 mt-auto backdrop-blur-sm bg-black/30">
-        <div className="max-w-6xl mx-auto px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-10">
-            <div className="flex items-center mb-6 md:mb-0">
-              <Logo size="sm" />
-              <span className="ml-3 text-gray-400">© {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.</span>
+      <footer className="relative z-10 mt-auto border-t border-gamehaus-purple/25 bg-black/35 backdrop-blur-md">
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.05] pointer-events-none" />
+        <div className="absolute inset-0 bg-noise-soft opacity-[0.08] mix-blend-overlay pointer-events-none" />
+        <div className="pointer-events-none absolute -top-24 left-1/4 h-48 w-48 rounded-full bg-gradient-to-br from-gamehaus-purple/18 to-transparent blur-[70px]" />
+        <div className="pointer-events-none absolute -top-24 right-1/4 h-48 w-48 rounded-full bg-gradient-to-br from-gamehaus-magenta/14 to-transparent blur-[70px]" />
+
+        <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Logo size="sm" />
+                <div>
+                  <p className="text-sm font-semibold text-white">{BRAND_NAME}</p>
+                  <p className="text-xs tracking-[0.2em] text-gray-400">PREMIER GAMING LOUNGE</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                Tournament-grade tables, next‑gen console sessions, and a premium lounge vibe—built for smooth bookings and clean gameplay.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+                  <Radio className="h-3 w-3 mr-1.5 text-green-400" />
+                  Live status
+                </Badge>
+                <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+                  <ShieldCheck className="h-3 w-3 mr-1.5 text-gamehaus-lightpurple" />
+                  Secure booking
+                </Badge>
+                <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
+                  <Trophy className="h-3 w-3 mr-1.5 text-gamehaus-magenta" />
+                  Tournaments
+                </Badge>
+              </div>
             </div>
-            
-            <div className="flex space-x-6">
-              <Dialog open={openDialog === 'terms'} onOpenChange={(open) => setOpenDialog(open ? 'terms' : null)}>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-gray-400 hover:text-gamehaus-lightpurple transition-colors"
-                  onClick={() => setOpenDialog('terms')}
-                >
-                  Terms
-                </Button>
-                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-white">Terms and Conditions</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-6 text-gray-300 mt-4">
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">1. Acceptance of Terms</h2>
-                      <p>
-                        By accessing and using {BRAND_NAME}'s services, you agree to be bound by these Terms and Conditions. 
-                        If you do not agree to these terms, please do not use our services.
-                      </p>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">2. Table Reservations</h2>
-                      <p>
-                        {BRAND_NAME} provides snooker and 8-ball pool facilities on a reservation or walk-in basis, subject to availability.
-                        Members receive preferential rates and booking privileges.
-                      </p>
-                      <p>
-                        All sessions are charged according to our current rate card. Extensions are subject to availability and additional charges.
-                      </p>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">3. Club Conduct</h2>
-                      <p>
-                        Members and guests must maintain appropriate conduct within our premises. {BRAND_NAME} reserves the right to refuse service 
-                        to anyone engaging in disruptive, abusive, or inappropriate behavior.
-                      </p>
-                      <p>
-                        Players are responsible for any damage caused to equipment, tables, or fixtures through improper use.
-                        Damages will be charged at repair or replacement cost.
-                      </p>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Cancellations and Refunds</h2>
-                      <p>
-                        Reservations may be cancelled or rescheduled at least 2 hours prior without penalty.
-                        Late cancellations or no-shows may incur a 50% booking fee.
-                      </p>
-                      <p>
-                        Refunds for technical issues will be assessed case-by-case by management.
-                      </p>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Modifications</h2>
-                      <p>
-                        {BRAND_NAME} reserves the right to modify these terms at any time. Changes take effect immediately 
-                        upon posting. Continued use constitutes acceptance of modified terms.
-                      </p>
-                    </section>
-                  </div>
-                </DialogContent>
-              </Dialog>
 
-              <Dialog open={openDialog === 'privacy'} onOpenChange={(open) => setOpenDialog(open ? 'privacy' : null)}>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-gray-400 hover:text-gamehaus-lightpurple transition-colors"
-                  onClick={() => setOpenDialog('privacy')}
+            {/* Quick Links */}
+            <div>
+              <p className="text-xs tracking-[0.25em] text-gray-400">QUICK LINKS</p>
+              <div className="mt-4 space-y-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
+                  onClick={() => window.open(PUBLIC_BOOKING_URL, "_blank")}
                 >
-                  Privacy
+                  Book a slot
                 </Button>
-                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-white">Privacy Policy</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-6 text-gray-300 mt-4">
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">1. Information Collection</h2>
-                      <p>
-                        {BRAND_NAME} collects personal information including name, contact details, 
-                        and payment information when you register or reserve tables.
-                      </p>
-                      <p>
-                        We collect usage data such as playing preferences, session duration, and purchase history 
-                        to improve services and customize your experience.
-                      </p>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">2. Information Usage</h2>
-                      <p>We use collected information to:</p>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li>Process reservations and payments</li>
-                        <li>Personalize your club experience</li>
-                        <li>Communicate services and promotions</li>
-                        <li>Improve our facilities</li>
-                        <li>Maintain security and prevent fraud</li>
-                      </ul>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">3. Information Sharing</h2>
-                      <p>We do not sell or rent personal information. We may share with:</p>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li>Service providers assisting operations</li>
-                        <li>Legal authorities when required</li>
-                        <li>Partners with your consent</li>
-                      </ul>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Your Rights</h2>
-                      <p>You have the right to:</p>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li>Access your information</li>
-                        <li>Request corrections</li>
-                        <li>Request deletion</li>
-                        <li>Opt-out of marketing</li>
-                        <li>Lodge complaints with authorities</li>
-                      </ul>
-                    </section>
-                    
-                    <section className="space-y-4">
-                      <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Policy Changes</h2>
-                      <p>
-                        {BRAND_NAME} may update this policy anytime. Changes are posted on our website. 
-                        Continued use after modifications constitutes acceptance.
-                      </p>
-                    </section>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
+                  onClick={() => navigate("/public/stations")}
+                >
+                  Live availability
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
+                  onClick={() => navigate("/public/tournaments")}
+                >
+                  Tournaments
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
+                  onClick={() => navigate("/login")}
+                >
+                  Management login
+                </Button>
+              </div>
+            </div>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-gray-400 hover:text-gamehaus-lightpurple transition-colors"
+            {/* Legal */}
+            <div>
+              <p className="text-xs tracking-[0.25em] text-gray-400">LEGAL</p>
+              <div className="mt-4 space-y-2">
+                <Dialog open={openDialog === "terms"} onOpenChange={(open) => setOpenDialog(open ? "terms" : null)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
+                    onClick={() => setOpenDialog("terms")}
                   >
-                    Contact
+                    Terms & Conditions
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white p-5 backdrop-blur-md">
-                  <h3 className="font-semibold text-lg mb-4 text-gamehaus-lightpurple">Contact Us</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-start">
-                      <Phone className="h-5 w-5 text-gamehaus-lightpurple mr-3 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-white">Phone</p>
-                        <a href="tel:+919345187098" className="text-gray-300 text-sm hover:text-gamehaus-lightpurple transition-colors">
-                          +91 93451 87098
-                        </a>
-                      </div>
+                  <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold text-white">Terms and Conditions</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6 text-gray-300 mt-4">
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">1. Acceptance of Terms</h2>
+                        <p>
+                          By accessing and using {BRAND_NAME}'s services, you agree to be bound by these Terms and Conditions.
+                          If you do not agree to these terms, please do not use our services.
+                        </p>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">2. Table Reservations</h2>
+                        <p>
+                          {BRAND_NAME} provides snooker and 8-ball pool facilities on a reservation or walk-in basis, subject to availability.
+                          Members receive preferential rates and booking privileges.
+                        </p>
+                        <p>
+                          All sessions are charged according to our current rate card. Extensions are subject to availability and additional charges.
+                        </p>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">3. Club Conduct</h2>
+                        <p>
+                          Members and guests must maintain appropriate conduct within our premises. {BRAND_NAME} reserves the right to refuse service
+                          to anyone engaging in disruptive, abusive, or inappropriate behavior.
+                        </p>
+                        <p>
+                          Players are responsible for any damage caused to equipment, tables, or fixtures through improper use.
+                          Damages will be charged at repair or replacement cost.
+                        </p>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Cancellations and Refunds</h2>
+                        <p>
+                          Reservations may be cancelled or rescheduled at least 2 hours prior without penalty.
+                          Late cancellations or no-shows may incur a 50% booking fee.
+                        </p>
+                        <p>
+                          Refunds for technical issues will be assessed case-by-case by management.
+                        </p>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Modifications</h2>
+                        <p>
+                          {BRAND_NAME} reserves the right to modify these terms at any time. Changes take effect immediately
+                          upon posting. Continued use constitutes acceptance of modified terms.
+                        </p>
+                      </section>
                     </div>
-                    
-                    <div className="flex items-start">
-                      <Mail className="h-5 w-5 text-gamehaus-magenta mr-3 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-white">Email</p>
-                        <a href={`mailto:${SUPPORT_EMAIL}`} className="text-gray-300 text-sm hover:text-gamehaus-magenta transition-colors">
-                          {SUPPORT_EMAIL}
-                        </a>
-                      </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={openDialog === "privacy"} onOpenChange={(open) => setOpenDialog(open ? "privacy" : null)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
+                    onClick={() => setOpenDialog("privacy")}
+                  >
+                    Privacy Policy
+                  </Button>
+                  <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold text-white">Privacy Policy</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6 text-gray-300 mt-4">
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">1. Information Collection</h2>
+                        <p>
+                          {BRAND_NAME} collects personal information including name, contact details,
+                          and payment information when you register or reserve tables.
+                        </p>
+                        <p>
+                          We collect usage data such as playing preferences, session duration, and purchase history
+                          to improve services and customize your experience.
+                        </p>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">2. Information Usage</h2>
+                        <p>We use collected information to:</p>
+                        <ul className="list-disc pl-6 space-y-2">
+                          <li>Process reservations and payments</li>
+                          <li>Personalize your club experience</li>
+                          <li>Communicate services and promotions</li>
+                          <li>Improve our facilities</li>
+                          <li>Maintain security and prevent fraud</li>
+                        </ul>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">3. Information Sharing</h2>
+                        <p>We do not sell or rent personal information. We may share with:</p>
+                        <ul className="list-disc pl-6 space-y-2">
+                          <li>Service providers assisting operations</li>
+                          <li>Legal authorities when required</li>
+                          <li>Partners with your consent</li>
+                        </ul>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Your Rights</h2>
+                        <p>You have the right to:</p>
+                        <ul className="list-disc pl-6 space-y-2">
+                          <li>Access your information</li>
+                          <li>Request corrections</li>
+                          <li>Request deletion</li>
+                          <li>Opt-out of marketing</li>
+                          <li>Lodge complaints with authorities</li>
+                        </ul>
+                      </section>
+                      
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Policy Changes</h2>
+                        <p>
+                          {BRAND_NAME} may update this policy anytime. Changes are posted on our website.
+                          Continued use after modifications constitutes acceptance.
+                        </p>
+                      </section>
                     </div>
-                    
-                    <div className="flex items-start">
-                      <Clock className="h-5 w-5 text-gamehaus-lightpurple mr-3 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-white">Hours</p>
-                        <span className="text-gray-300 text-sm">Open Daily</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <MapPin className="h-5 w-5 text-gamehaus-magenta mr-3 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-white">Location</p>
-                        <span className="text-gray-300 text-sm leading-relaxed">
-                          40, S W Boag Rd, CIT Nagar West,<br />
-                          T. Nagar, Chennai,<br />
-                          Tamil Nadu 600035
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <p className="text-xs tracking-[0.25em] text-gray-400">CONTACT</p>
+              <div className="mt-4 space-y-3 text-sm text-gray-300">
+                <div className="flex items-start gap-3">
+                  <Phone className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
+                  <a href="tel:+919345187098" className="hover:text-gamehaus-lightpurple transition-colors">
+                    +91 93451 87098
+                  </a>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Mail className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-gamehaus-lightpurple transition-colors break-all">
+                    {SUPPORT_EMAIL}
+                  </a>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Clock className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
+                  <span>Open daily</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
+                  <span className="leading-relaxed">
+                    40, S W Boag Rd, CIT Nagar West, T. Nagar, Chennai, Tamil Nadu 600035
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div className="text-xs text-center text-gray-500">
-            <p className="mb-2 text-gray-400">Designed & Developed by Cuephoria Tech<sup>™</sup></p>
-            <div className="flex flex-col md:flex-row justify-center items-center gap-6 text-gray-400">
-              <div className="flex items-center gap-2">
-                <Phone className="h-3 w-3 text-gamehaus-purple" />
-                <a href="tel:+919345187098" className="hover:text-gamehaus-lightpurple transition-colors">+91 93451 87098</a>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-3 w-3 text-gamehaus-purple" />
-                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-gamehaus-lightpurple transition-colors">{SUPPORT_EMAIL}</a>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-3 w-3 text-gamehaus-purple" />
-                <span>40, S W Boag Rd, T. Nagar, Chennai</span>
-              </div>
+
+          <Separator className="my-10 bg-gamehaus-purple/20" />
+
+          <div className="flex flex-col md:flex-row items-center justify-between gap-5">
+            <div className="text-sm text-gray-400 text-center md:text-left">
+              © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
             </div>
+
+            <a
+              href="https://cuephoriatech.in"
+              target="_blank"
+              rel="noreferrer"
+              className="group inline-flex items-center gap-2 rounded-full border border-gamehaus-purple/35 bg-black/55 px-4 py-2 backdrop-blur-sm transition-all duration-300 hover:border-gamehaus-purple/60 hover:bg-black/70 hover:shadow-lg hover:shadow-gamehaus-purple/25"
+              aria-label="Cuephoria Tech"
+              title="Cuephoria Tech"
+            >
+              <span className="inline-flex items-center justify-center h-7 w-7 rounded-full border border-gamehaus-purple/30 bg-gamehaus-purple/10">
+                <span className="text-gamehaus-lightpurple font-bold tracking-tight">&lt;/&gt;</span>
+              </span>
+              <span className="text-sm font-semibold">
+                <span className="text-gamehaus-lightpurple group-hover:text-gamehaus-pink transition-colors">Cuephoria</span>{" "}
+                <span className="text-gray-200">Tech</span>
+              </span>
+              <span className="ml-1 inline-flex items-center justify-center h-7 w-7 rounded-full border border-gamehaus-purple/20 bg-black/40 text-gray-300 group-hover:text-white transition-colors">
+                ↗
+              </span>
+            </a>
           </div>
         </div>
       </footer>
