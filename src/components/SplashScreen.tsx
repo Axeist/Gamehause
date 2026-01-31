@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { LOGO_PATH, BRAND_NAME } from "@/config/brand";
 
 type Props = {
@@ -8,6 +8,116 @@ type Props = {
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
+}
+
+function MatrixRainCanvas({ intensity = 1 }: { intensity?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduceMotion) return;
+
+    const chars =
+      "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@$%*+-<>[]{}()/\\|=;";
+
+    let w = 0;
+    let h = 0;
+    let dpr = 1;
+
+    let fontSize = 16; // px (CSS pixels)
+    let columns = 0;
+    let drops: number[] = [];
+    let speeds: number[] = [];
+
+    const reset = () => {
+      const rect = canvas.getBoundingClientRect();
+      w = Math.max(1, Math.floor(rect.width));
+      h = Math.max(1, Math.floor(rect.height));
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Slightly adapt density to viewport
+      const base = w < 420 ? 14 : w < 900 ? 16 : 18;
+      fontSize = Math.round(base);
+      columns = Math.min(160, Math.floor(w / fontSize));
+
+      drops = Array.from({ length: columns }, () => Math.random() * (h / fontSize));
+      speeds = Array.from({ length: columns }, () => (0.65 + Math.random() * 1.55) * intensity);
+
+      ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
+      ctx.textBaseline = "top";
+    };
+
+    reset();
+
+    const ro = new ResizeObserver(() => reset());
+    ro.observe(canvas);
+
+    let raf = 0;
+    let last = performance.now();
+
+    const draw = (t: number) => {
+      const dt = Math.min(48, t - last);
+      last = t;
+
+      // Trail fade (lower alpha = longer trails)
+      ctx.fillStyle = "rgba(0, 0, 0, 0.065)";
+      ctx.fillRect(0, 0, w, h);
+
+      for (let i = 0; i < columns; i++) {
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // Head character (bright)
+        const head = chars.charAt((Math.random() * chars.length) | 0);
+        ctx.fillStyle = "rgba(210, 255, 235, 0.95)";
+        ctx.shadowColor = "rgba(0, 255, 170, 0.55)";
+        ctx.shadowBlur = 10;
+        ctx.fillText(head, x, y);
+
+        // Body character (green)
+        const body = chars.charAt((Math.random() * chars.length) | 0);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "rgba(0, 255, 170, 0.58)";
+        ctx.fillText(body, x, Math.max(0, y - fontSize));
+
+        // Advance
+        drops[i] += (speeds[i] * dt) / 16.67;
+
+        // Reset drop randomly after passing bottom (keeps variation)
+        if (y > h + fontSize * 2 && Math.random() > 0.965) {
+          drops[i] = -Math.random() * 12;
+          speeds[i] = (0.65 + Math.random() * 1.55) * intensity;
+        }
+      }
+
+      raf = requestAnimationFrame(draw);
+    };
+
+    // Start with a clean frame
+    ctx.clearRect(0, 0, w, h);
+    raf = requestAnimationFrame(draw);
+
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [intensity]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 h-full w-full pointer-events-none mix-blend-screen opacity-[0.75]"
+      aria-hidden="true"
+    />
+  );
 }
 
 export default function SplashScreen({ variant, onDone }: Props) {
@@ -50,14 +160,20 @@ export default function SplashScreen({ variant, onDone }: Props) {
       variant === "login_success"
         ? [
             "AUTH OK  •  SESSION VALID",
+            "VERIFYING ADMIN TOKENS…",
+            "DECRYPTING CONFIG • KEYS",
             "LOADING DASHBOARD MODULES…",
             "SYNCING STATIONS • BOOKINGS • POS",
+            "WARMING GPU • PRELOADING UI",
             "READY.",
           ]
         : [
             "NEON GRID ONLINE",
             "FIREWALL: ARMED (POLITE MODE)",
+            "COMMS ONLINE • PINGING NODES",
+            "SPINNING UP LOUNGE SYSTEMS…",
             "SCANNING SLOTS • OPTIMIZING FLOW",
+            "CALIBRATING LIGHTS • AUDIO • VIBES",
             "READY.",
           ];
 
@@ -80,8 +196,7 @@ export default function SplashScreen({ variant, onDone }: Props) {
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.08]" />
       <div className="absolute inset-0 bg-noise-soft opacity-[0.12] mix-blend-overlay" />
       <div className="absolute inset-0 bg-scanlines opacity-[0.06] mix-blend-overlay" />
-      <div className="absolute inset-0 gh-matrix opacity-[0.36]" />
-      <div className="absolute inset-0 gh-matrix-rain opacity-[0.28]" />
+      <MatrixRainCanvas intensity={variant === "login_success" ? 1.1 : 1} />
       <div className="absolute inset-0 gh-scanline opacity-[0.9]" />
 
       {/* glow blobs */}
