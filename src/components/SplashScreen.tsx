@@ -80,7 +80,8 @@ export default function SplashScreen({ variant, onDone }: Props) {
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.08]" />
       <div className="absolute inset-0 bg-noise-soft opacity-[0.12] mix-blend-overlay" />
       <div className="absolute inset-0 bg-scanlines opacity-[0.06] mix-blend-overlay" />
-      <div className="absolute inset-0 gh-matrix opacity-[0.22]" />
+      <div className="absolute inset-0 gh-matrix opacity-[0.36]" />
+      <div className="absolute inset-0 gh-matrix-rain opacity-[0.28]" />
       <div className="absolute inset-0 gh-scanline opacity-[0.9]" />
 
       {/* glow blobs */}

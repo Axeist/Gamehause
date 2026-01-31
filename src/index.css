@@ -278,22 +278,63 @@
   100% { background-position: 0 320px, 0 640px; }
 }
 .gh-matrix {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background-image:
     repeating-linear-gradient(
       to bottom,
       rgba(0, 255, 170, 0.00) 0px,
-      rgba(0, 255, 170, 0.04) 2px,
-      rgba(0, 255, 170, 0.00) 6px
+      rgba(0, 255, 170, 0.06) 2px,
+      rgba(0, 255, 170, 0.00) 7px
     ),
     repeating-linear-gradient(
       to right,
       rgba(255, 74, 26, 0.00) 0px,
-      rgba(255, 74, 26, 0.03) 1px,
-      rgba(255, 74, 26, 0.00) 7px
-    );
-  animation: gh-matrix-scroll 3.2s linear infinite;
+      rgba(255, 74, 26, 0.04) 1px,
+      rgba(255, 74, 26, 0.00) 9px
+    ),
+    radial-gradient(circle at 35% 30%, rgba(0, 255, 170, 0.14), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(255, 74, 26, 0.10), transparent 55%);
+  background-size: 100% 320px, 560px 100%, 100% 100%, 100% 100%;
+  animation: gh-matrix-scroll 2.8s linear infinite;
   mix-blend-mode: screen;
+  filter: saturate(1.25) contrast(1.05);
   will-change: background-position;
+}
+
+@keyframes gh-matrix-rain {
+  0% { background-position: 0 -420px, 0 0; }
+  100% { background-position: 0 420px, 0 0; }
+}
+@keyframes gh-matrix-flicker {
+  0%, 100% { opacity: 0.22; }
+  50% { opacity: 0.36; }
+}
+.gh-matrix-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 255, 170, 0.00) 0px,
+      rgba(0, 255, 170, 0.10) 14px,
+      rgba(0, 255, 170, 0.00) 18px,
+      rgba(0, 255, 170, 0.00) 34px
+    ),
+    repeating-linear-gradient(
+      to right,
+      rgba(0, 255, 170, 0.00) 0px,
+      rgba(0, 255, 170, 0.06) 28px,
+      rgba(0, 255, 170, 0.00) 30px,
+      rgba(0, 255, 170, 0.00) 58px
+    );
+  background-size: 100% 420px, 560px 100%;
+  animation: gh-matrix-rain 1.7s linear infinite, gh-matrix-flicker 3.1s ease-in-out infinite;
+  mix-blend-mode: screen;
+  filter: blur(0.25px) saturate(1.25);
+  will-change: background-position, opacity;
 }
 
 @keyframes gh-scanline {
