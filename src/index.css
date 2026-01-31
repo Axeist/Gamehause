@@ -236,7 +236,7 @@
 }
 
 .gh-ring {
-  animation: gh-ring 0.9s ease-in-out 0s 2;
+  animation: gh-ring 0.95s ease-in-out 0s infinite;
   transform-origin: 50% 70%;
 }
 

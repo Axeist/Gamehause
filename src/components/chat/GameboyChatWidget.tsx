@@ -93,8 +93,8 @@ export default function GameboyChatWidget() {
   const pendingNudgeRef = useRef(false);
   const [ringing, setRinging] = useState(false);
   const nudgeTimeoutRef = useRef<number | null>(null);
-  const ringTimeoutRef = useRef<number | null>(null);
   const hasInteractedRef = useRef(false);
+  const pendingAttentionRef = useRef(false); // sound/vibrate waiting for user gesture
   const bookingDoneRef = useRef(false);
   const BOOKING_DONE_KEY = "gh_gameboy_booking_done_v1";
 
@@ -245,10 +245,6 @@ export default function GameboyChatWidget() {
       window.clearTimeout(nudgeTimeoutRef.current);
       nudgeTimeoutRef.current = null;
     }
-    if (ringTimeoutRef.current) {
-      window.clearTimeout(ringTimeoutRef.current);
-      ringTimeoutRef.current = null;
-    }
   };
 
   useEffect(() => {
@@ -260,6 +256,11 @@ export default function GameboyChatWidget() {
   useEffect(() => {
     const onInteract = () => {
       hasInteractedRef.current = true;
+      if (pendingAttentionRef.current) {
+        pendingAttentionRef.current = false;
+        playSoftChirp(); // try again after gesture
+        tryVibrate();
+      }
     };
     window.addEventListener("pointerdown", onInteract, { passive: true });
     window.addEventListener("keydown", onInteract);
@@ -270,7 +271,6 @@ export default function GameboyChatWidget() {
   }, []);
 
   const playSoftChirp = () => {
-    if (!hasInteractedRef.current) return;
     try {
       const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
       if (!AudioCtx) return;
@@ -279,8 +279,9 @@ export default function GameboyChatWidget() {
 
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.02, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+      // slightly louder but still short/not harsh
+      gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
       gain.connect(ctx.destination);
 
       const osc = ctx.createOscillator();
@@ -290,8 +291,21 @@ export default function GameboyChatWidget() {
       osc.connect(gain);
 
       osc.start(now);
-      osc.stop(now + 0.16);
+      osc.stop(now + 0.18);
       osc.onended = () => ctx.close().catch(() => {});
+    } catch {
+      // Autoplay blocked in many browsers without a user gesture
+      pendingAttentionRef.current = true;
+    }
+  };
+
+  const tryVibrate = () => {
+    try {
+      if (typeof navigator === "undefined") return;
+      const vib = (navigator as any).vibrate as ((pattern: number | number[]) => boolean) | undefined;
+      if (!vib) return;
+      // Short, phone-like buzz pattern
+      vib([60, 40, 60]);
     } catch {
       // ignore
     }
@@ -320,7 +334,7 @@ export default function GameboyChatWidget() {
     setUnreadCount(1);
     setRinging(true);
     playSoftChirp();
-    ringTimeoutRef.current = window.setTimeout(() => setRinging(false), 2200);
+    tryVibrate();
   };
 
   const scheduleNudge = (delayMs: number, reason: "initial" | "repeat") => {
@@ -347,6 +361,7 @@ export default function GameboyChatWidget() {
     pendingNudgeRef.current = false;
     setUnreadCount(0);
     setRinging(false);
+    pendingAttentionRef.current = false;
     // Wait a tick so viewport refs are ready
     window.setTimeout(() => {
       animateBotReply(
@@ -697,8 +712,8 @@ export default function GameboyChatWidget() {
                   online
                 </Badge>
               </div>
-              <p className="text-[11px] text-gray-300/80 whitespace-normal break-words leading-tight max-w-[240px]">
-                Quirky concierge • fast replies • zero judgement • heavy “book now” energy
+              <p className="text-[11px] text-gray-300/80 whitespace-nowrap leading-tight max-w-[240px] truncate">
+                Slot‑locker • mildly dramatic
               </p>
             </div>
           </div>
