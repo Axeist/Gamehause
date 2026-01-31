@@ -275,24 +275,39 @@ export default function GameboyChatWidget() {
       const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
-      const now = ctx.currentTime;
 
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.0001, now);
-      // slightly louder but still short/not harsh
-      gain.gain.exponentialRampToValueAtTime(0.045, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
-      gain.connect(ctx.destination);
+      const startTone = () => {
+        const now = ctx.currentTime;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, now);
+        // louder but still short/not harsh
+        gain.gain.exponentialRampToValueAtTime(0.065, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+        gain.connect(ctx.destination);
 
-      const osc = ctx.createOscillator();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(760, now);
-      osc.frequency.setValueAtTime(640, now + 0.07);
-      osc.connect(gain);
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(760, now);
+        osc.frequency.setValueAtTime(640, now + 0.08);
+        osc.connect(gain);
 
-      osc.start(now);
-      osc.stop(now + 0.18);
-      osc.onended = () => ctx.close().catch(() => {});
+        osc.start(now);
+        osc.stop(now + 0.2);
+        osc.onended = () => ctx.close().catch(() => {});
+      };
+
+      // Some browsers create AudioContext in "suspended" state until user gesture.
+      if (ctx.state === "suspended") {
+        void ctx
+          .resume()
+          .then(() => startTone())
+          .catch(() => {
+            pendingAttentionRef.current = true;
+            ctx.close().catch(() => {});
+          });
+      } else {
+        startTone();
+      }
     } catch {
       // Autoplay blocked in many browsers without a user gesture
       pendingAttentionRef.current = true;
