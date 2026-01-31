@@ -74,7 +74,7 @@ const CouponPromotionalPopup: React.FC<CouponPromotionalPopupProps> = ({ onCoupo
     discountText: "50% OFF",
     description: "Special offer for NIT Trichy students. Use code 'NIT50' to get 50% off from the bill.",
     couponCode: "NIT50",
-    bgColor: "from-blue-400 to-purple-500",
+    bgColor: "from-gamehaus-purple to-gamehaus-magenta",
     iconColor: "text-blue-400",
     icon: GraduationCap
   };
@@ -148,8 +148,8 @@ const CouponPromotionalPopup: React.FC<CouponPromotionalPopupProps> = ({ onCoupo
               </div>
             )}
             
-            <div className="mt-4 p-4 bg-gradient-to-r from-purple-900/40 to-pink-900/40 rounded-lg border border-purple-400/30">
-              <p className="text-sm text-purple-200 font-medium mb-2">
+            <div className="mt-4 p-4 bg-gradient-to-r from-gamehaus-purple/20 to-gamehaus-magenta/15 rounded-lg border border-gamehaus-purple/30">
+              <p className="text-sm text-gamehaus-lightpurple font-medium mb-2">
                 💫 Coupon Code:
               </p>
               <div className="bg-black/30 rounded-lg px-4 py-2 border border-yellow-400/50">

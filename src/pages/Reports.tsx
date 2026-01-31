@@ -898,7 +898,7 @@ const ReportsPage: React.FC = () => {
                           {billSearchQuery && (
                             <Button
                               variant="outline"
-                              className="text-purple-400 border-purple-800 hover:bg-purple-900/20"
+                              className="text-gamehaus-lightpurple border-gamehaus-purple/35 hover:bg-gamehaus-purple/10 hover:text-white"
                               onClick={() => setBillSearchQuery('')}
                             >
                               Clear search
@@ -907,7 +907,7 @@ const ReportsPage: React.FC = () => {
                           {paymentTypeFilter !== 'all' && (
                             <Button
                               variant="outline"
-                              className="text-purple-400 border-purple-800 hover:bg-purple-900/20"
+                              className="text-gamehaus-lightpurple border-gamehaus-purple/35 hover:bg-gamehaus-purple/10 hover:text-white"
                               onClick={() => setPaymentTypeFilter('all')}
                             >
                               Clear payment filter
@@ -916,7 +916,7 @@ const ReportsPage: React.FC = () => {
                           {(date?.from || date?.to) && (
                             <Button
                               variant="outline"
-                              className="text-purple-400 border-purple-800 hover:bg-purple-900/20"
+                              className="text-gamehaus-lightpurple border-gamehaus-purple/35 hover:bg-gamehaus-purple/10 hover:text-white"
                               onClick={() => setDate(undefined)}
                             >
                               Reset date filter
@@ -994,7 +994,7 @@ const ReportsPage: React.FC = () => {
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className={customer.isMember ? "bg-purple-900/30 text-purple-400 border-purple-800" : "bg-gray-800/50 text-gray-400 border-gray-700"}
+                    className={customer.isMember ? "bg-gamehaus-purple/10 text-gamehaus-lightpurple border-gamehaus-purple/30" : "bg-gray-800/50 text-gray-400 border-gray-700"}
                   >
                     {customer.isMember ? "Member" : "Non-Member"}
                   </Badge>
@@ -1249,8 +1249,8 @@ const ReportsPage: React.FC = () => {
               
               <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                  <div className="h-8 w-8 rounded-full bg-gamehaus-purple/10 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gamehaus-lightpurple">
                       <line x1="12" y1="20" x2="12" y2="10"></line>
                       <line x1="18" y1="20" x2="18" y2="4"></line>
                       <line x1="6" y1="20" x2="6" y2="16"></line>
@@ -1354,7 +1354,7 @@ const ReportsPage: React.FC = () => {
             </PopoverContent>
           </Popover>
           
-          <Button onClick={handleDownloadReport} className="gap-2 bg-purple-500 hover:bg-purple-600 text-white">
+          <Button onClick={handleDownloadReport} className="gap-2 bg-gamehaus-purple hover:bg-gamehaus-magenta text-white">
             <Download className="h-4 w-4" />
             Export
           </Button>

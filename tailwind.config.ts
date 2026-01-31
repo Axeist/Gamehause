@@ -68,8 +68,10 @@ export default {
           ring: 'hsl(var(--sidebar-ring))'
         },
         cuephoria: {
-          purple: '#6E59A5',
-          lightpurple: '#9b87f5',
+          // Legacy classnames kept for compatibility.
+          // Mapped to the current Gamehaus warm neon ember/orange theme.
+          purple: '#FF4A1A', // Flame
+          lightpurple: '#FF7A2A', // Tangerine
           orange: '#F97316',
           blue: '#0EA5E9',
           green: '#10B981',

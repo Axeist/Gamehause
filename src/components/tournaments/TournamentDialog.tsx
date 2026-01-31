@@ -101,8 +101,8 @@ const TournamentDialog: React.FC<TournamentDialogProps> = ({
       <DialogContent className="sm:max-w-[700px] max-h-[95vh] overflow-y-auto bg-gradient-to-br from-gray-950/95 to-gray-900/95 border-gray-700/60 backdrop-blur-sm shadow-2xl animate-scale-in">
         <DialogHeader className="pb-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-500/30">
-              <Trophy className="h-6 w-6 text-purple-400" />
+            <div className="p-3 bg-gradient-to-br from-gamehaus-purple/15 to-gamehaus-magenta/10 rounded-xl border border-gamehaus-purple/30">
+              <Trophy className="h-6 w-6 text-gamehaus-lightpurple" />
             </div>
             <div>
               <DialogTitle className="text-2xl font-bold text-white">
@@ -128,7 +128,7 @@ const TournamentDialog: React.FC<TournamentDialogProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <Label htmlFor="name" className="text-gray-200 font-medium flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-purple-400" />
+                  <Trophy className="h-4 w-4 text-gamehaus-lightpurple" />
                   Tournament Name *
                 </Label>
                 <Input
@@ -137,7 +137,7 @@ const TournamentDialog: React.FC<TournamentDialogProps> = ({
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter tournament name"
                   required
-                  className="bg-gray-800/60 border-gray-600/60 text-white placeholder-gray-400 focus:border-purple-500/80 focus:ring-purple-500/20 rounded-xl px-4 py-3 h-auto transition-all duration-200"
+                  className="bg-gray-800/60 border-gray-600/60 text-white placeholder-gray-400 focus:border-gamehaus-purple/80 focus:ring-gamehaus-purple/20 rounded-xl px-4 py-3 h-auto transition-all duration-200"
                 />
               </div>
               
@@ -180,8 +180,8 @@ const TournamentDialog: React.FC<TournamentDialogProps> = ({
           {/* Tournament Format Section */}
           <div className="space-y-6 p-6 bg-gradient-to-r from-gray-800/40 to-gray-700/40 rounded-xl border border-gray-700/50">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <Sparkles className="h-5 w-5 text-purple-400" />
+              <div className="p-2 bg-gamehaus-purple/10 rounded-lg">
+                <Sparkles className="h-5 w-5 text-gamehaus-lightpurple" />
               </div>
               <h3 className="text-lg font-semibold text-white">Tournament Format</h3>
             </div>
@@ -316,7 +316,7 @@ const TournamentDialog: React.FC<TournamentDialogProps> = ({
           <Button 
             type="submit" 
             onClick={handleSubmit}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105"
+            className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-magenta hover:to-gamehaus-purple text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-gamehaus-purple/25 transition-all duration-300 transform hover:scale-105"
           >
             {tournament ? 'Update Tournament' : 'Create Tournament'}
           </Button>

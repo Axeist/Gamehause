@@ -53,8 +53,8 @@ const CustomerSpendingCorrelation: React.FC = () => {
               <CardTitle className="text-xl font-bold text-white font-heading">Customer Spending Analysis</CardTitle>
               <CardDescription className="text-gray-400">Correlation between visits and spending</CardDescription>
             </div>
-            <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-purple-500" />
+            <div className="h-10 w-10 rounded-full bg-gamehaus-purple/10 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-gamehaus-lightpurple" />
             </div>
           </div>
         </CardHeader>
@@ -73,8 +73,8 @@ const CustomerSpendingCorrelation: React.FC = () => {
             <CardTitle className="text-xl font-bold text-white font-heading">Customer Spending Analysis</CardTitle>
             <CardDescription className="text-gray-400">Correlation between visits and spending</CardDescription>
           </div>
-          <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-            <TrendingUp className="h-5 w-5 text-purple-500" />
+          <div className="h-10 w-10 rounded-full bg-gamehaus-purple/10 flex items-center justify-center">
+            <TrendingUp className="h-5 w-5 text-gamehaus-lightpurple" />
           </div>
         </div>
       </CardHeader>
@@ -84,8 +84,8 @@ const CustomerSpendingCorrelation: React.FC = () => {
             spending: {
               label: "Customer Spending",
               theme: {
-                light: "#8B5CF6",
-                dark: "#8B5CF6",
+                light: "#FF4A1A",
+                dark: "#FF4A1A",
               },
             },
           }}
@@ -163,7 +163,7 @@ const CustomerSpendingCorrelation: React.FC = () => {
               <Scatter 
                 name="spending" 
                 data={correlationData} 
-                fill="#8B5CF6" 
+                fill="#FF4A1A" 
                 opacity={0.8}
               />
             </ScatterChart>

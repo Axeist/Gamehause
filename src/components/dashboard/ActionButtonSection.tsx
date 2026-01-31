@@ -20,7 +20,7 @@ const ActionButtonSection: React.FC = () => {
         icon={ShoppingCart}
         label={isMobile ? "Sale" : "New Sale"}
         path="/pos"
-        iconColor="text-[#9b87f5]"
+        iconColor="text-gamehaus-lightpurple"
       />
       
       <ActionButton

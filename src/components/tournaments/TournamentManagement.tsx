@@ -218,7 +218,7 @@ const TournamentManagement: React.FC<TournamentManagementProps> = ({
         return {
           label: 'League Tournament', 
           description: 'Round-robin format',
-          color: 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-purple-300 border-purple-500/40',
+          color: 'bg-gradient-to-r from-gamehaus-purple/15 to-gamehaus-magenta/10 text-gamehaus-lightpurple border-gamehaus-purple/40',
           icon: Trophy
         };
       default:
@@ -238,8 +238,8 @@ const TournamentManagement: React.FC<TournamentManagementProps> = ({
       <CardContent className="p-6">
         {/* Tournament Format Badge */}
         <div className="mb-6 flex items-center gap-4 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-700/60">
-          <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-500/30">
-            <formatInfo.icon className="h-6 w-6 text-purple-400" />
+          <div className="p-3 bg-gradient-to-br from-gamehaus-purple/15 to-gamehaus-magenta/10 rounded-xl border border-gamehaus-purple/30">
+            <formatInfo.icon className="h-6 w-6 text-gamehaus-lightpurple" />
           </div>
           <div className="flex-1">
             <Badge variant="outline" className={formatInfo.color}>
@@ -260,14 +260,14 @@ const TournamentManagement: React.FC<TournamentManagementProps> = ({
           <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-gray-800/60 border border-gray-700/60 rounded-xl">
             <TabsTrigger 
               value="players" 
-              className="flex items-center gap-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/30 data-[state=active]:to-blue-600/30 data-[state=active]:text-white font-semibold h-10 rounded-lg transition-all duration-200"
+              className="flex items-center gap-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-purple/20 data-[state=active]:to-gamehaus-magenta/15 data-[state=active]:text-white font-semibold h-10 rounded-lg transition-all duration-200"
             >
               <Users className="h-4 w-4" />
               Players ({players.length})
             </TabsTrigger>
             <TabsTrigger 
               value="matches" 
-              className="flex items-center gap-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/30 data-[state=active]:to-blue-600/30 data-[state=active]:text-white font-semibold h-10 rounded-lg transition-all duration-200"
+              className="flex items-center gap-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-purple/20 data-[state=active]:to-gamehaus-magenta/15 data-[state=active]:text-white font-semibold h-10 rounded-lg transition-all duration-200"
             >
               <Play className="h-4 w-4" />
               Fixtures ({matches.length})
@@ -288,7 +288,7 @@ const TournamentManagement: React.FC<TournamentManagementProps> = ({
               <Button 
                 onClick={handleGenerateMatches} 
                 disabled={!canGenerateMatches || saving || isLoading}
-                className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-700 hover:via-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105"
+                className="bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-purple hover:from-gamehaus-magenta hover:via-gamehaus-purple hover:to-gamehaus-magenta text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-gamehaus-purple/25 transition-all duration-300 transform hover:scale-105"
                 size="lg"
               >
                 {(saving || isLoading) && <Loader2 className="mr-3 h-5 w-5 animate-spin" />}

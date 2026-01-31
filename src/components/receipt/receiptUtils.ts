@@ -140,7 +140,7 @@ export const generatePDF = async (element: HTMLElement, billId: string, customer
     // Format filename
     const sanitizedCustomerName = customerName.replace(/[^a-zA-Z0-9]/g, '_');
     const shortBillId = billId.substring(0, 8).toUpperCase();
-    const fileName = `Cuephoria_Receipt_${sanitizedCustomerName}_${shortBillId}.pdf`;
+    const fileName = `Gamehaus_Receipt_${sanitizedCustomerName}_${shortBillId}.pdf`;
     
     pdf.save(fileName);
     
@@ -212,7 +212,7 @@ export const handlePrint = (printContent: string): void => {
             h1 {
               font-size: 36px;
               font-weight: bold;
-              color: #6E59A5 !important;
+              color: #FF4A1A !important;
               text-align: center;
               margin-bottom: 5px;
               -webkit-print-color-adjust: exact;

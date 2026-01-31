@@ -60,7 +60,7 @@ const PromotionalPopup: React.FC<PromotionalPopupProps> = ({ isMember = false })
       <DialogContent className="bg-gradient-to-br from-cuephoria-dark via-cuephoria-darkpurple to-cuephoria-dark border-2 border-yellow-400/50 text-white max-w-md animate-scale-in shadow-2xl shadow-yellow-400/20">
         <DialogHeader className="text-center space-y-4 pt-2">
           <div className="flex justify-center">
-            <Badge className={`${isMember ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-yellow-400 to-orange-400'} text-black font-bold text-lg px-4 py-2 animate-pulse`}>
+            <Badge className={`${isMember ? 'bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta' : 'bg-gradient-to-r from-yellow-400 to-orange-400'} text-black font-bold text-lg px-4 py-2 animate-pulse`}>
               {isMember ? <Crown className="mr-2 h-5 w-5" /> : <Star className="mr-2 h-5 w-5" />}
               {discountText}
             </Badge>
@@ -75,7 +75,7 @@ const PromotionalPopup: React.FC<PromotionalPopupProps> = ({ isMember = false })
           <div className="space-y-2">
             {isMember ? (
               <>
-                <p className="text-lg font-semibold text-purple-200">
+                <p className="text-lg font-semibold text-gamehaus-lightpurple">
                   Exclusive {discountPercentage}% member discount at Cuephoria!
                 </p>
                 <p className="text-cuephoria-grey">
@@ -90,8 +90,8 @@ const PromotionalPopup: React.FC<PromotionalPopupProps> = ({ isMember = false })
                 <p className="text-cuephoria-grey">
                   Don't miss out on this great deal. Book now and save on your next visit!
                 </p>
-                <div className="mt-3 p-3 bg-gradient-to-r from-purple-900/40 to-pink-900/40 rounded-lg border border-purple-400/30">
-                  <p className="text-sm text-purple-200 font-medium">
+                <div className="mt-3 p-3 bg-gradient-to-r from-gamehaus-purple/20 to-gamehaus-magenta/15 rounded-lg border border-gamehaus-purple/30">
+                  <p className="text-sm text-gamehaus-lightpurple font-medium">
                     💎 Want 50% off? Become a member and unlock exclusive deals!
                   </p>
                 </div>
@@ -107,7 +107,7 @@ const PromotionalPopup: React.FC<PromotionalPopupProps> = ({ isMember = false })
           <div className="space-y-3">
             <Button
               onClick={handleBookNow}
-              className={`w-full ${isMember ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : 'bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500'} text-black font-bold py-3 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-yellow-400/30`}
+              className={`w-full ${isMember ? 'bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-magenta hover:to-gamehaus-purple' : 'bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500'} text-black font-bold py-3 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-yellow-400/30`}
             >
               <ExternalLink className="mr-2 h-5 w-5" />
               Book Now & Save {discountPercentage}%
@@ -128,7 +128,7 @@ const PromotionalPopup: React.FC<PromotionalPopupProps> = ({ isMember = false })
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
-              className={`absolute w-2 h-2 ${isMember ? 'bg-purple-400/30' : 'bg-yellow-400/30'} rounded-full animate-float`}
+              className={`absolute w-2 h-2 ${isMember ? 'bg-gamehaus-purple/30' : 'bg-yellow-400/30'} rounded-full animate-float`}
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,

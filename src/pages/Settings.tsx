@@ -339,7 +339,7 @@ const Settings = () => {
                       setEditingTournament(defaultTournament);
                       setDialogOpen(true);
                     }}
-                    className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600"
+                    className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-magenta hover:to-gamehaus-purple"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Add Tournament

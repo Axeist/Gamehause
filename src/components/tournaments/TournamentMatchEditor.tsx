@@ -56,8 +56,8 @@ const TournamentMatchEditor: React.FC<TournamentMatchEditorProps> = ({
     <div className="space-y-6 p-6 bg-gradient-to-br from-gray-950/95 to-gray-900/95 rounded-2xl border border-gray-700/60 backdrop-blur-sm shadow-2xl">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-gradient-to-br from-purple-500/30 to-blue-500/30 rounded-xl border border-purple-500/40">
-            <Sparkles className="h-6 w-6 text-purple-400" />
+          <div className="p-3 bg-gradient-to-br from-gamehaus-purple/20 to-gamehaus-magenta/15 rounded-xl border border-gamehaus-purple/40">
+            <Sparkles className="h-6 w-6 text-gamehaus-lightpurple" />
           </div>
           <div>
             <h3 className="text-2xl font-bold text-white">Edit Match Details</h3>
@@ -205,8 +205,8 @@ const TournamentMatchEditor: React.FC<TournamentMatchEditorProps> = ({
       {/* Match Preview */}
       <div className="p-5 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-700/60 backdrop-blur-sm">
         <h4 className="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-3">
-          <div className="p-1.5 bg-purple-500/20 rounded-lg">
-            <Sparkles className="h-4 w-4 text-purple-400" />
+          <div className="p-1.5 bg-gamehaus-purple/10 rounded-lg">
+            <Sparkles className="h-4 w-4 text-gamehaus-lightpurple" />
           </div>
           Match Preview
         </h4>
@@ -214,7 +214,7 @@ const TournamentMatchEditor: React.FC<TournamentMatchEditorProps> = ({
           <div className="text-white font-bold text-lg">
             {players.find(p => p.id === player1Id)?.name || 'Player 1'}
           </div>
-          <div className="px-4 py-2 bg-gradient-to-r from-purple-600/30 to-blue-600/30 rounded-full border border-purple-500/40">
+          <div className="px-4 py-2 bg-gradient-to-r from-gamehaus-purple/20 to-gamehaus-magenta/15 rounded-full border border-gamehaus-purple/40">
             <span className="text-white font-bold text-sm">VS</span>
           </div>
           <div className="text-white font-bold text-lg">

@@ -702,7 +702,7 @@ export default function BookingManagement() {
 
     return (
       <Card className="bg-background border-border shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-b">
+        <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-gamehaus-purple/10 dark:to-gamehaus-magenta/5 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <CalendarIcon className="h-6 w-6 text-blue-600" />
@@ -739,7 +739,7 @@ export default function BookingManagement() {
             </div>
             <div className="text-center p-3 bg-background rounded-lg border border-border shadow-sm">
               <p className="text-sm text-muted-foreground">With Coupons</p>
-              <p className="text-2xl font-bold text-purple-600">{couponBookings}</p>
+              <p className="text-2xl font-bold text-gamehaus-purple">{couponBookings}</p>
               <p className="text-xs text-muted-foreground">{totalBookings ? Math.round((couponBookings/totalBookings)*100) : 0}%</p>
             </div>
             <div className="text-center p-3 bg-background rounded-lg border border-border shadow-sm">
@@ -824,7 +824,7 @@ export default function BookingManagement() {
                         key={booking.id}
                         className={`absolute rounded-lg border-2 cursor-pointer transition-all duration-200 z-20 ${
                           booking.coupon_code 
-                            ? 'bg-gradient-to-r from-purple-100 to-purple-50 border-purple-300 shadow-purple-100' 
+                            ? 'bg-gradient-to-r from-orange-100 to-orange-50 border-orange-300 shadow-orange-100' 
                             : 'bg-gradient-to-r from-blue-100 to-blue-50 border-blue-300 shadow-blue-100'
                         } ${isExpanded ? 'shadow-lg z-30' : 'shadow-sm hover:shadow-md'}`}
                         style={{
@@ -841,7 +841,7 @@ export default function BookingManagement() {
                             <div className="h-full flex flex-col justify-between">
                               <div>
                                 <div className={`text-sm font-semibold truncate ${
-                                  booking.coupon_code ? 'text-purple-800' : 'text-blue-800'
+                                  booking.coupon_code ? 'text-orange-800' : 'text-blue-800'
                                 }`}>
                                   {booking.customer.name}
                                 </div>
@@ -871,7 +871,7 @@ export default function BookingManagement() {
                                   )}
                                 </div>
                                 {booking.coupon_code && (
-                                  <Gift className="h-3 w-3 text-purple-600" />
+                                  <Gift className="h-3 w-3 text-orange-600" />
                                 )}
                               </div>
                             </div>
@@ -882,7 +882,7 @@ export default function BookingManagement() {
                             <div className="space-y-3 text-sm overflow-y-auto max-h-full">
                               <div className="flex items-center justify-between">
                                 <div className={`font-bold text-lg ${
-                                  booking.coupon_code ? 'text-purple-800' : 'text-blue-800'
+                                  booking.coupon_code ? 'text-orange-800' : 'text-blue-800'
                                 }`}>
                                   {booking.customer.name}
                                 </div>
@@ -1971,7 +1971,7 @@ export default function BookingManagement() {
                       {couponOptions.map(code => (
                         <SelectItem key={code} value={code}>
                           <div className="flex items-center gap-2">
-                            <Gift className="h-3 w-3 text-purple-500" />
+                            <Gift className="h-3 w-3 text-gamehaus-purple" />
                             {code}
                           </div>
                         </SelectItem>
@@ -2124,14 +2124,14 @@ export default function BookingManagement() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Coupon Usage</p>
-                        <p className="text-2xl font-bold text-purple-600">
+                        <p className="text-2xl font-bold text-gamehaus-purple">
                           {analytics.coupons.couponConversionRate.toFixed(1)}%
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {analytics.coupons.totalCouponsUsed} of {analytics.bookings.total} bookings
                         </p>
                       </div>
-                      <Gift className="h-8 w-8 text-purple-600" />
+                      <Gift className="h-8 w-8 text-gamehaus-purple" />
                     </div>
                   </CardContent>
                 </Card>
@@ -2160,9 +2160,9 @@ export default function BookingManagement() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Revenue with Coupons</p>
-                        <p className="text-2xl font-bold text-purple-600">₹{analytics.coupons.revenueWithCoupons.toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-gamehaus-purple">₹{analytics.coupons.revenueWithCoupons.toLocaleString()}</p>
                       </div>
-                      <Megaphone className="h-8 w-8 text-purple-600" />
+                      <Megaphone className="h-8 w-8 text-gamehaus-purple" />
                     </div>
                   </CardContent>
                 </Card>
@@ -2214,7 +2214,7 @@ export default function BookingManagement() {
                   <CardContent className="p-6">
                     <div className="text-center">
                       <p className="text-sm font-medium text-muted-foreground">Total Coupons Used</p>
-                      <p className="text-3xl font-bold text-purple-600">{analytics.coupons.totalCouponsUsed}</p>
+                      <p className="text-3xl font-bold text-gamehaus-purple">{analytics.coupons.totalCouponsUsed}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {analytics.coupons.couponConversionRate.toFixed(1)}% of all bookings
                       </p>
@@ -2373,7 +2373,7 @@ export default function BookingManagement() {
                       <div className="p-3 bg-muted/20 border border-border rounded-lg">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-foreground">Coupon Adoption Rate</span>
-                          <span className="text-2xl font-bold text-purple-500">
+                          <span className="text-2xl font-bold text-gamehaus-purple">
                             {analytics.coupons.couponConversionRate.toFixed(1)}%
                           </span>
                         </div>
@@ -2429,7 +2429,7 @@ export default function BookingManagement() {
                   <CardContent className="p-6">
                     <div className="text-center">
                       <p className="text-sm font-medium text-muted-foreground">Revenue with Coupons</p>
-                      <p className="text-3xl font-bold text-purple-600">₹{analytics.coupons.revenueWithCoupons.toLocaleString()}</p>
+                      <p className="text-3xl font-bold text-gamehaus-purple">₹{analytics.coupons.revenueWithCoupons.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {((analytics.coupons.revenueWithCoupons / analytics.revenue.total) * 100).toFixed(1)}% of total
                       </p>
@@ -2534,12 +2534,12 @@ export default function BookingManagement() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground">Retention Rate</p>
-                        <p className="text-3xl font-bold text-purple-600">
+                        <p className="text-3xl font-bold text-gamehaus-purple">
                           {analytics.customers.retentionRate.toFixed(1)}%
                         </p>
                         <p className="text-xs text-muted-foreground">Returning customers</p>
                       </div>
-                      <TrendingUpIcon className="h-8 w-8 text-purple-600" />
+                      <TrendingUpIcon className="h-8 w-8 text-gamehaus-purple" />
                     </div>
                   </CardContent>
                 </Card>
@@ -2715,7 +2715,7 @@ export default function BookingManagement() {
                             </div>
                             <div className="text-center p-3 bg-background rounded-lg border border-border shadow-sm">
                               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Avg/Booking</p>
-                              <p className="text-xl font-bold text-purple-600">₹{Math.round((stats.revenue / stats.bookings) || 0)}</p>
+                              <p className="text-xl font-bold text-gamehaus-purple">₹{Math.round((stats.revenue / stats.bookings) || 0)}</p>
                             </div>
                           </div>
                         </div>
@@ -3572,7 +3572,7 @@ export default function BookingManagement() {
                                                 key={stationKey}
                                                 className={`border rounded-lg bg-card shadow-sm overflow-hidden ${
                                                   stationBookings.some(b => b.coupon_code) 
-                                                    ? 'ring-2 ring-purple-200 bg-purple-50/30 dark:bg-purple-950/30' 
+                                                    ? 'ring-2 ring-orange-200 bg-orange-50/30 dark:bg-orange-950/30' 
                                                     : ''
                                                 }`}
                                               >

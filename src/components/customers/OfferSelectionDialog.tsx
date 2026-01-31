@@ -70,7 +70,7 @@ const OfferSelectionDialog: React.FC<OfferSelectionDialogProps> = ({
   const getAudienceColor = (audience: string) => {
     switch (audience) {
       case 'all': return 'bg-blue-500';
-      case 'members': return 'bg-purple-500';
+      case 'members': return 'bg-gamehaus-purple';
       case 'non_members': return 'bg-gray-500';
       case 'new_customers': return 'bg-green-500';
       case 'vip': return 'bg-gold-500';

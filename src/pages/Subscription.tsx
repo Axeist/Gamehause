@@ -425,7 +425,7 @@ const Subscription: React.FC = () => {
                       : isDiamond
                       ? 'bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-cyan-500/15 border-cyan-500/40 hover:border-cyan-500/60 hover:shadow-2xl hover:shadow-cyan-500/20'
                       : isPlatinum
-                      ? 'bg-gradient-to-br from-purple-500/15 via-pink-500/10 to-purple-500/15 border-purple-500/40 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/20'
+                      ? 'bg-gradient-to-br from-gamehaus-purple/15 via-gamehaus-magenta/10 to-gamehaus-purple/15 border-gamehaus-purple/40 hover:border-gamehaus-purple/60 hover:shadow-2xl hover:shadow-gamehaus-purple/20'
                       : isGold
                       ? 'bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-amber-500/15 border-amber-500/40 hover:border-amber-500/60 hover:shadow-2xl hover:shadow-amber-500/20'
                       : 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-gamehaus-purple/40 hover:border-gamehaus-purple/60'
@@ -442,7 +442,7 @@ const Subscription: React.FC = () => {
                           <h3 className={`text-2xl font-bold ${
                             isLifetime ? 'text-yellow-400' : 
                             isDiamond ? 'text-cyan-400' : 
-                            isPlatinum ? 'text-purple-400' : 
+                            isPlatinum ? 'text-gamehaus-lightpurple' : 
                             isGold ? 'text-amber-400' : 
                             'text-white'
                           }`}>
@@ -472,7 +472,7 @@ const Subscription: React.FC = () => {
                         <span className={`text-4xl font-bold ${
                           isLifetime ? 'text-yellow-400' : 
                           isDiamond ? 'text-cyan-400' : 
-                          isPlatinum ? 'text-purple-400' : 
+                          isPlatinum ? 'text-gamehaus-lightpurple' : 
                           isGold ? 'text-amber-400' : 
                           'bg-gradient-to-r from-gamehaus-lightpurple to-gamehaus-magenta bg-clip-text text-transparent'
                         }`}>

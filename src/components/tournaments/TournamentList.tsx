@@ -40,7 +40,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
       case 'knockout':
         return 'bg-gradient-to-r from-red-500/20 to-pink-500/20 text-red-300 border-red-500/40';
       case 'league':
-        return 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-purple-300 border-purple-500/40';
+        return 'bg-gradient-to-r from-gamehaus-purple/15 to-gamehaus-magenta/10 text-gamehaus-lightpurple border-gamehaus-purple/40';
       default:
         return 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-300 border-gray-500/40';
     }
@@ -51,8 +51,8 @@ const TournamentList: React.FC<TournamentListProps> = ({
       <Card className="bg-gradient-to-br from-gray-950/90 to-gray-900/90 border-gray-800/50 shadow-2xl backdrop-blur-sm">
         <CardContent className="p-12 text-center">
           <div className="flex flex-col items-center space-y-6">
-            <div className="p-8 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-3xl border border-purple-500/30">
-              <Trophy className="h-20 w-20 text-purple-400" />
+            <div className="p-8 bg-gradient-to-br from-gamehaus-purple/15 to-gamehaus-magenta/10 rounded-3xl border border-gamehaus-purple/30">
+              <Trophy className="h-20 w-20 text-gamehaus-lightpurple" />
             </div>
             <div className="space-y-3 max-w-md">
               <h3 className="text-3xl font-bold text-white">No Tournaments Yet</h3>
@@ -71,8 +71,8 @@ const TournamentList: React.FC<TournamentListProps> = ({
           <CardHeader className="pb-4">
             <div className="flex justify-between items-start mb-3">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-500/30">
-                  <Trophy className="h-6 w-6 text-purple-400" />
+                <div className="p-3 bg-gradient-to-br from-gamehaus-purple/15 to-gamehaus-magenta/10 rounded-xl border border-gamehaus-purple/30">
+                  <Trophy className="h-6 w-6 text-gamehaus-lightpurple" />
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-xl font-bold text-white line-clamp-2 leading-tight">
@@ -90,7 +90,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
                 <Play className="h-3 w-3 mr-1" />
                 {tournament.tournamentFormat === 'knockout' ? 'Knockout' : 'League'}
               </Badge>
-              <Badge variant="outline" className="bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-300 border-indigo-500/40">
+              <Badge variant="outline" className="bg-gradient-to-r from-gamehaus-purple/10 to-gamehaus-magenta/10 text-gamehaus-lightpurple border-gamehaus-purple/30">
                 {tournament.gameType} {tournament.gameVariant || tournament.gameTitle || ''}
               </Badge>
             </div>
@@ -146,7 +146,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={() => onManage(tournament)}
-                className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-purple-600/40 text-purple-300 hover:from-purple-600/30 hover:to-blue-600/30 hover:border-purple-500/60 transition-all duration-200 font-medium h-9"
+                className="bg-gradient-to-r from-gamehaus-purple/15 to-gamehaus-magenta/10 border-gamehaus-purple/40 text-gamehaus-lightpurple hover:from-gamehaus-purple/20 hover:to-gamehaus-magenta/15 hover:border-gamehaus-purple/60 transition-all duration-200 font-medium h-9"
               >
                 <Settings className="h-4 w-4 mr-2" />
                 Manage

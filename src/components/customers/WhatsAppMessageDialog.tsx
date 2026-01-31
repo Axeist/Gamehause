@@ -180,7 +180,7 @@ const WhatsAppMessageDialog: React.FC<WhatsAppMessageDialogProps> = ({
       },
       {
         title: "Exclusive Member Offer",
-        icon: <Gift className="h-4 w-4 text-purple-400" />,
+        icon: <Gift className="h-4 w-4 text-gamehaus-lightpurple" />,
         message: customer.isMember 
           ? `👑 VIP Member Alert - ${customer.name}!\n\nAs our valued member with ₹${customer.totalSpent.toLocaleString('en-IN')} lifetime spending, you deserve the best!\n\n${getRandomOffer(2)}\n\n${customer.membershipHoursLeft ? `You have ${customer.membershipHoursLeft} hours left on your membership - make them count!` : ''}\n\nYour loyalty means everything to us!\nCuephoria Gaming`
           : `Hey ${customer.name}! 🎮\n\nYou've spent ₹${customer.totalSpent.toLocaleString('en-IN')} with us - thank you for your trust!\n\nReady to level up? Consider our membership for exclusive benefits:\n• Priority booking\n• Member-only discounts\n• Extended play hours\n• Special events access\n\n${getRandomOffer(2)}\n\nLet's game together!\nCuephoria Gaming`
@@ -384,7 +384,7 @@ const WhatsAppMessageDialog: React.FC<WhatsAppMessageDialogProps> = ({
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Status:</span>
-                        <span className={customer.isMember ? "text-purple-400" : "text-gray-400"}>
+                        <span className={customer.isMember ? "text-gamehaus-lightpurple" : "text-gray-400"}>
                           {customer.isMember ? "Member" : "Non-Member"}
                         </span>
                       </div>

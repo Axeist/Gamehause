@@ -192,7 +192,7 @@ const ExpandableBillRow: React.FC<ExpandableBillRowProps> = ({
               Complimentary
             </Badge>
           ) : isSplit ? (
-            <Badge variant="outline" className="bg-purple-900/30 text-purple-400 border-purple-800">
+            <Badge variant="outline" className="bg-gamehaus-purple/10 text-gamehaus-lightpurple border-gamehaus-purple/30">
               Split
             </Badge>
           ) : (
@@ -274,7 +274,7 @@ const ExpandableBillRow: React.FC<ExpandableBillRowProps> = ({
                       <Badge variant="outline" className={
                         item.type === 'session' 
                           ? "bg-blue-900/30 text-blue-400 border-blue-800" 
-                          : "bg-purple-900/30 text-purple-400 border-purple-800"
+                          : "bg-gamehaus-purple/10 text-gamehaus-lightpurple border-gamehaus-purple/30"
                       }>
                         {item.type === 'session' ? 'Session' : 'Product'}
                       </Badge>
@@ -309,7 +309,7 @@ const ExpandableBillRow: React.FC<ExpandableBillRowProps> = ({
                 {(bill.discountValue || 0) > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Discount:</span>
-                    <CurrencyDisplay amount={bill.discountValue || 0} className="text-purple-400" />
+                    <CurrencyDisplay amount={bill.discountValue || 0} className="text-gamehaus-lightpurple" />
                   </div>
                 )}
                 {(bill.loyaltyPointsUsed || 0) > 0 && (

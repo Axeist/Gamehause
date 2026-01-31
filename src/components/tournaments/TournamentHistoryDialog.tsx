@@ -60,7 +60,7 @@ const TournamentHistoryDialog: React.FC<TournamentHistoryDialogProps> = ({
       case 'semi_final':
         return {
           label: 'SEMI FINAL',
-          color: 'bg-gradient-to-r from-purple-600 to-purple-400 text-white',
+          color: 'bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta text-white',
           icon: <Medal className="h-4 w-4 mr-1" />
         };
       case 'quarter_final':

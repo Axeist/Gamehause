@@ -91,9 +91,9 @@ const StatCardSection: React.FC<StatCardSectionProps> = ({
             {trendIcon && React.createElement(trendIcon, { className: `h-3 w-3 ${trendClass}` })}
           </div>
         }
-        iconColor="text-[#9b87f5]"
-        iconBgColor="bg-[#6E59A5]/20"
-        className="hover:shadow-purple-900/10"
+        iconColor="text-gamehaus-lightpurple"
+        iconBgColor="bg-gamehaus-purple/15"
+        className="hover:shadow-gamehaus-purple/15"
       />
 
       <StatsCard

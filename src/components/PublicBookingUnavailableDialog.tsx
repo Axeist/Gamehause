@@ -90,7 +90,7 @@ const PublicBookingUnavailableDialog: React.FC<PublicBookingUnavailableDialogPro
             </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30">
+          <div className="p-4 rounded-lg bg-gradient-to-r from-gamehaus-purple/10 to-gamehaus-magenta/10 border border-gamehaus-purple/30">
             <p className="text-gray-300 text-sm text-center leading-relaxed">
               <span className="font-semibold text-white">We're here to help!</span> Our team is ready to assist you with your gaming session bookings. 
               Give us a call or visit our venue for immediate assistance.

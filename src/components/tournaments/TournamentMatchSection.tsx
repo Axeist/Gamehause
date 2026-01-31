@@ -58,11 +58,11 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
       case 'final':
         return 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-300 border-yellow-500/40';
       case 'semi_final':
-        return 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-purple-300 border-purple-500/40';
+        return 'bg-gradient-to-r from-gamehaus-purple/15 to-gamehaus-magenta/10 text-gamehaus-lightpurple border-gamehaus-purple/40';
       case 'quarter_final':
         return 'bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-300 border-orange-500/40';
       default:
-        return 'bg-gradient-to-r from-indigo-500/20 to-blue-500/20 text-indigo-300 border-indigo-500/40';
+        return 'bg-gradient-to-r from-gamehaus-purple/10 to-gamehaus-magenta/10 text-gamehaus-lightpurple border-gamehaus-purple/30';
     }
   };
 
@@ -133,8 +133,8 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
           <CardContent className="p-12 text-center">
             <div className="flex flex-col items-center space-y-8">
               <div className="relative">
-                <div className="p-8 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-3xl border border-purple-500/30">
-                  <Target className="h-16 w-16 text-purple-400" />
+                <div className="p-8 bg-gradient-to-br from-gamehaus-purple/15 to-gamehaus-magenta/10 rounded-3xl border border-gamehaus-purple/30">
+                  <Target className="h-16 w-16 text-gamehaus-lightpurple" />
                 </div>
               </div>
               <div className="space-y-4 max-w-md">
@@ -146,7 +146,7 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
                 <Button 
                   onClick={onGenerateMatches}
                   size="lg"
-                  className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-purple-500/25 transform hover:scale-105"
+                  className="bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-purple hover:from-gamehaus-magenta hover:via-gamehaus-purple hover:to-gamehaus-magenta text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-gamehaus-purple/25 transform hover:scale-105"
                 >
                   <Plus className="mr-3 h-5 w-5" />
                   Generate Tournament Fixtures
@@ -237,8 +237,8 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
       {rounds.map((round, roundIndex) => (
         <div key={round} className="space-y-6 animate-fade-in" style={{ animationDelay: `${roundIndex * 0.1}s` }}>
           <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-500/40">
-              <Play className="h-6 w-6 text-purple-400" />
+            <div className="p-3 bg-gradient-to-br from-gamehaus-purple/15 to-gamehaus-magenta/10 rounded-xl border border-gamehaus-purple/40">
+              <Play className="h-6 w-6 text-gamehaus-lightpurple" />
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-bold text-white flex items-center gap-3">
@@ -250,7 +250,7 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
                   </Badge>
                 )}
               </h3>
-              <div className="h-1 bg-gradient-to-r from-purple-500/50 via-blue-500/50 to-transparent rounded-full mt-2"></div>
+              <div className="h-1 bg-gradient-to-r from-gamehaus-purple/40 via-gamehaus-magenta/30 to-transparent rounded-full mt-2"></div>
             </div>
           </div>
           
@@ -373,8 +373,8 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
                       {!match.completed && match.player1Id && match.player2Id && match.player1Id !== '' && match.player2Id !== '' && (
                         <div className="space-y-3 pt-2">
                           <div className="flex items-center gap-2">
-                            <div className="p-1 bg-purple-500/20 rounded">
-                              <Settings className="h-3 w-3 text-purple-400" />
+                            <div className="p-1 bg-gamehaus-purple/10 rounded">
+                              <Settings className="h-3 w-3 text-gamehaus-lightpurple" />
                             </div>
                             <span className="font-medium text-gray-200 text-sm">Select Winner:</span>
                           </div>
@@ -390,7 +390,7 @@ const TournamentMatchSection: React.FC<TournamentMatchSectionProps> = ({
                             <Button
                               size="sm"
                               onClick={() => updateMatchResult(match.id, match.player2Id)}
-                              className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 hover:from-purple-700 hover:to-pink-700 border border-purple-500/50 hover:border-purple-400/70 text-white transition-all duration-300 font-medium text-xs py-2 rounded-lg transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+                              className="bg-gradient-to-r from-gamehaus-purple/80 to-gamehaus-magenta/80 hover:from-gamehaus-magenta hover:to-gamehaus-purple border border-gamehaus-purple/50 hover:border-gamehaus-lightpurple/70 text-white transition-all duration-300 font-medium text-xs py-2 rounded-lg transform hover:scale-105 shadow-lg hover:shadow-gamehaus-purple/25"
                             >
                               <Trophy className="h-3 w-3 mr-1" />
                               {getPlayerName(match.player2Id)}

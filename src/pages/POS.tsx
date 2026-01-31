@@ -560,7 +560,7 @@ const POS = () => {
                   </TabsTrigger>
                   <TabsTrigger
                     value="membership"
-                    className="text-xs px-1 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white flex items-center gap-1"
+                    className="text-xs px-1 py-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-gamehaus-purple data-[state=active]:to-gamehaus-magenta data-[state=active]:text-white flex items-center gap-1"
                   >
                     <Award className="h-3 w-3" />
                     Membership ({categoryCounts.membership || 0})

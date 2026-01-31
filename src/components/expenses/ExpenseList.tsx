@@ -18,12 +18,12 @@ const getCategoryColor = (category: string) => {
   switch (c) {
     case 'rent': return 'bg-blue-500';
     case 'utilities': return 'bg-green-600';
-    case 'salary': return 'bg-purple-500';
+    case 'salary': return 'bg-gamehaus-purple';
     case 'inventory': return 'bg-orange-500';
     case 'marketing': return 'bg-pink-500';
     case 'maintenance': return 'bg-teal-600';
     case 'transport': return 'bg-amber-600';
-    case 'subscriptions': return 'bg-indigo-500';
+    case 'subscriptions': return 'bg-gamehaus-lightpurple';
     case 'events': return 'bg-cyan-600';
     case 'bank_charges': return 'bg-slate-600';
     case 'withdrawal': return 'bg-red-600';

@@ -48,7 +48,7 @@ const ProductPerformance: React.FC = () => {
       'drinks': '#3B82F6',    // Blue
       'tobacco': '#EF4444',   // Red
       'challenges': '#22C55E', // Green
-      'membership': '#8B5CF6'  // Purple
+      'membership': '#FF4A1A'  // Flame (Gamehaus)
     };
     
     return colorMap[category] || '#10B981';

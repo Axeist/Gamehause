@@ -26,12 +26,12 @@ const getCategoryColor = (category: string) => {
   switch (c) {
     case 'rent': return 'bg-blue-500';
     case 'utilities': return 'bg-green-600';
-    case 'salary': return 'bg-purple-500';
+    case 'salary': return 'bg-gamehaus-purple';
     case 'inventory': return 'bg-orange-500';
     case 'marketing': return 'bg-pink-500';
     case 'maintenance': return 'bg-teal-600';
     case 'transport': return 'bg-amber-600';
-    case 'subscriptions': return 'bg-indigo-500';
+    case 'subscriptions': return 'bg-gamehaus-lightpurple';
     case 'events': return 'bg-cyan-600';
     case 'bank_charges': return 'bg-slate-600';
     case 'withdrawal': return 'bg-red-600';
@@ -113,20 +113,20 @@ const FilteredExpenseList: React.FC<FilteredExpenseListProps> = ({
           role="button"
           onClick={() => onCategorySelect?.(null)}
           className={clsx(
-            "bg-gray-800 border-2 border-purple-600 transition-colors cursor-pointer",
-            selectedCategory === null && "ring-2 ring-purple-400"
+            "bg-gray-800 border-2 border-gamehaus-purple transition-colors cursor-pointer",
+            selectedCategory === null && "ring-2 ring-gamehaus-lightpurple"
           )}
         >
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-purple-400">
+            <CardTitle className="text-sm font-medium text-gamehaus-lightpurple">
               Total Expenses
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold text-purple-400">
+            <div className="text-xl font-bold text-gamehaus-lightpurple">
               <CurrencyDisplay amount={byDate.reduce((s, e) => s + e.amount, 0)} />
             </div>
-            <p className="text-xs text-purple-300 mt-1">Clear filter</p>
+            <p className="text-xs text-gamehaus-lightpurple/80 mt-1">Clear filter</p>
           </CardContent>
         </Card>
       </div>
@@ -150,7 +150,7 @@ const FilteredExpenseList: React.FC<FilteredExpenseListProps> = ({
             Expenses for Selected Period ({visibleExpenses.length} items)
           </CardTitle>
           <ExpenseDialog>
-            <Button variant="default" className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700">
+            <Button variant="default" className="flex items-center gap-2 bg-gamehaus-purple hover:bg-gamehaus-magenta text-white">
               <PlusCircle className="h-4 w-4" />
               Add Expense
             </Button>

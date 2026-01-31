@@ -109,34 +109,34 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
 
   return (
     <>
-      <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-1 bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-700/50 backdrop-blur-sm">
+      <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-gamehaus-purple/20 hover:-translate-y-1 bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-700/50 backdrop-blur-sm">
         {isActive && (
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-r from-gamehaus-purple/10 to-gamehaus-magenta/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         )}
         
         <CardHeader className="pb-3 relative z-10">
           {customer.customerId && (
-            <div className="flex items-center justify-between mb-3 p-2 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-md border border-purple-500/30">
+            <div className="flex items-center justify-between mb-3 p-2 bg-gradient-to-r from-gamehaus-purple/15 to-gamehaus-magenta/10 rounded-md border border-gamehaus-purple/30">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <Hash className="h-4 w-4 text-purple-400 flex-shrink-0" />
-                <span className="text-sm font-mono font-bold text-purple-300 truncate">
+                <Hash className="h-4 w-4 text-gamehaus-lightpurple flex-shrink-0" />
+                <span className="text-sm font-mono font-bold text-gamehaus-lightpurple truncate">
                   {customer.customerId}
                 </span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 hover:bg-purple-500/20 flex-shrink-0"
+                className="h-7 w-7 p-0 hover:bg-gamehaus-purple/10 flex-shrink-0"
                 onClick={handleCopyCustomerId}
               >
-                <Copy className="h-3.5 w-3.5 text-purple-400" />
+                <Copy className="h-3.5 w-3.5 text-gamehaus-lightpurple" />
               </Button>
             </div>
           )}
 
           <div className="flex items-start gap-3">
-            <Avatar className="h-12 w-12 ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition-all duration-300 flex-shrink-0">
-              <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white font-semibold text-sm">
+            <Avatar className="h-12 w-12 ring-2 ring-gamehaus-purple/20 group-hover:ring-gamehaus-purple/40 transition-all duration-300 flex-shrink-0">
+              <AvatarFallback className="bg-gradient-to-br from-gamehaus-purple to-gamehaus-magenta text-white font-semibold text-sm">
                 {getInitials(customer.name)}
               </AvatarFallback>
             </Avatar>
@@ -169,12 +169,12 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           )}
           
           {customer.isMember && (
-            <div className="space-y-2 p-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg border border-purple-500/20">
+            <div className="space-y-2 p-3 bg-gradient-to-r from-gamehaus-purple/10 to-gamehaus-magenta/10 rounded-lg border border-gamehaus-purple/20">
               {customer.membershipPlan && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm text-purple-300">Plan</span>
+                    <Award className="h-4 w-4 text-gamehaus-lightpurple" />
+                    <span className="text-sm text-gamehaus-lightpurple">Plan</span>
                   </div>
                   <span className="text-sm font-medium text-white">{customer.membershipPlan}</span>
                 </div>
@@ -183,8 +183,8 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
               {customer.membershipStartDate && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm text-purple-300">Start</span>
+                    <Calendar className="h-4 w-4 text-gamehaus-lightpurple" />
+                    <span className="text-sm text-gamehaus-lightpurple">Start</span>
                   </div>
                   <span className="text-sm text-gray-300">{formatDate(customer.membershipStartDate)}</span>
                 </div>
@@ -193,8 +193,8 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
               {customer.membershipExpiryDate && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CalendarCheck className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm text-purple-300">Expires</span>
+                    <CalendarCheck className="h-4 w-4 text-gamehaus-lightpurple" />
+                    <span className="text-sm text-gamehaus-lightpurple">Expires</span>
                   </div>
                   <span className="text-sm text-gray-300">{formatDate(customer.membershipExpiryDate)}</span>
                 </div>
@@ -203,8 +203,8 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
               {customer.membershipHoursLeft !== undefined && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-purple-400" />
-                    <span className="text-sm text-purple-300">Hours Left</span>
+                    <Clock className="h-4 w-4 text-gamehaus-lightpurple" />
+                    <span className="text-sm text-gamehaus-lightpurple">Hours Left</span>
                   </div>
                   <span className="text-sm font-medium text-white">{customer.membershipHoursLeft}</span>
                 </div>
@@ -251,7 +251,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
         <CardFooter className="pt-4 pb-6 px-6 relative z-10">
           {isSelectable ? (
             <Button 
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+              className="w-full bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-magenta hover:to-gamehaus-purple text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
               onClick={() => onSelect && onSelect(customer)}
             >
               Select Customer

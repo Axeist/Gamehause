@@ -730,25 +730,25 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
                     className="flex flex-col space-y-2"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="cash" id="cash" className="text-purple-400" />
+                      <RadioGroupItem value="cash" id="cash" className="text-gamehaus-lightpurple" />
                       <Label htmlFor="cash" className="flex items-center gap-1 cursor-pointer">
                         <Wallet className="h-4 w-4" /> Cash
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="upi" id="upi" className="text-purple-400" />
+                      <RadioGroupItem value="upi" id="upi" className="text-gamehaus-lightpurple" />
                       <Label htmlFor="upi" className="flex items-center gap-1 cursor-pointer">
                         <CreditCard className="h-4 w-4" /> UPI
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="credit" id="credit" className="text-purple-400" />
+                      <RadioGroupItem value="credit" id="credit" className="text-gamehaus-lightpurple" />
                       <Label htmlFor="credit" className="flex items-center gap-1 cursor-pointer">
                         <CreditCard className="h-4 w-4" /> Credit
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="split" id="split" className="text-purple-400" />
+                      <RadioGroupItem value="split" id="split" className="text-gamehaus-lightpurple" />
                       <Label htmlFor="split" className="flex items-center gap-1 cursor-pointer">
                         <X className="h-4 w-4" /> Split
                       </Label>
@@ -829,7 +829,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
                 </Button>
                 <Button
                   onClick={handleSaveChanges}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  className="bg-gamehaus-purple hover:bg-gamehaus-magenta text-white"
                   disabled={isSaving}
                 >
                   {isSaving ? (
@@ -936,7 +936,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
             </Button>
             <Button 
               onClick={handleAddNewItem}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-gamehaus-purple hover:bg-gamehaus-magenta text-white"
             >
               Add to Bill
             </Button>
