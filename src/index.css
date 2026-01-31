@@ -213,6 +213,35 @@
   }
 }
 
+@keyframes fire-flicker {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.45;
+    filter: blur(18px);
+  }
+  35% {
+    transform: translateY(-2px) scale(1.03);
+    opacity: 0.75;
+    filter: blur(22px);
+  }
+  70% {
+    transform: translateY(-1px) scale(1.01);
+    opacity: 0.6;
+    filter: blur(20px);
+  }
+}
+
+@keyframes fire-flicker-slow {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-3px) scale(1.04);
+    opacity: 0.55;
+  }
+}
+
 @keyframes scaleIn {
   from {
     transform: scale(0.9);
@@ -281,6 +310,40 @@
 
 .gamehaus-marquee:hover .gamehaus-marquee-track {
   animation-play-state: paused;
+}
+
+.animate-fire-flicker {
+  animation: fire-flicker 1.1s ease-in-out infinite;
+  will-change: transform, opacity, filter;
+}
+
+.animate-fire-flicker-slow {
+  animation: fire-flicker-slow 2.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: fit-content;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.5rem;
+  color: rgba(209, 213, 219, 0.95); /* gray-300 */
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.footer-link:hover {
+  background: rgba(255, 74, 26, 0.10);
+  border-color: rgba(255, 74, 26, 0.20);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.footer-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 74, 26, 0.65);
 }
 
 .animate-scale-in {

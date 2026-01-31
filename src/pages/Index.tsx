@@ -795,53 +795,33 @@ const Index: React.FC = () => {
             {/* Quick Links */}
             <div>
               <p className="text-xs tracking-[0.25em] text-gray-400">QUICK LINKS</p>
-              <div className="mt-4 space-y-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
-                  onClick={() => window.open(PUBLIC_BOOKING_URL, "_blank")}
+              <div className="mt-4 flex flex-col gap-1">
+                <a
+                  href={PUBLIC_BOOKING_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="footer-link"
                 >
                   Book a slot
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
-                  onClick={() => navigate("/public/stations")}
-                >
+                </a>
+                <button type="button" className="footer-link" onClick={() => navigate("/public/stations")}>
                   Live availability
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
-                  onClick={() => navigate("/public/tournaments")}
-                >
+                </button>
+                <button type="button" className="footer-link" onClick={() => navigate("/public/tournaments")}>
                   Tournaments
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
-                  onClick={() => navigate("/login")}
-                >
+                </button>
+                <button type="button" className="footer-link" onClick={() => navigate("/login")}>
                   Management login
-                </Button>
+                </button>
               </div>
             </div>
 
             {/* Legal */}
             <div>
               <p className="text-xs tracking-[0.25em] text-gray-400">LEGAL</p>
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 flex flex-col gap-1">
                 <Dialog open={openDialog === "terms"} onOpenChange={(open) => setOpenDialog(open ? "terms" : null)}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
-                    onClick={() => setOpenDialog("terms")}
-                  >
+                  <Button variant="ghost" size="sm" className="footer-link justify-start" onClick={() => setOpenDialog("terms")}>
                     Terms & Conditions
                   </Button>
                   <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white">
@@ -849,6 +829,18 @@ const Index: React.FC = () => {
                       <DialogTitle className="text-2xl font-bold text-white">Terms and Conditions</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6 text-gray-300 mt-4">
+                      <p className="text-xs text-gray-400">
+                        Last updated: {new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">0. Overview</h2>
+                        <p>
+                          These Terms explain how bookings, walk-ins, payments, cancellations, and on‑premise conduct work at {BRAND_NAME}.
+                          They are designed to keep sessions fair, predictable, and safe for everyone.
+                        </p>
+                      </section>
+
                       <section className="space-y-4">
                         <h2 className="text-lg font-semibold text-gamehaus-lightpurple">1. Acceptance of Terms</h2>
                         <p>
@@ -866,6 +858,11 @@ const Index: React.FC = () => {
                         <p>
                           All sessions are charged according to our current rate card. Extensions are subject to availability and additional charges.
                         </p>
+                        <ul className="list-disc pl-6 space-y-2 text-sm">
+                          <li>Bookings are time-bound; arriving late may reduce your playable time during peak hours.</li>
+                          <li>Station allocation may change in exceptional cases (maintenance/safety), while keeping your experience equivalent.</li>
+                          <li>Rates may differ by station type and time; always confirm prices shown during booking.</li>
+                        </ul>
                       </section>
                       
                       <section className="space-y-4">
@@ -878,10 +875,14 @@ const Index: React.FC = () => {
                           Players are responsible for any damage caused to equipment, tables, or fixtures through improper use.
                           Damages will be charged at repair or replacement cost.
                         </p>
+                        <ul className="list-disc pl-6 space-y-2 text-sm">
+                          <li>Follow staff instructions for safety, scheduling, and equipment handling.</li>
+                          <li>No harassment, unsafe behavior, or intentional damage—this results in immediate removal.</li>
+                        </ul>
                       </section>
                       
                       <section className="space-y-4">
-                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Cancellations and Refunds</h2>
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Cancellations & Refunds (summary)</h2>
                         <p>
                           Reservations may be cancelled or rescheduled at least 2 hours prior without penalty.
                           Late cancellations or no-shows may incur a 50% booking fee.
@@ -889,10 +890,41 @@ const Index: React.FC = () => {
                         <p>
                           Refunds for technical issues will be assessed case-by-case by management.
                         </p>
+                        <p className="text-sm text-gray-400">
+                          For full details, see the Refund Policy in the footer.
+                        </p>
+                      </section>
+
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Payments & Pricing</h2>
+                        <p>
+                          Payments may be collected online and/or at the venue depending on booking type. All prices shown are subject to applicable taxes
+                          unless explicitly stated otherwise. Promotional pricing, coupons, and offers may have separate terms.
+                        </p>
+                        <ul className="list-disc pl-6 space-y-2 text-sm">
+                          <li>We may require advance payment for peak slots or special events.</li>
+                          <li>Chargebacks or fraudulent payments may lead to access restrictions.</li>
+                        </ul>
+                      </section>
+
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">6. Safety & Liability</h2>
+                        <p>
+                          Play at your own discretion. While we maintain equipment and a safe environment, {BRAND_NAME} is not liable for loss or damage to
+                          personal property. Use lockers/storage if provided and keep valuables with you.
+                        </p>
+                      </section>
+
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">7. Contact</h2>
+                        <p>
+                          Questions about bookings, billing, or refunds? Reach us at <span className="text-white font-semibold">{SUPPORT_EMAIL}</span> or call
+                          <span className="text-white font-semibold"> +91 93451 87098</span>.
+                        </p>
                       </section>
                       
                       <section className="space-y-4">
-                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Modifications</h2>
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">8. Modifications</h2>
                         <p>
                           {BRAND_NAME} reserves the right to modify these terms at any time. Changes take effect immediately
                           upon posting. Continued use constitutes acceptance of modified terms.
@@ -902,13 +934,65 @@ const Index: React.FC = () => {
                   </DialogContent>
                 </Dialog>
 
+                <Dialog open={openDialog === "refunds"} onOpenChange={(open) => setOpenDialog(open ? "refunds" : null)}>
+                  <Button variant="ghost" size="sm" className="footer-link justify-start" onClick={() => setOpenDialog("refunds")}>
+                    Refund Policy
+                  </Button>
+                  <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-bold text-white">Refund Policy</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6 text-gray-300 mt-4">
+                      <p className="text-xs text-gray-400">
+                        Last updated: {new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+
+                      <section className="space-y-3">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">1. Eligibility</h2>
+                        <p>
+                          Refunds are typically considered for verified technical issues, duplicate payments, or booking errors that are clearly attributable to the
+                          platform or venue operations.
+                        </p>
+                      </section>
+
+                      <section className="space-y-3">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">2. Cancellations</h2>
+                        <ul className="list-disc pl-6 space-y-2 text-sm">
+                          <li><span className="text-white font-semibold">2+ hours before slot:</span> cancellation/reschedule allowed without penalty (subject to payment gateway rules).</li>
+                          <li><span className="text-white font-semibold">Less than 2 hours:</span> may incur up to a 50% booking fee due to slot blocking during peak schedules.</li>
+                          <li><span className="text-white font-semibold">No-shows:</span> are generally non-refundable.</li>
+                        </ul>
+                      </section>
+
+                      <section className="space-y-3">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">3. Refund method & timelines</h2>
+                        <p>
+                          Approved refunds are processed back to the original payment method. Depending on your bank/payment provider, it may take
+                          <span className="text-white font-semibold"> 3–10 business days</span> to reflect.
+                        </p>
+                      </section>
+
+                      <section className="space-y-3">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Special cases</h2>
+                        <ul className="list-disc pl-6 space-y-2 text-sm">
+                          <li><span className="text-white font-semibold">Maintenance/safety closure:</span> if we cancel your slot, you’ll be offered a reschedule or refund.</li>
+                          <li><span className="text-white font-semibold">Partial session:</span> if an issue occurs mid-session, credits/refunds may be prorated at management’s discretion.</li>
+                          <li><span className="text-white font-semibold">Offers/coupons:</span> promotional discounts are non-cash and may not be refunded.</li>
+                        </ul>
+                      </section>
+
+                      <section className="space-y-3">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. How to request</h2>
+                        <p>
+                          Email <span className="text-white font-semibold">{SUPPORT_EMAIL}</span> with your booking details (name, phone, slot time, and payment reference). We respond as soon as possible.
+                        </p>
+                      </section>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <Dialog open={openDialog === "privacy"} onOpenChange={(open) => setOpenDialog(open ? "privacy" : null)}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="px-0 text-gray-300 hover:text-gamehaus-lightpurple"
-                    onClick={() => setOpenDialog("privacy")}
-                  >
+                  <Button variant="ghost" size="sm" className="footer-link justify-start" onClick={() => setOpenDialog("privacy")}>
                     Privacy Policy
                   </Button>
                   <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-[#1a1a1a] to-[#1a0f1a] border-gamehaus-purple/40 text-white">
@@ -916,6 +1000,10 @@ const Index: React.FC = () => {
                       <DialogTitle className="text-2xl font-bold text-white">Privacy Policy</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6 text-gray-300 mt-4">
+                      <p className="text-xs text-gray-400">
+                        Last updated: {new Date().toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+
                       <section className="space-y-4">
                         <h2 className="text-lg font-semibold text-gamehaus-lightpurple">1. Information Collection</h2>
                         <p>
@@ -949,9 +1037,25 @@ const Index: React.FC = () => {
                           <li>Partners with your consent</li>
                         </ul>
                       </section>
+
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Security & Retention</h2>
+                        <p>
+                          We use reasonable security measures to protect information. Access to operational systems is role-based. We retain data only as long as
+                          needed for operational, legal, or security purposes.
+                        </p>
+                      </section>
+
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Cookies & Analytics</h2>
+                        <p>
+                          We may use cookies or similar technologies to keep sessions functional and improve performance. Third‑party tools may collect aggregated
+                          usage metrics.
+                        </p>
+                      </section>
                       
                       <section className="space-y-4">
-                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">4. Your Rights</h2>
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">6. Your Rights</h2>
                         <p>You have the right to:</p>
                         <ul className="list-disc pl-6 space-y-2">
                           <li>Access your information</li>
@@ -961,9 +1065,16 @@ const Index: React.FC = () => {
                           <li>Lodge complaints with authorities</li>
                         </ul>
                       </section>
+
+                      <section className="space-y-4">
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">7. Contact</h2>
+                        <p>
+                          For privacy requests, contact <span className="text-white font-semibold">{SUPPORT_EMAIL}</span>.
+                        </p>
+                      </section>
                       
                       <section className="space-y-4">
-                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">5. Policy Changes</h2>
+                        <h2 className="text-lg font-semibold text-gamehaus-lightpurple">8. Policy Changes</h2>
                         <p>
                           {BRAND_NAME} may update this policy anytime. Changes are posted on our website.
                           Continued use after modifications constitutes acceptance.
@@ -1016,18 +1127,22 @@ const Index: React.FC = () => {
               href="https://cuephoriatech.in"
               target="_blank"
               rel="noreferrer"
-              className="group inline-flex items-center gap-2 rounded-full border border-gamehaus-purple/35 bg-black/55 px-4 py-2 backdrop-blur-sm transition-all duration-300 hover:border-gamehaus-purple/60 hover:bg-black/70 hover:shadow-lg hover:shadow-gamehaus-purple/25"
+              className="group cuephoria-fire-badge relative inline-flex items-center gap-2 rounded-full border border-gamehaus-purple/25 bg-black/55 px-3.5 py-1.5 backdrop-blur-sm transition-all duration-300 hover:border-gamehaus-pink/45 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-gamehaus-magenta/30"
               aria-label="Cuephoria Tech"
               title="Cuephoria Tech"
             >
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="absolute -inset-3 rounded-full bg-gradient-to-r from-gamehaus-magenta/35 via-gamehaus-pink/35 to-gamehaus-purple/35 blur-xl animate-fire-flicker" />
+                <span className="absolute -inset-1 rounded-full bg-[radial-gradient(closest-side,rgba(255,193,74,0.25),transparent)] blur-lg opacity-70 animate-fire-flicker-slow" />
+              </span>
               <span className="inline-flex items-center justify-center h-7 w-7 rounded-full border border-gamehaus-purple/30 bg-gamehaus-purple/10">
                 <span className="text-gamehaus-lightpurple font-bold tracking-tight">&lt;/&gt;</span>
               </span>
-              <span className="text-sm font-semibold">
+              <span className="text-[13px] font-semibold">
                 <span className="text-gamehaus-lightpurple group-hover:text-gamehaus-pink transition-colors">Cuephoria</span>{" "}
                 <span className="text-gray-200">Tech</span>
               </span>
-              <span className="ml-1 inline-flex items-center justify-center h-7 w-7 rounded-full border border-gamehaus-purple/20 bg-black/40 text-gray-300 group-hover:text-white transition-colors">
+              <span className="ml-0.5 inline-flex items-center justify-center h-7 w-7 rounded-full border border-gamehaus-purple/20 bg-black/40 text-gray-300 group-hover:text-white transition-colors">
                 ↗
               </span>
             </a>
