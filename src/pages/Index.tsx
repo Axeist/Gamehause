@@ -236,7 +236,8 @@ const Index: React.FC = () => {
             <img
               src={LOGO_PATH}
               alt={`${BRAND_NAME} Logo`} 
-              className="h-28 sm:h-32 md:h-36 lg:h-44 relative z-10 drop-shadow-[0_0_20px_rgba(255,74,26,0.6)]"
+              className="h-32 sm:h-36 md:h-40 lg:h-52 relative z-10 drop-shadow-[0_0_22px_rgba(255,74,26,0.6)] mix-blend-screen"
+              style={{ transform: "scale(1.08)", transformOrigin: "center" }}
             />
           </div>
         </div>
