@@ -45,6 +45,26 @@
     --sidebar-accent-foreground: 240 5% 96%;
     --sidebar-border: 240 6% 16%;
     --sidebar-ring: 14 100% 55%; /* Flame */
+
+    /*
+      Gamehaus custom cursor set (served from /public).
+      Note: most browsers do NOT support animated .ani cursors; they will fall back
+      to the built-in cursor keyword (pointer/text/etc). For reliable custom cursors,
+      convert these files to .cur or .png and update the URLs below.
+    */
+    --gh-cursor-default: url("/Fire_Normal_right.ani");
+    --gh-cursor-pointer: url("/Fire_Link_Select.ani");
+    --gh-cursor-text: url("/Fire_Text_Select.ani");
+    --gh-cursor-busy: url("/Fire_Busy.ani");
+    --gh-cursor-working: url("/Fire_working_in_bk.ani");
+    --gh-cursor-help: url("/Fire_Help_Select.ani");
+    --gh-cursor-move: url("/Fire_move.ani");
+    --gh-cursor-precision: url("/Fire_Precision_Select.ani");
+    --gh-cursor-unavailable: url("/Fire_unavailable1.ani");
+    --gh-cursor-resize-ew: url("/Fire_res_horizontal.ani");
+    --gh-cursor-resize-ns: url("/Fire_res_vertical.ani");
+    --gh-cursor-resize-nesw: url("/Fire_res_diag1.ani");
+    --gh-cursor-resize-nwse: url("/Fire_res_diag2.ani");
   }
 
   * {
@@ -60,12 +80,111 @@
   body {
     @apply bg-background text-foreground font-quicksand;
     -webkit-tap-highlight-color: transparent;
+    cursor: var(--gh-cursor-default), default;
   }
 
   /* Content wrapper for all main areas */
   #root {
     @apply overflow-x-hidden;
     width: 100%;
+  }
+
+  /* Base cursor defaults for common interactive elements */
+  a[href],
+  button,
+  summary,
+  select,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  [role="button"] {
+    cursor: var(--gh-cursor-pointer), pointer;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: var(--gh-cursor-text), text;
+  }
+
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: var(--gh-cursor-unavailable), not-allowed;
+  }
+}
+
+/* Override Tailwind cursor utilities with the custom cursor set */
+@layer utilities {
+  .cursor-auto {
+    cursor: var(--gh-cursor-default), auto;
+  }
+
+  .cursor-default {
+    cursor: var(--gh-cursor-default), default;
+  }
+
+  .cursor-pointer {
+    cursor: var(--gh-cursor-pointer), pointer;
+  }
+
+  .cursor-text {
+    cursor: var(--gh-cursor-text), text;
+  }
+
+  .cursor-wait {
+    cursor: var(--gh-cursor-busy), wait;
+  }
+
+  .cursor-progress {
+    cursor: var(--gh-cursor-working), progress;
+  }
+
+  .cursor-help {
+    cursor: var(--gh-cursor-help), help;
+  }
+
+  .cursor-move {
+    cursor: var(--gh-cursor-move), move;
+  }
+
+  .cursor-crosshair {
+    cursor: var(--gh-cursor-precision), crosshair;
+  }
+
+  .cursor-not-allowed {
+    cursor: var(--gh-cursor-unavailable), not-allowed;
+  }
+
+  .cursor-ew-resize {
+    cursor: var(--gh-cursor-resize-ew), ew-resize;
+  }
+
+  .cursor-ns-resize {
+    cursor: var(--gh-cursor-resize-ns), ns-resize;
+  }
+
+  .cursor-nesw-resize {
+    cursor: var(--gh-cursor-resize-nesw), nesw-resize;
+  }
+
+  .cursor-nwse-resize {
+    cursor: var(--gh-cursor-resize-nwse), nwse-resize;
+  }
+
+  .cursor-col-resize {
+    cursor: var(--gh-cursor-resize-ew), col-resize;
+  }
+
+  .cursor-row-resize {
+    cursor: var(--gh-cursor-resize-ns), row-resize;
+  }
+
+  .cursor-grab {
+    cursor: var(--gh-cursor-move), grab;
+  }
+
+  .cursor-grabbing {
+    cursor: var(--gh-cursor-move), grabbing;
   }
 }
 
