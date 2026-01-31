@@ -231,10 +231,10 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
   };
 
   return (
-    <Card className="bg-[#1A1F2C] border-gray-700 shadow-xl">
+    <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl backdrop-blur-sm">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold text-white font-heading">Sales Overview</CardTitle>
+          <CardTitle className="text-xl font-bold text-foreground font-heading">Sales Overview</CardTitle>
           <div className="flex items-center gap-4">
             {/* Year Filter */}
             <div className="flex items-center gap-2">
@@ -256,28 +256,28 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
             
             {/* Time Period Tabs */}
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-auto">
-              <TabsList className="bg-gray-800 text-gray-400">
+              <TabsList className="bg-muted/20 text-muted-foreground border border-border/50">
                 <TabsTrigger 
                   value="hourly"
-                  className="transition-all duration-200 data-[state=active]:bg-cuephoria-lightpurple data-[state=active]:text-white"
+                  className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   Hourly
                 </TabsTrigger>
                 <TabsTrigger 
                   value="daily"
-                  className="transition-all duration-200 data-[state=active]:bg-cuephoria-lightpurple data-[state=active]:text-white"
+                  className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   Daily
                 </TabsTrigger>
                 <TabsTrigger 
                   value="weekly"
-                  className="transition-all duration-200 data-[state=active]:bg-cuephoria-lightpurple data-[state=active]:text-white"
+                  className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   Weekly
                 </TabsTrigger>
                 <TabsTrigger 
                   value="monthly"
-                  className="transition-all duration-200 data-[state=active]:bg-cuephoria-lightpurple data-[state=active]:text-white"
+                  className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   Monthly
                 </TabsTrigger>
@@ -293,15 +293,15 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
               sales: {
                 label: "Sales",
                 theme: {
-                  light: "#9b87f5",
-                  dark: "#9b87f5",
+                  light: "hsl(var(--primary))",
+                  dark: "hsl(var(--primary))",
                 },
               },
               expenses: {
                 label: "Expenses",
                 theme: {
-                  light: "#ef4444",
-                  dark: "#ef4444",
+                  light: "hsl(var(--destructive))",
+                  dark: "hsl(var(--destructive))",
                 },
               },
             }}
@@ -314,24 +314,24 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
               >
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#9b87f5" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#333" strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
                 <XAxis 
                   dataKey="name" 
-                  stroke="#777" 
+                  stroke="hsl(var(--muted-foreground))" 
                   axisLine={false}
                   tickLine={false}
                   padding={{ left: 10, right: 10 }}
                 />
                 <YAxis 
-                  stroke="#777"
+                  stroke="hsl(var(--muted-foreground))"
                   axisLine={false}
                   tickLine={false}
                   width={40}
@@ -353,7 +353,7 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
                             <div className="grid grid-cols-2 gap-2">
                               <div className="flex flex-col">
                                 <span className="text-[0.70rem] uppercase text-muted-foreground flex items-center gap-1">
-                                  <div className="w-2 h-2 rounded-full bg-[#9b87f5]"></div>
+                                  <div className="w-2 h-2 rounded-full bg-primary"></div>
                                   Sales
                                 </span>
                                 <span className="font-bold">
@@ -362,7 +362,7 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
                               </div>
                               <div className="flex flex-col">
                                 <span className="text-[0.70rem] uppercase text-muted-foreground flex items-center gap-1">
-                                  <div className="w-2 h-2 rounded-full bg-[#ef4444]"></div>
+                                  <div className="w-2 h-2 rounded-full bg-destructive"></div>
                                   Expenses
                                 </span>
                                 <span className="font-bold">
@@ -383,12 +383,12 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
                   content={({ payload }) => (
                     <div className="flex items-center justify-center gap-6">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-[#9b87f5]"></div>
-                        <span className="text-sm text-gray-300">Sales</span>
+                        <div className="w-3 h-3 rounded-full bg-primary"></div>
+                        <span className="text-sm text-muted-foreground">Sales</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-[#ef4444]"></div>
-                        <span className="text-sm text-gray-300">Expenses</span>
+                        <div className="w-3 h-3 rounded-full bg-destructive"></div>
+                        <span className="text-sm text-muted-foreground">Expenses</span>
                       </div>
                     </div>
                   )}
@@ -397,13 +397,13 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
                   type="monotone"
                   dataKey="sales"
                   name="Sales"
-                  stroke="#9b87f5"
+                  stroke="hsl(var(--primary))"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#9b87f5", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "hsl(var(--primary))", strokeWidth: 0 }}
                   activeDot={{ 
                     r: 6, 
-                    fill: "#9b87f5", 
-                    stroke: "#1A1F2C", 
+                    fill: "hsl(var(--primary))", 
+                    stroke: "hsl(var(--background))", 
                     strokeWidth: 2,
                     className: "transition-all duration-200 hover:r-8"
                   }}
@@ -417,14 +417,14 @@ const SalesChart: React.FC<SalesChartProps> = ({ activeTab, setActiveTab }) => {
                   type="monotone"
                   dataKey="expenses"
                   name="Expenses"
-                  stroke="#ef4444"
+                  stroke="hsl(var(--destructive))"
                   strokeWidth={2}
                   strokeDasharray="5 5"
-                  dot={{ r: 4, fill: "#ef4444", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "hsl(var(--destructive))", strokeWidth: 0 }}
                   activeDot={{ 
                     r: 6, 
-                    fill: "#ef4444", 
-                    stroke: "#1A1F2C", 
+                    fill: "hsl(var(--destructive))", 
+                    stroke: "hsl(var(--background))", 
                     strokeWidth: 2,
                     className: "transition-all duration-200 hover:r-8"
                   }}

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePOS } from '@/context/POSContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CreditCard, TrendingUp } from 'lucide-react';
 import { CurrencyDisplay } from '@/components/ui/currency';
 
@@ -135,9 +135,9 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
 
     return {
       chartData: [
-        { method: 'Cash', amount: totalCashAmount, count: cashOnlyCount + splitCount, color: '#10B981' },
-        { method: 'UPI', amount: totalUpiAmount, count: upiOnlyCount + splitCount, color: '#8B5CF6' },
-        { method: 'Credit', amount: totalCreditAmount, count: creditOnlyCount, color: '#F59E0B' }
+        { method: 'Cash', amount: totalCashAmount, count: cashOnlyCount + splitCount, color: '#FF4A1A' }, // primary (flame)
+        { method: 'UPI', amount: totalUpiAmount, count: upiOnlyCount + splitCount, color: '#FF7A2A' }, // secondary (tangerine)
+        { method: 'Credit', amount: totalCreditAmount, count: creditOnlyCount, color: '#FFC14A' } // gold highlight
       ].filter(item => item.amount > 0), // Only show payment methods that have been used
       totalRevenue,
       totalTransactions,
@@ -165,22 +165,22 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
   }, [bills, startDate, endDate]);
 
   return (
-    <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-gamehaus-purple/20 hover:border-gamehaus-purple/30 transition-all duration-300 backdrop-blur-sm">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-gray-700/30">
-        <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-gamehaus-magenta" />
+    <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border/50">
+        <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <CreditCard className="h-5 w-5 text-primary" />
           Payment Analytics
         </CardTitle>
-        <div className="h-8 w-8 rounded-full bg-gamehaus-purple/20 flex items-center justify-center">
-          <TrendingUp className="h-4 w-4 text-gamehaus-magenta" />
+        <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+          <TrendingUp className="h-4 w-4 text-primary" />
         </div>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-4">
-          <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+          <div className="bg-muted/20 rounded-lg p-4 border border-border/50">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-200">Total Sales</span>
-              <span className="font-bold text-xl text-gamehaus-magenta">
+              <span className="text-sm font-medium text-muted-foreground">Total Sales</span>
+              <span className="font-bold text-xl text-primary">
                 <CurrencyDisplay amount={paymentData.totalRevenue} />
               </span>
             </div>
@@ -189,54 +189,54 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={paymentData.chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis 
                   dataKey="method" 
-                  stroke="#9CA3AF"
+                  stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                 />
                 <YAxis 
-                  stroke="#9CA3AF"
+                  stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
                   tickFormatter={(value) => `₹${value}`}
                 />
                 <Tooltip 
                   contentStyle={{
-                    backgroundColor: '#1F2937',
-                    border: '1px solid #374151',
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
                     borderRadius: '6px',
-                    color: '#F9FAFB'
+                    color: 'hsl(var(--foreground))'
                   }}
                   formatter={(value: number, name: string) => [
                     name === 'amount' ? `₹${Math.round(value)}` : value,
                     name === 'amount' ? 'Revenue' : 'Transactions'
                   ]}
                 />
-                <Bar 
-                  dataKey="amount" 
-                  fill="#10B981"
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
+                  {paymentData.chartData.map((entry, index) => (
+                    <Cell key={`${entry.method}-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           <div className="space-y-3">
             {paymentData.chartData.map((item, index) => (
-              <div key={index} className="bg-gray-800/40 border border-gray-700/40 rounded-lg p-3 hover:bg-gray-700/30 hover:border-gray-600/50 transition-all duration-200 group">
+              <div key={index} className="bg-muted/20 border border-border/50 rounded-lg p-3 hover:bg-muted/30 hover:border-border/70 transition-all duration-200 group">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div 
                       className="w-3 h-3 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-200" 
                       style={{ backgroundColor: item.color, boxShadow: `0 0 10px ${item.color}30` }}
                     />
-                    <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{item.method}</span>
+                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{item.method}</span>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-foreground">
                       <CurrencyDisplay amount={item.amount} />
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-muted-foreground">
                       {item.count} transactions
                       {paymentData.totalRevenue > 0 && 
                         ` (${((item.amount / paymentData.totalRevenue) * 100).toFixed(1)}%)`
@@ -249,24 +249,24 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
           </div>
 
           {/* Additional Insights Section */}
-          <div className="pt-2 border-t border-gray-700/30 space-y-3">
-            <h4 className="text-sm font-medium text-gray-200 mb-2 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-blue-400" />
+          <div className="pt-2 border-t border-border/50 space-y-3">
+            <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
               Transaction Insights
             </h4>
             
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
+              <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
                 <div className="text-center">
-                  <p className="text-xs text-gray-400">Total Transactions</p>
-                  <p className="text-lg font-bold text-white">{paymentData.totalTransactions}</p>
+                  <p className="text-xs text-muted-foreground">Total Transactions</p>
+                  <p className="text-lg font-bold text-foreground">{paymentData.totalTransactions}</p>
                 </div>
               </div>
               
-              <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
+              <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
                 <div className="text-center">
-                  <p className="text-xs text-gray-400">Avg Transaction</p>
-                  <p className="text-lg font-bold text-white">
+                  <p className="text-xs text-muted-foreground">Avg Transaction</p>
+                  <p className="text-lg font-bold text-foreground">
                     <CurrencyDisplay amount={paymentData.averageTransactionValue} />
                   </p>
                 </div>
@@ -274,38 +274,38 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
             </div>
             
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
+              <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
                 <div className="text-center">
-                  <p className="text-xs text-gray-400">Cash Preference</p>
-                  <p className="text-lg font-bold text-gamehaus-magenta">{paymentData.cashPreference.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">Cash Preference</p>
+                  <p className="text-lg font-bold text-primary">{paymentData.cashPreference.toFixed(1)}%</p>
                 </div>
               </div>
               
-              <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
+              <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
                 <div className="text-center">
-                  <p className="text-xs text-gray-400">UPI Preference</p>
-                  <p className="text-lg font-bold text-purple-400">{paymentData.upiPreference.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">UPI Preference</p>
+                  <p className="text-lg font-bold text-secondary">{paymentData.upiPreference.toFixed(1)}%</p>
                 </div>
               </div>
 
-              <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
+              <div className="bg-muted/30 rounded-lg p-3 border border-border/50">
                 <div className="text-center">
-                  <p className="text-xs text-gray-400">Credit Preference</p>
-                  <p className="text-lg font-bold text-yellow-400">{paymentData.creditPreference.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground">Credit Preference</p>
+                  <p className="text-lg font-bold text-gamehaus-pink">{paymentData.creditPreference.toFixed(1)}%</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Average Transaction Values */}
-          <div className="pt-2 border-t border-gray-700/30 space-y-2">
-            <h4 className="text-sm font-medium text-gray-200 mb-2">Avg by Payment Method</h4>
+          <div className="pt-2 border-t border-border/50 space-y-2">
+            <h4 className="text-sm font-medium text-foreground mb-2">Avg by Payment Method</h4>
             
             {paymentData.paymentMethodCounts.cashOnly > 0 && (
-              <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
+              <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Avg Cash Only:</span>
-                  <span className="font-medium text-white">
+                  <span className="text-muted-foreground">Avg Cash Only:</span>
+                  <span className="font-medium text-foreground">
                     <CurrencyDisplay amount={paymentData.avgCashTransaction} />
                   </span>
                 </div>
@@ -313,10 +313,10 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
             )}
             
             {paymentData.paymentMethodCounts.upiOnly > 0 && (
-              <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
+              <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Avg UPI Only:</span>
-                  <span className="font-medium text-white">
+                  <span className="text-muted-foreground">Avg UPI Only:</span>
+                  <span className="font-medium text-foreground">
                     <CurrencyDisplay amount={paymentData.avgUpiTransaction} />
                   </span>
                 </div>
@@ -324,10 +324,10 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
             )}
 
             {paymentData.paymentMethodCounts.creditOnly > 0 && (
-              <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
+              <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Avg Credit Only:</span>
-                  <span className="font-medium text-white">
+                  <span className="text-muted-foreground">Avg Credit Only:</span>
+                  <span className="font-medium text-foreground">
                     <CurrencyDisplay amount={paymentData.avgCreditTransaction} />
                   </span>
                 </div>
@@ -335,10 +335,10 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
             )}
             
             {paymentData.paymentMethodCounts.split > 0 && (
-              <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
+              <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Avg Split Payment:</span>
-                  <span className="font-medium text-white">
+                  <span className="text-muted-foreground">Avg Split Payment:</span>
+                  <span className="font-medium text-foreground">
                     <CurrencyDisplay amount={paymentData.avgSplitTransaction} />
                   </span>
                 </div>
@@ -347,31 +347,31 @@ const PaymentAnalyticsWidget: React.FC<PaymentAnalyticsWidgetProps> = ({ startDa
           </div>
 
           {paymentData.splitBreakdown.count > 0 && (
-            <div className="pt-2 border-t border-gray-700/30">
-              <h4 className="text-sm font-medium text-gray-200 mb-2">Split Payment Details</h4>
+            <div className="pt-2 border-t border-border/50">
+              <h4 className="text-sm font-medium text-foreground mb-2">Split Payment Details</h4>
               <div className="space-y-2">
-                <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
+                <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                   <div className="flex justify-between text-xs">
-                    <span className="text-gray-400">Split transactions:</span>
-                    <span className="text-white">{paymentData.splitBreakdown.count}</span>
+                    <span className="text-muted-foreground">Split transactions:</span>
+                    <span className="text-foreground">{paymentData.splitBreakdown.count}</span>
                   </div>
                 </div>
-                <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
+                <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                   <div className="flex justify-between text-xs">
-                    <span className="text-gray-400">Cash portion:</span>
-                    <span className="text-white"><CurrencyDisplay amount={paymentData.splitBreakdown.cash} /></span>
+                    <span className="text-muted-foreground">Cash portion:</span>
+                    <span className="text-foreground"><CurrencyDisplay amount={paymentData.splitBreakdown.cash} /></span>
                   </div>
                 </div>
-                <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
+                <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                   <div className="flex justify-between text-xs">
-                    <span className="text-gray-400">UPI portion:</span>
-                    <span className="text-white"><CurrencyDisplay amount={paymentData.splitBreakdown.upi} /></span>
+                    <span className="text-muted-foreground">UPI portion:</span>
+                    <span className="text-foreground"><CurrencyDisplay amount={paymentData.splitBreakdown.upi} /></span>
                   </div>
                 </div>
-                <div className="bg-gray-800/30 rounded-lg p-2 border border-gray-700/30">
+                <div className="bg-muted/20 rounded-lg p-2 border border-border/50">
                   <div className="flex justify-between text-xs font-medium">
-                    <span className="text-gray-300">Split total:</span>
-                    <span className="text-gamehaus-magenta"><CurrencyDisplay amount={paymentData.splitBreakdown.total} /></span>
+                    <span className="text-muted-foreground">Split total:</span>
+                    <span className="text-primary"><CurrencyDisplay amount={paymentData.splitBreakdown.total} /></span>
                   </div>
                 </div>
               </div>

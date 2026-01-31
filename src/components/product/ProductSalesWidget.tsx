@@ -56,18 +56,18 @@ const ProductSalesWidget: React.FC = () => {
   console.log('ProductSalesWidget - Total items sold:', totalItemsSold);
 
   return (
-    <Card className="mb-6 bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-blue-500/20 hover:border-blue-500/30 transition-all duration-300 backdrop-blur-sm">
+    <Card className="mb-6 bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-base font-medium text-white">Total Product Sales</CardTitle>
-        <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-          <TrendingUp className="h-4 w-4 text-blue-400" />
+        <CardTitle className="text-base font-medium text-foreground">Total Product Sales</CardTitle>
+        <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+          <TrendingUp className="h-4 w-4 text-primary" />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-xl font-bold text-white">
+        <div className="text-xl font-bold text-foreground">
           <CurrencyDisplay amount={totalProductSales} />
         </div>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted-foreground">
           Food & drinks sold ({totalItemsSold} items)
         </p>
       </CardContent>

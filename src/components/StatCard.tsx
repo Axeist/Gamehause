@@ -21,17 +21,17 @@ const StatCard: React.FC<StatCardProps> = ({
   description,
   isCurrency = false,
   change,
-  color = 'text-cuephoria-purple'
+  color = 'text-primary'
 }) => {
   // Extract color name for glow effect
   const getGlowColor = (colorClass: string) => {
-    if (colorClass.includes('purple')) return 'hover:shadow-purple-500/20 hover:border-purple-500/30';
-    if (colorClass.includes('blue')) return 'hover:shadow-blue-500/20 hover:border-blue-500/30';
-    if (colorClass.includes('green')) return 'hover:shadow-green-500/20 hover:border-green-500/30';
-    if (colorClass.includes('red')) return 'hover:shadow-red-500/20 hover:border-red-500/30';
-    if (colorClass.includes('yellow')) return 'hover:shadow-yellow-500/20 hover:border-yellow-500/30';
-    if (colorClass.includes('orange')) return 'hover:shadow-orange-500/20 hover:border-orange-500/30';
-    return 'hover:shadow-purple-500/20 hover:border-purple-500/30'; // default
+    if (colorClass.includes('red')) return 'hover:shadow-destructive/15 hover:border-destructive/25';
+    if (colorClass.includes('yellow')) return 'hover:shadow-gamehaus-pink/15 hover:border-gamehaus-pink/25';
+    if (colorClass.includes('green')) return 'hover:shadow-secondary/15 hover:border-secondary/25';
+    if (colorClass.includes('orange')) return 'hover:shadow-secondary/15 hover:border-secondary/25';
+    if (colorClass.includes('blue')) return 'hover:shadow-primary/15 hover:border-primary/25';
+    if (colorClass.includes('purple')) return 'hover:shadow-primary/15 hover:border-primary/25';
+    return 'hover:shadow-primary/15 hover:border-primary/25'; // default
   };
 
   return (
@@ -48,7 +48,7 @@ const StatCard: React.FC<StatCardProps> = ({
           <p className="text-xs text-muted-foreground">{description}</p>
         )}
         {typeof change !== 'undefined' && (
-          <div className={`text-xs ${change >= 0 ? 'text-gamehaus-magenta' : 'text-red-500'} mt-1`}>
+          <div className={`text-xs ${change >= 0 ? 'text-primary' : 'text-destructive'} mt-1`}>
             {change >= 0 ? '↑' : '↓'} {Math.abs(change)}% from last period
           </div>
         )}

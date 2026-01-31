@@ -23,9 +23,9 @@ const StatsCard: React.FC<StatsCardProps> = ({
   className = ""
 }) => {
   return (
-    <Card className={`bg-[#1A1F2C] border-gray-700 shadow-xl hover:shadow-${iconColor.split('-')[1]}-900/10 transition-all ${className}`}>
+    <Card className={`bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base font-medium text-gray-200">{title}</CardTitle>
+        <CardTitle className="text-base font-medium text-muted-foreground">{title}</CardTitle>
         <div className={`h-10 w-10 rounded-full ${iconBgColor} flex items-center justify-center`}>
           <Icon className={`h-5 w-5 ${iconColor}`} />
         </div>
@@ -34,8 +34,8 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <div className="text-2xl font-bold font-heading">{value}</div>
         {subValue && (
           typeof subValue === 'string' 
-            ? <p className="text-xs text-gray-400 mt-1">{subValue}</p>
-            : <div className="text-xs text-gray-400 mt-1">{subValue}</div>
+            ? <p className="text-xs text-muted-foreground mt-1">{subValue}</p>
+            : <div className="text-xs text-muted-foreground mt-1">{subValue}</div>
         )}
       </CardContent>
     </Card>

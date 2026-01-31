@@ -41,70 +41,70 @@ const BusinessSummarySection: React.FC<BusinessSummarySectionProps> = ({ filtere
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-      <Card className="bg-gray-800 border-gray-700 hover:shadow-gamehaus-purple/20 hover:border-gamehaus-purple/30 transition-all">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-200">Gross Income</CardTitle>
-          <DollarSign className="h-4 w-4 text-gamehaus-purple" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Gross Income</CardTitle>
+          <DollarSign className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white"><CurrencyDisplay amount={grossIncome} /></div>
-          <p className="text-xs text-gray-400">{dateRange ? 'Revenue for selected period (paid only)' : 'Revenue (paid only)'}</p>
+          <div className="text-2xl font-bold text-foreground"><CurrencyDisplay amount={grossIncome} /></div>
+          <p className="text-xs text-muted-foreground">{dateRange ? 'Revenue for selected period (paid only)' : 'Revenue (paid only)'}</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border-gray-700 hover:shadow-orange-500/20 hover:border-orange-500/30 transition-all">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-secondary/15 hover:border-secondary/30 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-200">Operating Expenses</CardTitle>
-          <Wallet className="h-4 w-4 text-orange-500" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Operating Expenses</CardTitle>
+          <Wallet className="h-4 w-4 text-secondary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white"><CurrencyDisplay amount={operatingExpenses} /></div>
-          <p className="text-xs text-gray-400">{filteredExpenses ? 'Expenses for selected period (excl. withdrawals)' : 'All operating expenses (excl. withdrawals)'}</p>
+          <div className="text-2xl font-bold text-foreground"><CurrencyDisplay amount={operatingExpenses} /></div>
+          <p className="text-xs text-muted-foreground">{filteredExpenses ? 'Expenses for selected period (excl. withdrawals)' : 'All operating expenses (excl. withdrawals)'}</p>
         </CardContent>
       </Card>
 
-      <Card className={`bg-gray-800 border-gray-700 transition-all ${netProfit >= 0 ? 'hover:shadow-gamehaus-purple/20 hover:border-gamehaus-purple/30' : 'hover:shadow-red-500/20 hover:border-red-500/30'}`}>
+      <Card className={`bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl transition-all duration-300 backdrop-blur-sm ${netProfit >= 0 ? 'hover:shadow-primary/15 hover:border-primary/30' : 'hover:shadow-destructive/15 hover:border-destructive/30'}`}>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-200">Net Profit</CardTitle>
-          {netProfit >= 0 ? <ArrowUpRight className="h-4 w-4 text-gamehaus-purple" /> : <ArrowDownRight className="h-4 w-4 text-red-500" />}
+          <CardTitle className="text-sm font-medium text-muted-foreground">Net Profit</CardTitle>
+          {netProfit >= 0 ? <ArrowUpRight className="h-4 w-4 text-primary" /> : <ArrowDownRight className="h-4 w-4 text-destructive" />}
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white"><CurrencyDisplay amount={netProfit} /></div>
-          <p className="text-xs text-gray-400">Revenue minus operating expenses</p>
+          <div className="text-2xl font-bold text-foreground"><CurrencyDisplay amount={netProfit} /></div>
+          <p className="text-xs text-muted-foreground">Revenue minus operating expenses</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border-gray-700 hover:shadow-blue-500/20 hover:border-blue-500/30 transition-all">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-secondary/15 hover:border-secondary/30 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-200">Profit Margin</CardTitle>
-          <TrendingUp className="h-4 w-4 text-blue-500" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Profit Margin</CardTitle>
+          <TrendingUp className="h-4 w-4 text-secondary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">{formattedProfitMargin}%</div>
+          <div className="text-2xl font-bold text-foreground">{formattedProfitMargin}%</div>
           <div className="mt-2"><Progress value={profitPercentage} className="h-2" /></div>
-          <p className="text-xs text-gray-400 mt-1">{profitMargin >= 20 ? 'Healthy' : profitMargin >= 10 ? 'Average' : 'Low'}</p>
+          <p className="text-xs text-muted-foreground mt-1">{profitMargin >= 20 ? 'Healthy' : profitMargin >= 10 ? 'Average' : 'Low'}</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border-gray-700 hover:shadow-rose-500/20 hover:border-rose-500/30 transition-all">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-accent/15 hover:border-accent/30 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-200">Withdrawals</CardTitle>
-          <ArrowDownRight className="h-4 w-4 text-rose-400" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Withdrawals</CardTitle>
+          <ArrowDownRight className="h-4 w-4 text-accent" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white"><CurrencyDisplay amount={withdrawals} /></div>
-          <p className="text-xs text-gray-400">Partner drawings (excluded from expenses)</p>
+          <div className="text-2xl font-bold text-foreground"><CurrencyDisplay amount={withdrawals} /></div>
+          <p className="text-xs text-muted-foreground">Partner drawings (excluded from expenses)</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-gray-800 border-gray-700 hover:shadow-sky-500/20 hover:border-sky-500/30 transition-all">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-200">Money in Bank</CardTitle>
-          <ArrowUpRight className="h-4 w-4 text-sky-400" />
+          <CardTitle className="text-sm font-medium text-muted-foreground">Money in Bank</CardTitle>
+          <ArrowUpRight className="h-4 w-4 text-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white"><CurrencyDisplay amount={moneyInBank} /></div>
-          <p className="text-xs text-gray-400">Net profit after withdrawals</p>
+          <div className="text-2xl font-bold text-foreground"><CurrencyDisplay amount={moneyInBank} /></div>
+          <p className="text-xs text-muted-foreground">Net profit after withdrawals</p>
         </CardContent>
       </Card>
     </div>

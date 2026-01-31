@@ -105,14 +105,14 @@ const DailySalesTrendWidget: React.FC<DailySalesTrendWidgetProps> = ({ startDate
   }, [chartData, selectedPeriod]);
 
   return (
-    <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-blue-500/20 hover:border-blue-500/30 transition-all duration-300 backdrop-blur-sm">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-gray-700/30">
-        <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-blue-400" />
+    <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border/50">
+        <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-primary" />
           Daily Sales Trend
         </CardTitle>
-        <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-          <BarChart3 className="h-4 w-4 text-blue-400" />
+        <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+          <BarChart3 className="h-4 w-4 text-primary" />
         </div>
       </CardHeader>
       <CardContent className="p-6">
@@ -124,8 +124,8 @@ const DailySalesTrendWidget: React.FC<DailySalesTrendWidgetProps> = ({ startDate
               onClick={() => setSelectedPeriod('7days')}
               className={`text-xs transition-all duration-200 ${
                 selectedPeriod === '7days' 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30' 
-                  : 'bg-gray-800/50 border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500/50'
+                  ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25' 
+                  : 'bg-muted/30 border-border/60 text-muted-foreground hover:bg-muted/40 hover:border-border'
               }`}
             >
               7 Days
@@ -136,8 +136,8 @@ const DailySalesTrendWidget: React.FC<DailySalesTrendWidgetProps> = ({ startDate
               onClick={() => setSelectedPeriod('30days')}
               className={`text-xs transition-all duration-200 ${
                 selectedPeriod === '30days' 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30' 
-                  : 'bg-gray-800/50 border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500/50'
+                  ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25' 
+                  : 'bg-muted/30 border-border/60 text-muted-foreground hover:bg-muted/40 hover:border-border'
               }`}
             >
               30 Days
@@ -148,8 +148,8 @@ const DailySalesTrendWidget: React.FC<DailySalesTrendWidgetProps> = ({ startDate
               onClick={() => setSelectedPeriod('year')}
               className={`text-xs transition-all duration-200 ${
                 selectedPeriod === 'year' 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30' 
-                  : 'bg-gray-800/50 border-gray-600/50 text-gray-300 hover:bg-gray-700/50 hover:border-gray-500/50'
+                  ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25' 
+                  : 'bg-muted/30 border-border/60 text-muted-foreground hover:bg-muted/40 hover:border-border'
               }`}
             >
               This Year
@@ -157,49 +157,49 @@ const DailySalesTrendWidget: React.FC<DailySalesTrendWidgetProps> = ({ startDate
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 hover:border-gray-600/50 transition-colors">
+            <div className="bg-muted/30 rounded-lg p-3 border border-border/50 hover:border-border/70 transition-colors">
               <div className="flex items-center gap-2 mb-1">
-                <Calendar className="h-4 w-4 text-gamehaus-magenta" />
-                <p className="text-xs text-gray-400">Total Sales</p>
+                <Calendar className="h-4 w-4 text-accent" />
+                <p className="text-xs text-muted-foreground">Total Sales</p>
               </div>
-              <p className="text-lg font-bold text-gamehaus-magenta">
+              <p className="text-lg font-bold text-primary">
                 <CurrencyDisplay amount={metrics.totalSales} />
               </p>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30 hover:border-gray-600/50 transition-colors">
+            <div className="bg-muted/30 rounded-lg p-3 border border-border/50 hover:border-border/70 transition-colors">
               <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="h-4 w-4 text-purple-400" />
-                <p className="text-xs text-gray-400">
+                <TrendingUp className="h-4 w-4 text-secondary" />
+                <p className="text-xs text-muted-foreground">
                   {selectedPeriod === 'year' ? 'Monthly Avg' : 'Daily Avg'}
                 </p>
               </div>
-              <p className="text-lg font-bold text-purple-400">
+              <p className="text-lg font-bold text-secondary">
                 <CurrencyDisplay amount={metrics.periodAverage} />
               </p>
             </div>
           </div>
 
-          <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+          <div className="bg-muted/20 rounded-lg p-4 border border-border/50">
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
                     dataKey="date" 
-                    stroke="#9CA3AF"
+                    stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                   />
                   <YAxis 
-                    stroke="#9CA3AF"
+                    stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     tickFormatter={(value) => `₹${value}`}
                   />
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
                       borderRadius: '6px',
-                      color: '#F9FAFB',
+                      color: 'hsl(var(--foreground))',
                       boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
                     }}
                     formatter={(value: number) => [`₹${value}`, 'Sales']}
@@ -207,26 +207,26 @@ const DailySalesTrendWidget: React.FC<DailySalesTrendWidgetProps> = ({ startDate
                   <Line 
                     type="monotone" 
                     dataKey="sales" 
-                    stroke="#8B5CF6" 
+                    stroke="hsl(var(--primary))" 
                     strokeWidth={3}
-                    dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: '#8B5CF6', stroke: '#ffffff', strokeWidth: 2 }}
-                    filter="drop-shadow(0 0 8px rgba(139, 92, 246, 0.3))"
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: 'hsl(var(--primary))', stroke: 'hsl(var(--background))', strokeWidth: 2 }}
+                    filter="drop-shadow(0 0 8px rgba(255, 74, 26, 0.25))"
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+          <div className="bg-muted/20 rounded-lg p-4 border border-border/50">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-purple-400 shadow-lg shadow-purple-400/30"></div>
-                <span className="text-gray-300">
+                <div className="w-3 h-3 rounded-full bg-primary shadow-lg shadow-primary/25"></div>
+                <span className="text-muted-foreground">
                   {selectedPeriod === '7days' ? '7-day' : selectedPeriod === '30days' ? '30-day' : 'Monthly'} average:
                 </span>
               </div>
-              <span className="font-medium text-purple-400">
+              <span className="font-medium text-secondary">
                 <CurrencyDisplay amount={metrics.periodAverage} />
               </span>
             </div>

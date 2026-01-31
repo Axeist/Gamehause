@@ -55,22 +55,22 @@ const TopCustomersWidget: React.FC<TopCustomersWidgetProps> = ({ startDate, endD
 
   const getRankColor = (index: number) => {
     switch (index) {
-      case 0: return 'text-yellow-400 bg-yellow-500/20';
-      case 1: return 'text-gray-300 bg-gray-500/20';
-      case 2: return 'text-amber-600 bg-amber-600/20';
-      default: return 'text-blue-400 bg-blue-500/20';
+      case 0: return 'text-gamehaus-pink bg-gamehaus-pink/15';
+      case 1: return 'text-primary bg-primary/15';
+      case 2: return 'text-secondary bg-secondary/15';
+      default: return 'text-accent bg-accent/15';
     }
   };
 
   return (
-    <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-blue-500/20 hover:border-blue-500/30 transition-all duration-300 backdrop-blur-sm h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-gray-700/30">
-        <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-blue-400" />
+    <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm h-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border/50">
+        <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-primary" />
           Top Customers
         </CardTitle>
-        <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-          <Crown className="h-4 w-4 text-blue-400" />
+        <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+          <Crown className="h-4 w-4 text-primary" />
         </div>
       </CardHeader>
       <CardContent className="pb-4 p-6">
@@ -83,7 +83,7 @@ const TopCustomersWidget: React.FC<TopCustomersWidgetProps> = ({ startDate, endD
               return (
                 <div 
                   key={customer.id} 
-                  className="bg-gray-800/40 border border-gray-700/40 rounded-lg p-4 hover:bg-gray-700/30 hover:border-gray-600/50 transition-all duration-200 group"
+                  className="bg-muted/20 border border-border/50 rounded-lg p-4 hover:bg-muted/30 hover:border-border/70 transition-all duration-200 group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -91,19 +91,19 @@ const TopCustomersWidget: React.FC<TopCustomersWidgetProps> = ({ startDate, endD
                         <RankIcon className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium leading-tight text-white group-hover:text-blue-200 transition-colors">
+                        <p className="text-sm font-medium leading-tight text-foreground group-hover:text-primary transition-colors">
                           {customer.name}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-muted-foreground">
                           {customer.billCount} orders • Rank #{index + 1}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-white">
+                      <p className="text-sm font-bold text-foreground">
                         <CurrencyDisplay amount={customer.totalSpent} />
                       </p>
-                      <p className="text-xs text-blue-400 flex items-center gap-1">
+                      <p className="text-xs text-secondary flex items-center gap-1">
                         Avg: <CurrencyDisplay amount={customer.avgBill} />
                       </p>
                     </div>
@@ -113,9 +113,9 @@ const TopCustomersWidget: React.FC<TopCustomersWidgetProps> = ({ startDate, endD
             })}
           </div>
         ) : (
-          <div className="bg-gray-800/30 border border-gray-700/30 rounded-lg p-8 text-center">
-            <Trophy className="h-8 w-8 text-gray-500 mx-auto mb-3" />
-            <p className="text-sm text-gray-400">
+          <div className="bg-muted/20 border border-border/50 rounded-lg p-8 text-center">
+            <Trophy className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">
               No customer data available for the selected period
             </p>
           </div>

@@ -39,27 +39,27 @@ const StockValueWidget: React.FC = () => {
   }, [products]);
 
   return (
-    <Card className="mb-6 bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-xl hover:shadow-cuephoria-purple/20 transition-all duration-300 backdrop-blur-sm">
+    <Card className="mb-6 bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-base font-medium text-white">
+        <CardTitle className="text-base font-medium text-foreground">
           Food & Drinks Stock Value
         </CardTitle>
-        <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-          <Package className="h-4 w-4 text-purple-400" />
+        <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+          <Package className="h-4 w-4 text-primary" />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-white mb-2">
+        <div className="text-2xl font-bold text-foreground mb-2">
           <CurrencyDisplay amount={totalStockValue} />
         </div>
-        <div className="flex items-center gap-3 text-xs text-gray-400">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span>{totalItems.toLocaleString()} items in stock</span>
           <span>•</span>
           <span>{productsWithStock} products</span>
         </div>
         <div className="flex items-center pt-2">
-          <TrendingUp className="h-3 w-3 text-green-400 mr-1" />
-          <span className="text-xs text-green-400">
+          <TrendingUp className="h-3 w-3 text-secondary mr-1" />
+          <span className="text-xs text-secondary">
             Food & Drinks inventory only
           </span>
         </div>

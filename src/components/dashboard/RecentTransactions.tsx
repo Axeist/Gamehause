@@ -438,20 +438,20 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
   };
   
   return (
-    <Card className={`bg-[#1A1F2C] border-gray-700 shadow-xl ${className}`}>
+    <Card className={`bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl backdrop-blur-sm ${className}`}>
       <CardHeader className="space-y-4">
         <div>
-          <CardTitle className="text-xl font-bold text-white font-heading">Recent Transactions</CardTitle>
-          <CardDescription className="text-gray-400">Latest sales and billing information</CardDescription>
+          <CardTitle className="text-xl font-bold text-foreground font-heading">Recent Transactions</CardTitle>
+          <CardDescription className="text-muted-foreground">Latest sales and billing information</CardDescription>
         </div>
         <div className="relative flex w-full items-center">
           <Input
             placeholder="Search by ID, name, phone or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-8 bg-gray-800 border-gray-700 text-white"
+            className="pr-8 bg-muted/20 border-border/60 text-foreground placeholder:text-muted-foreground"
           />
-          <Search className="absolute right-2 h-4 w-4 text-gray-400" />
+          <Search className="absolute right-2 h-4 w-4 text-muted-foreground" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -468,45 +468,45 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
                     key={bill.id} 
                     className={`flex items-center justify-between p-4 rounded-lg border ${
                       isComplimentary 
-                        ? 'bg-orange-950/20 border-orange-800/50' 
-                        : 'bg-gray-800 border-gray-700'
+                        ? 'bg-gamehaus-pink/10 border-gamehaus-pink/30' 
+                        : 'bg-muted/20 border-border/50'
                     }`}
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                         isComplimentary 
-                          ? 'bg-orange-500/30' 
-                          : 'bg-[#6E59A5]/30'
+                          ? 'bg-gamehaus-pink/15' 
+                          : 'bg-primary/15'
                       }`}>
                         {isComplimentary ? (
-                          <Gift className="h-5 w-5 text-orange-400" />
+                          <Gift className="h-5 w-5 text-gamehaus-pink" />
                         ) : (
-                          <User className="h-5 w-5 text-purple-400" />
+                          <User className="h-5 w-5 text-primary" />
                         )}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-white">{customer?.name || 'Unknown Customer'}</p>
+                          <p className="font-medium text-foreground">{customer?.name || 'Unknown Customer'}</p>
                           {isComplimentary && (
-                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/50 text-xs px-2 py-0.5">
+                            <Badge className="bg-gamehaus-pink/15 text-gamehaus-pink border-gamehaus-pink/30 text-xs px-2 py-0.5">
                               Comp
                             </Badge>
                           )}
                         </div>
                         <div className="flex space-x-2">
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-muted-foreground">
                             {date.toLocaleDateString()} {date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                           </p>
-                          <p className="text-xs text-gray-400">ID: {bill.id.substring(0, 8)}</p>
+                          <p className="text-xs text-muted-foreground">ID: {bill.id.substring(0, 8)}</p>
                         </div>
                         {isComplimentary && bill.compNote && (
-                          <p className="text-xs text-orange-400 mt-1 italic">Note: {bill.compNote}</p>
+                          <p className="text-xs text-gamehaus-pink mt-1 italic">Note: {bill.compNote}</p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className={`font-semibold ${
-                        isComplimentary ? 'text-orange-400' : 'text-white'
+                        isComplimentary ? 'text-gamehaus-pink' : 'text-foreground'
                       }`}>
                         <CurrencyDisplay amount={bill.total} />
                       </div>
@@ -514,7 +514,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="text-gray-400 hover:text-blue-500 transition-colors"
+                          className="text-muted-foreground hover:text-primary transition-colors"
                           onClick={() => handleEditClick(bill)}
                           type="button"
                         >
@@ -523,7 +523,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="text-gray-400 hover:text-red-500 transition-colors"
+                          className="text-muted-foreground hover:text-destructive transition-colors"
                           onClick={() => handleDeleteClick(bill)}
                           type="button"
                         >
@@ -537,26 +537,26 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
             </div>
           </ScrollArea>
         ) : (
-          <div className="flex items-center justify-center p-6 text-gray-400">
+          <div className="flex items-center justify-center p-6 text-muted-foreground">
             <p>No transactions found</p>
           </div>
         )}
       </CardContent>
       
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <AlertDialogContent className="bg-gray-800 border-gray-700 text-white">
+        <AlertDialogContent className="bg-card border-border text-foreground">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300">
+            <AlertDialogDescription className="text-muted-foreground">
               Are you sure you want to delete this transaction? This will revert the sale, 
               update inventory, and adjust customer loyalty points. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 text-white hover:bg-gray-600">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-muted text-foreground hover:bg-muted/80">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting..." : "Delete"}
@@ -566,10 +566,10 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
       </AlertDialog>
       
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-card border-border text-foreground max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Transaction</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-muted-foreground">
               Modify transaction details including products, discount, loyalty points, and payment method.
             </DialogDescription>
           </DialogHeader>

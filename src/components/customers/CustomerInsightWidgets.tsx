@@ -43,43 +43,43 @@ const CustomerInsightWidgets: React.FC<CustomerInsightWidgetsProps> = ({
     value: totalCustomers.toLocaleString(),
     icon: Users,
     description: "Registered customers",
-    color: "text-cuephoria-purple",
-    bgColor: "bg-cuephoria-purple/10"
+    color: "text-primary",
+    bgColor: "bg-primary/15"
   }, {
     title: "Avg. Sales per Customer",
     value: <CurrencyDisplay amount={avgSpentPerCustomer} />,
     icon: DollarSign,
     description: "Average lifetime value",
-    color: "text-green-500",
-    bgColor: "bg-green-500/10"
+    color: "text-secondary",
+    bgColor: "bg-secondary/15"
   }, {
     title: "Active Members",
     value: `${membersCount} (${memberPercentage.toFixed(1)}%)`,
     icon: UserCheck,
     description: "Customers with membership",
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/10"
+    color: "text-accent",
+    bgColor: "bg-accent/15"
   }, {
     title: "High-Value Customers",
     value: `${highValueCustomers.length} (${highValuePercentage.toFixed(1)}%)`,
     icon: TrendingUp,
     description: "Top 20% by spending",
-    color: "text-orange-500",
-    bgColor: "bg-orange-500/10"
+    color: "text-gamehaus-pink",
+    bgColor: "bg-gamehaus-pink/15"
   }, {
     title: "Active This Month",
     value: activeCustomersCount.toLocaleString(),
     icon: Calendar,
     description: "Recent customer activity",
-    color: "text-cuephoria-blue",
-    bgColor: "bg-cuephoria-blue/10"
+    color: "text-primary",
+    bgColor: "bg-primary/15"
   }, {
     title: "Avg. Loyalty Points",
     value: Math.round(avgLoyaltyPoints).toLocaleString(),
     icon: Award,
     description: "Points per customer",
-    color: "text-yellow-500",
-    bgColor: "bg-yellow-500/10"
+    color: "text-secondary",
+    bgColor: "bg-secondary/15"
   }];
 
   return (
@@ -87,10 +87,10 @@ const CustomerInsightWidgets: React.FC<CustomerInsightWidgetsProps> = ({
       {widgets.map((widget, index) => (
         <Card 
           key={index} 
-          className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-xl hover:shadow-cuephoria-purple/20 transition-all duration-300 backdrop-blur-sm"
+          className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm"
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-base font-medium text-white">
+            <CardTitle className="text-base font-medium text-foreground">
               {widget.title}
             </CardTitle>
             <div className={`h-8 w-8 rounded-full ${widget.bgColor} flex items-center justify-center`}>
@@ -98,10 +98,10 @@ const CustomerInsightWidgets: React.FC<CustomerInsightWidgetsProps> = ({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-bold text-white">
+            <div className="text-xl font-bold text-foreground">
               {widget.value}
             </div>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {widget.description}
             </p>
           </CardContent>

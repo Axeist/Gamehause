@@ -146,64 +146,64 @@ const CanteenSalesProfitWidget: React.FC<CanteenSalesProfitWidgetProps> = ({ sta
   }, [bills, products, startDate, endDate]);
 
   return (
-    <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-orange-500/20 hover:border-orange-500/30 transition-all duration-300 backdrop-blur-sm">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-gray-700/30">
-        <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
-          <ShoppingCart className="h-5 w-5 text-orange-400" />
+    <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/15 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border/50">
+        <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <ShoppingCart className="h-5 w-5 text-primary" />
           Canteen Performance
         </CardTitle>
-        <div className="h-8 w-8 rounded-full bg-orange-500/20 flex items-center justify-center">
-          <TrendingUp className="h-4 w-4 text-orange-400" />
+        <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+          <TrendingUp className="h-4 w-4 text-primary" />
         </div>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-6">
           {/* Enhanced Summary Stats */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30 hover:border-orange-500/30 transition-colors">
+            <div className="bg-muted/30 rounded-lg p-4 border border-border/50 hover:border-primary/35 transition-colors">
               <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="h-4 w-4 text-gray-400" />
-                <p className="text-xs text-gray-400 font-medium">Total Sales</p>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground font-medium">Total Sales</p>
               </div>
-              <p className="text-xl font-bold text-white">
+              <p className="text-xl font-bold text-foreground">
                 <CurrencyDisplay amount={canteenData.totalSales} />
               </p>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30 hover:border-gamehaus-purple/30 transition-colors">
+            <div className="bg-muted/30 rounded-lg p-4 border border-border/50 hover:border-accent/35 transition-colors">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-gamehaus-magenta" />
-                <p className="text-xs text-gray-400 font-medium">Total Profit</p>
+                <TrendingUp className="h-4 w-4 text-accent" />
+                <p className="text-xs text-muted-foreground font-medium">Total Profit</p>
               </div>
-              <p className="text-xl font-bold text-gamehaus-magenta">
+              <p className="text-xl font-bold text-primary">
                 <CurrencyDisplay amount={canteenData.totalProfit} />
               </p>
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30 hover:border-blue-500/30 transition-colors">
+            <div className="bg-muted/30 rounded-lg p-4 border border-border/50 hover:border-secondary/35 transition-colors">
               <div className="flex items-center gap-2 mb-2">
-                <Package className="h-4 w-4 text-blue-400" />
-                <p className="text-xs text-gray-400 font-medium">Stock Value</p>
+                <Package className="h-4 w-4 text-secondary" />
+                <p className="text-xs text-muted-foreground font-medium">Stock Value</p>
               </div>
-              <p className="text-xl font-bold text-blue-400">
+              <p className="text-xl font-bold text-secondary">
                 <CurrencyDisplay amount={canteenData.totalStockValue} />
               </p>
             </div>
           </div>
 
           {/* Enhanced Profit Margin */}
-          <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+          <div className="bg-muted/20 rounded-lg p-4 border border-border/50">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-sm text-gray-300 font-medium">Profit Margin</span>
-              <span className="text-lg font-bold text-orange-400">
+              <span className="text-sm text-muted-foreground font-medium">Profit Margin</span>
+              <span className="text-lg font-bold text-secondary">
                 {canteenData.profitMargin.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-muted/40 rounded-full h-2 overflow-hidden">
               <div 
-                className="bg-gradient-to-r from-orange-500 to-orange-400 h-2 rounded-full transition-all duration-500 ease-out shadow-lg shadow-orange-500/30"
+                className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all duration-500 ease-out shadow-lg shadow-primary/25"
                 style={{ width: `${Math.min(canteenData.profitMargin, 100)}%` }}
               />
             </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>0%</span>
               <span>100%</span>
             </div>
@@ -212,8 +212,8 @@ const CanteenSalesProfitWidget: React.FC<CanteenSalesProfitWidgetProps> = ({ sta
           {/* Enhanced Product Sales List */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-gray-400" />
-              <h4 className="text-sm font-semibold text-gray-200">Product Sales</h4>
+              <Package className="h-4 w-4 text-muted-foreground" />
+              <h4 className="text-sm font-semibold text-foreground">Product Sales</h4>
             </div>
             {canteenData.allProducts.length > 0 ? (
               <ScrollArea className="h-[320px] w-full">
@@ -221,22 +221,22 @@ const CanteenSalesProfitWidget: React.FC<CanteenSalesProfitWidgetProps> = ({ sta
                   {canteenData.allProducts.map((product, index) => (
                     <div 
                       key={index} 
-                      className="bg-gray-800/40 border border-gray-700/40 rounded-lg p-3 hover:bg-gray-700/30 hover:border-gray-600/50 transition-all duration-200 group"
+                      className="bg-muted/20 border border-border/50 rounded-lg p-3 hover:bg-muted/30 hover:border-border/70 transition-all duration-200 group"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate group-hover:text-orange-200 transition-colors">
+                          <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
                             {product.name}
                           </p>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {product.quantity} sold
                           </p>
                         </div>
                         <div className="text-right ml-3">
-                          <p className="text-sm font-bold text-white">
+                          <p className="text-sm font-bold text-foreground">
                             <CurrencyDisplay amount={product.sales} />
                           </p>
-                          <p className="text-xs text-gamehaus-magenta flex items-center gap-1">
+                          <p className="text-xs text-primary flex items-center gap-1">
                             <TrendingUp className="h-3 w-3" />
                             <CurrencyDisplay amount={product.profit} />
                           </p>
@@ -247,9 +247,9 @@ const CanteenSalesProfitWidget: React.FC<CanteenSalesProfitWidgetProps> = ({ sta
                 </div>
               </ScrollArea>
             ) : (
-              <div className="bg-gray-800/30 border border-gray-700/30 rounded-lg p-6 text-center">
-                <Package className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">
+              <div className="bg-muted/20 border border-border/50 rounded-lg p-6 text-center">
+                <Package className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
                   No product sales data for the selected period
                 </p>
               </div>

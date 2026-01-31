@@ -131,138 +131,138 @@ const SalesWidgets: React.FC<SalesWidgetsProps> = ({ filteredBills }) => {
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 mb-8">
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-red-500/30 hover:border-red-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/20 hover:border-primary/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">Cash Sales</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center">
-            <DollarSign className="h-5 w-5 text-red-400" />
+          <CardTitle className="text-sm font-medium text-foreground">Cash Sales</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center">
+            <DollarSign className="h-5 w-5 text-primary" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-foreground">
             <CurrencyDisplay amount={cashSales} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-blue-500/30 hover:border-blue-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-secondary/20 hover:border-secondary/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">UPI Sales</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-            <CreditCard className="h-5 w-5 text-blue-400" />
+          <CardTitle className="text-sm font-medium text-foreground">UPI Sales</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-secondary/15 flex items-center justify-center">
+            <CreditCard className="h-5 w-5 text-secondary" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-foreground">
             <CurrencyDisplay amount={upiSales} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-orange-500/30 hover:border-orange-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-accent/20 hover:border-accent/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">Credit Sales</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-            <HandCoins className="h-5 w-5 text-orange-400" />
+          <CardTitle className="text-sm font-medium text-foreground">Credit Sales</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-accent/15 flex items-center justify-center">
+            <HandCoins className="h-5 w-5 text-accent" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-foreground">
             <CurrencyDisplay amount={creditSales} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-purple-500/30 hover:border-purple-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/20 hover:border-primary/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">Split Payments</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-            <Split className="h-5 w-5 text-purple-400" />
+          <CardTitle className="text-sm font-medium text-foreground">Split Payments</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center">
+            <Split className="h-5 w-5 text-primary" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white mb-2">
+          <div className="text-2xl font-bold text-foreground mb-2">
             <CurrencyDisplay amount={totalSplitSales} />
           </div>
-          <div className="text-xs text-gray-400 space-y-0.5">
+          <div className="text-xs text-muted-foreground space-y-0.5">
             <div>Cash: <CurrencyDisplay amount={splitCashAmount} /></div>
             <div>UPI: <CurrencyDisplay amount={splitUpiAmount} /></div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-amber-950/40 to-orange-950/30 border-amber-700/50 shadow-xl hover:shadow-amber-500/30 hover:border-amber-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-gamehaus-pink/20 hover:border-gamehaus-pink/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-amber-100">Complimentary</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-amber-500/30 flex items-center justify-center">
-            <Gift className="h-5 w-5 text-amber-400" />
+          <CardTitle className="text-sm font-medium text-foreground">Complimentary</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-gamehaus-pink/15 flex items-center justify-center">
+            <Gift className="h-5 w-5 text-gamehaus-pink" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-amber-400 mb-2">
+          <div className="text-2xl font-bold text-gamehaus-pink mb-2">
             <CurrencyDisplay amount={complimentarySales} />
           </div>
-          <div className="text-xs text-amber-300/70 space-y-0.5">
+          <div className="text-xs text-muted-foreground space-y-0.5">
             <div>{complimentaryCount} transactions</div>
             <div>{complimentaryItems} items given</div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-cyan-500/30 hover:border-cyan-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/20 hover:border-primary/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">PS5 Sessions</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-            <Gamepad2 className="h-5 w-5 text-cyan-400" />
+          <CardTitle className="text-sm font-medium text-foreground">PS5 Sessions</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center">
+            <Gamepad2 className="h-5 w-5 text-primary" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-foreground">
             <CurrencyDisplay amount={ps5SessionSales} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-yellow-500/30 hover:border-yellow-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-secondary/20 hover:border-secondary/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">8-Ball Sessions</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-            <Gamepad2 className="h-5 w-5 text-yellow-400" />
+          <CardTitle className="text-sm font-medium text-foreground">8-Ball Sessions</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-secondary/15 flex items-center justify-center">
+            <Gamepad2 className="h-5 w-5 text-secondary" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-foreground">
             <CurrencyDisplay amount={eightBallSales} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-pink-500/30 hover:border-pink-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-accent/20 hover:border-accent/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">Product Sales</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-pink-500/20 flex items-center justify-center">
-            <Package className="h-5 w-5 text-pink-400" />
+          <CardTitle className="text-sm font-medium text-foreground">Product Sales</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-accent/15 flex items-center justify-center">
+            <Package className="h-5 w-5 text-accent" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">
+          <div className="text-2xl font-bold text-foreground">
             <CurrencyDisplay amount={productSales} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-emerald-500/30 hover:border-emerald-400/40 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-card/95 via-card/90 to-card/80 border-border/60 shadow-xl hover:shadow-primary/20 hover:border-primary/35 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-medium text-white/90">Total Sales</CardTitle>
-          <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <DollarSign className="h-5 w-5 text-emerald-400" />
+          <CardTitle className="text-sm font-medium text-foreground">Total Sales</CardTitle>
+          <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center">
+            <DollarSign className="h-5 w-5 text-primary" />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white mb-2">
+          <div className="text-2xl font-bold text-foreground mb-2">
             <CurrencyDisplay amount={totalSales} />
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Paid transactions only
           </p>
         </CardContent>
