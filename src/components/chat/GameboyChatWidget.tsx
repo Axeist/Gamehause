@@ -230,8 +230,6 @@ export default function GameboyChatWidget() {
     setSlotHint(null);
   }, [location.pathname]);
 
-  if (!shouldRender) return null;
-
   const readBookingDone = () => {
     try {
       return sessionStorage.getItem(BOOKING_DONE_KEY) === "1";
@@ -364,6 +362,7 @@ export default function GameboyChatWidget() {
 
   // After 10s on page: show unread + ring. If they close: re-nudge after 20s (until booking done).
   useEffect(() => {
+    if (!shouldRender) return;
     bookingDoneRef.current = readBookingDone();
     if (bookingDoneRef.current) return;
     if (open && !minimized) return;
@@ -640,6 +639,9 @@ export default function GameboyChatWidget() {
       );
     }
   };
+
+  // Only render UI on allowed pages (but keep hooks consistent to avoid React hook-order crash)
+  if (!shouldRender) return null;
 
   const ChatBubble = (
     <button
