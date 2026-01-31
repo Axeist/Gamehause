@@ -198,6 +198,11 @@ export default function PublicPaymentSuccess() {
           setStatus("done");
           setMsg("Booking confirmed successfully!");
           setShowPaymentWarning(false);
+          try {
+            sessionStorage.setItem("gh_gameboy_booking_done_v1", "1");
+          } catch {
+            // ignore
+          }
           
           setTimeout(() => {
             setShowConfirmationDialog(true);
@@ -363,6 +368,11 @@ export default function PublicPaymentSuccess() {
           setStatus("done");
           setMsg("Booking confirmed successfully!");
           setShowPaymentWarning(false);
+          try {
+            sessionStorage.setItem("gh_gameboy_booking_done_v1", "1");
+          } catch {
+            // ignore
+          }
           
           setTimeout(() => {
             setShowConfirmationDialog(true);
@@ -548,6 +558,11 @@ export default function PublicPaymentSuccess() {
       setStatus("done");
       setMsg("Booking confirmed successfully!");
       setShowPaymentWarning(false);
+      try {
+        sessionStorage.setItem("gh_gameboy_booking_done_v1", "1");
+      } catch {
+        // ignore
+      }
       
       // Show confirmation dialog after a brief delay
       setTimeout(() => {

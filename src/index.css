@@ -220,6 +220,26 @@
   animation: gh-chat-pop 220ms ease-out both;
 }
 
+/* Gameboy chat bubble "phone ring" wobble */
+@keyframes gh-ring {
+  0% { transform: rotate(0deg) translateX(0); }
+  10% { transform: rotate(-6deg) translateX(-1px); }
+  20% { transform: rotate(6deg) translateX(1px); }
+  30% { transform: rotate(-7deg) translateX(-1px); }
+  40% { transform: rotate(7deg) translateX(1px); }
+  50% { transform: rotate(-5deg) translateX(-1px); }
+  60% { transform: rotate(5deg) translateX(1px); }
+  70% { transform: rotate(-3deg) translateX(-1px); }
+  80% { transform: rotate(3deg) translateX(1px); }
+  90% { transform: rotate(-2deg) translateX(0); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+.gh-ring {
+  animation: gh-ring 0.9s ease-in-out 0s 2;
+  transform-origin: 50% 70%;
+}
+
 /* Custom styles */
 .indian-rupee::before {
   content: "₹";

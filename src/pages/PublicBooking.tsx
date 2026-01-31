@@ -1230,6 +1230,13 @@ export default function PublicBooking() {
       });
       setShowConfirmationDialog(true);
 
+      // Mark booking done for Gameboy nudge logic (same tab/session)
+      try {
+        sessionStorage.setItem("gh_gameboy_booking_done_v1", "1");
+      } catch {
+        // ignore
+      }
+
       toast.success("🎉 Booking confirmed! Get ready to game! 🎮");
 
       setSelectedStations([]);

@@ -77,6 +77,7 @@ export default function GameboyChatWidget() {
     if (user) return false;
     const p = location.pathname || "/";
     if (p === "/") return true;
+    if (p === "/public/booking") return false; // requested: hide on public booking page
     if (p.startsWith("/public")) return true;
     return false;
   }, [location.pathname, user]);
@@ -90,6 +91,12 @@ export default function GameboyChatWidget() {
   const [booking, setBooking] = useState<BookingFlow>({ active: false });
   const [unreadCount, setUnreadCount] = useState(0);
   const pendingNudgeRef = useRef(false);
+  const [ringing, setRinging] = useState(false);
+  const nudgeTimeoutRef = useRef<number | null>(null);
+  const ringTimeoutRef = useRef<number | null>(null);
+  const hasInteractedRef = useRef(false);
+  const bookingDoneRef = useRef(false);
+  const BOOKING_DONE_KEY = "gh_gameboy_booking_done_v1";
 
   // Booking UI state (matches PublicBooking flow: type filter -> station select -> date -> time slot)
   const [stationTypeFilter, setStationTypeFilter] = useState<StationType | "all">("all");
@@ -210,6 +217,7 @@ export default function GameboyChatWidget() {
     setBooking({ active: false });
     setUnreadCount(0);
     pendingNudgeRef.current = false;
+    setRinging(false);
     setStations([]);
     setStationsLoading(false);
     setStationsError(null);
@@ -224,43 +232,121 @@ export default function GameboyChatWidget() {
 
   if (!shouldRender) return null;
 
-  // Unread “nudge” after 10 seconds on public pages (once per session)
-  useEffect(() => {
-    const KEY = "gh_gameboy_unread_nudge_v1";
+  const readBookingDone = () => {
     try {
-      if (sessionStorage.getItem(KEY) === "1") return;
+      return sessionStorage.getItem(BOOKING_DONE_KEY) === "1";
     } catch {
-      // ignore storage errors
+      return false;
     }
+  };
 
-    const t = window.setTimeout(() => {
-      // If chat is open, just deliver the nudge as a message.
-      // If closed/minimized, show unread badge and deliver when opened.
-      const nudgeText =
-        "Psst. Your future self called.\n\nType **book** and I’ll lock a slot in under a minute.\n(Yes, I’m annoyingly efficient.)";
+  const clearNudgeTimers = () => {
+    if (nudgeTimeoutRef.current) {
+      window.clearTimeout(nudgeTimeoutRef.current);
+      nudgeTimeoutRef.current = null;
+    }
+    if (ringTimeoutRef.current) {
+      window.clearTimeout(ringTimeoutRef.current);
+      ringTimeoutRef.current = null;
+    }
+  };
 
-      if (open && !minimized) {
-        animateBotReply(nudgeText);
-      } else {
-        pendingNudgeRef.current = true;
-        setUnreadCount(1);
-      }
-
-      try {
-        sessionStorage.setItem(KEY, "1");
-      } catch {
-        // ignore
-      }
-    }, 10000);
-
-    return () => window.clearTimeout(t);
+  useEffect(() => {
+    return () => clearNudgeTimers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Track if user interacted at least once (audio autoplay restrictions)
+  useEffect(() => {
+    const onInteract = () => {
+      hasInteractedRef.current = true;
+    };
+    window.addEventListener("pointerdown", onInteract, { passive: true });
+    window.addEventListener("keydown", onInteract);
+    return () => {
+      window.removeEventListener("pointerdown", onInteract as any);
+      window.removeEventListener("keydown", onInteract as any);
+    };
+  }, []);
+
+  const playSoftChirp = () => {
+    if (!hasInteractedRef.current) return;
+    try {
+      const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext);
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.02, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+      gain.connect(ctx.destination);
+
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(760, now);
+      osc.frequency.setValueAtTime(640, now + 0.07);
+      osc.connect(gain);
+
+      osc.start(now);
+      osc.stop(now + 0.16);
+      osc.onended = () => ctx.close().catch(() => {});
+    } catch {
+      // ignore
+    }
+  };
+
+  const triggerNudge = (reason: "initial" | "repeat") => {
+    if (bookingDoneRef.current) return;
+    if (readBookingDone()) {
+      bookingDoneRef.current = true;
+      setUnreadCount(0);
+      pendingNudgeRef.current = false;
+      setRinging(false);
+      return;
+    }
+
+    if (open && !minimized) {
+      animateBotReply(
+        reason === "initial"
+          ? "Hey. Tiny reminder.\n\nType **book** and I’ll lock your slot in under a minute."
+          : "I’m back.\n\nType **book** and let’s finish your booking (I’ll do the heavy lifting)."
+      );
+      return;
+    }
+
+    pendingNudgeRef.current = true;
+    setUnreadCount(1);
+    setRinging(true);
+    playSoftChirp();
+    ringTimeoutRef.current = window.setTimeout(() => setRinging(false), 2200);
+  };
+
+  const scheduleNudge = (delayMs: number, reason: "initial" | "repeat") => {
+    clearNudgeTimers();
+    if (bookingDoneRef.current) return;
+    if (readBookingDone()) {
+      bookingDoneRef.current = true;
+      return;
+    }
+    nudgeTimeoutRef.current = window.setTimeout(() => triggerNudge(reason), delayMs);
+  };
+
+  // After 10s on page: show unread + ring. If they close: re-nudge after 20s (until booking done).
+  useEffect(() => {
+    bookingDoneRef.current = readBookingDone();
+    if (bookingDoneRef.current) return;
+    if (open && !minimized) return;
+    scheduleNudge(10000, "initial");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, minimized, location.pathname]);
 
   const deliverPendingNudgeIfAny = () => {
     if (!pendingNudgeRef.current && unreadCount === 0) return;
     pendingNudgeRef.current = false;
     setUnreadCount(0);
+    setRinging(false);
     // Wait a tick so viewport refs are ready
     window.setTimeout(() => {
       animateBotReply(
@@ -533,7 +619,7 @@ export default function GameboyChatWidget() {
         setMinimized(false);
         deliverPendingNudgeIfAny();
       }}
-      className="fixed bottom-5 right-5 z-[60] h-14 w-14 rounded-2xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/70 via-gamehaus-purple/25 to-black/70 backdrop-blur-md shadow-2xl shadow-gamehaus-purple/25 hover:shadow-gamehaus-magenta/20 transition-all duration-300 group"
+      className={`fixed bottom-5 right-5 z-[60] h-14 w-14 rounded-2xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/70 via-gamehaus-purple/25 to-black/70 backdrop-blur-md shadow-2xl shadow-gamehaus-purple/25 hover:shadow-gamehaus-magenta/20 transition-all duration-300 group ${ringing ? "gh-ring" : ""}`}
       aria-label="Open Gameboy chat"
     >
       <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-gamehaus-purple/25 to-gamehaus-magenta/20 blur-xl opacity-60 group-hover:opacity-90 transition-opacity" />
@@ -633,7 +719,11 @@ export default function GameboyChatWidget() {
               variant="ghost"
               size="icon"
               className="h-9 w-9 text-gray-200 hover:bg-white/10 hover:text-white"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                setMinimized(false);
+                scheduleNudge(20000, "repeat");
+              }}
               aria-label="Close chat"
             >
               <X className="h-4 w-4" />
