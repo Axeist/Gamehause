@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { X, Minus, Send, Sparkles, Gamepad2, Calendar, Clock, ArrowRight } from "lucide-react";
+import { X, Minus, Send, Sparkles, Gamepad2, Calendar as CalendarIcon, Clock, ArrowRight, Table2, Timer } from "lucide-react";
 import { getGameboyReply } from "@/components/chat/gameboyBrain";
 import { QUICK_TILES } from "@/components/chat/gameboyKnowledge";
 import {
@@ -16,10 +16,11 @@ import {
   lookupCustomerByPhone,
   normalizePhoneNumber,
   StationType,
-  toDateString,
-  toSlotTimeString,
   validateIndianPhoneNumber,
 } from "@/components/chat/bookingActions";
+import type { StationLite, TimeSlot } from "@/components/chat/bookingActions";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 type Role = "user" | "bot";
 
@@ -33,19 +34,7 @@ type ChatMessage = {
 type BookingFlow =
   | { active: false }
   | { active: true; step: "phone" }
-  | { active: true; step: "stationType"; phone: string; customerName?: string }
-  | { active: true; step: "date"; phone: string; customerName?: string; stationType: StationType | "all" }
-  | { active: true; step: "time"; phone: string; customerName?: string; stationType: StationType | "all"; dateStr: string }
-  | {
-      active: true;
-      step: "slot";
-      phone?: string;
-      customerName?: string;
-      stationType: StationType | "all";
-      dateStr: string;
-      slots: Array<{ start_time: string; end_time: string; is_available: boolean; status?: string }>;
-      selectedStartTime?: string;
-    };
+  | { active: true; step: "details"; phone: string; customerName?: string };
 
 function uid(): string {
   return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
@@ -108,6 +97,17 @@ export default function GameboyChatWidget() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [booking, setBooking] = useState<BookingFlow>({ active: false });
+
+  // Booking UI state (matches PublicBooking flow: type filter -> station select -> date -> time slot)
+  const [stationTypeFilter, setStationTypeFilter] = useState<StationType | "all">("all");
+  const [stations, setStations] = useState<StationLite[]>([]);
+  const [stationsLoading, setStationsLoading] = useState(false);
+  const [stationsError, setStationsError] = useState<string | null>(null);
+  const [selectedStationIds, setSelectedStationIds] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const greet = getGameboyReply("hi", { firstMessage: true });
     return [
@@ -132,6 +132,15 @@ export default function GameboyChatWidget() {
     setMinimized(false);
     setIsTyping(false);
     setBooking({ active: false });
+    setStations([]);
+    setStationsLoading(false);
+    setStationsError(null);
+    setSelectedStationIds([]);
+    setStationTypeFilter("all");
+    setSelectedDate(new Date());
+    setSlots([]);
+    setSlotsLoading(false);
+    setSelectedStartTime(null);
   }, [location.pathname]);
 
   if (!shouldRender) return null;
@@ -164,6 +173,21 @@ export default function GameboyChatWidget() {
     return true;
   };
 
+  const ensureStationsLoaded = async () => {
+    if (stationsLoading) return;
+    if (stations.length > 0) return;
+    setStationsLoading(true);
+    setStationsError(null);
+    try {
+      const data = await fetchStations();
+      setStations(data);
+    } catch (e: any) {
+      setStationsError(e?.message ? String(e.message) : "Failed to load stations.");
+    } finally {
+      setStationsLoading(false);
+    }
+  };
+
   const handleBookingFlow = async (raw: string): Promise<string | null> => {
     if (!booking.active) return null;
     const t = raw.trim();
@@ -184,203 +208,79 @@ export default function GameboyChatWidget() {
         // non-fatal: continue
       }
 
-      setBooking({ active: true, step: "stationType", phone, customerName });
+      setBooking({ active: true, step: "details", phone, customerName });
+      setStationTypeFilter("all");
+      setSelectedStationIds([]);
+      setSelectedDate(new Date());
+      setSlots([]);
+      setSelectedStartTime(null);
+      void ensureStationsLoaded();
 
       if (customerName) {
         return [
           `Welcome back, **${customerName}**. Gameboy remembers champions.`,
           "",
-          "Step 2/4: What are we booking?",
+          "Step 2/4: Pick stations + date + time below. I’ll only show slots that are actually free.",
         ].join("\n");
       }
 
       return [
         "Nice — fresh entry unlocked.",
         "",
-        "Step 2/4: What are we booking?",
+        "Step 2/4: Pick stations + date + time below. I’ll only show slots that are actually free.",
       ].join("\n");
     }
 
-    // Step: station type
-    if (booking.step === "stationType") {
-      const lowered = t.toLowerCase();
-      let stationType: StationType | "all" = "all";
-      if (lowered.includes("ps5") || lowered.includes("playstation") || lowered.includes("console")) stationType = "ps5";
-      else if (lowered.includes("foos")) stationType = "foosball";
-      else if (lowered.includes("pool") || lowered.includes("8ball") || lowered.includes("snooker")) stationType = "8ball";
-      else if (lowered.includes("any") || lowered.includes("all")) stationType = "all";
-
-      setBooking({ active: true, step: "date", phone: booking.phone, customerName: booking.customerName, stationType });
-      return [
-        `Locked: **${stationType === "all" ? "Any station" : stationType.toUpperCase()}**.`,
-        "",
-        "Step 3/4: Which date?",
-        "- Type `today`, `tomorrow`, `YYYY-MM-DD`, or `DD/MM/YYYY`",
-      ].join("\n");
-    }
-
-    // Step: date
-    if (booking.step === "date") {
-      const dateStr = toDateString(t);
-      if (!dateStr) {
-        return "Date format didn’t compute. Try `today`, `tomorrow`, `2026-02-01`, or `01/02/2026`.";
-      }
-      setBooking({
-        active: true,
-        step: "time",
-        phone: booking.phone,
-        customerName: booking.customerName,
-        stationType: booking.stationType,
-        dateStr,
-      });
-      return [
-        `Great — **${dateStr}**.`,
-        "",
-        "Step 4/4: What start time?",
-        "- Type `18:00` (24h) or `6pm` / `6:30pm`",
-      ].join("\n");
-    }
-
-    // Step: time -> fetch slots, check
-    if (booking.step === "time") {
-      const startTime = toSlotTimeString(t);
-      if (!startTime) {
-        return "Time format didn’t compute. Try `18:00` or `6pm` / `6:30pm`.";
-      }
-
-      // load stations + slots
-      const allStations = await fetchStations();
-      const stationIds =
-        booking.stationType === "all"
-          ? allStations.map((s) => s.id)
-          : allStations.filter((s) => s.type === booking.stationType).map((s) => s.id);
-
-      const slots = await getAvailableSlotsUnion(booking.dateStr, stationIds);
-      const match = slots.find((s) => s.start_time === startTime);
-      const available = Boolean(match?.is_available);
-
-      setBooking({
-        active: true,
-        step: "slot",
-        phone: booking.phone,
-        customerName: booking.customerName,
-        stationType: booking.stationType,
-        dateStr: booking.dateStr,
-        slots,
-        selectedStartTime: startTime,
-      });
-
-      const availableOnly = slots.filter((s) => s.is_available);
-      const preview = availableOnly.slice(0, 10).map((s) => `- ${formatSlotLabel(s.start_time)}`).join("\n");
-
-      if (available) {
-        return [
-          `✅ **${formatSlotLabel(startTime)}** on **${booking.dateStr}** looks **available**.`,
-          "",
-          "Here are some other open starts too:",
-          preview || "- (none)",
-          "",
-          "Tap **Continue to booking** below and I’ll prefill everything for you.",
-        ].join("\n");
-      }
-
-      return [
-        `❌ **${formatSlotLabel(startTime)}** on **${booking.dateStr}** is **not available** right now.`,
-        "",
-        "Here are the closest options I can see:",
-        preview || "- (none)",
-        "",
-        "Pick a slot chip below and I’ll take you to booking with it prefilled.",
-      ].join("\n");
-    }
-
-    // Step: slot selection
-    if (booking.step === "slot") {
-      const startTime = toSlotTimeString(t);
-      if (!startTime) {
-        return "Pick a slot chip below, or type a time like `18:30`.";
-      }
-      const match = booking.slots.find((s) => s.start_time === startTime);
-      if (!match?.is_available) {
-        return `That one isn’t free. Try another (example: ${booking.slots.find((s) => s.is_available)?.start_time?.slice(0, 5) ?? "18:30"}).`;
-      }
-      setBooking({ ...booking, selectedStartTime: startTime });
-      return `Perfect — **${formatSlotLabel(startTime)}** selected. Hit **Continue to booking** and I’ll prefill it.`;
+    if (booking.step === "details") {
+      return "Use the station tiles + date picker + time slots below. When you’re ready, hit **Continue to booking**.";
     }
 
     return null;
   };
 
-  const tryDirectAvailabilityQuestion = async (raw: string): Promise<string | null> => {
-    const t = raw.trim();
-    const lowered = t.toLowerCase();
-    const looksLikeAvailability =
-      lowered.includes("available") ||
-      lowered.includes("availability") ||
-      lowered.includes("slot") ||
-      lowered.includes("free");
-    if (!looksLikeAvailability) return null;
+  const dateStr = useMemo(() => format(selectedDate, "yyyy-MM-dd"), [selectedDate]);
 
-    // Station type hint
-    let stationType: StationType | "all" = "all";
-    if (lowered.includes("ps5") || lowered.includes("playstation") || lowered.includes("console")) stationType = "ps5";
-    else if (lowered.includes("foos")) stationType = "foosball";
-    else if (lowered.includes("pool") || lowered.includes("8ball") || lowered.includes("snooker")) stationType = "8ball";
+  const filteredStations = useMemo(() => {
+    const list = stations;
+    if (stationTypeFilter === "all") return list;
+    return list.filter((s) => s.type === stationTypeFilter);
+  }, [stations, stationTypeFilter]);
 
-    // Date hint
-    const dateStr =
-      lowered.includes("tomorrow") ? toDateString("tomorrow") :
-      lowered.includes("today") ? toDateString("today") :
-      (() => {
-        const iso = lowered.match(/\b\d{4}-\d{2}-\d{2}\b/)?.[0];
-        if (iso) return toDateString(iso);
-        const dmy = lowered.match(/\b\d{1,2}\/\d{1,2}\/\d{4}\b/)?.[0];
-        if (dmy) return toDateString(dmy);
-        return null;
-      })();
-
-    // Time hint
-    const timeMatch =
-      lowered.match(/\b\d{1,2}:\d{2}(?::\d{2})?\b/)?.[0] ??
-      lowered.match(/\b\d{1,2}(?::\d{2})?\s*(am|pm)\b/)?.[0];
-    const startTime = timeMatch ? toSlotTimeString(timeMatch) : null;
-
-    if (!dateStr || !startTime) return null;
-
-    const allStations = await fetchStations();
-    const stationIds =
-      stationType === "all"
-        ? allStations.map((s) => s.id)
-        : allStations.filter((s) => s.type === stationType).map((s) => s.id);
-
-    const slots = await getAvailableSlotsUnion(dateStr, stationIds);
-    const match = slots.find((s) => s.start_time === startTime);
-    const ok = Boolean(match?.is_available);
-
-    if (ok) {
-      setBooking({
-        active: true,
-        step: "slot",
-        phone: undefined,
-        stationType,
-        dateStr,
-        slots,
-        selectedStartTime: startTime,
-      });
-      return [
-        `✅ **${formatSlotLabel(startTime)}** on **${dateStr}** looks **available**.`,
-        "",
-        "Want me to take you to booking with this prefilled? Type **book** and I’ll do the full flow (fastest).",
-      ].join("\n");
+  useEffect(() => {
+    if (!(booking.active && booking.step === "details")) return;
+    if (selectedStationIds.length === 0) {
+      setSlots([]);
+      setSelectedStartTime(null);
+      return;
     }
 
-    const next = slots.find((s) => s.is_available);
-    return [
-      `❌ **${formatSlotLabel(startTime)}** on **${dateStr}** is **not available** right now.`,
-      next ? `Closest available start I can see: **${formatSlotLabel(next.start_time)}**.` : "I’m not seeing open slots for that day in this category.",
-      "",
-      "If you type **book**, I’ll guide you to the fastest available slot and prefill the booking page.",
-    ].join("\n");
+    let cancelled = false;
+    setSlotsLoading(true);
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const data = await getAvailableSlotsUnion(dateStr, selectedStationIds);
+        if (cancelled) return;
+        setSlots(data);
+        if (selectedStartTime && !data.some((s) => s.start_time === selectedStartTime && s.is_available)) {
+          setSelectedStartTime(null);
+        }
+      } catch (e: any) {
+        if (cancelled) return;
+        setSlots([]);
+      } finally {
+        if (!cancelled) setSlotsLoading(false);
+      }
+    }, 220);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [booking.active, booking.step, dateStr, selectedStationIds.join(","), selectedStartTime]);
+
+  const tryDirectAvailabilityQuestion = async (_raw: string): Promise<string | null> => {
+    return null;
   };
 
   const sendUserMessage = async (text: string) => {
@@ -600,108 +500,204 @@ export default function GameboyChatWidget() {
                 </div>
               )}
 
-              {/* Booking flow helpers */}
-              {booking.active && booking.step === "stationType" && (
-                <div className="rounded-2xl border border-white/10 bg-black/25 backdrop-blur-sm p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-4 w-4 text-gamehaus-magenta" />
-                    <p className="text-xs font-semibold text-gray-200">Pick a category</p>
+              {/* Booking flow UI (mirrors /public/booking) */}
+              {booking.active && booking.step === "details" && (
+                <div className="rounded-3xl border border-white/10 bg-black/25 backdrop-blur-sm p-3">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Sparkles className="h-4 w-4 text-gamehaus-magenta shrink-0" />
+                      <p className="text-xs font-semibold text-gray-200 truncate">
+                        Booking assistant • pick stations + date + time
+                      </p>
+                    </div>
+                    <Badge className="bg-white/10 text-gray-200 border-white/10 text-[10px] px-2 py-0.5">
+                      {selectedStationIds.length} selected
+                    </Badge>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { k: "ps5", label: "PS5" },
+
+                  {/* Station type filter (like booking page) */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {([
+                      { k: "all", label: "All" },
                       { k: "8ball", label: "Pool / Snooker" },
+                      { k: "ps5", label: "PS5" },
                       { k: "foosball", label: "Foosball" },
-                      { k: "all", label: "Any" },
-                    ].map((t) => (
-                      <button
-                        key={t.k}
-                        type="button"
-                        onClick={() => sendUserMessage(t.label)}
-                        className="text-xs px-3 py-1.5 rounded-full border border-gamehaus-purple/30 bg-gradient-to-r from-black/40 to-gamehaus-purple/15 text-gray-100 hover:border-gamehaus-purple/45 hover:bg-black/50 transition-colors"
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {booking.active && booking.step === "slot" && (
-                <div className="rounded-2xl border border-white/10 bg-black/25 backdrop-blur-sm p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-gamehaus-lightpurple" />
-                      <p className="text-xs font-semibold text-gray-200">Available starts</p>
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] text-gray-400">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>{booking.dateStr}</span>
-                    </div>
+                    ] as const).map((t) => {
+                      const active = stationTypeFilter === t.k;
+                      return (
+                        <button
+                          key={t.k}
+                          type="button"
+                          onClick={() => setStationTypeFilter(t.k)}
+                          className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                            active
+                              ? "border-gamehaus-magenta/45 bg-gamehaus-magenta/20 text-white"
+                              : "border-gamehaus-purple/25 bg-black/30 text-gray-100 hover:border-gamehaus-purple/40"
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  <div className="flex flex-wrap gap-2 max-h-[132px] overflow-auto pr-1">
-                    {booking.slots
-                      .filter((s) => s.is_available)
-                      .map((s) => {
-                        const selected = booking.selectedStartTime === s.start_time;
-                        return (
-                          <button
-                            key={s.start_time}
-                            type="button"
-                            onClick={() => sendUserMessage(s.start_time)}
-                            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                              selected
-                                ? "border-gamehaus-magenta/50 bg-gamehaus-magenta/20 text-white"
-                                : "border-white/10 bg-black/30 text-gray-100 hover:border-gamehaus-purple/35"
-                            }`}
-                          >
-                            {formatSlotLabel(s.start_time)}
-                          </button>
-                        );
-                      })}
+                  {/* Station tiles (multi-select) */}
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <p className="text-xs font-semibold text-gray-200">Select stations (multi)</p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="text-[10px] text-gamehaus-lightpurple hover:text-white"
+                          onClick={() => {
+                            const shownIds = filteredStations.map((s) => s.id);
+                            setSelectedStationIds((prev) => Array.from(new Set([...prev, ...shownIds])));
+                          }}
+                          disabled={stationsLoading || filteredStations.length === 0}
+                        >
+                          Select all shown
+                        </button>
+                        <span className="text-[10px] text-gray-600">•</span>
+                        <button
+                          type="button"
+                          className="text-[10px] text-gray-300 hover:text-white"
+                          onClick={() => setSelectedStationIds([])}
+                          disabled={selectedStationIds.length === 0}
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    {stationsLoading ? (
+                      <div className="text-xs text-gray-400">Loading stations…</div>
+                    ) : stationsError ? (
+                      <div className="text-xs text-red-300">
+                        {stationsError}{" "}
+                        <button type="button" className="underline" onClick={() => void ensureStationsLoaded()}>
+                          Retry
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2 max-h-[170px] overflow-auto pr-1">
+                        {filteredStations.map((s) => {
+                          const selected = selectedStationIds.includes(s.id);
+                          const Icon = s.type === "ps5" ? Gamepad2 : s.type === "8ball" ? Timer : Table2;
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedStartTime(null);
+                                setSelectedStationIds((prev) =>
+                                  prev.includes(s.id) ? prev.filter((x) => x !== s.id) : [...prev, s.id]
+                                );
+                              }}
+                              className={`text-left rounded-2xl border p-2 transition-colors ${
+                                selected
+                                  ? "border-gamehaus-magenta/45 bg-gamehaus-magenta/15"
+                                  : "border-white/10 bg-black/25 hover:border-gamehaus-purple/35"
+                              }`}
+                            >
+                              <div className="flex items-start gap-2">
+                                <div className="h-8 w-8 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center shrink-0">
+                                  <Icon className="h-4 w-4 text-white/85" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-white truncate">{s.name}</p>
+                                  <p className="text-[10px] text-gray-400 truncate">₹{s.hourly_rate}/hr</p>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Date picker */}
+                  <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 text-gamehaus-lightpurple" />
+                        <p className="text-xs font-semibold text-gray-200">Pick date</p>
+                      </div>
+                      <Badge className="bg-white/10 text-gray-200 border-white/10 text-[10px] px-2 py-0.5">
+                        {dateStr}
+                      </Badge>
+                    </div>
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(d) => {
+                        if (!d) return;
+                        setSelectedStartTime(null);
+                        setSelectedDate(d);
+                      }}
+                      disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                      className="rounded-xl border border-white/10 bg-black/10"
+                    />
+                  </div>
+
+                  {/* Time slot picker */}
+                  <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gamehaus-lightpurple" />
+                        <p className="text-xs font-semibold text-gray-200">Pick time</p>
+                      </div>
+                      <p className="text-[10px] text-gray-400">
+                        {selectedStationIds.length === 0 ? "Select stations first" : slotsLoading ? "Checking slots…" : `${slots.filter((s) => s.is_available).length} open`}
+                      </p>
+                    </div>
+
+                    {selectedStationIds.length === 0 ? (
+                      <p className="text-xs text-gray-400">Select one or more stations to load available time slots.</p>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2 max-h-[160px] overflow-auto pr-1">
+                        {slots.map((s) => {
+                          const isSelected = selectedStartTime === s.start_time;
+                          const disabled = !s.is_available || s.status === "elapsed";
+                          return (
+                            <button
+                              key={s.start_time}
+                              type="button"
+                              disabled={disabled}
+                              onClick={() => setSelectedStartTime(s.start_time)}
+                              className={`text-[11px] px-2 py-2 rounded-xl border transition-colors ${
+                                disabled
+                                  ? "border-white/5 bg-black/20 text-gray-600 cursor-not-allowed"
+                                  : isSelected
+                                    ? "border-gamehaus-magenta/55 bg-gamehaus-magenta/20 text-white"
+                                    : "border-white/10 bg-black/25 text-gray-100 hover:border-gamehaus-purple/35"
+                              }`}
+                              title={disabled ? "Not available" : "Select"}
+                            >
+                              {formatSlotLabel(s.start_time)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <Button
                       type="button"
                       className="bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta hover:from-gamehaus-purple hover:to-gamehaus-magenta shadow-lg shadow-gamehaus-purple/25"
+                      disabled={selectedStationIds.length === 0 || !selectedStartTime}
                       onClick={() => {
-                        if (!booking.selectedStartTime) return;
-                        if (!booking.phone) {
-                          setBooking({ active: true, step: "phone" });
-                          setMessages((prev) => [
-                            ...prev,
-                            { id: uid(), role: "bot", ts: Date.now(), text: "Before I can prefill booking, I need your **10‑digit mobile number**." },
-                          ]);
-                          return;
-                        }
                         const url = buildPublicBookingUrl({
                           phone: booking.phone,
-                          stationType: booking.stationType,
-                          dateStr: booking.dateStr,
-                          startTime: booking.selectedStartTime,
+                          stationIds: selectedStationIds,
+                          dateStr,
+                          startTime: selectedStartTime ?? undefined,
                         });
                         navigate(url);
                       }}
-                      disabled={!booking.selectedStartTime}
                     >
                       Continue to booking
                       <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="border-white/10 bg-black/20 text-gray-200 hover:bg-white/10"
-                      onClick={() => {
-                        setBooking({ active: true, step: "date", phone: booking.phone, customerName: booking.customerName, stationType: booking.stationType });
-                        setMessages((prev) => [
-                          ...prev,
-                          { id: uid(), role: "bot", ts: Date.now(), text: "Want a different date? Type `today`, `tomorrow`, `YYYY-MM-DD`, or `DD/MM/YYYY`." },
-                        ]);
-                      }}
-                    >
-                      Change date
                     </Button>
                     <Button
                       type="button"

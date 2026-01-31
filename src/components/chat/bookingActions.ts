@@ -202,13 +202,15 @@ export function formatSlotLabel(slotStart: string): string {
 
 export function buildPublicBookingUrl(params: {
   phone: string;
-  stationType: StationType | "all";
+  stationType?: StationType | "all";
+  stationIds?: string[];
   dateStr: string;
   startTime?: string; // "HH:mm:ss"
 }): string {
   const qp = new URLSearchParams();
   qp.set("phone", normalizePhoneNumber(params.phone));
-  if (params.stationType !== "all") qp.set("type", params.stationType);
+  if (params.stationType && params.stationType !== "all") qp.set("type", params.stationType);
+  if (params.stationIds && params.stationIds.length > 0) qp.set("stations", params.stationIds.join(","));
   qp.set("date", params.dateStr);
   if (params.startTime) qp.set("time", params.startTime);
   return `/public/booking?${qp.toString()}`;

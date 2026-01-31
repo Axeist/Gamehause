@@ -192,6 +192,7 @@ export default function PublicBooking() {
   const prefillTypeRef = useRef<"all" | StationType>("all");
   const prefillDateRef = useRef<string | null>(null);
   const prefillTimeRef = useRef<string | null>(null);
+  const prefillStationIdsRef = useRef<string[] | null>(null);
 
   // Load Razorpay script on mount (since razorpay is the default payment method)
   useEffect(() => {
@@ -214,6 +215,7 @@ export default function PublicBooking() {
 
     const phone = searchParams.get("phone");
     const type = searchParams.get("type") as StationType | null;
+    const stationsParam = searchParams.get("stations");
     const date = searchParams.get("date"); // yyyy-mm-dd
     const time = searchParams.get("time"); // HH:mm or HH:mm:ss
 
@@ -221,7 +223,16 @@ export default function PublicBooking() {
       setCustomerNumber(phone);
     }
 
-    if (type === "ps5" || type === "8ball" || type === "foosball") {
+    if (stationsParam) {
+      const ids = stationsParam
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (ids.length) {
+        prefillStationIdsRef.current = ids;
+        setStationType("all");
+      }
+    } else if (type === "ps5" || type === "8ball" || type === "foosball") {
       prefillTypeRef.current = type;
       setStationType(type);
     }
@@ -247,11 +258,22 @@ export default function PublicBooking() {
 
   // After stations load, preselect stations matching the prefilled type (to power slot availability)
   useEffect(() => {
+    const explicitIds = prefillStationIdsRef.current;
     const t = prefillTypeRef.current;
     if (!stations.length) return;
-    if (t === "all") return;
     // Only apply if user hasn't already selected stations
     if (selectedStations.length > 0) return;
+
+    if (explicitIds && explicitIds.length) {
+      const valid = explicitIds.filter((id) => stations.some((s) => s.id === id));
+      if (valid.length) {
+        setSelectedStations(valid);
+        prefillStationIdsRef.current = null;
+      }
+      return;
+    }
+
+    if (t === "all") return;
     const ids = stations.filter((s) => s.type === t).map((s) => s.id);
     if (ids.length) setSelectedStations(ids);
   }, [stations, selectedStations.length]);
