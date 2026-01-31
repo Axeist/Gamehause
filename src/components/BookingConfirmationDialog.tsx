@@ -81,9 +81,9 @@ Please arrive on time and show this confirmation at reception.`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-[#1a1a1a] border-gray-800 text-white">
+      <DialogContent className="w-[92vw] max-w-[380px] sm:max-w-md p-4 sm:p-6 rounded-3xl bg-gradient-to-br from-[#09060c]/95 via-[#120816]/90 to-[#09060c]/95 border border-white/10 text-white shadow-2xl shadow-black/70 backdrop-blur-xl">
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
+          <div className="mx-auto mb-4 h-14 w-14 sm:h-16 sm:w-16 bg-green-500/15 border border-green-400/20 rounded-full flex items-center justify-center">
             <CheckCircle2 className="h-8 w-8 text-green-400" />
           </div>
           <DialogTitle className="text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400">
@@ -91,46 +91,49 @@ Please arrive on time and show this confirmation at reception.`;
           </DialogTitle>
         </DialogHeader>
 
-        <Card className="bg-muted/20 border-border/50">
-          <CardContent className="p-4 space-y-4">
+        <Card className="bg-black/35 border-white/10">
+          <CardContent className="p-4 sm:p-5 space-y-4">
             {/* Booking ID */}
             <div className="text-center">
-              <p className="text-sm text-gray-400 mb-1">Booking ID</p>
+              <p className="text-sm text-gray-400/90 mb-1">Booking ID</p>
               <div className="flex items-center justify-center gap-2">
-                <Badge variant="outline" className="bg-cuephoria-purple/20 border-cuephoria-purple text-cuephoria-purple px-3 py-1 font-mono text-sm">
+                <Badge
+                  variant="outline"
+                  className="bg-gamehaus-purple/20 border-gamehaus-purple/30 text-gamehaus-lightpurple px-3 py-1 font-mono text-sm"
+                >
                   {bookingData.bookingId}
                 </Badge>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={handleCopyBookingId}
-                  className="h-6 w-6 p-0 hover:bg-gray-700"
+                  className="h-7 w-7 p-0 hover:bg-white/10"
                 >
                   <Copy className="h-3 w-3" />
                 </Button>
               </div>
             </div>
 
-            <Separator className="bg-border" />
+            <Separator className="bg-white/10" />
 
             {/* Booking Details */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-cuephoria-blue" />
+                <MapPin className="h-4 w-4 text-gamehaus-cyan" />
                 <span className="text-sm text-gray-300">
                   {bookingData.stationNames.join(', ')}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-cuephoria-lightpurple" />
+                <Calendar className="h-4 w-4 text-gamehaus-lightpurple" />
                 <span className="text-sm text-gray-300">
                   {format(new Date(bookingData.date), 'EEEE, MMMM d, yyyy')}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-cuephoria-orange" />
+                <Clock className="h-4 w-4 text-gamehaus-magenta" />
                 <span className="text-sm text-gray-300">
                   {bookingData.startTime} - {bookingData.endTime}
                 </span>
@@ -146,7 +149,7 @@ Please arrive on time and show this confirmation at reception.`;
               )}
             </div>
 
-            <Separator className="bg-border" />
+            <Separator className="bg-white/10" />
 
             {/* Payment Information */}
             {bookingData.paymentMode && (
@@ -161,10 +164,10 @@ Please arrive on time and show this confirmation at reception.`;
                 </div>
                 {bookingData.paymentTxnId && (
                   <div className="flex items-center gap-2">
-                    <Hash className="h-4 w-4 text-blue-400" />
+                    <Hash className="h-4 w-4 text-gamehaus-cyan" />
                     <div className="flex items-center gap-2 flex-1">
                       <span className="text-xs text-gray-400">Txn ID:</span>
-                      <span className="text-xs font-mono text-blue-400 flex-1 truncate">
+                      <span className="text-xs font-mono text-gamehaus-cyan flex-1 truncate">
                         {bookingData.paymentTxnId}
                       </span>
                       <Button
@@ -174,7 +177,7 @@ Please arrive on time and show this confirmation at reception.`;
                           navigator.clipboard.writeText(bookingData.paymentTxnId!);
                           toast.success('Transaction ID copied!');
                         }}
-                        className="h-5 w-5 p-0 hover:bg-gray-700"
+                        className="h-6 w-6 p-0 hover:bg-white/10"
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
@@ -184,12 +187,12 @@ Please arrive on time and show this confirmation at reception.`;
               </div>
             )}
 
-            <Separator className="bg-border" />
+            <Separator className="bg-white/10" />
 
             {/* Total Amount */}
             <div className="text-center">
               <p className="text-sm text-gray-400">Total Amount</p>
-              <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cuephoria-purple to-cuephoria-lightpurple">
+              <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-purple to-gamehaus-magenta">
                 ₹{bookingData.totalAmount}
               </p>
               {!bookingData.paymentMode && (
@@ -211,7 +214,7 @@ Please arrive on time and show this confirmation at reception.`;
         <div className="space-y-3">
           <Button
             onClick={handleSaveScreenshot}
-            className="w-full bg-cuephoria-purple/20 hover:bg-cuephoria-purple/30 border border-cuephoria-purple text-cuephoria-purple"
+            className="w-full bg-white/5 hover:bg-white/10 border border-gamehaus-purple/30 text-gamehaus-lightpurple"
             variant="outline"
           >
             <Download className="h-4 w-4 mr-2" />
@@ -220,7 +223,7 @@ Please arrive on time and show this confirmation at reception.`;
 
           <Button
             onClick={handleShare}
-            className="w-full bg-cuephoria-blue/20 hover:bg-cuephoria-blue/30 border border-cuephoria-blue text-cuephoria-blue"
+            className="w-full bg-white/5 hover:bg-white/10 border border-gamehaus-cyan/30 text-gamehaus-cyan"
             variant="outline"
           >
             <Share2 className="h-4 w-4 mr-2" />
@@ -229,13 +232,13 @@ Please arrive on time and show this confirmation at reception.`;
 
           <Button
             onClick={onClose}
-            className="w-full bg-gradient-to-r from-cuephoria-purple to-cuephoria-lightpurple hover:from-cuephoria-purple/90 hover:to-cuephoria-lightpurple/90"
+            className="w-full bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-purple hover:opacity-95"
           >
             Close
           </Button>
         </div>
 
-        <p className="text-xs text-center text-gray-400">
+        <p className="text-[11px] leading-relaxed text-center text-gray-400/90">
           Please save this confirmation for your records. Show this at the reception when you arrive.
         </p>
       </DialogContent>
