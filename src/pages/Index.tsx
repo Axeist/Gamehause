@@ -61,6 +61,7 @@ const STATION_TYPE_META: Record<
 };
 
 const getStationImageSrc = (station: Station): string | null => {
+  if (station.type === "foosball") return "/Foosball.jpeg";
   if (station.type !== "8ball") return null;
 
   const name = station.name.toLowerCase();
