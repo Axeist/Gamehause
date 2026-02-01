@@ -109,14 +109,14 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
 
   return (
     <>
-      <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/40 hover:-translate-y-1 bg-gradient-to-br from-black/60 via-black/45 to-black/60 border-white/10 backdrop-blur-sm">
+      <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-secondary/15 hover:-translate-y-1 bg-gradient-to-br from-secondary/10 via-black/55 to-black/70 border-secondary/20 backdrop-blur-sm">
         {isActive && (
           <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         )}
         
         <CardHeader className="pb-3 relative z-10">
           {customer.customerId && (
-            <div className="flex items-center justify-between mb-3 p-2 bg-black/35 rounded-md border border-white/10">
+            <div className="flex items-center justify-between mb-3 p-2 bg-secondary/10 rounded-md border border-secondary/20">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <Hash className="h-4 w-4 text-gray-300 flex-shrink-0" />
                 <span className="text-sm font-mono font-bold text-gray-200 truncate">
@@ -126,7 +126,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 hover:bg-white/5 flex-shrink-0"
+                className="h-7 w-7 p-0 hover:bg-secondary/10 flex-shrink-0"
                 onClick={handleCopyCustomerId}
               >
                 <Copy className="h-3.5 w-3.5 text-gray-300" />
@@ -169,7 +169,7 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
           )}
           
           {customer.isMember && (
-            <div className="space-y-2 p-3 bg-black/25 rounded-lg border border-white/10">
+            <div className="space-y-2 p-3 bg-secondary/10 rounded-lg border border-secondary/20">
               {customer.membershipPlan && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

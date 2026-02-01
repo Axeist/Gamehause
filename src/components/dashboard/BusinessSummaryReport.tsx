@@ -48,7 +48,7 @@ const BusinessSummaryReport: React.FC<BusinessSummaryReportProps> = ({
         </div>
         <Button
           onClick={handleDownloadExcel}
-          className="gap-2 bg-gamehaus-purple hover:bg-gamehaus-magenta text-white"
+          className="gap-2 bg-secondary hover:bg-primary text-white"
         >
           <Download className="h-4 w-4" />
           Export to Excel

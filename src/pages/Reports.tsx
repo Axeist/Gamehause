@@ -734,7 +734,7 @@ const ReportsPage: React.FC = () => {
   const renderBillsTab = () => (
     <div className="space-y-4">
       <SalesWidgets filteredBills={filteredData.filteredBills} />
-      <div className="bg-gamehaus-darker border border-gamehaus-purple/20 rounded-lg overflow-hidden">
+      <div className="bg-gradient-to-br from-secondary/10 via-black/60 to-black/80 border border-secondary/20 rounded-lg overflow-hidden">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-1">Transaction History</h2>
           <p className="text-gray-400">
@@ -749,15 +749,15 @@ const ReportsPage: React.FC = () => {
                 placeholder="Search by customer name, email, phone, or bill ID"
                 value={billSearchQuery}
                 onChange={(e) => setBillSearchQuery(e.target.value)}
-                className="pl-10 bg-gray-800 border-gray-700 text-white w-full"
+                className="pl-10 bg-secondary/10 border-secondary/20 text-white w-full placeholder:text-gray-400 focus-visible:ring-secondary/25"
               />
             </div>
             
             <Select value={paymentTypeFilter} onValueChange={setPaymentTypeFilter}>
-              <SelectTrigger className="w-full md:w-[180px] bg-gray-800 border-gray-700 text-white">
+              <SelectTrigger className="w-full md:w-[180px] bg-secondary/10 border-secondary/20 text-white focus:ring-secondary/25">
                 <SelectValue placeholder="Payment Type" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700 text-white">
+              <SelectContent className="bg-[#120d08] border-secondary/25 text-white">
                 <SelectItem value="all">All Payments</SelectItem>
                 <SelectItem value="upi">UPI</SelectItem>
                 <SelectItem value="cash">Cash</SelectItem>
@@ -936,7 +936,7 @@ const ReportsPage: React.FC = () => {
   );
 
   const renderCustomersTab = () => (
-    <div className="bg-gamehaus-darker border border-gamehaus-purple/20 rounded-lg overflow-hidden">
+    <div className="bg-gradient-to-br from-secondary/10 via-black/60 to-black/80 border border-secondary/20 rounded-lg overflow-hidden">
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-1">Customer Activity</h2>
         <p className="text-gray-400">
@@ -994,7 +994,7 @@ const ReportsPage: React.FC = () => {
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className={customer.isMember ? "bg-gamehaus-purple/10 text-gamehaus-lightpurple border-gamehaus-purple/30" : "bg-gray-800/50 text-gray-400 border-gray-700"}
+                    className={customer.isMember ? "bg-secondary/10 text-secondary border-secondary/30" : "bg-black/30 text-gray-400 border-white/10"}
                   >
                     {customer.isMember ? "Member" : "Non-Member"}
                   </Badge>
@@ -1014,7 +1014,7 @@ const ReportsPage: React.FC = () => {
   );
 
   const renderSessionsTab = () => (
-    <div className="bg-gamehaus-darker border border-gamehaus-purple/20 rounded-lg overflow-hidden">
+    <div className="bg-gradient-to-br from-secondary/10 via-black/60 to-black/80 border border-secondary/20 rounded-lg overflow-hidden">
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-1">Session History</h2>
         <p className="text-gray-400">
@@ -1029,7 +1029,7 @@ const ReportsPage: React.FC = () => {
               placeholder="Search by customer name, email or phone"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-800 border-gray-700 text-white w-full md:w-96"
+              className="pl-10 bg-secondary/10 border-secondary/20 text-white w-full md:w-96 placeholder:text-gray-400 focus-visible:ring-secondary/25"
             />
           </div>
           {searchQuery && (
@@ -1167,7 +1167,7 @@ const ReportsPage: React.FC = () => {
                 <TableCell colSpan={8} className="text-center py-8 text-gray-400">
                   {sessionsLoading ? (
                     <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cuephoria-purple"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-secondary"></div>
                       <span className="ml-3">Loading sessions...</span>
                     </div>
                   ) : searchQuery ? (
@@ -1175,7 +1175,7 @@ const ReportsPage: React.FC = () => {
                       <p>No sessions found matching "{searchQuery}"</p>
                       <Button
                         variant="link"
-                        className="text-cuephoria-purple"
+                          className="text-secondary"
                         onClick={() => setSearchQuery('')}
                       >
                         Clear search
@@ -1202,7 +1202,7 @@ const ReportsPage: React.FC = () => {
       />
       
       {/* Complimentary Insights Widget - Moved to bottom with matching theme */}
-      <Card className="bg-gradient-to-br from-gray-900/95 to-gray-800/90 border-gray-700/50 shadow-xl hover:shadow-amber-500/20 hover:border-amber-500/30 transition-all duration-300 backdrop-blur-sm">
+      <Card className="bg-gradient-to-br from-secondary/10 via-black/60 to-black/80 border-secondary/20 shadow-xl hover:shadow-secondary/15 hover:border-secondary/30 transition-all duration-300 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-gray-700/30">
           <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
             <Gift className="h-5 w-5 text-amber-400" />
@@ -1216,7 +1216,7 @@ const ReportsPage: React.FC = () => {
           <div className="space-y-4">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+              <div className="bg-secondary/5 rounded-lg p-4 border border-secondary/15">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="h-8 w-8 rounded-full bg-amber-500/20 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400">
@@ -1232,7 +1232,7 @@ const ReportsPage: React.FC = () => {
                 />
               </div>
               
-              <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+              <div className="bg-secondary/5 rounded-lg p-4 border border-secondary/15">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
@@ -1247,10 +1247,10 @@ const ReportsPage: React.FC = () => {
                 </p>
               </div>
               
-              <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+              <div className="bg-secondary/5 rounded-lg p-4 border border-secondary/15">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-8 w-8 rounded-full bg-gamehaus-purple/10 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gamehaus-lightpurple">
+                  <div className="h-8 w-8 rounded-full bg-secondary/15 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-secondary">
                       <line x1="12" y1="20" x2="12" y2="10"></line>
                       <line x1="18" y1="20" x2="18" y2="4"></line>
                       <line x1="6" y1="20" x2="6" y2="16"></line>
@@ -1266,7 +1266,7 @@ const ReportsPage: React.FC = () => {
             </div>
             
             {/* Percentage of Total Volume */}
-            <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
+            <div className="bg-secondary/5 rounded-lg p-4 border border-secondary/15">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-200">% of Total Transaction Volume</span>
                 <span className="text-lg font-bold text-amber-400">
@@ -1320,10 +1320,10 @@ const ReportsPage: React.FC = () => {
         <h1 className="text-4xl font-bold gradient-text font-heading">Reports</h1>
         <div className="flex items-center gap-4">
           <Select value={dateRangeKey} onValueChange={handleDateRangeChange}>
-            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white">
+            <SelectTrigger className="w-[180px] bg-secondary/10 border-secondary/20 text-white focus:ring-secondary/25">
               <SelectValue placeholder="Select period" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+            <SelectContent className="bg-[#120d08] border-secondary/25 text-white">
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="yesterday">Yesterday</SelectItem>
               <SelectItem value="thisWeek">This week</SelectItem>
@@ -1336,12 +1336,12 @@ const ReportsPage: React.FC = () => {
           
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2 bg-gray-800 border-gray-700 text-white">
+              <Button variant="outline" className="gap-2 bg-secondary/10 border-secondary/20 text-white hover:bg-secondary/15">
                 <CalendarIcon className="h-4 w-4" />
                 {dateRangeString}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-gray-800 border-gray-700" align="end">
+            <PopoverContent className="w-auto p-0 bg-[#120d08] border-secondary/25" align="end">
               <Calendar
                 initialFocus
                 mode="range"
@@ -1349,23 +1349,23 @@ const ReportsPage: React.FC = () => {
                 selected={date}
                 onSelect={handleCalendarSelect}
                 numberOfMonths={2}
-                className="p-3 pointer-events-auto bg-gray-800 text-white"
+                className="p-3 pointer-events-auto bg-[#120d08] text-white"
               />
             </PopoverContent>
           </Popover>
           
-          <Button onClick={handleDownloadReport} className="gap-2 bg-gamehaus-purple hover:bg-gamehaus-magenta text-white">
+          <Button onClick={handleDownloadReport} className="gap-2 bg-secondary hover:bg-primary text-white">
             <Download className="h-4 w-4" />
             Export
           </Button>
         </div>
       </div>
       
-      <div className="bg-gray-800/60 rounded-lg p-1 flex gap-2 w-fit">
+      <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-1 flex gap-2 w-fit">
         <Button
           onClick={() => setActiveTab('bills')}
           variant={activeTab === 'bills' ? 'default' : 'ghost'}
-          className={`gap-2 ${activeTab === 'bills' ? 'bg-gray-700' : 'text-gray-400'}`}
+          className={`gap-2 ${activeTab === 'bills' ? 'bg-secondary/20 text-white' : 'text-gray-300 hover:bg-secondary/10'}`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -1379,7 +1379,7 @@ const ReportsPage: React.FC = () => {
         <Button
           onClick={() => setActiveTab('customers')}
           variant={activeTab === 'customers' ? 'default' : 'ghost'}
-          className={`gap-2 ${activeTab === 'customers' ? 'bg-gray-700' : 'text-gray-400'}`}
+          className={`gap-2 ${activeTab === 'customers' ? 'bg-secondary/20 text-white' : 'text-gray-300 hover:bg-secondary/10'}`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -1391,7 +1391,7 @@ const ReportsPage: React.FC = () => {
         <Button
           onClick={() => setActiveTab('sessions')}
           variant={activeTab === 'sessions' ? 'default' : 'ghost'}
-          className={`gap-2 ${activeTab === 'sessions' ? 'bg-gray-700' : 'text-gray-400'}`}
+          className={`gap-2 ${activeTab === 'sessions' ? 'bg-secondary/20 text-white' : 'text-gray-300 hover:bg-secondary/10'}`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
@@ -1402,7 +1402,7 @@ const ReportsPage: React.FC = () => {
         <Button
           onClick={() => setActiveTab('summary')}
           variant={activeTab === 'summary' ? 'default' : 'ghost'}
-          className={`gap-2 ${activeTab === 'summary' ? 'bg-gray-700' : 'text-gray-400'}`}
+          className={`gap-2 ${activeTab === 'summary' ? 'bg-secondary/20 text-white' : 'text-gray-300 hover:bg-secondary/10'}`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect width="20" height="14" x="2" y="5" rx="2" />
