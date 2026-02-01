@@ -54,10 +54,14 @@ const PublicStations = () => {
           type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' ? item.type : 'ps5',
           hourlyRate: item.hourly_rate,
           imageUrl: item.image_url ?? null,
+          isPublicBooking: item.is_public_booking ?? true,
           isOccupied: item.is_occupied,
           currentSession: null
         })) || [];
         
+        // Hide stations disabled from public booking
+        const publicStationsOnly = transformedStations.filter((s) => s.isPublicBooking !== false);
+
         const transformedSessions: Session[] = sessionsData?.map(item => ({
           id: item.id,
           stationId: item.station_id,
@@ -68,7 +72,7 @@ const PublicStations = () => {
         })) || [];
         
         // Connect sessions to stations
-        const stationsWithSessions = transformedStations.map(station => {
+        const stationsWithSessions = publicStationsOnly.map(station => {
           const activeSession = transformedSessions.find(s => s.stationId === station.id);
           return {
             ...station,

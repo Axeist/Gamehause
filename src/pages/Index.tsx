@@ -23,6 +23,7 @@ interface Station {
   type: 'ps5' | '8ball' | 'foosball';
   hourly_rate: number;
   image_url: string | null;
+  is_public_booking: boolean;
   is_occupied: boolean;
 }
 
@@ -136,9 +137,11 @@ const Index: React.FC = () => {
           type: row.type === "ps5" || row.type === "8ball" || row.type === "foosball" ? row.type : "ps5",
           hourly_rate: row.hourly_rate,
           image_url: row.image_url ?? null,
+          is_public_booking: row.is_public_booking ?? true,
           is_occupied: row.is_occupied,
         }));
-        setLiveStations(normalized);
+        // Hide stations disabled from public booking
+        setLiveStations(normalized.filter((s) => s.is_public_booking));
         setStationsLoading(false);
       } catch (error) {
         console.error('Error fetching stations:', error);
