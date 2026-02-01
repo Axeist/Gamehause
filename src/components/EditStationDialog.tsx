@@ -15,6 +15,7 @@ import { Station } from '@/types/pos.types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Edit, Upload, X, Crop } from 'lucide-react';
 
 interface EditStationDialogProps {
@@ -49,6 +50,17 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
   const cropFrameRef = useRef<HTMLDivElement>(null);
   const cropImgRef = useRef<HTMLImageElement>(null);
   const { toast } = useToast();
+
+  const PRESET_IMAGES: { id: string; label: string; url: string }[] = useMemo(
+    () => [
+      { id: 'american', label: 'American Table', url: '/American table.jpg' },
+      { id: 'medium', label: 'Medium Table', url: '/Medium Table.jpg' },
+      { id: 'standard', label: 'Standard Table', url: '/Standard Table.jpg' },
+      { id: 'foosball', label: 'Foosball', url: '/Foosball.jpeg' },
+      { id: 'ps', label: 'PS', url: '/controller.png' },
+    ],
+    []
+  );
 
   // Update form when station changes
   React.useEffect(() => {
@@ -248,6 +260,43 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const applyPresetImage = async (imageUrl: string) => {
+    if (!station) return;
+
+    // Reset local crop/upload state; this is a direct assignment.
+    cancelCrop();
+    setPreviewUrl(imageUrl);
+
+    setIsUploadingImage(true);
+    try {
+      if (onUpdateImage) {
+        const ok = await onUpdateImage(station.id, imageUrl);
+        if (!ok) return;
+      } else {
+        const { error: updateError } = await supabase
+          .from('stations')
+          .update({ image_url: imageUrl })
+          .eq('id', station.id);
+        if (updateError) {
+          console.error('Error saving preset station image url:', updateError);
+          toast({
+            title: 'Save failed',
+            description: 'Failed to set preset image for this station.',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      toast({
+        title: 'Preset applied',
+        description: 'Station image updated.',
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const handleUploadImage = async () => {
     if (!station) return;
     if (!selectedFile) {
@@ -388,6 +437,33 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
           {/* Station Image */}
           <div className="space-y-2">
             <Label>Station Image</Label>
+
+            {/* Preset image selector */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Quick presets</Label>
+              <Select
+                onValueChange={(value) => {
+                  const preset = PRESET_IMAGES.find((p) => p.id === value);
+                  if (preset) applyPresetImage(preset.url);
+                }}
+                disabled={isUploadingImage || isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select: American / Medium / Standard / Foosball / PS" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRESET_IMAGES.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Selecting a preset will instantly set the station image.
+              </p>
+            </div>
+
             {isCropping ? (
               <div className="space-y-3">
                 <div
