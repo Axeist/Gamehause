@@ -139,13 +139,16 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
 
         <CardHeader className="pb-2 relative z-10">
           {cardImageSrc && (
-            <div className="mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+            <div
+              className="relative mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/20"
+              style={{ aspectRatio: "16 / 9" }}
+            >
               <img
                 src={cardImageSrc}
                 alt={`${station.name} image`}
                 loading="lazy"
                 decoding="async"
-                className="h-28 w-full object-cover opacity-95"
+                className="absolute inset-0 h-full w-full object-cover opacity-95"
               />
             </div>
           )}

@@ -493,11 +493,14 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
                 </div>
               </div>
             ) : previewUrl ? (
-              <div className="relative overflow-hidden rounded-lg border border-white/10 bg-black/20">
+              <div
+                className="relative overflow-hidden rounded-lg border border-white/10 bg-black/20"
+                style={{ aspectRatio: "16 / 9" }}
+              >
                 <img
                   src={previewUrl}
                   alt="Station preview"
-                  className="h-28 w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute top-2 right-2 flex gap-2">
                   <Button

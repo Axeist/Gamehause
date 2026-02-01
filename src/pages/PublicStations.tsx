@@ -516,13 +516,13 @@ const PublicStationCard = ({ station }: { station: Station }) => {
       
       {/* Image */}
       {cardImageSrc && (
-        <div className="relative">
+        <div className="relative" style={{ aspectRatio: "16 / 9" }}>
           <img
             src={cardImageSrc}
             alt={`${station.name} image`}
             loading="lazy"
             decoding="async"
-            className="h-28 w-full object-cover opacity-95"
+            className="absolute inset-0 h-full w-full object-cover opacity-95"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
         </div>

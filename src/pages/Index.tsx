@@ -470,13 +470,16 @@ const Index: React.FC = () => {
                                       const imageSrc = getStationImageSrc(station);
                                       if (!imageSrc) return null;
                                       return (
-                                        <div className="relative mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/25">
+                                        <div
+                                          className="relative mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/25"
+                                          style={{ aspectRatio: "16 / 9" }}
+                                        >
                                           <img
                                             src={imageSrc}
                                             alt={`${station.name} table`}
                                             loading="lazy"
                                             decoding="async"
-                                            className="h-28 w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-[1.04]"
+                                            className="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-[1.04]"
                                           />
                                           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                                         </div>
