@@ -8,6 +8,7 @@ interface Station {
   name: string;
   type: 'ps5' | '8ball' | 'foosball';
   hourly_rate: number;
+  image_url?: string | null;
 }
 
 interface StationSelectorProps {
@@ -60,6 +61,17 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
     return `₹${station.hourly_rate}/hour`;
   };
 
+  const getFallbackImageSrc = (station: Station): string | null => {
+    if (station.type === 'foosball') return '/Foosball.jpeg';
+    if (station.type === 'ps5') return '/controller.png';
+    if (station.type !== '8ball') return null;
+    const name = station.name.toLowerCase();
+    if (name.includes('american')) return '/American table.jpg';
+    if (name.includes('medium')) return '/Medium Table.jpg';
+    if (name.includes('standard')) return '/Standard Table.jpg';
+    return null;
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -75,6 +87,7 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
       {stations.map((station) => {
         const Icon = getStationIcon(station.type);
         const isSelected = selectedStations.includes(station.id);
+        const imageSrc = station.image_url ?? getFallbackImageSrc(station);
         
         return (
           <Card
@@ -87,6 +100,21 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
             onClick={() => onStationToggle(station.id)}
           >
             <CardHeader className="pb-3">
+              {imageSrc && (
+                <div
+                  className="relative mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/25"
+                  style={{ aspectRatio: "16 / 9" }}
+                >
+                  <img
+                    src={imageSrc}
+                    alt={`${station.name} image`}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover opacity-95"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2 text-white">
                   <Icon className="h-5 w-5" />

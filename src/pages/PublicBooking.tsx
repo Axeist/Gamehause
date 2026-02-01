@@ -55,6 +55,7 @@ interface Station {
   type: StationType;
   hourly_rate: number;
   is_public_booking?: boolean;
+  image_url?: string | null;
 }
 interface TimeSlot {
   start_time: string;
@@ -440,7 +441,7 @@ export default function PublicBooking() {
     try {
       const { data, error } = await supabase
         .from("stations")
-        .select("id, name, type, hourly_rate, is_public_booking")
+        .select("id, name, type, hourly_rate, is_public_booking, image_url")
         .eq("is_public_booking", true)
         .order("name");
       if (error) throw error;
