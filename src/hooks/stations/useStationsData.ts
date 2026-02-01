@@ -76,6 +76,7 @@ export const useStationsData = () => {
             name: item.name,
             type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' ? item.type : 'ps5',
             hourlyRate: item.hourly_rate,
+            imageUrl: item.image_url ?? null,
             isOccupied: item.is_occupied,
             currentSession: currentSession
           };
@@ -155,6 +156,57 @@ export const useStationsData = () => {
       toast({
         title: 'Error',
         description: 'Failed to update station',
+        variant: 'destructive'
+      });
+      return false;
+    }
+  };
+
+  const updateStationImage = async (stationId: string, imageUrl: string | null) => {
+    try {
+      const station = stations.find(s => s.id === stationId);
+      if (!station) {
+        console.error('Station not found:', stationId);
+        toast({
+          title: 'Error',
+          description: 'Station not found',
+          variant: 'destructive'
+        });
+        return false;
+      }
+
+      const { error } = await supabase
+        .from('stations')
+        .update({ image_url: imageUrl })
+        .eq('id', stationId);
+
+      if (error) {
+        console.error('Error updating station image in Supabase:', error);
+        toast({
+          title: 'Database Error',
+          description: 'Failed to update station image in database',
+          variant: 'destructive'
+        });
+        return false;
+      }
+
+      setStations(prev => prev.map(s =>
+        s.id === stationId
+          ? { ...s, imageUrl }
+          : s
+      ));
+
+      toast({
+        title: 'Image Updated',
+        description: 'Station image has been updated successfully',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error in updateStationImage:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update station image',
         variant: 'destructive'
       });
       return false;
@@ -285,6 +337,7 @@ export const useStationsData = () => {
     stationsError,
     refreshStations,
     deleteStation,
-    updateStation
+    updateStation,
+    updateStationImage
   };
 };
