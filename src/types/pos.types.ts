@@ -142,6 +142,7 @@ export interface POSContextType {
   endSession: (stationId: string) => Promise<void>;
   deleteStation: (stationId: string) => Promise<boolean>;
   updateStation: (stationId: string, name: string, hourlyRate: number) => Promise<boolean>;
+  updateStationImage: (stationId: string, imageUrl: string | null) => Promise<boolean>;
   
   addCustomer: (customer: Omit<Customer, 'id' | 'createdAt'>) => void;
   updateCustomer: (customer: Customer) => void;

@@ -24,11 +24,23 @@ interface StationCardProps {
 }
 
 const StationCard: React.FC<StationCardProps> = ({ station }) => {
-  const { customers, startSession, endSession, deleteStation, updateStation } = usePOS();
+  const { customers, startSession, endSession, deleteStation, updateStation, updateStationImage } = usePOS();
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
   const isPs5 = station.type === 'ps5';
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  const getFallbackImageSrc = () => {
+    if (station.type === 'foosball') return '/Foosball.jpeg';
+    if (station.type !== '8ball') return null;
+    const name = station.name.toLowerCase();
+    if (name.includes('american')) return '/American table.jpg';
+    if (name.includes('medium')) return '/Medium Table.jpg';
+    if (name.includes('standard')) return '/Standard Table.jpg';
+    return null;
+  };
+
+  const cardImageSrc = station.imageUrl ?? getFallbackImageSrc();
 
   const getCustomer = (id: string) => {
     return customers.find(c => c.id === id);
@@ -126,6 +138,17 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
         )}
 
         <CardHeader className="pb-2 relative z-10">
+          {cardImageSrc && (
+            <div className="mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/20">
+              <img
+                src={cardImageSrc}
+                alt={`${station.name} image`}
+                loading="lazy"
+                decoding="async"
+                className="h-28 w-full object-cover opacity-95"
+              />
+            </div>
+          )}
           <div className="flex justify-between items-center space-x-2">
             <div className="flex-grow">
               <StationInfo station={station} customerName={customerName} customerData={customer} />
@@ -251,6 +274,7 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
         onOpenChange={setEditDialogOpen}
         station={station}
         onSave={updateStation}
+        onUpdateImage={updateStationImage}
       />
     </>
   );

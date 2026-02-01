@@ -55,6 +55,7 @@ const POSContext = createContext<POSContextType>({
   endSession: async () => {},
   deleteStation: async () => false,
   updateStation: async () => false,
+  updateStationImage: async () => false,
   addCustomer: () => ({}),
   updateCustomer: () => ({}),
   updateCustomerMembership: () => null,
@@ -124,7 +125,8 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     startSession: startSessionBase, 
     endSession: endSessionBase,
     deleteStation,
-    updateStation
+    updateStation,
+    updateStationImage
   } = useStations([], updateCustomer);
   
   const { 
@@ -800,6 +802,7 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         endSession,
         deleteStation,
         updateStation,
+        updateStationImage,
         addCustomer,
         updateCustomer,
         updateCustomerMembership: updateCustomerMembershipWrapper,

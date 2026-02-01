@@ -22,6 +22,7 @@ interface Station {
   name: string;
   type: 'ps5' | '8ball' | 'foosball';
   hourly_rate: number;
+  image_url: string | null;
   is_occupied: boolean;
 }
 
@@ -61,6 +62,7 @@ const STATION_TYPE_META: Record<
 };
 
 const getStationImageSrc = (station: Station): string | null => {
+  if (station.image_url) return station.image_url;
   if (station.type === "foosball") return "/Foosball.jpeg";
   if (station.type !== "8ball") return null;
 
@@ -133,6 +135,7 @@ const Index: React.FC = () => {
           name: row.name,
           type: row.type === "ps5" || row.type === "8ball" || row.type === "foosball" ? row.type : "ps5",
           hourly_rate: row.hourly_rate,
+          image_url: row.image_url ?? null,
           is_occupied: row.is_occupied,
         }));
         setLiveStations(normalized);

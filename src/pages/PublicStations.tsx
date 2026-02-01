@@ -53,6 +53,7 @@ const PublicStations = () => {
           name: item.name,
           type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' ? item.type : 'ps5',
           hourlyRate: item.hourly_rate,
+          imageUrl: item.image_url ?? null,
           isOccupied: item.is_occupied,
           currentSession: null
         })) || [];
@@ -425,6 +426,18 @@ const PublicStationCard = ({ station }: { station: Station }) => {
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
   const sessionStartTime = station.currentSession?.startTime;
+
+  const getFallbackImageSrc = () => {
+    if (station.type === 'foosball') return '/Foosball.jpeg';
+    if (station.type !== '8ball') return null;
+    const name = station.name.toLowerCase();
+    if (name.includes('american')) return '/American table.jpg';
+    if (name.includes('medium')) return '/Medium Table.jpg';
+    if (name.includes('standard')) return '/Standard Table.jpg';
+    return null;
+  };
+
+  const cardImageSrc = station.imageUrl ?? getFallbackImageSrc();
   
   const calculateDuration = () => {
     if (!sessionStartTime) return null;
@@ -501,6 +514,20 @@ const PublicStationCard = ({ station }: { station: Station }) => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity"></div>
       )}
       
+      {/* Image */}
+      {cardImageSrc && (
+        <div className="relative">
+          <img
+            src={cardImageSrc}
+            alt={`${station.name} image`}
+            loading="lazy"
+            decoding="async"
+            className="h-28 w-full object-cover opacity-95"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        </div>
+      )}
+
       {/* Content */}
       <div className="p-5 relative z-10">
         {/* Status Badge */}
