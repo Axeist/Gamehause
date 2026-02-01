@@ -24,7 +24,7 @@ interface StationCardProps {
 }
 
 const StationCard: React.FC<StationCardProps> = ({ station }) => {
-  const { customers, startSession, endSession, deleteStation, updateStation, updateStationImage } = usePOS();
+  const { stations, customers, startSession, endSession, deleteStation, updateStation, updateStationImage } = usePOS();
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
   const isPs5 = station.type === 'ps5';
@@ -278,6 +278,7 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
         station={station}
         onSave={updateStation}
         onUpdateImage={updateStationImage}
+        allStations={stations}
       />
     </>
   );

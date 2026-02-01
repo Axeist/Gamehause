@@ -24,6 +24,7 @@ interface EditStationDialogProps {
   station: Station | null;
   onSave: (stationId: string, name: string, hourlyRate: number) => Promise<boolean>;
   onUpdateImage?: (stationId: string, imageUrl: string | null) => Promise<boolean>;
+  allStations?: Station[];
 }
 
 const EditStationDialog: React.FC<EditStationDialogProps> = ({
@@ -32,6 +33,7 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
   station,
   onSave,
   onUpdateImage,
+  allStations,
 }) => {
   const [name, setName] = React.useState('');
   const [hourlyRate, setHourlyRate] = React.useState(0);
@@ -51,16 +53,45 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
   const cropImgRef = useRef<HTMLImageElement>(null);
   const { toast } = useToast();
 
-  const PRESET_IMAGES: { id: string; label: string; url: string }[] = useMemo(
-    () => [
-      { id: 'american', label: 'American Table', url: '/American table.jpg' },
-      { id: 'medium', label: 'Medium Table', url: '/Medium Table.jpg' },
-      { id: 'standard', label: 'Standard Table', url: '/Standard Table.jpg' },
-      { id: 'foosball', label: 'Foosball', url: '/Foosball.jpeg' },
-      { id: 'ps', label: 'PS', url: '/controller.png' },
-    ],
-    []
-  );
+  const getGroupKey = React.useCallback((s: Station) => {
+    const base = s.name
+      .trim()
+      .replace(/\s*#?\d+\s*$/g, "")
+      .trim()
+      .toLowerCase();
+    return `${s.type}:${base}`;
+  }, []);
+
+  const parseSuffixNumber = React.useCallback((name: string): number | null => {
+    const m = name.trim().match(/(\d+)\s*$/);
+    if (!m) return null;
+    const n = Number.parseInt(m[1], 10);
+    return Number.isFinite(n) ? n : null;
+  }, []);
+
+  const sortedGroupStations = useMemo(() => {
+    if (!station || !allStations || allStations.length === 0) return [];
+    const key = getGroupKey(station);
+    const siblings = allStations.filter((s) => getGroupKey(s) === key);
+    siblings.sort((a, b) => {
+      const na = parseSuffixNumber(a.name);
+      const nb = parseSuffixNumber(b.name);
+      if (na !== null && nb !== null && na !== nb) return na - nb;
+      if (na !== null && nb === null) return -1;
+      if (na === null && nb !== null) return 1;
+      return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+    });
+    return siblings;
+  }, [allStations, getGroupKey, parseSuffixNumber, station]);
+
+  const canCopyFromOtherStation = useMemo(() => {
+    if (!station) return false;
+    if (sortedGroupStations.length <= 1) return false;
+    const idx = sortedGroupStations.findIndex((s) => s.id === station.id);
+    if (idx <= 0) return false; // first in group should not have dropdown
+    // Only show if there is a prior station with an image_url set.
+    return sortedGroupStations.slice(0, idx).some((s) => !!s.imageUrl);
+  }, [sortedGroupStations, station]);
 
   // Update form when station changes
   React.useEffect(() => {
@@ -260,7 +291,7 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const applyPresetImage = async (imageUrl: string) => {
+  const applyImageUrlToStation = async (imageUrl: string) => {
     if (!station) return;
 
     // Reset local crop/upload state; this is a direct assignment.
@@ -278,10 +309,10 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
           .update({ image_url: imageUrl })
           .eq('id', station.id);
         if (updateError) {
-          console.error('Error saving preset station image url:', updateError);
+          console.error('Error saving station image url:', updateError);
           toast({
             title: 'Save failed',
-            description: 'Failed to set preset image for this station.',
+            description: 'Failed to set image for this station.',
             variant: 'destructive',
           });
           return;
@@ -289,7 +320,7 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
       }
 
       toast({
-        title: 'Preset applied',
+        title: 'Image updated',
         description: 'Station image updated.',
       });
     } finally {
@@ -437,32 +468,40 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
           {/* Station Image */}
           <div className="space-y-2">
             <Label>Station Image</Label>
-
-            {/* Preset image selector */}
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Quick presets</Label>
-              <Select
-                onValueChange={(value) => {
-                  const preset = PRESET_IMAGES.find((p) => p.id === value);
-                  if (preset) applyPresetImage(preset.url);
-                }}
-                disabled={isUploadingImage || isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select: American / Medium / Standard / Foosball / PS" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRESET_IMAGES.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Selecting a preset will instantly set the station image.
-              </p>
-            </div>
+            {/* Copy image from first station in group (only when duplicates exist) */}
+            {canCopyFromOtherStation && station && (
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Copy image from</Label>
+                <Select
+                  onValueChange={(value) => {
+                    const src = sortedGroupStations.find((s) => s.id === value);
+                    if (!src?.imageUrl) return;
+                    applyImageUrlToStation(src.imageUrl);
+                  }}
+                  disabled={isUploadingImage || isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a station to copy image from" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(() => {
+                      const idx = sortedGroupStations.findIndex((s) => s.id === station.id);
+                      const prior = sortedGroupStations.slice(0, Math.max(0, idx));
+                      const options = prior.filter((s) => !!s.imageUrl);
+                      // Prefer the first station (index 0) but include any earlier ones with images.
+                      return options.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}
+                        </SelectItem>
+                      ));
+                    })()}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  This appears only for duplicate stations (e.g. Medium Table 2) and copies the image from an earlier one (e.g. Medium Table 1).
+                </p>
+              </div>
+            )}
 
             {isCropping ? (
               <div className="space-y-3">
