@@ -39,6 +39,7 @@ export interface Station {
   name: string;
   type: 'ps5' | '8ball' | 'foosball';
   hourlyRate: number;
+  imageUrl?: string | null;
   isOccupied: boolean;
   currentSession: Session | null;
 }

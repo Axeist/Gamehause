@@ -1339,6 +1339,7 @@ export type Database = {
           created_at: string
           hourly_rate: number
           id: string
+          image_url: string | null
           is_controller: boolean | null
           is_occupied: boolean
           name: string
@@ -1350,6 +1351,7 @@ export type Database = {
           created_at?: string
           hourly_rate: number
           id?: string
+          image_url?: string | null
           is_controller?: boolean | null
           is_occupied?: boolean
           name: string
@@ -1361,6 +1363,7 @@ export type Database = {
           created_at?: string
           hourly_rate?: number
           id?: string
+          image_url?: string | null
           is_controller?: boolean | null
           is_occupied?: boolean
           name?: string
