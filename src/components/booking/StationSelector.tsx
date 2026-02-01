@@ -38,7 +38,7 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
   const getStationTypeLabel = (type: string) => {
     switch (type) {
       case 'ps5':
-        return 'PlayStation 5';
+        return 'PlayStation';
       case 'foosball':
         return 'Foosball Table';
       default:

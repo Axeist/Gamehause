@@ -253,7 +253,7 @@ const PublicStations = () => {
             <div className="w-10 h-10 rounded-xl bg-gamehaus-purple/20 flex items-center justify-center mr-3 animate-pulse-soft">
               <Gamepad2 className="h-5 w-5 text-gamehaus-lightpurple" />
             </div>
-            <h2 className="text-2xl font-bold text-white">PlayStation 5 Consoles</h2>
+            <h2 className="text-2xl font-bold text-white">PlayStation Consoles</h2>
           </div>
           
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

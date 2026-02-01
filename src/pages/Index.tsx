@@ -54,7 +54,7 @@ const STATION_TYPE_META: Record<
     chipClass: "bg-amber-500/12 text-amber-200 border-amber-500/25",
   },
   ps5: {
-    title: "PlayStation 5",
+    title: "PlayStation Consoles",
     subtitle: "PS5 stations",
     Icon: Gamepad2,
     accentClass: "from-sky-500/18 via-sky-500/8 to-sky-500/18 border-sky-500/35",

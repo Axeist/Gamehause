@@ -75,7 +75,7 @@ const Stations = () => {
         <Card className="bg-gradient-to-r from-cuephoria-purple/20 to-cuephoria-lightpurple/20 border-cuephoria-purple/30 border animate-fade-in delay-100">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">PlayStation 5</p>
+              <p className="text-sm text-muted-foreground">PlayStation</p>
               <p className="text-2xl font-bold">{activePs5} / {ps5Stations.length} Active</p>
             </div>
             <div className="rounded-full bg-cuephoria-purple/20 p-3">
@@ -128,7 +128,7 @@ const Stations = () => {
         <div className="animate-slide-up delay-300">
           <div className="flex items-center mb-4">
             <Gamepad2 className="h-5 w-5 text-cuephoria-lightpurple mr-2" />
-            <h3 className="text-xl font-semibold font-heading">PlayStation 5 Consoles</h3>
+            <h3 className="text-xl font-semibold font-heading">PlayStation Consoles</h3>
             <span className="ml-2 bg-cuephoria-purple/20 text-cuephoria-lightpurple text-xs px-2 py-1 rounded-full">
               {activePs5} active
             </span>
