@@ -15,7 +15,8 @@ export const useStations = (initialStations: Station[] = [], updateCustomer: (cu
     refreshStations,
     deleteStation,
     updateStation,
-    updateStationImage
+    updateStationImage,
+    updateStationPublicBooking
   } = useStationsData();
   
   const {
@@ -87,6 +88,7 @@ export const useStations = (initialStations: Station[] = [], updateCustomer: (cu
     deleteStation,
     updateStation,
     updateStationImage,
+    updateStationPublicBooking,
     stationsLoading,
     stationsError,
     sessionsLoading,

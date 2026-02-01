@@ -56,6 +56,7 @@ const POSContext = createContext<POSContextType>({
   deleteStation: async () => false,
   updateStation: async () => false,
   updateStationImage: async () => false,
+  updateStationPublicBooking: async () => false,
   addCustomer: () => ({}),
   updateCustomer: () => ({}),
   updateCustomerMembership: () => null,
@@ -127,6 +128,7 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteStation,
     updateStation,
     updateStationImage
+    ,updateStationPublicBooking
   } = useStations([], updateCustomer);
   
   const { 
@@ -803,6 +805,7 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteStation,
         updateStation,
         updateStationImage,
+        updateStationPublicBooking,
         addCustomer,
         updateCustomer,
         updateCustomerMembership: updateCustomerMembershipWrapper,

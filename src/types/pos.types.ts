@@ -40,6 +40,7 @@ export interface Station {
   type: 'ps5' | '8ball' | 'foosball';
   hourlyRate: number;
   imageUrl?: string | null;
+  isPublicBooking?: boolean;
   isOccupied: boolean;
   currentSession: Session | null;
 }
@@ -143,6 +144,7 @@ export interface POSContextType {
   deleteStation: (stationId: string) => Promise<boolean>;
   updateStation: (stationId: string, name: string, hourlyRate: number) => Promise<boolean>;
   updateStationImage: (stationId: string, imageUrl: string | null) => Promise<boolean>;
+  updateStationPublicBooking: (stationId: string, enabled: boolean) => Promise<boolean>;
   
   addCustomer: (customer: Omit<Customer, 'id' | 'createdAt'>) => void;
   updateCustomer: (customer: Customer) => void;

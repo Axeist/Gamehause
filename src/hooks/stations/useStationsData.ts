@@ -77,6 +77,7 @@ export const useStationsData = () => {
             type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' ? item.type : 'ps5',
             hourlyRate: item.hourly_rate,
             imageUrl: item.image_url ?? null,
+            isPublicBooking: item.is_public_booking ?? true,
             isOccupied: item.is_occupied,
             currentSession: currentSession
           };
@@ -212,6 +213,59 @@ export const useStationsData = () => {
       return false;
     }
   };
+
+  const updateStationPublicBooking = async (stationId: string, enabled: boolean) => {
+    try {
+      const station = stations.find(s => s.id === stationId);
+      if (!station) {
+        console.error('Station not found:', stationId);
+        toast({
+          title: 'Error',
+          description: 'Station not found',
+          variant: 'destructive'
+        });
+        return false;
+      }
+
+      const { error } = await supabase
+        .from('stations')
+        .update({ is_public_booking: enabled })
+        .eq('id', stationId);
+
+      if (error) {
+        console.error('Error updating station public booking flag in Supabase:', error);
+        toast({
+          title: 'Database Error',
+          description: 'Failed to update public booking visibility',
+          variant: 'destructive'
+        });
+        return false;
+      }
+
+      setStations(prev => prev.map(s =>
+        s.id === stationId
+          ? { ...s, isPublicBooking: enabled }
+          : s
+      ));
+
+      toast({
+        title: enabled ? 'Enabled on Public Booking' : 'Disabled on Public Booking',
+        description: enabled
+          ? 'This station will appear on the public booking page.'
+          : 'This station will be hidden from the public booking page.',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error in updateStationPublicBooking:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update public booking visibility',
+        variant: 'destructive'
+      });
+      return false;
+    }
+  };
   
   const deleteStation = async (stationId: string) => {
     try {
@@ -338,6 +392,7 @@ export const useStationsData = () => {
     refreshStations,
     deleteStation,
     updateStation,
-    updateStationImage
+    updateStationImage,
+    updateStationPublicBooking
   };
 };

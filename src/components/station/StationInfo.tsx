@@ -2,6 +2,7 @@
 import React from 'react';
 import { Station } from '@/context/POSContext';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Gamepad2, CircleOff, Table2, UserCheck, User } from 'lucide-react';
 import { CurrencyDisplay } from '@/components/ui/currency';
 import { Customer } from '@/types/pos.types';
@@ -11,12 +12,21 @@ interface StationInfoProps {
   station: Station;
   customerName: string;
   customerData?: Customer | null;
+  onPublicBookingToggle?: (enabled: boolean) => void;
+  publicBookingUpdating?: boolean;
 }
 
-const StationInfo: React.FC<StationInfoProps> = ({ station, customerName, customerData }) => {
+const StationInfo: React.FC<StationInfoProps> = ({
+  station,
+  customerName,
+  customerData,
+  onPublicBookingToggle,
+  publicBookingUpdating = false,
+}) => {
   // Different styling based on station type
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
+  const isPublicBooking = station.isPublicBooking !== false;
   
   // Check if customer is a member and membership is active
   const isMember = customerData ? isMembershipActive(customerData) : false;
@@ -71,6 +81,26 @@ const StationInfo: React.FC<StationInfoProps> = ({ station, customerName, custom
           <span>Hourly Rate:</span>
           <CurrencyDisplay amount={station.hourlyRate} />
         </div>
+
+        {/* Live on public booking toggle */}
+        {onPublicBookingToggle && (
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className={`h-2 w-2 rounded-full ${isPublicBooking ? "bg-green-500" : "bg-red-500"}`}
+              />
+              <span className="text-xs text-gray-400 truncate">
+                {isPublicBooking ? "Live on public booking" : "Disabled on public booking"}
+              </span>
+            </div>
+            <Switch
+              checked={isPublicBooking}
+              disabled={publicBookingUpdating}
+              onCheckedChange={(checked) => onPublicBookingToggle(checked)}
+              className={publicBookingUpdating ? "opacity-70" : ""}
+            />
+          </div>
+        )}
         
         {station.isOccupied && station.currentSession && (
           <>

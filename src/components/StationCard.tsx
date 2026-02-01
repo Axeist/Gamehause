@@ -24,11 +24,12 @@ interface StationCardProps {
 }
 
 const StationCard: React.FC<StationCardProps> = ({ station }) => {
-  const { stations, customers, startSession, endSession, deleteStation, updateStation, updateStationImage } = usePOS();
+  const { stations, customers, startSession, endSession, deleteStation, updateStation, updateStationImage, updateStationPublicBooking } = usePOS();
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
   const isPs5 = station.type === 'ps5';
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [publicBookingUpdating, setPublicBookingUpdating] = useState(false);
 
   const getFallbackImageSrc = () => {
     if (station.type === 'foosball') return '/Foosball.jpeg';
@@ -51,6 +52,15 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
     : null;
     
   const customerName = customer ? customer.name : 'Unknown Customer';
+
+  const handlePublicBookingToggle = async (enabled: boolean) => {
+    setPublicBookingUpdating(true);
+    try {
+      await updateStationPublicBooking(station.id, enabled);
+    } finally {
+      setPublicBookingUpdating(false);
+    }
+  };
   
   // ✅ NEW: Get coupon information from session
   const session = station.currentSession;
@@ -154,7 +164,13 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
           )}
           <div className="flex justify-between items-center space-x-2">
             <div className="flex-grow">
-              <StationInfo station={station} customerName={customerName} customerData={customer} />
+              <StationInfo
+                station={station}
+                customerName={customerName}
+                customerData={customer}
+                onPublicBookingToggle={handlePublicBookingToggle}
+                publicBookingUpdating={publicBookingUpdating}
+              />
             </div>
             <div className="flex gap-1">
               <Button 

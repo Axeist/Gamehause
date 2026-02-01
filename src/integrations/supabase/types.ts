@@ -1340,6 +1340,7 @@ export type Database = {
           hourly_rate: number
           id: string
           image_url: string | null
+          is_public_booking: boolean
           is_controller: boolean | null
           is_occupied: boolean
           name: string
@@ -1352,6 +1353,7 @@ export type Database = {
           hourly_rate: number
           id?: string
           image_url?: string | null
+          is_public_booking?: boolean
           is_controller?: boolean | null
           is_occupied?: boolean
           name: string
@@ -1364,6 +1366,7 @@ export type Database = {
           hourly_rate?: number
           id?: string
           image_url?: string | null
+          is_public_booking?: boolean
           is_controller?: boolean | null
           is_occupied?: boolean
           name?: string
