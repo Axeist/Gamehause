@@ -60,6 +60,17 @@ const STATION_TYPE_META: Record<
   },
 };
 
+const getStationImageSrc = (station: Station): string | null => {
+  if (station.type !== "8ball") return null;
+
+  const name = station.name.toLowerCase();
+  if (name.includes("american")) return "/American table.jpg";
+  if (name.includes("medium")) return "/Medium Table.jpg";
+  if (name.includes("standard")) return "/Standard Table.jpg";
+
+  return null;
+};
+
 const Index: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -451,6 +462,23 @@ const Index: React.FC = () => {
                                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/6 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                                   <div className="p-5 relative z-10">
+                                    {(() => {
+                                      const imageSrc = getStationImageSrc(station);
+                                      if (!imageSrc) return null;
+                                      return (
+                                        <div className="relative mb-4 overflow-hidden rounded-xl border border-white/10 bg-black/25">
+                                          <img
+                                            src={imageSrc}
+                                            alt={`${station.name} table`}
+                                            loading="lazy"
+                                            decoding="async"
+                                            className="h-28 w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-[1.04]"
+                                          />
+                                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                                        </div>
+                                      );
+                                    })()}
+
                                     <div className="flex items-start justify-between gap-4 mb-4">
                                       <div className="min-w-0">
                                         <h4 className="text-base sm:text-lg font-bold text-white truncate">{station.name}</h4>
