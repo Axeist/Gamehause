@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -14,7 +14,8 @@ import { Label } from './ui/label';
 import { Station } from '@/types/pos.types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, Upload, X } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Edit, Upload, X, Crop } from 'lucide-react';
 
 interface EditStationDialogProps {
   open: boolean;
@@ -34,10 +35,19 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
   const [name, setName] = React.useState('');
   const [hourlyRate, setHourlyRate] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null); // cropped file ready to upload
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null); // current preview (station image or cropped preview)
+  const [rawFile, setRawFile] = React.useState<File | null>(null); // original chosen file (before crop)
+  const [rawPreviewUrl, setRawPreviewUrl] = React.useState<string | null>(null); // object URL for original chosen file
+  const [isCropping, setIsCropping] = React.useState(false);
+  const [zoom, setZoom] = React.useState(1);
+  const [center, setCenter] = React.useState<{ x: number; y: number }>({ x: 0.5, y: 0.5 }); // normalized 0..1
+  const [imageNatural, setImageNatural] = React.useState<{ w: number; h: number } | null>(null);
+  const [cropFrameSize, setCropFrameSize] = React.useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [isUploadingImage, setIsUploadingImage] = React.useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cropFrameRef = useRef<HTMLDivElement>(null);
+  const cropImgRef = useRef<HTMLImageElement>(null);
   const { toast } = useToast();
 
   // Update form when station changes
@@ -46,9 +56,77 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
       setName(station.name);
       setHourlyRate(station.hourlyRate);
       setSelectedFile(null);
+      setRawFile(null);
+      setIsCropping(false);
+      setZoom(1);
+      setCenter({ x: 0.5, y: 0.5 });
+      setImageNatural(null);
+      if (rawPreviewUrl) URL.revokeObjectURL(rawPreviewUrl);
+      setRawPreviewUrl(null);
       setPreviewUrl(station.imageUrl ?? null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [station]);
+
+  // Keep crop frame size updated (for drag math + preview transform)
+  useEffect(() => {
+    if (!cropFrameRef.current) return;
+    const el = cropFrameRef.current;
+    const ro = new ResizeObserver(() => {
+      const rect = el.getBoundingClientRect();
+      setCropFrameSize({ w: rect.width, h: rect.height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isCropping]);
+
+  // Cleanup object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (rawPreviewUrl) URL.revokeObjectURL(rawPreviewUrl);
+      if (previewUrl && previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
+    };
+  }, [rawPreviewUrl, previewUrl]);
+
+  const clampCenter = React.useCallback(
+    (next: { x: number; y: number }, z: number) => {
+      if (!imageNatural) return next;
+
+      // We constrain based on the final output ratio (16:9) so what you see is what you save.
+      const outW = 1200;
+      const outH = 675;
+      const { w: imgW, h: imgH } = imageNatural;
+      const scale0 = Math.max(outW / imgW, outH / imgH);
+      const scale = scale0 * z;
+      const srcW = outW / scale;
+      const srcH = outH / scale;
+
+      const minX = (srcW / 2) / imgW;
+      const maxX = 1 - minX;
+      const minY = (srcH / 2) / imgH;
+      const maxY = 1 - minY;
+
+      return {
+        x: Math.min(Math.max(next.x, minX), maxX),
+        y: Math.min(Math.max(next.y, minY), maxY),
+      };
+    },
+    [imageNatural]
+  );
+
+  const previewTransform = useMemo(() => {
+    if (!isCropping || !imageNatural || cropFrameSize.w === 0 || cropFrameSize.h === 0) return null;
+    const { w: imgW, h: imgH } = imageNatural;
+    const frameW = cropFrameSize.w;
+    const frameH = cropFrameSize.h;
+    const scale0 = Math.max(frameW / imgW, frameH / imgH);
+    const scale = scale0 * zoom;
+    const cx = center.x * imgW;
+    const cy = center.y * imgH;
+    const tx = frameW / 2 - scale * cx;
+    const ty = frameH / 2 - scale * cy;
+    return { tx, ty, scale };
+  }, [center.x, center.y, cropFrameSize.h, cropFrameSize.w, imageNatural, isCropping, zoom]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,8 +165,84 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
       return;
     }
 
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    // Start crop flow
+    if (rawPreviewUrl) URL.revokeObjectURL(rawPreviewUrl);
+    const url = URL.createObjectURL(file);
+    setRawFile(file);
+    setRawPreviewUrl(url);
+    setSelectedFile(null); // will be set after crop applied
+    setIsCropping(true);
+    setZoom(1);
+    setCenter({ x: 0.5, y: 0.5 });
+    setImageNatural(null);
+  };
+
+  const applyCrop = async () => {
+    if (!rawFile || !rawPreviewUrl || !station) return;
+    if (!imageNatural) return;
+
+    const outW = 1200;
+    const outH = 675;
+    const { w: imgW, h: imgH } = imageNatural;
+
+    const imgEl = cropImgRef.current;
+    if (!imgEl) return;
+
+    const scale0 = Math.max(outW / imgW, outH / imgH);
+    const scale = scale0 * zoom;
+    const srcW = outW / scale;
+    const srcH = outH / scale;
+
+    const clamped = clampCenter(center, zoom);
+    const cx = clamped.x * imgW;
+    const cy = clamped.y * imgH;
+
+    const sx = Math.max(0, Math.min(imgW - srcW, cx - srcW / 2));
+    const sy = Math.max(0, Math.min(imgH - srcH, cy - srcH / 2));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = outW;
+    canvas.height = outH;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(imgEl, sx, sy, srcW, srcH, 0, 0, outW, outH);
+
+    const blob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.9)
+    );
+    if (!blob) return;
+
+    const croppedFile = new File([blob], `station-${station.id}-${Date.now()}.jpg`, {
+      type: 'image/jpeg',
+    });
+
+    // Replace preview with cropped output
+    if (previewUrl && previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
+    const croppedUrl = URL.createObjectURL(croppedFile);
+
+    setSelectedFile(croppedFile);
+    setPreviewUrl(croppedUrl);
+    setIsCropping(false);
+    toast({
+      title: 'Crop applied',
+      description: 'Now upload to save this cropped image.',
+    });
+  };
+
+  const cancelCrop = () => {
+    if (rawPreviewUrl) URL.revokeObjectURL(rawPreviewUrl);
+    setRawPreviewUrl(null);
+    setRawFile(null);
+    setSelectedFile(null);
+    setIsCropping(false);
+    setZoom(1);
+    setCenter({ x: 0.5, y: 0.5 });
+    setImageNatural(null);
+    setPreviewUrl(station?.imageUrl ?? null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleUploadImage = async () => {
@@ -96,7 +250,7 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
     if (!selectedFile) {
       toast({
         title: 'No image selected',
-        description: 'Choose an image first, then upload.',
+        description: isCropping ? 'Apply the crop first, then upload.' : 'Choose an image first, then upload.',
         variant: 'destructive',
       });
       return;
@@ -173,6 +327,15 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
     if (!station) return;
     setIsUploadingImage(true);
     try {
+      if (rawPreviewUrl) URL.revokeObjectURL(rawPreviewUrl);
+      setRawPreviewUrl(null);
+      setRawFile(null);
+      setIsCropping(false);
+      setSelectedFile(null);
+      setZoom(1);
+      setCenter({ x: 0.5, y: 0.5 });
+      setImageNatural(null);
+
       if (onUpdateImage) {
         const ok = await onUpdateImage(station.id, null);
         if (!ok) return;
@@ -222,7 +385,105 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
           {/* Station Image */}
           <div className="space-y-2">
             <Label>Station Image</Label>
-            {previewUrl ? (
+            {isCropping ? (
+              <div className="space-y-3">
+                <div
+                  ref={cropFrameRef}
+                  className="relative overflow-hidden rounded-lg border border-white/10 bg-black/20 select-none touch-none"
+                  style={{ aspectRatio: '16 / 9' }}
+                  onPointerDown={(e) => {
+                    if (!previewTransform || !imageNatural) return;
+                    const frame = cropFrameRef.current;
+                    if (!frame) return;
+                    frame.setPointerCapture(e.pointerId);
+                    const startX = e.clientX;
+                    const startY = e.clientY;
+                    const startCenter = { ...center };
+                    const { w: imgW, h: imgH } = imageNatural;
+                    const frameW = cropFrameSize.w;
+                    const frameH = cropFrameSize.h;
+                    const scale0 = Math.max(frameW / imgW, frameH / imgH);
+                    const scale = scale0 * zoom;
+
+                    const onMove = (ev: PointerEvent) => {
+                      const dx = ev.clientX - startX;
+                      const dy = ev.clientY - startY;
+                      const next = {
+                        x: startCenter.x - dx / (imgW * scale),
+                        y: startCenter.y - dy / (imgH * scale),
+                      };
+                      setCenter(clampCenter(next, zoom));
+                    };
+                    const onUp = () => {
+                      window.removeEventListener('pointermove', onMove);
+                      window.removeEventListener('pointerup', onUp);
+                    };
+                    window.addEventListener('pointermove', onMove);
+                    window.addEventListener('pointerup', onUp);
+                  }}
+                >
+                  {rawPreviewUrl && (
+                    <img
+                      ref={cropImgRef}
+                      src={rawPreviewUrl}
+                      alt="Crop preview"
+                      className="absolute left-0 top-0 will-change-transform"
+                      style={{
+                        transformOrigin: 'top left',
+                        transform: previewTransform
+                          ? `translate(${previewTransform.tx}px, ${previewTransform.ty}px) scale(${previewTransform.scale})`
+                          : undefined,
+                      }}
+                      onLoad={(e) => {
+                        const img = e.currentTarget;
+                        setImageNatural({ w: img.naturalWidth, h: img.naturalHeight });
+                      }}
+                      draggable={false}
+                    />
+                  )}
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+                  <div className="pointer-events-none absolute inset-2 rounded-md border border-white/15" />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">Drag to reposition</p>
+                    <p className="text-xs text-muted-foreground">Zoom</p>
+                  </div>
+                  <Slider
+                    value={[zoom]}
+                    min={1}
+                    max={3}
+                    step={0.01}
+                    onValueChange={(v) => {
+                      const nextZoom = v[0] ?? 1;
+                      setZoom(nextZoom);
+                      setCenter((c) => clampCenter(c, nextZoom));
+                    }}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={cancelCrop}
+                    disabled={isUploadingImage || isLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={applyCrop}
+                    disabled={isUploadingImage || isLoading || !imageNatural}
+                    className="bg-cuephoria-purple hover:bg-cuephoria-purple/80 gap-2"
+                  >
+                    <Crop className="h-4 w-4" />
+                    Apply Crop
+                  </Button>
+                </div>
+              </div>
+            ) : previewUrl ? (
               <div className="relative overflow-hidden rounded-lg border border-white/10 bg-black/20">
                 <img
                   src={previewUrl}
@@ -237,7 +498,7 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
                     className="h-8 w-8 bg-black/50 hover:bg-black/70 text-white"
                     onClick={() => {
                       setSelectedFile(null);
-                      setPreviewUrl(station?.imageUrl ?? null);
+                      cancelCrop();
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
                     title="Clear selected"
@@ -277,7 +538,7 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
               <Button
                 type="button"
                 onClick={handleUploadImage}
-                disabled={isUploadingImage || isLoading || !selectedFile}
+                disabled={isUploadingImage || isLoading || !selectedFile || isCropping}
                 className="bg-cuephoria-purple hover:bg-cuephoria-purple/80"
               >
                 {isUploadingImage ? 'Uploading...' : 'Upload'}
@@ -294,7 +555,9 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
                 </Button>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">PNG/JPG/WebP up to 5MB.</p>
+            <p className="text-xs text-muted-foreground">
+              PNG/JPG/WebP up to 5MB. After choosing, adjust crop then upload.
+            </p>
           </div>
 
           <div className="space-y-2">
