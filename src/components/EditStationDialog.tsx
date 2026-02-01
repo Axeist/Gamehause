@@ -77,6 +77,9 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
       setCropFrameSize({ w: rect.width, h: rect.height });
     });
     ro.observe(el);
+    // Ensure an initial size immediately (prevents tiny top-left preview)
+    const rect = el.getBoundingClientRect();
+    setCropFrameSize({ w: rect.width, h: rect.height });
     return () => ro.disconnect();
   }, [isCropping]);
 
@@ -427,11 +430,17 @@ const EditStationDialog: React.FC<EditStationDialogProps> = ({
                       ref={cropImgRef}
                       src={rawPreviewUrl}
                       alt="Crop preview"
-                      className="absolute left-0 top-0 will-change-transform"
+                      className="absolute left-0 top-0 max-w-none will-change-transform"
                       style={{
                         transformOrigin: 'top left',
+                        // Important: size the element to its natural pixel size so transform math is stable.
+                        width: imageNatural ? `${imageNatural.w}px` : undefined,
+                        height: imageNatural ? `${imageNatural.h}px` : undefined,
+                        opacity: previewTransform ? 1 : 0,
+                        transition: "opacity 150ms ease",
+                        // Use a matrix to avoid transform-order quirks (pan won't affect zoom).
                         transform: previewTransform
-                          ? `translate(${previewTransform.tx}px, ${previewTransform.ty}px) scale(${previewTransform.scale})`
+                          ? `matrix(${previewTransform.scale}, 0, 0, ${previewTransform.scale}, ${previewTransform.tx}, ${previewTransform.ty})`
                           : undefined,
                       }}
                       onLoad={(e) => {
