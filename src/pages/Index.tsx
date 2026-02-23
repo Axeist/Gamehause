@@ -927,8 +927,8 @@ const Index: React.FC = () => {
         <div className="pointer-events-none absolute -top-24 left-1/4 h-48 w-48 rounded-full bg-gradient-to-br from-gamehaus-purple/18 to-transparent blur-[70px]" />
         <div className="pointer-events-none absolute -top-24 right-1/4 h-48 w-48 rounded-full bg-gradient-to-br from-gamehaus-magenta/14 to-transparent blur-[70px]" />
 
-        <div className="relative max-w-6xl mx-auto px-6 md:px-8 py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-10 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
             {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -1279,7 +1279,7 @@ const Index: React.FC = () => {
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
-                  <span className="leading-relaxed">
+                  <span className="leading-relaxed break-words">
                     {ADDRESS}
                   </span>
                 </div>
@@ -1289,7 +1289,7 @@ const Index: React.FC = () => {
 
           <Separator className="my-10 bg-gamehaus-purple/20" />
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-5">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-5">
             <div className="text-sm text-gray-400 text-center md:text-left">
               © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
             </div>
@@ -1321,17 +1321,17 @@ const Index: React.FC = () => {
         </div>
       </footer>
       
-      {/* Elegant animated elements */}
-      <div className="fixed top-[12%] left-[8%] text-gamehaus-lightpurple opacity-15 animate-float">
+      {/* Elegant animated elements (hidden on small screens to avoid overlap with content/chat) */}
+      <div className="hidden md:block fixed top-[12%] left-[8%] text-gamehaus-lightpurple opacity-15 animate-float pointer-events-none">
         <Trophy size={28} className="animate-wiggle" />
       </div>
-      <div className="fixed bottom-[18%] right-[12%] text-gamehaus-magenta opacity-15 animate-float delay-300">
+      <div className="hidden md:block fixed bottom-[18%] right-[12%] text-gamehaus-magenta opacity-15 animate-float delay-300 pointer-events-none">
         <Sparkles size={26} className="animate-pulse-soft" />
       </div>
-      <div className="fixed top-[35%] right-[8%] text-gamehaus-lightpurple opacity-15 animate-float delay-150">
+      <div className="hidden md:block fixed top-[35%] right-[8%] text-gamehaus-lightpurple opacity-15 animate-float delay-150 pointer-events-none">
         <Star size={24} className="animate-wiggle" />
       </div>
-      <div className="fixed bottom-[30%] left-[15%] text-gamehaus-magenta opacity-15 animate-float delay-200">
+      <div className="hidden md:block fixed bottom-[30%] left-[15%] text-gamehaus-magenta opacity-15 animate-float delay-200 pointer-events-none">
         <Trophy size={22} className="animate-pulse-soft" />
       </div>
     </div>

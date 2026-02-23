@@ -651,7 +651,7 @@ export default function GameboyChatWidget() {
         setMinimized(false);
         deliverPendingNudgeIfAny();
       }}
-      className={`fixed bottom-5 right-5 z-[60] h-14 w-14 rounded-2xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/70 via-gamehaus-purple/25 to-black/70 backdrop-blur-md shadow-2xl shadow-gamehaus-purple/25 hover:shadow-gamehaus-magenta/20 transition-all duration-300 group ${ringing ? "gh-ring" : ""}`}
+      className={`fixed z-[60] h-14 w-14 rounded-2xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/70 via-gamehaus-purple/25 to-black/70 backdrop-blur-md shadow-2xl shadow-gamehaus-purple/25 hover:shadow-gamehaus-magenta/20 transition-all duration-300 group gh-chat-fab-position ${ringing ? "gh-ring" : ""}`}
       aria-label="Open Gameboy chat"
     >
       <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-gamehaus-purple/25 to-gamehaus-magenta/20 blur-xl opacity-60 group-hover:opacity-90 transition-opacity" />
@@ -677,8 +677,8 @@ export default function GameboyChatWidget() {
     return (
       <>
         {ChatBubble}
-        <div className="fixed bottom-5 right-5 z-[61] pointer-events-none">
-          <div className="translate-y-[-68px] mr-0 w-[220px] rounded-2xl border border-white/10 bg-black/60 backdrop-blur-md px-3 py-2 shadow-xl shadow-black/30">
+        <div className="fixed z-[61] pointer-events-none gh-chat-fab-position">
+          <div className="translate-y-[-68px] mr-0 w-[220px] max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-black/60 backdrop-blur-md px-3 py-2 shadow-xl shadow-black/30">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <Sparkles className="h-4 w-4 text-gamehaus-magenta shrink-0" />
@@ -702,12 +702,11 @@ export default function GameboyChatWidget() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-[70]">
+    <div className="fixed z-[70] gh-chat-panel-position sm:w-[min(420px,calc(100vw-24px))]">
       <div
-        className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/75 via-gamehaus-purple/20 to-black/75 backdrop-blur-xl shadow-2xl shadow-black/50 animate-slide-up"
+        className="relative overflow-hidden rounded-3xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/75 via-gamehaus-purple/20 to-black/75 backdrop-blur-xl shadow-2xl shadow-black/50 animate-slide-up w-full"
         style={{
-          width: `min(${panelWidth}px, ${mobileWidth})`,
-          height: `min(${panelHeight}px, calc(100vh - 120px))`,
+          height: `min(${panelHeight}px, calc(100dvh - 2rem - env(safe-area-inset-bottom, 0px)))`,
         }}
       >
         {/* glow */}
