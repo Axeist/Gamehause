@@ -1109,7 +1109,7 @@ export default function GameboyChatWidget() {
         {/* input */}
         <div className="border-t border-white/10 bg-black/25 px-3 py-3 shrink-0">
           <form
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 min-w-0"
             onSubmit={(e) => {
               e.preventDefault();
               void sendUserMessage(input);
@@ -1119,7 +1119,7 @@ export default function GameboyChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={booking.active ? "Reply to Gameboy’s question…" : "Ask me about booking, pricing, availability…"}
-              className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus-visible:ring-gamehaus-purple/40"
+              className="bg-black/30 border-white/10 text-white placeholder:text-gray-400 focus-visible:ring-gamehaus-purple/40 min-w-0 flex-1"
               maxLength={500}
             />
             <Button

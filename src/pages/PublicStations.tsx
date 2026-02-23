@@ -147,7 +147,7 @@ const PublicStations = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] overflow-x-hidden">
       {/* Header with logo */}
       <header className="py-8 px-4 sm:px-6 md:px-8 animate-fade-in relative">
         <div className="max-w-7xl mx-auto">
@@ -301,7 +301,7 @@ const PublicStations = () => {
       </main>
       
       {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 md:px-8 border-t border-gamehaus-purple/30 mt-6 backdrop-blur-md bg-black/30">
+      <footer className="pt-8 pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 border-t border-gamehaus-purple/30 mt-6 backdrop-blur-md bg-black/30 pb-safe">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
             <img 

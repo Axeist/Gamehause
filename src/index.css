@@ -73,6 +73,11 @@
     max-width: 100%;
   }
 
+  /* Safe area padding for notched devices (optional use on footers) */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
+
   body {
     @apply bg-background text-foreground font-quicksand;
     -webkit-tap-highlight-color: transparent;

@@ -897,7 +897,7 @@ const PublicTournaments = () => {
   const ENABLE_PROMOTIONAL_POPUP = false; // Set to true to enable popup
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] text-white overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] text-white overflow-x-hidden">
       {/* Promotional Popup - Disabled by default, can be enabled by setting ENABLE_PROMOTIONAL_POPUP to true */}
       {ENABLE_PROMOTIONAL_POPUP && <PromotionalPopup />}
 
@@ -1110,7 +1110,7 @@ const PublicTournaments = () => {
       </main>
       
       {/* Enhanced Footer with contact details, legal links, and action buttons */}
-      <footer className="py-12 px-4 sm:px-6 md:px-8 border-t border-gamehaus-lightpurple/20 mt-12 backdrop-blur-md bg-black/50 relative z-10">
+      <footer className="pt-12 pb-20 sm:pb-12 px-4 sm:px-6 md:px-8 border-t border-gamehaus-lightpurple/20 mt-12 backdrop-blur-md bg-black/50 relative z-10 pb-safe">
         <div className="max-w-7xl mx-auto">
           {/* Action Buttons Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -2399,7 +2399,7 @@ export default function PublicBooking() {
         </div>
       </main>
 
-      <footer className="py-10 px-4 sm:px-6 md:px-8 border-t border-white/10 backdrop-blur-md bg-black/30 relative z-10">
+      <footer className="pt-10 pb-20 sm:pb-10 px-4 sm:px-6 md:px-8 border-t border-white/10 backdrop-blur-md bg-black/30 relative z-10 pb-safe">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center mb-4 md:mb-0">
@@ -2459,8 +2459,8 @@ export default function PublicBooking() {
               </button>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-gray-400">
-              <div className="flex items-center gap-1 flex-wrap justify-center">
+            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-1.5 flex-wrap justify-center">
                 <Phone className="h-4 w-4 shrink-0" />
                 <a href={`tel:+91${SUPPORT_PHONE_PRIMARY}`} className="hover:text-white transition-colors">
                   +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}

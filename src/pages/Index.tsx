@@ -921,7 +921,7 @@ const Index: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 mt-auto border-t border-gamehaus-purple/25 bg-black/35 backdrop-blur-md">
+      <footer className="relative z-10 mt-auto border-t border-gamehaus-purple/25 bg-black/35 backdrop-blur-md pt-10 pb-20 sm:pb-12 pb-safe">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.05] pointer-events-none" />
         <div className="absolute inset-0 bg-noise-soft opacity-[0.08] mix-blend-overlay pointer-events-none" />
         <div className="pointer-events-none absolute -top-24 left-1/4 h-48 w-48 rounded-full bg-gradient-to-br from-gamehaus-purple/18 to-transparent blur-[70px]" />
