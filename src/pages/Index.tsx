@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from '@/hooks/use-mobile';
-import { BRAND_NAME, LOGO_PATH, PUBLIC_BOOKING_URL, SUPPORT_EMAIL } from '@/config/brand';
+import { BRAND_NAME, LOGO_PATH, PUBLIC_BOOKING_URL, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY, ADDRESS } from '@/config/brand';
 import NeonMarquee from "@/components/marketing/NeonMarquee";
 import ExperienceShowcase from "@/components/marketing/ExperienceShowcase";
 import TestimonialsSection from "@/components/marketing/TestimonialsSection";
@@ -1084,7 +1084,7 @@ const Index: React.FC = () => {
                         <h2 className="text-lg font-semibold text-gamehaus-lightpurple">7. Contact</h2>
                         <p>
                           Questions about bookings, billing, or refunds? Reach us at <span className="text-white font-semibold">{SUPPORT_EMAIL}</span> or call
-                          <span className="text-white font-semibold"> +91 93451 87098</span>.
+                          <span className="text-white font-semibold"> +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}</span> / <span className="text-white font-semibold">+91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}</span>.
                         </p>
                       </section>
                       
@@ -1257,9 +1257,15 @@ const Index: React.FC = () => {
               <div className="mt-4 space-y-3 text-sm text-gray-300">
                 <div className="flex items-start gap-3">
                   <Phone className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
-                  <a href="tel:+919345187098" className="hover:text-gamehaus-lightpurple transition-colors">
-                    +91 93451 87098
-                  </a>
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <a href={`tel:+91${SUPPORT_PHONE_PRIMARY}`} className="hover:text-gamehaus-lightpurple transition-colors">
+                      +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}
+                    </a>
+                    <span className="text-gray-500">/</span>
+                    <a href={`tel:+91${SUPPORT_PHONE_SECONDARY}`} className="hover:text-gamehaus-lightpurple transition-colors">
+                      +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}
+                    </a>
+                  </span>
                 </div>
                 <div className="flex items-start gap-3">
                   <Mail className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
@@ -1274,7 +1280,7 @@ const Index: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
                   <span className="leading-relaxed">
-                    40, S W Boag Rd, CIT Nagar West, T. Nagar, Chennai, Tamil Nadu 600035
+                    {ADDRESS}
                   </span>
                 </div>
               </div>

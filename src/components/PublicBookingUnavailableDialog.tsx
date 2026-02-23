@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Phone, Info, Calendar, Clock, MapPin } from 'lucide-react';
-import { BRAND_NAME } from '@/config/brand';
+import { BRAND_NAME, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY, ADDRESS } from '@/config/brand';
 
 interface PublicBookingUnavailableDialogProps {
   open: boolean;
@@ -65,13 +65,30 @@ const PublicBookingUnavailableDialog: React.FC<PublicBookingUnavailableDialogPro
                 <Phone className="h-5 w-5 text-gamehaus-lightpurple flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-gray-400 text-xs mb-1">Call us for bookings</p>
-                  <a
-                    href="tel:+919345187098"
-                    className="text-gamehaus-lightpurple hover:text-gamehaus-magenta font-bold text-lg underline transition-colors flex items-center gap-2"
-                  >
-                    +91 93451 87098
+                  <div className="flex flex-wrap items-center gap-2">
+                    <a
+                      href={`tel:+91${SUPPORT_PHONE_PRIMARY}`}
+                      className="text-gamehaus-lightpurple hover:text-gamehaus-magenta font-bold text-lg underline transition-colors"
+                    >
+                      +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}
+                    </a>
+                    <span className="text-gray-500">/</span>
+                    <a
+                      href={`tel:+91${SUPPORT_PHONE_SECONDARY}`}
+                      className="text-gamehaus-lightpurple hover:text-gamehaus-magenta font-bold text-lg underline transition-colors"
+                    >
+                      +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}
+                    </a>
                     <span className="text-xs text-gray-400">(Tap to call)</span>
-                  </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-black/30 border border-gamehaus-purple/20">
+                <MapPin className="h-5 w-5 text-gamehaus-lightpurple flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-gray-400 text-xs mb-1">Visit us</p>
+                  <p className="text-white text-sm font-semibold leading-relaxed">{ADDRESS}</p>
                 </div>
               </div>
 

@@ -5,6 +5,10 @@ export const BRAND_NAME_UPPER = "GAMEHAUS" as const;
 export const BASE_URL = "https://gamehaus.co.in" as const;
 
 export const SUPPORT_EMAIL = "contact@gamehaus.co.in" as const;
+export const SUPPORT_PHONE_PRIMARY = "9994166622" as const;
+export const SUPPORT_PHONE_SECONDARY = "9345187098" as const;
+export const ADDRESS =
+  "SILINGI BUILDINGS, NO.134, 4th Floor Greams Road Backside to IDBI Bank, Tamil Nadu 600006" as const;
 export const LOGO_PATH = "/brand/gamehaus-logo.png" as const;
 
 /**

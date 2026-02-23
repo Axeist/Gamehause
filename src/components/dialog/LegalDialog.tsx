@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Phone, Mail, Clock, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { BRAND_NAME, SUPPORT_EMAIL } from '@/config/brand';
+import { BRAND_NAME, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY, ADDRESS } from '@/config/brand';
 
 interface LegalDialogProps {
   isOpen: boolean;
@@ -155,9 +155,14 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
                       <Phone className="h-5 w-5 text-gamehaus-purple" />
                     </div>
                     <h4 className="font-semibold mb-2 text-white">Phone</h4>
-                    <a href="tel:+919345187098" className="text-gray-300 hover:text-white transition-colors text-sm">
-                      +91 93451 87098
-                    </a>
+                    <div className="flex flex-col gap-1 text-sm">
+                      <a href={`tel:+91${SUPPORT_PHONE_PRIMARY}`} className="text-gray-300 hover:text-white transition-colors">
+                        +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}
+                      </a>
+                      <a href={`tel:+91${SUPPORT_PHONE_SECONDARY}`} className="text-gray-300 hover:text-white transition-colors">
+                        +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}
+                      </a>
+                    </div>
                   </CardContent>
                 </Card>
                 
@@ -190,10 +195,10 @@ const LegalDialog: React.FC<LegalDialogProps> = ({ isOpen, onClose, type }) => {
                       <MapPin className="h-5 w-5 text-gamehaus-pink" />
                     </div>
                     <h4 className="font-semibold mb-2 text-white">Visit Us</h4>
-                    <p className="text-gray-300 text-sm">{BRAND_NAME} – Gaming Lounge</p>
+                    <p className="text-gray-300 text-sm leading-relaxed">{ADDRESS}</p>
                     <a 
-                      href="https://maps.app.goo.gl/oBUVebkaFMWa7EPk8" 
-                      target="_blank" 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-gamehaus-purple hover:underline mt-2 text-xs"
                     >
