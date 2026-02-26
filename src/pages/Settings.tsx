@@ -258,25 +258,25 @@ const Settings = () => {
       </div>
       
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="mb-4">
-          <TabsTrigger value="general" className="flex items-center gap-2">
+        <TabsList className="mb-4 flex-wrap h-auto gap-1 overflow-x-auto justify-start">
+          <TabsTrigger value="general" className="flex items-center gap-2 shrink-0">
             <SettingsIcon className="h-4 w-4" />
             General
           </TabsTrigger>
-          <TabsTrigger value="tournaments" className="flex items-center gap-2">
-            <Trophy className="h-4 w-4" />
-            Tournaments
-          </TabsTrigger>
-          <TabsTrigger value="leaderboard" className="flex items-center gap-2">
-            <Award className="h-4 w-4" />
-            Leaderboard
-          </TabsTrigger>
-          <TabsTrigger value="booking" className="flex items-center gap-2">
+          <TabsTrigger value="booking" className="flex items-center gap-2 shrink-0">
             <Calendar className="h-4 w-4" />
             Booking Settings
           </TabsTrigger>
+          <TabsTrigger value="tournaments" className="flex items-center gap-2 shrink-0">
+            <Trophy className="h-4 w-4" />
+            Tournaments
+          </TabsTrigger>
+          <TabsTrigger value="leaderboard" className="flex items-center gap-2 shrink-0">
+            <Award className="h-4 w-4" />
+            Leaderboard
+          </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="staff" className="flex items-center gap-2">
+            <TabsTrigger value="staff" className="flex items-center gap-2 shrink-0">
               <Users className="h-4 w-4" />
               <Shield className="h-3 w-3 text-amber-500" />
               Staff Management
