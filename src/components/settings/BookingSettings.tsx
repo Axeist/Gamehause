@@ -209,7 +209,7 @@ const BookingSettings = () => {
             <div className="space-y-4">
               {coupons.map((coupon, index) => (
                 <div
-                  key={`${coupon.code}-${index}`}
+                  key={index}
                   className="rounded-lg border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-start gap-4"
                 >
                   <div className="flex-1 min-w-0 space-y-3">
