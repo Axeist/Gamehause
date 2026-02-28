@@ -1870,9 +1870,13 @@ export default function PublicBooking() {
                       </p>
                       <div className="flex flex-col gap-2.5 max-h-[220px] overflow-y-auto pr-0.5 scrollbar-thin">
                         {couponsShownOnBookingPage.map((c) => {
-                          const discountLabel = c.discount_type === "percentage"
-                            ? `${c.discount_value}% off`
-                            : `₹${c.discount_value} off`;
+                          const hasStationOverrides = c.station_overrides && Object.keys(c.station_overrides).length > 0;
+                          const discountLabel =
+                            hasStationOverrides && c.discount_value === 0
+                              ? "Varies by station"
+                              : c.discount_type === "percentage"
+                                ? `${c.discount_value}% off`
+                                : `₹${c.discount_value} off`;
                           return (
                             <div
                               key={c.code}
@@ -1938,7 +1942,7 @@ export default function PublicBooking() {
                   {appliedCoupon && (
                     <div className="mt-2">
                       <div
-                        className="flex items-center justify-between px-4 py-2 rounded-xl shadow-sm font-semibold"
+                        className="flex items-center justify-between gap-2 px-4 py-2 rounded-xl shadow-sm font-semibold min-w-0"
                         style={{
                           background: "linear-gradient(90deg,#231743 10%,#181121 100%)",
                           border: "1px solid #A37CFF",
@@ -1946,20 +1950,22 @@ export default function PublicBooking() {
                           letterSpacing: "1.5px"
                         }}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">🏷️</span>
-                          <span className="font-extrabold uppercase tracking-widest">{appliedCoupon.code}</span>
-                          {appliedCoupon.description && (
-                            <span className="ml-2 text-xs text-gray-300 truncate max-w-[140px]" title={appliedCoupon.description}>
-                              {appliedCoupon.description}
-                            </span>
-                          )}
-                          <span className="ml-2 text-xs font-semibold text-green-400">Applied!</span>
+                        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+                          <span className="text-xl shrink-0">🏷️</span>
+                          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+                            <span className="shrink-0 font-extrabold uppercase tracking-widest">{appliedCoupon.code}</span>
+                            {appliedCoupon.description && (
+                              <span className="min-w-0 truncate text-xs text-gray-300" title={appliedCoupon.description}>
+                                {appliedCoupon.description}
+                              </span>
+                            )}
+                            <span className="shrink-0 text-xs font-semibold text-green-400">Applied!</span>
+                          </div>
                         </div>
                         <button
                           onClick={() => removeCoupon()}
                           aria-label="Remove coupon"
-                          className="ml-2 p-1 hover:bg-[#3B2159] rounded-full"
+                          className="shrink-0 p-1 hover:bg-[#3B2159] rounded-full"
                         >
                           <X className="h-4 w-4 text-purple-200" />
                         </button>
