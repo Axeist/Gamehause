@@ -35,7 +35,13 @@ import {
 } from "lucide-react";
 import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY } from "@/config/brand";
 import type { BookingCoupon } from "@/types/coupon.types";
-import { getEnabledBookingCoupons, getBookingCouponsShowList } from "@/services/bookingCouponConfig";
+import {
+  getEnabledBookingCoupons,
+  getPublicBookingEnabled,
+  getCouponsShownOnBookingPage,
+  getCouponDiscountForStation,
+  computeDiscountAmount,
+} from "@/services/bookingCouponConfig";
 import {
   Dialog,
   DialogContent,
@@ -155,17 +161,22 @@ export default function PublicBooking() {
     }
   }, [hasBookingAccess, subscriptionLoading]);
 
-  // Load enabled coupons and "show list on booking" setting from config
+  // Load enabled coupons and public booking enabled from config
+  const [configLoaded, setConfigLoaded] = useState(false);
+  const [publicBookingEnabled, setPublicBookingEnabled] = useState(true);
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getEnabledBookingCoupons(), getBookingCouponsShowList()])
-      .then(([list, showList]) => {
+    Promise.all([getEnabledBookingCoupons(), getPublicBookingEnabled()])
+      .then(([list, enabled]) => {
         if (!cancelled) {
           setAllowedCoupons(list);
-          setShowAvailableCouponsOnBooking(showList);
+          setPublicBookingEnabled(enabled);
+          setConfigLoaded(true);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setConfigLoaded(true);
+      });
     return () => { cancelled = true; };
   }, []);
 
@@ -180,7 +191,11 @@ export default function PublicBooking() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const [allowedCoupons, setAllowedCoupons] = useState<BookingCoupon[]>([]);
-  const [showAvailableCouponsOnBooking, setShowAvailableCouponsOnBooking] = useState(false);
+  // Coupons to show in the "available coupons" list (per-coupon show_on_booking_page)
+  const couponsShownOnBookingPage = useMemo(
+    () => getCouponsShownOnBookingPage(allowedCoupons),
+    [allowedCoupons]
+  );
   const [appliedCoupon, setAppliedCoupon] = useState<BookingCoupon | null>(null);
   const [couponCode, setCouponCode] = useState("");
 
@@ -754,10 +769,21 @@ export default function PublicBooking() {
   const calculateDiscount = (): number => {
     const original = calculateOriginalPrice();
     if (original === 0 || !appliedCoupon) return 0;
-    if (appliedCoupon.discount_type === "percentage") {
-      return original * (appliedCoupon.discount_value / 100);
+    const numberOfSlots = selectedSlotRange.length > 0 ? selectedSlotRange.length : 1;
+    const selectedStationsList = stations.filter((s) => selectedStations.includes(s.id));
+    const priceByType: Record<string, number> = { 8ball: 0, ps5: 0, foosball: 0 };
+    for (const s of selectedStationsList) {
+      const t = s.type === "8ball" || s.type === "ps5" || s.type === "foosball" ? s.type : "ps5";
+      priceByType[t] += (s.hourly_rate / 2) * numberOfSlots;
     }
-    return Math.min(appliedCoupon.discount_value, original);
+    let totalDiscount = 0;
+    for (const stationType of ["8ball", "ps5", "foosball"] as const) {
+      const price = priceByType[stationType];
+      if (price <= 0) continue;
+      const { discount_type, discount_value } = getCouponDiscountForStation(appliedCoupon, stationType);
+      totalDiscount += computeDiscountAmount(price, discount_type, discount_value);
+    }
+    return totalDiscount;
   };
 
   const originalPrice = calculateOriginalPrice();
@@ -1832,11 +1858,11 @@ export default function PublicBooking() {
                   <Label className="text-xs font-semibold text-gray-400 uppercase">
                     Coupon Code
                   </Label>
-                  {showAvailableCouponsOnBooking && allowedCoupons.length > 0 && (
+                  {couponsShownOnBookingPage.length > 0 && (
                     <div className="mt-2 space-y-2">
                       <p className="text-[11px] text-gray-400">Available coupons — click Apply to use</p>
                       <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
-                        {allowedCoupons.map((c) => (
+                        {couponsShownOnBookingPage.map((c) => (
                           <div
                             key={c.code}
                             className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2"
@@ -1866,7 +1892,7 @@ export default function PublicBooking() {
                     <Input
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      placeholder={showAvailableCouponsOnBooking ? "Or enter coupon code" : "Enter coupon code"}
+                      placeholder={couponsShownOnBookingPage.length > 0 ? "Or enter coupon code" : "Enter coupon code"}
                       className="bg-black/30 border-white/10 text-white placeholder:text-gray-500 rounded-xl flex-1"
                     />
                     <Button
@@ -2326,7 +2352,7 @@ export default function PublicBooking() {
       )}
 
       <PublicBookingUnavailableDialog
-        open={showUpgradeDialog}
+        open={showUpgradeDialog || (configLoaded && !publicBookingEnabled)}
         onOpenChange={setShowUpgradeDialog}
       />
 

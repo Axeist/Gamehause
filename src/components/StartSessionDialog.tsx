@@ -9,13 +9,15 @@ import { usePOS, Customer } from '@/context/POSContext';
 import { useToast } from '@/hooks/use-toast';
 import { CurrencyDisplay } from '@/components/ui/currency';
 import type { BookingCoupon } from '@/types/coupon.types';
-import { getEnabledBookingCoupons } from '@/services/bookingCouponConfig';
+import type { BookingCouponStationType } from '@/types/coupon.types';
+import { getEnabledBookingCoupons, getCouponDiscountForStation, computeDiscountAmount } from '@/services/bookingCouponConfig';
 
 interface StartSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   stationId: string;
   stationName: string;
+  stationType?: BookingCouponStationType;
   baseRate: number;
   onConfirm: (customerId: string, customerName: string, finalRate: number, couponCode?: string) => void;
 }
@@ -25,6 +27,7 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
   onOpenChange,
   stationId,
   stationName,
+  stationType,
   baseRate,
   onConfirm,
 }) => {
@@ -56,12 +59,11 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
     return () => { cancelled = true; };
   }, [open]);
 
-  // Compute discount from config: percentage => price * (value/100); fixed => min(value, price)
+  // Compute final rate: use station override if present, else global discount
   const getFinalRate = (price: number, coupon: BookingCoupon | null): number => {
     if (!coupon) return price;
-    const discount = coupon.discount_type === 'percentage'
-      ? price * (coupon.discount_value / 100)
-      : Math.min(coupon.discount_value, price);
+    const { discount_type, discount_value } = getCouponDiscountForStation(coupon, stationType);
+    const discount = computeDiscountAmount(price, discount_type, discount_value);
     return Math.max(0, Math.round(price - discount));
   };
 

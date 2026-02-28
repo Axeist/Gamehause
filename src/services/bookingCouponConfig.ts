@@ -1,6 +1,26 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { BookingCoupon } from "@/types/coupon.types";
-import { BOOKING_COUPONS_CONFIG_KEY, BOOKING_COUPONS_SHOW_LIST_KEY } from "@/types/coupon.types";
+import type { BookingCoupon, BookingCouponStationType } from "@/types/coupon.types";
+import { BOOKING_COUPONS_CONFIG_KEY, PUBLIC_BOOKING_ENABLED_KEY } from "@/types/coupon.types";
+
+/** Effective discount (type + value) for a coupon, optionally for a station type (uses override if present). */
+export function getCouponDiscountForStation(
+  coupon: BookingCoupon,
+  stationType?: BookingCouponStationType
+): { discount_type: "percentage" | "fixed"; discount_value: number } {
+  const override = stationType && coupon.station_overrides?.[stationType];
+  if (override) return { discount_type: override.discount_type, discount_value: override.discount_value };
+  return { discount_type: coupon.discount_type, discount_value: coupon.discount_value };
+}
+
+/** Compute discount amount for a given price using type and value. */
+export function computeDiscountAmount(
+  price: number,
+  discount_type: "percentage" | "fixed",
+  discount_value: number
+): number {
+  if (discount_type === "percentage") return price * (discount_value / 100);
+  return Math.min(discount_value, price);
+}
 
 export async function getBookingCouponsConfig(): Promise<BookingCoupon[]> {
   const { data, error } = await supabase
@@ -33,22 +53,27 @@ export async function getEnabledBookingCoupons(): Promise<BookingCoupon[]> {
   return all.filter((c) => c.enabled);
 }
 
-/** Whether to show the list of available coupons on the public booking page. */
-export async function getBookingCouponsShowList(): Promise<boolean> {
+/** Whether the public booking page is enabled (when false, show unavailable). */
+export async function getPublicBookingEnabled(): Promise<boolean> {
   const { data, error } = await supabase
     .from("app_config")
     .select("value")
-    .eq("key", BOOKING_COUPONS_SHOW_LIST_KEY)
+    .eq("key", PUBLIC_BOOKING_ENABLED_KEY)
     .single();
 
-  if (error || data?.value == null) return false;
+  if (error || data?.value == null) return true;
   return data.value === true;
 }
 
-export async function setBookingCouponsShowList(show: boolean): Promise<void> {
+export async function setPublicBookingEnabled(enabled: boolean): Promise<void> {
   const { error } = await supabase
     .from("app_config")
-    .upsert({ key: BOOKING_COUPONS_SHOW_LIST_KEY, value: show }, { onConflict: "key" });
+    .upsert({ key: PUBLIC_BOOKING_ENABLED_KEY, value: enabled }, { onConflict: "key" });
 
   if (error) throw error;
+}
+
+/** Enabled coupons that should appear in the "available coupons" list on the booking page (show_on_booking_page !== false). */
+export function getCouponsShownOnBookingPage(coupons: BookingCoupon[]): BookingCoupon[] {
+  return coupons.filter((c) => c.enabled && c.show_on_booking_page !== false);
 }

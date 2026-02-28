@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus, Ticket, Loader2, Save } from 'lucide-react';
+import { Trash2, Plus, Ticket, Loader2, Save, Calendar } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
@@ -17,12 +17,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { BookingCoupon, BookingCouponDiscountType } from '@/types/coupon.types';
+import type {
+  BookingCoupon,
+  BookingCouponDiscountType,
+  BookingCouponStationType,
+} from '@/types/coupon.types';
+
+const STATION_TYPES: { id: BookingCouponStationType; label: string }[] = [
+  { id: '8ball', label: '8-Ball / Pool' },
+  { id: 'ps5', label: 'PS5' },
+  { id: 'foosball', label: 'Foosball' },
+];
 import {
   getBookingCouponsConfig,
   setBookingCouponsConfig,
-  getBookingCouponsShowList,
-  setBookingCouponsShowList,
+  getPublicBookingEnabled,
+  setPublicBookingEnabled,
 } from '@/services/bookingCouponConfig';
 
 const valueLabel = (type: BookingCouponDiscountType) =>
@@ -31,7 +41,7 @@ const valueLabel = (type: BookingCouponDiscountType) =>
 const BookingSettings = () => {
   const { toast } = useToast();
   const [coupons, setCoupons] = useState<BookingCoupon[]>([]);
-  const [showListOnBooking, setShowListOnBooking] = useState(false);
+  const [publicBookingEnabled, setPublicBookingEnabledState] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -39,12 +49,12 @@ const BookingSettings = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [data, showList] = await Promise.all([
+      const [data, bookingEnabled] = await Promise.all([
         getBookingCouponsConfig(),
-        getBookingCouponsShowList(),
+        getPublicBookingEnabled(),
       ]);
       setCoupons(data);
-      setShowListOnBooking(showList);
+      setPublicBookingEnabledState(bookingEnabled);
     } catch (e) {
       console.error(e);
       toast({
@@ -57,20 +67,20 @@ const BookingSettings = () => {
     }
   }, [toast]);
 
-  const handleShowListToggle = useCallback(
+  const handlePublicBookingToggle = useCallback(
     async (checked: boolean) => {
-      setShowListOnBooking(checked);
+      setPublicBookingEnabledState(checked);
       try {
-        await setBookingCouponsShowList(checked);
+        await setPublicBookingEnabled(checked);
         toast({
-          title: checked ? 'Coupon list enabled' : 'Coupon list disabled',
+          title: checked ? 'Public booking enabled' : 'Public booking disabled',
           description: checked
-            ? 'Available coupons will be shown on the booking page with Apply buttons.'
-            : 'Booking page will only show the manual coupon code input.',
+            ? 'Customers can access the public booking page.'
+            : 'The public booking page will show as unavailable.',
         });
       } catch (e) {
         console.error(e);
-        setShowListOnBooking(!checked);
+        setPublicBookingEnabledState(!checked);
         toast({
           title: 'Error saving setting',
           description: 'Could not update. Please try again.',
@@ -133,6 +143,7 @@ const BookingSettings = () => {
       discount_type: 'percentage',
       discount_value: 0,
       enabled: true,
+      show_on_booking_page: true,
     };
     setCoupons((prev) => [...prev, newCoupon]);
     toast({ title: 'Coupon added', description: 'Fill in the details and click "Save changes" when done.' });
@@ -156,25 +167,37 @@ const BookingSettings = () => {
       <Card className="w-full animate-fade-in">
         <CardHeader>
           <div className="flex items-center gap-2 mb-2">
+            <Calendar className="h-5 w-5 text-gamehaus-lightpurple" />
+            <CardTitle>Public booking page</CardTitle>
+          </div>
+          <CardDescription>
+            Allow or block access to the public booking page. When disabled, customers will see that booking is unavailable.
+          </CardDescription>
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 p-4 mt-4">
+            <div>
+              <p className="font-medium text-sm">Enable public booking page</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Turn off to temporarily disable the public booking page for all customers.
+              </p>
+            </div>
+            <Switch
+              checked={publicBookingEnabled}
+              onCheckedChange={handlePublicBookingToggle}
+              className="data-[state=checked]:bg-gamehaus-purple shrink-0"
+            />
+          </div>
+        </CardHeader>
+      </Card>
+
+      <Card className="w-full animate-fade-in">
+        <CardHeader>
+          <div className="flex items-center gap-2 mb-2">
             <Ticket className="h-5 w-5 text-gamehaus-lightpurple" />
             <CardTitle>Coupon Codes</CardTitle>
           </div>
           <CardDescription>
             Manage coupon codes available for public bookings. Only enabled coupons can be applied at checkout.
           </CardDescription>
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 p-4 mt-4">
-            <div>
-              <p className="font-medium text-sm">Show available coupons on booking page</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                When enabled, the public booking page displays all enabled coupons with an Apply button for easy application.
-              </p>
-            </div>
-            <Switch
-              checked={showListOnBooking}
-              onCheckedChange={handleShowListToggle}
-              className="data-[state=checked]:bg-gamehaus-purple shrink-0"
-            />
-          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
@@ -231,6 +254,14 @@ const BookingSettings = () => {
                       >
                         {coupon.enabled ? 'Enabled' : 'Disabled'}
                       </span>
+                      <span className="text-xs text-muted-foreground">Show on booking page</span>
+                      <Switch
+                        checked={coupon.show_on_booking_page !== false}
+                        onCheckedChange={(checked) =>
+                          handleUpdate(index, { show_on_booking_page: checked })
+                        }
+                        className="data-[state=checked]:bg-gamehaus-purple shrink-0"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-muted-foreground text-xs">Description</Label>
@@ -276,6 +307,66 @@ const BookingSettings = () => {
                           className="bg-background border-input"
                         />
                       </div>
+                    </div>
+                    <div className="space-y-2 pt-2 border-t border-border">
+                      <Label className="text-muted-foreground text-xs">Station-wise overrides (optional)</Label>
+                      <p className="text-[11px] text-muted-foreground">
+                        Override discount for specific station types. Leave unchecked to use the global discount above.
+                      </p>
+                      {STATION_TYPES.map(({ id, label }) => {
+                        const override = coupon.station_overrides?.[id];
+                        const hasOverride = override != null;
+                        return (
+                          <div key={id} className="flex flex-wrap items-center gap-2 rounded-md bg-muted/30 p-2">
+                            <Switch
+                              checked={hasOverride}
+                              onCheckedChange={(checked) => {
+                                const nextOverrides = { ...coupon.station_overrides };
+                                if (checked) nextOverrides[id] = { discount_type: 'percentage', discount_value: 0 };
+                                else delete nextOverrides[id];
+                                handleUpdate(index, {
+                                  station_overrides: Object.keys(nextOverrides).length ? nextOverrides : undefined,
+                                });
+                              }}
+                              className="data-[state=checked]:bg-gamehaus-purple"
+                            />
+                            <span className="text-sm font-medium w-24">{label}</span>
+                            {hasOverride && override && (
+                              <>
+                                <Select
+                                  value={override.discount_type}
+                                  onValueChange={(v) => {
+                                    const nextOverrides = { ...coupon.station_overrides!, [id]: { ...override, discount_type: v as BookingCouponDiscountType } };
+                                    handleUpdate(index, { station_overrides: nextOverrides });
+                                  }}
+                                >
+                                  <SelectTrigger className="w-32 h-8 bg-background">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="percentage">%</SelectItem>
+                                    <SelectItem value="fixed">₹ fixed</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  max={override.discount_type === 'percentage' ? 100 : undefined}
+                                  value={override.discount_value}
+                                  onChange={(e) => {
+                                    const nextOverrides = { ...coupon.station_overrides!, [id]: { ...override, discount_value: Number(e.target.value) || 0 } };
+                                    handleUpdate(index, { station_overrides: nextOverrides });
+                                  }}
+                                  className="w-20 h-8 bg-background"
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  {override.discount_type === 'percentage' ? '%' : '₹'}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2 shrink-0">

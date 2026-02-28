@@ -1,4 +1,4 @@
--- Option to show available coupons on the public booking page (with Apply buttons).
+-- Enable/disable the public booking page. When false, the booking page shows as unavailable.
 INSERT INTO public.app_config (key, value)
-VALUES ('booking_coupons_show_list', 'false'::jsonb)
+VALUES ('public_booking_enabled', 'true'::jsonb)
 ON CONFLICT (key) DO NOTHING;
