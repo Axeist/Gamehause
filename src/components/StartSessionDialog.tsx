@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Gift, Tag, Clock, AlertCircle, User as UserIcon } from 'lucide-react';
+import { Search, Tag, Clock, User as UserIcon } from 'lucide-react';
 import { usePOS, Customer } from '@/context/POSContext';
 import { useToast } from '@/hooks/use-toast';
 import { CurrencyDisplay } from '@/components/ui/currency';
+import type { BookingCoupon } from '@/types/coupon.types';
+import { getEnabledBookingCoupons } from '@/services/bookingCouponConfig';
 
 interface StartSessionDialogProps {
   open: boolean;
@@ -31,8 +33,9 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
   
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [selectedCoupon, setSelectedCoupon] = useState<string>('none');
+  const [selectedCouponCode, setSelectedCouponCode] = useState<string>('none');
   const [finalRate, setFinalRate] = useState(baseRate);
+  const [coupons, setCoupons] = useState<BookingCoupon[]>([]);
 
   const filteredCustomers = customerSearchQuery.trim() === ''
     ? customers.slice(0, 10)
@@ -41,63 +44,35 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
         customer.phone.includes(customerSearchQuery)
       ).slice(0, 10);
 
-  // Validate Happy Hour timing
-  const isHappyHour = () => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const currentHour = now.getHours();
-    return (dayOfWeek >= 1 && dayOfWeek <= 5) && (currentHour >= 11 && currentHour < 16);
+  // Load enabled coupons from Settings config when dialog opens
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    getEnabledBookingCoupons()
+      .then((list) => {
+        if (!cancelled) setCoupons(list);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [open]);
+
+  // Compute discount from config: percentage => price * (value/100); fixed => min(value, price)
+  const getFinalRate = (price: number, coupon: BookingCoupon | null): number => {
+    if (!coupon) return price;
+    const discount = coupon.discount_type === 'percentage'
+      ? price * (coupon.discount_value / 100)
+      : Math.min(coupon.discount_value, price);
+    return Math.max(0, Math.round(price - discount));
   };
 
-  // Calculate final rate based on coupon
+  const selectedCoupon = selectedCouponCode === 'none'
+    ? null
+    : coupons.find((c) => c.code.toUpperCase() === selectedCouponCode.toUpperCase()) ?? null;
+
+  // Recompute final rate when coupon or base rate changes
   useEffect(() => {
-    if (!selectedCoupon || selectedCoupon === 'none') {
-      setFinalRate(baseRate);
-      return;
-    }
-
-    let newRate = baseRate;
-
-    switch (selectedCoupon) {
-      case 'HH99':
-        if (!isHappyHour()) {
-          toast({
-            title: 'Invalid Timing',
-            description: 'HH99 is only valid Mon-Fri, 11 AM - 4 PM',
-            variant: 'destructive',
-          });
-          setSelectedCoupon('none');
-          return;
-        }
-        newRate = 99;
-        break;
-      
-      case 'CUEPHORIA25':
-        newRate = baseRate * 0.75;
-        break;
-      
-      case 'CUEPHORIA50':
-        newRate = baseRate * 0.50;
-        break;
-      
-      case 'NIT50':
-        newRate = baseRate * 0.50;
-        break;
-      
-      case 'ALMA50':
-        newRate = baseRate * 0.50;
-        break;
-      
-      case 'AXEIST':
-        newRate = 0;
-        break;
-      
-      default:
-        newRate = baseRate;
-    }
-
-    setFinalRate(Math.round(newRate));
-  }, [selectedCoupon, baseRate]);
+    setFinalRate(getFinalRate(baseRate, selectedCoupon));
+  }, [selectedCouponCode, baseRate, selectedCoupon, coupons]);
 
   const handleSelectCustomer = (customer: Customer) => {
     setSelectedCustomer(customer);
@@ -117,21 +92,28 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
       selectedCustomer.id,
       selectedCustomer.name,
       finalRate,
-      selectedCoupon !== 'none' ? selectedCoupon : undefined
+      selectedCouponCode !== 'none' ? selectedCouponCode : undefined
     );
     
     // Reset state
     setSelectedCustomer(null);
-    setSelectedCoupon('none');
+    setSelectedCouponCode('none');
     setCustomerSearchQuery('');
     onOpenChange(false);
   };
 
   const handleCancel = () => {
     setSelectedCustomer(null);
-    setSelectedCoupon('none');
+    setSelectedCouponCode('none');
     setCustomerSearchQuery('');
     onOpenChange(false);
+  };
+
+  const couponLabel = (c: BookingCoupon): string => {
+    if (c.discount_type === 'percentage') {
+      return `${c.code} - ${c.discount_value}% OFF${c.description ? ` (${c.description})` : ''}`;
+    }
+    return `${c.code} - ₹${c.discount_value} off${c.description ? ` (${c.description})` : ''}`;
   };
 
   return (
@@ -227,49 +209,24 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
                 Apply Coupon (Optional)
               </Label>
               
-              <Select value={selectedCoupon} onValueChange={setSelectedCoupon}>
+              <Select value={selectedCouponCode} onValueChange={setSelectedCouponCode}>
                 <SelectTrigger>
                   <SelectValue placeholder="No coupon (regular price)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">No coupon - Regular Price</SelectItem>
-                  <SelectItem value="HH99">
-                    🎮 HH99 - ₹99/hour (Mon-Fri 11AM-4PM)
-                  </SelectItem>
-                  <SelectItem value="CUEPHORIA25">
-                    🎉 CUEPHORIA25 - 25% OFF
-                  </SelectItem>
-                  <SelectItem value="CUEPHORIA50">
-                    🎓 CUEPHORIA50 - 50% OFF (Student ID Required)
-                  </SelectItem>
-                  <SelectItem value="NIT50">
-                    🏫 NIT50 - 50% OFF (NIT Students)
-                  </SelectItem>
-                  <SelectItem value="ALMA50">
-                    🎓 ALMA50 - 50% OFF (Alumni)
-                  </SelectItem>
-                  <SelectItem value="AXEIST">
-                    👑 AXEIST - 100% OFF (VIP)
-                  </SelectItem>
+                  {coupons.map((c) => (
+                    <SelectItem key={c.code} value={c.code.toUpperCase()}>
+                      🏷️ {couponLabel(c)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
-              {selectedCoupon === 'HH99' && !isHappyHour() && (
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md p-3 flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-amber-900 dark:text-amber-100">
-                    <strong>Note:</strong> HH99 is only valid Mon-Fri, 11 AM - 4 PM. Currently outside Happy Hour.
-                  </p>
-                </div>
-              )}
-
-              {selectedCoupon !== 'none' && selectedCoupon === 'CUEPHORIA50' && (
-                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md p-3 flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-blue-900 dark:text-blue-100">
-                    Student ID verification required at checkout
-                  </p>
-                </div>
+              {selectedCoupon && selectedCoupon.description && (
+                <p className="text-sm text-muted-foreground">
+                  {selectedCoupon.description}
+                </p>
               )}
             </div>
           )}
@@ -283,10 +240,10 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
                   <CurrencyDisplay amount={baseRate} className="text-sm" />
                 </div>
                 
-                {selectedCoupon !== 'none' && finalRate !== baseRate && (
+                {selectedCouponCode !== 'none' && finalRate !== baseRate && (
                   <>
                     <div className="flex justify-between items-center text-cuephoria-orange">
-                      <span className="text-sm">Discount ({selectedCoupon})</span>
+                      <span className="text-sm">Discount ({selectedCoupon?.code})</span>
                       <span className="text-sm font-semibold">- ₹{baseRate - finalRate}</span>
                     </div>
                     <div className="border-t pt-2" />
