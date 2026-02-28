@@ -1,13 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { BookingCoupon, BookingCouponStationType } from "@/types/coupon.types";
+import type { BookingCoupon } from "@/types/coupon.types";
 import { BOOKING_COUPONS_CONFIG_KEY, PUBLIC_BOOKING_ENABLED_KEY } from "@/types/coupon.types";
 
-/** Effective discount (type + value) for a coupon, optionally for a station type (uses override if present). */
+/** Effective discount (type + value) for a coupon, optionally for a station (uses override if present). */
 export function getCouponDiscountForStation(
   coupon: BookingCoupon,
-  stationType?: BookingCouponStationType
+  stationId?: string
 ): { discount_type: "percentage" | "fixed"; discount_value: number } {
-  const override = stationType && coupon.station_overrides?.[stationType];
+  const override = stationId && coupon.station_overrides?.[stationId];
   if (override) return { discount_type: override.discount_type, discount_value: override.discount_value };
   return { discount_type: coupon.discount_type, discount_value: coupon.discount_value };
 }

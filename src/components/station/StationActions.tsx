@@ -144,7 +144,6 @@ const StationActions: React.FC<StationActionsProps> = ({
         onOpenChange={setIsStartDialogOpen}
         stationId={station.id}
         stationName={station.name}
-        stationType={station.type}
         baseRate={station.hourlyRate}
         onConfirm={handleStartSession}
       />

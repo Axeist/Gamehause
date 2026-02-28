@@ -17,23 +17,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type {
-  BookingCoupon,
-  BookingCouponDiscountType,
-  BookingCouponStationType,
-} from '@/types/coupon.types';
-
-const STATION_TYPES: { id: BookingCouponStationType; label: string }[] = [
-  { id: '8ball', label: '8-Ball / Pool' },
-  { id: 'ps5', label: 'PS5' },
-  { id: 'foosball', label: 'Foosball' },
-];
+import type { BookingCoupon, BookingCouponDiscountType } from '@/types/coupon.types';
 import {
   getBookingCouponsConfig,
   setBookingCouponsConfig,
   getPublicBookingEnabled,
   setPublicBookingEnabled,
 } from '@/services/bookingCouponConfig';
+import { supabase } from '@/integrations/supabase/client';
+
+interface StationOption {
+  id: string;
+  name: string;
+  type: string;
+}
 
 const valueLabel = (type: BookingCouponDiscountType) =>
   type === 'percentage' ? 'Value (%)' : 'Value (₹)';
@@ -41,10 +38,29 @@ const valueLabel = (type: BookingCouponDiscountType) =>
 const BookingSettings = () => {
   const { toast } = useToast();
   const [coupons, setCoupons] = useState<BookingCoupon[]>([]);
+  const [stations, setStations] = useState<StationOption[]>([]);
   const [publicBookingEnabled, setPublicBookingEnabledState] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from('stations')
+      .select('id, name, type')
+      .then(({ data, error }) => {
+        if (cancelled || error) return;
+        const list: StationOption[] = (data ?? []).map((row: { id: string; name: string; type: string }) => ({
+          id: row.id,
+          name: row.name ?? 'Station',
+          type: row.type ?? 'ps5',
+        }));
+        list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+        setStations(list);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -311,62 +327,68 @@ const BookingSettings = () => {
                     <div className="space-y-2 pt-2 border-t border-border">
                       <Label className="text-muted-foreground text-xs">Station-wise overrides (optional)</Label>
                       <p className="text-[11px] text-muted-foreground">
-                        Override discount for specific station types. Leave unchecked to use the global discount above.
+                        Override discount for specific stations. Leave unchecked to use the global discount above.
                       </p>
-                      {STATION_TYPES.map(({ id, label }) => {
-                        const override = coupon.station_overrides?.[id];
-                        const hasOverride = override != null;
-                        return (
-                          <div key={id} className="flex flex-wrap items-center gap-2 rounded-md bg-muted/30 p-2">
-                            <Switch
-                              checked={hasOverride}
-                              onCheckedChange={(checked) => {
-                                const nextOverrides = { ...coupon.station_overrides };
-                                if (checked) nextOverrides[id] = { discount_type: 'percentage', discount_value: 0 };
-                                else delete nextOverrides[id];
-                                handleUpdate(index, {
-                                  station_overrides: Object.keys(nextOverrides).length ? nextOverrides : undefined,
-                                });
-                              }}
-                              className="data-[state=checked]:bg-gamehaus-purple"
-                            />
-                            <span className="text-sm font-medium w-24">{label}</span>
-                            {hasOverride && override && (
-                              <>
-                                <Select
-                                  value={override.discount_type}
-                                  onValueChange={(v) => {
-                                    const nextOverrides = { ...coupon.station_overrides!, [id]: { ...override, discount_type: v as BookingCouponDiscountType } };
-                                    handleUpdate(index, { station_overrides: nextOverrides });
-                                  }}
-                                >
-                                  <SelectTrigger className="w-32 h-8 bg-background">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="percentage">%</SelectItem>
-                                    <SelectItem value="fixed">₹ fixed</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <Input
-                                  type="number"
-                                  min={0}
-                                  max={override.discount_type === 'percentage' ? 100 : undefined}
-                                  value={override.discount_value}
-                                  onChange={(e) => {
-                                    const nextOverrides = { ...coupon.station_overrides!, [id]: { ...override, discount_value: Number(e.target.value) || 0 } };
-                                    handleUpdate(index, { station_overrides: nextOverrides });
-                                  }}
-                                  className="w-20 h-8 bg-background"
-                                />
-                                <span className="text-xs text-muted-foreground">
-                                  {override.discount_type === 'percentage' ? '%' : '₹'}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
+                      {stations.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-1">No stations found. Add stations in Gaming Stations first.</p>
+                      ) : (
+                        stations.map((station) => {
+                          const override = coupon.station_overrides?.[station.id];
+                          const hasOverride = override != null;
+                          const typeLabel = station.type === '8ball' ? '8-Ball' : station.type === 'foosball' ? 'Foosball' : 'PS5';
+                          return (
+                            <div key={station.id} className="flex flex-wrap items-center gap-2 rounded-md bg-muted/30 p-2">
+                              <Switch
+                                checked={hasOverride}
+                                onCheckedChange={(checked) => {
+                                  const nextOverrides = { ...coupon.station_overrides };
+                                  if (checked) nextOverrides[station.id] = { discount_type: 'percentage', discount_value: 0 };
+                                  else delete nextOverrides[station.id];
+                                  handleUpdate(index, {
+                                    station_overrides: Object.keys(nextOverrides).length ? nextOverrides : undefined,
+                                  });
+                                }}
+                                className="data-[state=checked]:bg-gamehaus-purple"
+                              />
+                              <span className="text-sm font-medium min-w-[120px]">{station.name}</span>
+                              <span className="text-xs text-muted-foreground">({typeLabel})</span>
+                              {hasOverride && override && (
+                                <>
+                                  <Select
+                                    value={override.discount_type}
+                                    onValueChange={(v) => {
+                                      const nextOverrides = { ...coupon.station_overrides!, [station.id]: { ...override, discount_type: v as BookingCouponDiscountType } };
+                                      handleUpdate(index, { station_overrides: nextOverrides });
+                                    }}
+                                  >
+                                    <SelectTrigger className="w-32 h-8 bg-background">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="percentage">%</SelectItem>
+                                      <SelectItem value="fixed">₹ fixed</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    max={override.discount_type === 'percentage' ? 100 : undefined}
+                                    value={override.discount_value}
+                                    onChange={(e) => {
+                                      const nextOverrides = { ...coupon.station_overrides!, [station.id]: { ...override, discount_value: Number(e.target.value) || 0 } };
+                                      handleUpdate(index, { station_overrides: nextOverrides });
+                                    }}
+                                    className="w-20 h-8 bg-background"
+                                  />
+                                  <span className="text-xs text-muted-foreground">
+                                    {override.discount_type === 'percentage' ? '%' : '₹'}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2 shrink-0">

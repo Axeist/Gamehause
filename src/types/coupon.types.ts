@@ -1,6 +1,6 @@
 export type BookingCouponDiscountType = "percentage" | "fixed";
 
-/** Station types that can have per-station discount overrides. */
+/** Station types (for display). Overrides are keyed by station id. */
 export type BookingCouponStationType = "8ball" | "ps5" | "foosball";
 
 export interface StationDiscountOverride {
@@ -16,8 +16,8 @@ export interface BookingCoupon {
   enabled: boolean;
   /** When true (default), this coupon appears in the "available coupons" list on the public booking page. */
   show_on_booking_page?: boolean;
-  /** Optional per-station-type overrides. If set for a type, that type uses this instead of global discount. */
-  station_overrides?: Partial<Record<BookingCouponStationType, StationDiscountOverride>>;
+  /** Optional per-station overrides (key = station id). If set for a station, that station uses this instead of global discount. */
+  station_overrides?: Partial<Record<string, StationDiscountOverride>>;
 }
 
 export const BOOKING_COUPONS_CONFIG_KEY = "booking_coupons";

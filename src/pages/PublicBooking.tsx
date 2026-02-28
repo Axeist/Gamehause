@@ -767,20 +767,14 @@ export default function PublicBooking() {
   };
 
   const calculateDiscount = (): number => {
-    const original = calculateOriginalPrice();
-    if (original === 0 || !appliedCoupon) return 0;
+    if (!appliedCoupon) return 0;
     const numberOfSlots = selectedSlotRange.length > 0 ? selectedSlotRange.length : 1;
     const selectedStationsList = stations.filter((s) => selectedStations.includes(s.id));
-    const priceByType: Record<string, number> = { "8ball": 0, "ps5": 0, "foosball": 0 };
-    for (const s of selectedStationsList) {
-      const t = s.type === "8ball" || s.type === "ps5" || s.type === "foosball" ? s.type : "ps5";
-      priceByType[t] += (s.hourly_rate / 2) * numberOfSlots;
-    }
     let totalDiscount = 0;
-    for (const stationType of ["8ball", "ps5", "foosball"] as const) {
-      const price = priceByType[stationType];
+    for (const s of selectedStationsList) {
+      const price = (s.hourly_rate / 2) * numberOfSlots;
       if (price <= 0) continue;
-      const { discount_type, discount_value } = getCouponDiscountForStation(appliedCoupon, stationType);
+      const { discount_type, discount_value } = getCouponDiscountForStation(appliedCoupon, s.id);
       totalDiscount += computeDiscountAmount(price, discount_type, discount_value);
     }
     return totalDiscount;
