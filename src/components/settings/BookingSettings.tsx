@@ -403,6 +403,9 @@ const BookingSettings = () => {
                                               <span className="text-xs text-muted-foreground">
                                                 {override.discount_type === 'percentage' ? '%' : '₹'}
                                               </span>
+                                              {override.discount_type === 'percentage' && override.discount_value > 100 && (
+                                                <span className="text-xs text-amber-600 dark:text-amber-400">Max 100%. Use ₹ fixed for rupee amount.</span>
+                                              )}
                                             </>
                                           )}
                                         </div>

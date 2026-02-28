@@ -14,8 +14,8 @@ export function getCouponDiscountForStation(
 
 /**
  * Compute discount amount for a given price.
- * - Percentage: discount_value % of price.
- * - Fixed: discount_value is per hour; pass hours (e.g. numberOfSlots * 0.5 for 30-min slots) so discount = discount_value * hours, capped by price.
+ * - Percentage: discount_value % of price (capped at 100% so discount never exceeds price).
+ * - Fixed: discount_value is per hour in rupees; pass hours (e.g. numberOfSlots * 0.5 for 30-min slots) so discount = discount_value * hours, capped by price.
  *   If hours is omitted, treats as 1 hour (single-session use).
  */
 export function computeDiscountAmount(
@@ -24,7 +24,10 @@ export function computeDiscountAmount(
   discount_value: number,
   hours?: number
 ): number {
-  if (discount_type === "percentage") return price * (discount_value / 100);
+  if (discount_type === "percentage") {
+    const cappedPercent = Math.min(discount_value, 100);
+    return price * (cappedPercent / 100);
+  }
   const effectiveHours = hours ?? 1;
   return Math.min(discount_value * effectiveHours, price);
 }

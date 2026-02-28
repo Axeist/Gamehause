@@ -108,7 +108,7 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
     onOpenChange(false);
   };
 
-  // Show discount for this station (station-wise override or global); avoid "0% OFF" when station-wise
+  // Show discount for this station (station-wise override or global); avoid "0% OFF" when station-wise; cap percentage at 100%
   const couponLabel = (c: BookingCoupon): string => {
     const { discount_type, discount_value } = getCouponDiscountForStation(c, stationId);
     const hasStationOverrides = c.station_overrides && Object.keys(c.station_overrides).length > 0;
@@ -116,15 +116,19 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
       discount_value === 0 && hasStationOverrides
         ? 'Varies by station'
         : discount_type === 'percentage'
-          ? `${discount_value}% OFF`
-          : `₹${discount_value}/hr off`;
+          ? `${Math.min(discount_value, 100)}% OFF`
+          : `₹${discount_value} off`;
     return `${c.code} - ${discountText}${c.description ? ` (${c.description})` : ''}`;
   };
 
-  // Effective discount for selected coupon on this station (for display)
+  // Effective discount for selected coupon on this station (for display); percentage capped at 100%
   const effectiveDiscountForStation = selectedCoupon
     ? getCouponDiscountForStation(selectedCoupon, stationId)
     : null;
+
+  const appliedDiscountAmount = selectedCoupon && baseRate > 0
+    ? computeDiscountAmount(baseRate, effectiveDiscountForStation!.discount_type, effectiveDiscountForStation!.discount_value)
+    : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -256,17 +260,19 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
                     {effectiveDiscountForStation.discount_value === 0
                       ? 'No discount (as configured)'
                       : effectiveDiscountForStation.discount_type === 'percentage'
-                        ? `${effectiveDiscountForStation.discount_value}% off`
-                        : `₹${effectiveDiscountForStation.discount_value}/hr off`}
-                    {effectiveDiscountForStation.discount_value !== 0 && ' (as configured)'}
+                        ? (effectiveDiscountForStation.discount_value > 100
+                            ? `100% off (configured ${effectiveDiscountForStation.discount_value}%, max 100% applied)`
+                            : `${effectiveDiscountForStation.discount_value}% off`)
+                        : `₹${effectiveDiscountForStation.discount_value} off`}
+                    {effectiveDiscountForStation.discount_value !== 0 && effectiveDiscountForStation.discount_type === 'percentage' && effectiveDiscountForStation.discount_value <= 100 && ' (as configured)'}
                   </div>
                 )}
                 
-                {selectedCouponCode !== 'none' && finalRate !== baseRate && (
+                {selectedCouponCode !== 'none' && appliedDiscountAmount > 0 && (
                   <>
                     <div className="flex justify-between items-center text-cuephoria-orange">
                       <span className="text-sm">Discount ({selectedCoupon?.code})</span>
-                      <span className="text-sm font-semibold">- ₹{baseRate - finalRate}</span>
+                      <span className="text-sm font-semibold">- ₹{Math.round(appliedDiscountAmount)}</span>
                     </div>
                     <div className="border-t pt-2" />
                   </>
