@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus, Ticket, Loader2 } from 'lucide-react';
+import { Trash2, Plus, Ticket, Loader2, Save } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
@@ -75,20 +75,21 @@ const BookingSettings = () => {
   );
 
   const handleToggle = (index: number, enabled: boolean) => {
-    const next = coupons.map((c, i) => (i === index ? { ...c, enabled } : c));
-    save(next, enabled ? 'Coupon enabled' : 'Coupon disabled');
+    setCoupons((prev) =>
+      prev.map((c, i) => (i === index ? { ...c, enabled } : c))
+    );
   };
 
   const handleUpdate = (index: number, updates: Partial<BookingCoupon>) => {
-    const next = coupons.map((c, i) => (i === index ? { ...c, ...updates } : c));
-    save(next, 'Coupon updated');
+    setCoupons((prev) =>
+      prev.map((c, i) => (i === index ? { ...c, ...updates } : c))
+    );
   };
 
   const handleDelete = (index: number) => {
-    const next = coupons.filter((_, i) => i !== index);
-    save(next);
+    setCoupons((prev) => prev.filter((_, i) => i !== index));
     setDeleteIndex(null);
-    toast({ title: 'Coupon removed', description: 'The coupon has been deleted.', variant: 'destructive' });
+    toast({ title: 'Coupon removed', description: 'Click "Save changes" to persist.', variant: 'destructive' });
   };
 
   const handleAdd = () => {
@@ -99,7 +100,13 @@ const BookingSettings = () => {
       discount_value: 0,
       enabled: true,
     };
-    save([...coupons, newCoupon], 'Coupon added');
+    setCoupons((prev) => [...prev, newCoupon]);
+    toast({ title: 'Coupon added', description: 'Fill in the details and click "Save changes" when done.' });
+  };
+
+  const handleSaveChanges = () => {
+    const normalized = coupons.map((c) => ({ ...c, code: c.code.trim() }));
+    save(normalized, 'Coupons saved');
   };
 
   if (loading) {
@@ -124,19 +131,32 @@ const BookingSettings = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h3 className="text-lg font-medium">Coupons</h3>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAdd}
-                disabled={saving}
-                className="flex items-center gap-2 border-gamehaus-purple/50 text-gamehaus-lightpurple hover:bg-gamehaus-purple/10"
-              >
-                <Plus className="h-4 w-4" />
-                Add Coupon
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={handleSaveChanges}
+                  disabled={saving}
+                  className="flex items-center gap-2 bg-gamehaus-purple hover:bg-gamehaus-purple/90"
+                >
+                  <Save className="h-4 w-4" />
+                  Save changes
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAdd}
+                  disabled={saving}
+                  className="flex items-center gap-2 border-gamehaus-purple/50 text-gamehaus-lightpurple hover:bg-gamehaus-purple/10"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Coupon
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -150,7 +170,7 @@ const BookingSettings = () => {
                       <Input
                         value={coupon.code}
                         onChange={(e) =>
-                          handleUpdate(index, { code: e.target.value.toUpperCase().trim() })
+                          handleUpdate(index, { code: e.target.value.toUpperCase() })
                         }
                         placeholder="COUPON_CODE"
                         className="max-w-[200px] text-lg font-bold tracking-tight bg-background border-input font-mono uppercase h-9"
