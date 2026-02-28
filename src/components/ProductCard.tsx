@@ -137,6 +137,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <span>Price:</span>
               <CurrencyDisplay amount={product.price} />
             </div>
+
+            {/* Show cost price only for admins and applicable categories */}
+            {isAdmin && shouldShowPricingFields && product.buyingPrice !== undefined && (
+              <div className="flex justify-between text-sm">
+                <span>Cost Price:</span>
+                <CurrencyDisplay amount={product.buyingPrice} />
+              </div>
+            )}
             
             {/* Only display profit information for applicable categories */}
             {shouldShowPricingFields && product.buyingPrice !== undefined && profit && (

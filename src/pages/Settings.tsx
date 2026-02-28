@@ -3,9 +3,10 @@ import { useAuth } from '@/context/AuthContext';
 import StaffManagement from '@/components/admin/StaffManagement';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Settings as SettingsIcon, Users, Shield, Trophy, Plus, ExternalLink, History, Award, RotateCcw, Lock, Upload } from 'lucide-react';
+import { Settings as SettingsIcon, Users, Shield, Trophy, Plus, ExternalLink, History, Award, RotateCcw, Lock, Upload, Calendar } from 'lucide-react';
 import TournamentManagement from '@/components/tournaments/TournamentManagement';
 import GeneralSettings from '@/components/settings/GeneralSettings';
+import BookingSettings from '@/components/settings/BookingSettings';
 import TournamentLeaderboard from '@/components/tournaments/TournamentLeaderboard';
 import TournamentHistoryDialog from '@/components/tournaments/TournamentHistoryDialog';
 import TournamentImageUpload from '@/components/tournaments/TournamentImageUpload';
@@ -257,21 +258,25 @@ const Settings = () => {
       </div>
       
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="mb-4">
-          <TabsTrigger value="general" className="flex items-center gap-2">
+        <TabsList className="mb-4 flex-wrap h-auto gap-1 overflow-x-auto justify-start">
+          <TabsTrigger value="general" className="flex items-center gap-2 shrink-0">
             <SettingsIcon className="h-4 w-4" />
             General
           </TabsTrigger>
-          <TabsTrigger value="tournaments" className="flex items-center gap-2">
+          <TabsTrigger value="booking" className="flex items-center gap-2 shrink-0">
+            <Calendar className="h-4 w-4" />
+            Booking Settings
+          </TabsTrigger>
+          <TabsTrigger value="tournaments" className="flex items-center gap-2 shrink-0">
             <Trophy className="h-4 w-4" />
             Tournaments
           </TabsTrigger>
-          <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+          <TabsTrigger value="leaderboard" className="flex items-center gap-2 shrink-0">
             <Award className="h-4 w-4" />
             Leaderboard
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="staff" className="flex items-center gap-2">
+            <TabsTrigger value="staff" className="flex items-center gap-2 shrink-0">
               <Users className="h-4 w-4" />
               <Shield className="h-3 w-3 text-amber-500" />
               Staff Management
@@ -375,6 +380,10 @@ const Settings = () => {
             tournamentId={selectedTournamentForHistory?.id || ''}
             tournamentName={selectedTournamentForHistory?.name || ''}
           />
+        </TabsContent>
+
+        <TabsContent value="booking" className="space-y-4">
+          <BookingSettings />
         </TabsContent>
 
         <TabsContent value="leaderboard" className="space-y-4">

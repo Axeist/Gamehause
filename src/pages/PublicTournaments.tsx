@@ -24,6 +24,9 @@ import {
   PUBLIC_BOOKING_URL,
   PUBLIC_STATIONS_URL,
   SUPPORT_EMAIL,
+  SUPPORT_PHONE_PRIMARY,
+  SUPPORT_PHONE_SECONDARY,
+  ADDRESS,
 } from '@/config/brand';
 
 interface Tournament {
@@ -894,7 +897,7 @@ const PublicTournaments = () => {
   const ENABLE_PROMOTIONAL_POPUP = false; // Set to true to enable popup
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] text-white overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] text-white overflow-x-hidden">
       {/* Promotional Popup - Disabled by default, can be enabled by setting ENABLE_PROMOTIONAL_POPUP to true */}
       {ENABLE_PROMOTIONAL_POPUP && <PromotionalPopup />}
 
@@ -1107,7 +1110,7 @@ const PublicTournaments = () => {
       </main>
       
       {/* Enhanced Footer with contact details, legal links, and action buttons */}
-      <footer className="py-12 px-4 sm:px-6 md:px-8 border-t border-gamehaus-lightpurple/20 mt-12 backdrop-blur-md bg-black/50 relative z-10">
+      <footer className="pt-12 pb-20 sm:pb-12 px-4 sm:px-6 md:px-8 border-t border-gamehaus-lightpurple/20 mt-12 backdrop-blur-md bg-black/50 relative z-10 pb-safe">
         <div className="max-w-7xl mx-auto">
           {/* Action Buttons Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -1188,20 +1191,24 @@ const PublicTournaments = () => {
             <div className="text-center">
               <h3 className="text-lg font-semibold text-gamehaus-lightpurple mb-4">Contact Us</h3>
               <div className="space-y-3">
-                <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
-                  <Phone className="h-4 w-4 text-gamehaus-lightpurple" />
-                  <span className="text-sm">+91 93451 87098</span>
+                <div className="flex items-center justify-center gap-2 text-gray-300">
+                  <Phone className="h-4 w-4 text-gamehaus-lightpurple shrink-0" />
+                  <span className="text-sm">
+                    <a href={`tel:+91${SUPPORT_PHONE_PRIMARY}`} className="hover:text-white transition-colors">+91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}</a>
+                    {' / '}
+                    <a href={`tel:+91${SUPPORT_PHONE_SECONDARY}`} className="hover:text-white transition-colors">+91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}</a>
+                  </span>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
                   <Mail className="h-4 w-4 text-gamehaus-lightpurple" />
-                  <span className="text-sm">{SUPPORT_EMAIL}</span>
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="text-sm">{SUPPORT_EMAIL}</a>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-gray-300 hover:text-white transition-colors">
+                <div className="flex items-center justify-center gap-2 text-gray-300">
                   <Clock className="h-4 w-4 text-gamehaus-lightpurple" />
                   <span className="text-sm">11:00 AM - 11:00 PM</span>
                 </div>
                 <a
-                  href="https://maps.app.goo.gl/oBUVebkaFMWa7EPk8"
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 text-gray-300 hover:text-gamehaus-lightpurple transition-colors group"
@@ -1416,7 +1423,7 @@ const PublicTournaments = () => {
             <div>
               <h4 className="text-white font-semibold mb-2">Contact Us</h4>
               <p>
-                If you have any questions about this Privacy Policy, please contact us at {SUPPORT_EMAIL} or +91 93451 87098.
+                If you have any questions about this Privacy Policy, please contact us at {SUPPORT_EMAIL} or +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)} / +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}.
               </p>
             </div>
           </div>

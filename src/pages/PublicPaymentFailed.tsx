@@ -2,6 +2,7 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { XCircle, AlertTriangle, ArrowLeft, RefreshCw, CreditCard } from 'lucide-react';
+import { SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY } from '@/config/brand';
 
 export default function PublicPaymentFailed() {
   const [searchParams] = useSearchParams();
@@ -101,8 +102,16 @@ export default function PublicPaymentFailed() {
           <div className="mt-6 pt-6 border-t border-gray-800">
             <p className="text-xs text-gray-500">
               Need help? Contact us at{' '}
-              <a href="tel:+919345187098" className="text-blue-400 hover:text-blue-300 underline">
-                +91 93451 87098
+              <a href={`tel:+91${SUPPORT_PHONE_PRIMARY}`} className="text-blue-400 hover:text-blue-300 underline">
+                +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}
+              </a>
+              {' / '}
+              <a href={`tel:+91${SUPPORT_PHONE_SECONDARY}`} className="text-blue-400 hover:text-blue-300 underline">
+                +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}
+              </a>
+              {' or '}
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-blue-400 hover:text-blue-300 underline">
+                {SUPPORT_EMAIL}
               </a>
             </p>
           </div>

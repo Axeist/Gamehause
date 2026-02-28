@@ -33,7 +33,7 @@ import {
   CreditCard,
   Table2,
 } from "lucide-react";
-import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL } from "@/config/brand";
+import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY } from "@/config/brand";
 import {
   Dialog,
   DialogContent,
@@ -2412,7 +2412,7 @@ export default function PublicBooking() {
         </div>
       </main>
 
-      <footer className="py-10 px-4 sm:px-6 md:px-8 border-t border-white/10 backdrop-blur-md bg-black/30 relative z-10">
+      <footer className="pt-10 pb-20 sm:pb-10 px-4 sm:px-6 md:px-8 border-t border-white/10 backdrop-blur-md bg-black/30 relative z-10 pb-safe">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center mb-4 md:mb-0">
@@ -2472,11 +2472,15 @@ export default function PublicBooking() {
               </button>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-gray-400">
-              <div className="flex items-center gap-1">
-                <Phone className="h-4 w-4" />
-                <a href="tel:+919345187098" className="hover:text-white transition-colors">
-                  +91 93451 87098
+            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                <Phone className="h-4 w-4 shrink-0" />
+                <a href={`tel:+91${SUPPORT_PHONE_PRIMARY}`} className="hover:text-white transition-colors">
+                  +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}
+                </a>
+                <span className="text-gray-500">/</span>
+                <a href={`tel:+91${SUPPORT_PHONE_SECONDARY}`} className="hover:text-white transition-colors">
+                  +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}
                 </a>
               </div>
               <div className="flex items-center gap-1">
@@ -2546,10 +2550,14 @@ export default function PublicBooking() {
 
               <p className="mt-4 text-xs text-gray-400">
                 Need help? Call{' '}
-                <a className="underline hover:text-white" href="tel:+919345187098">
-                  +91 93451 87098
-                </a>{' '}
-                or email{' '}
+                <a className="underline hover:text-white" href={`tel:+91${SUPPORT_PHONE_PRIMARY}`}>
+                  +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}
+                </a>
+                {' / '}
+                <a className="underline hover:text-white" href={`tel:+91${SUPPORT_PHONE_SECONDARY}`}>
+                  +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}
+                </a>
+                {' or email '}
                 <a className="ml-1 underline hover:text-white" href={`mailto:${SUPPORT_EMAIL}`}>
                   {SUPPORT_EMAIL}
                 </a>
