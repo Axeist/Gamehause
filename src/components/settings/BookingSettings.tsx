@@ -18,7 +18,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import type { BookingCoupon, BookingCouponDiscountType } from '@/types/coupon.types';
-import { getBookingCouponsConfig, setBookingCouponsConfig } from '@/services/bookingCouponConfig';
+import {
+  getBookingCouponsConfig,
+  setBookingCouponsConfig,
+  getBookingCouponsShowList,
+  setBookingCouponsShowList,
+} from '@/services/bookingCouponConfig';
 
 const valueLabel = (type: BookingCouponDiscountType) =>
   type === 'percentage' ? 'Value (%)' : 'Value (₹)';
@@ -26,6 +31,7 @@ const valueLabel = (type: BookingCouponDiscountType) =>
 const BookingSettings = () => {
   const { toast } = useToast();
   const [coupons, setCoupons] = useState<BookingCoupon[]>([]);
+  const [showListOnBooking, setShowListOnBooking] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -33,8 +39,12 @@ const BookingSettings = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getBookingCouponsConfig();
+      const [data, showList] = await Promise.all([
+        getBookingCouponsConfig(),
+        getBookingCouponsShowList(),
+      ]);
       setCoupons(data);
+      setShowListOnBooking(showList);
     } catch (e) {
       console.error(e);
       toast({
@@ -46,6 +56,30 @@ const BookingSettings = () => {
       setLoading(false);
     }
   }, [toast]);
+
+  const handleShowListToggle = useCallback(
+    async (checked: boolean) => {
+      setShowListOnBooking(checked);
+      try {
+        await setBookingCouponsShowList(checked);
+        toast({
+          title: checked ? 'Coupon list enabled' : 'Coupon list disabled',
+          description: checked
+            ? 'Available coupons will be shown on the booking page with Apply buttons.'
+            : 'Booking page will only show the manual coupon code input.',
+        });
+      } catch (e) {
+        console.error(e);
+        setShowListOnBooking(!checked);
+        toast({
+          title: 'Error saving setting',
+          description: 'Could not update. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    },
+    [toast]
+  );
 
   useEffect(() => {
     load();
@@ -128,6 +162,19 @@ const BookingSettings = () => {
           <CardDescription>
             Manage coupon codes available for public bookings. Only enabled coupons can be applied at checkout.
           </CardDescription>
+          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 p-4 mt-4">
+            <div>
+              <p className="font-medium text-sm">Show available coupons on booking page</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                When enabled, the public booking page displays all enabled coupons with an Apply button for easy application.
+              </p>
+            </div>
+            <Switch
+              checked={showListOnBooking}
+              onCheckedChange={handleShowListToggle}
+              className="data-[state=checked]:bg-gamehaus-purple shrink-0"
+            />
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>

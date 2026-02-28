@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY } from "@/config/brand";
 import type { BookingCoupon } from "@/types/coupon.types";
-import { getEnabledBookingCoupons } from "@/services/bookingCouponConfig";
+import { getEnabledBookingCoupons, getBookingCouponsShowList } from "@/services/bookingCouponConfig";
 import {
   Dialog,
   DialogContent,
@@ -155,12 +155,15 @@ export default function PublicBooking() {
     }
   }, [hasBookingAccess, subscriptionLoading]);
 
-  // Load enabled coupons from config (allowed codes at checkout)
+  // Load enabled coupons and "show list on booking" setting from config
   useEffect(() => {
     let cancelled = false;
-    getEnabledBookingCoupons()
-      .then((list) => {
-        if (!cancelled) setAllowedCoupons(list);
+    Promise.all([getEnabledBookingCoupons(), getBookingCouponsShowList()])
+      .then(([list, showList]) => {
+        if (!cancelled) {
+          setAllowedCoupons(list);
+          setShowAvailableCouponsOnBooking(showList);
+        }
       })
       .catch(() => {});
     return () => { cancelled = true; };
@@ -177,6 +180,7 @@ export default function PublicBooking() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const [allowedCoupons, setAllowedCoupons] = useState<BookingCoupon[]>([]);
+  const [showAvailableCouponsOnBooking, setShowAvailableCouponsOnBooking] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<BookingCoupon | null>(null);
   const [couponCode, setCouponCode] = useState("");
 
@@ -1828,11 +1832,41 @@ export default function PublicBooking() {
                   <Label className="text-xs font-semibold text-gray-400 uppercase">
                     Coupon Code
                   </Label>
-                  <div className="flex gap-2 mt-1">
+                  {showAvailableCouponsOnBooking && allowedCoupons.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      <p className="text-[11px] text-gray-400">Available coupons — click Apply to use</p>
+                      <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
+                        {allowedCoupons.map((c) => (
+                          <div
+                            key={c.code}
+                            className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <span className="font-semibold uppercase tracking-wide text-white">{c.code}</span>
+                              {c.description && (
+                                <span className="ml-2 text-xs text-gray-400 truncate block sm:inline" title={c.description}>
+                                  {c.description}
+                                </span>
+                              )}
+                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="rounded-lg bg-green-600 hover:bg-green-700 shrink-0"
+                              onClick={() => applyCoupon(c.code)}
+                            >
+                              Apply
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex gap-2 mt-2">
                     <Input
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      placeholder="Enter coupon code"
+                      placeholder={showAvailableCouponsOnBooking ? "Or enter coupon code" : "Enter coupon code"}
                       className="bg-black/30 border-white/10 text-white placeholder:text-gray-500 rounded-xl flex-1"
                     />
                     <Button
