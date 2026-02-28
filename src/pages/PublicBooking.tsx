@@ -34,6 +34,8 @@ import {
   Table2,
 } from "lucide-react";
 import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY } from "@/config/brand";
+import type { BookingCoupon } from "@/types/coupon.types";
+import { getEnabledBookingCoupons } from "@/services/bookingCouponConfig";
 import {
   Dialog,
   DialogContent,
@@ -42,7 +44,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { format, parse, getDay } from "date-fns";
+import { format, parse } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 /* =========================
@@ -94,13 +96,6 @@ const INR = (n: number) =>
 
 const genTxnId = () =>
   `CUE-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-
-const isHappyHour = (date: Date, slot: TimeSlot | null) => {
-  if (!slot) return false;
-  const day = getDay(date);
-  const startHour = Number(slot.start_time.split(":")[0]);
-  return day >= 1 && day <= 5 && startHour >= 11 && startHour < 16;
-};
 
 // ✅ NEW: Phone number normalization
 const normalizePhoneNumber = (phone: string): string => {
@@ -160,6 +155,17 @@ export default function PublicBooking() {
     }
   }, [hasBookingAccess, subscriptionLoading]);
 
+  // Load enabled coupons from config (allowed codes at checkout)
+  useEffect(() => {
+    let cancelled = false;
+    getEnabledBookingCoupons()
+      .then((list) => {
+        if (!cancelled) setAllowedCoupons(list);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   const [customerNumber, setCustomerNumber] = useState("");
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: "",
@@ -170,7 +176,8 @@ export default function PublicBooking() {
   const [searchingCustomer, setSearchingCustomer] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const [appliedCoupons, setAppliedCoupons] = useState<Record<string, string>>({});
+  const [allowedCoupons, setAllowedCoupons] = useState<BookingCoupon[]>([]);
+  const [appliedCoupon, setAppliedCoupon] = useState<BookingCoupon | null>(null);
   const [couponCode, setCouponCode] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState<"venue" | "razorpay">("venue");
@@ -335,25 +342,6 @@ export default function PublicBooking() {
       bookingSummaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 250);
   }, [isMobile, selectedSlot]);
-
-  useEffect(() => {
-    if (appliedCoupons["8ball"] === "HH99" && !isHappyHour(selectedDate, selectedSlot)) {
-      setAppliedCoupons((prev) => {
-        const copy = { ...prev };
-        delete copy["8ball"];
-        toast.error("❌ HH99 removed: valid only Mon–Fri 11 AM–4 PM");
-        return copy;
-      });
-    }
-    if (appliedCoupons["ps5"] === "HH99" && !isHappyHour(selectedDate, selectedSlot)) {
-      setAppliedCoupons((prev) => {
-        const copy = { ...prev };
-        delete copy["ps5"];
-        toast.error("❌ HH99 removed: valid only Mon–Fri 11 AM–4 PM");
-        return copy;
-      });
-    }
-  }, [selectedDate, selectedSlot, appliedCoupons]);
 
   useEffect(() => {
     const ch = supabase
@@ -726,148 +714,20 @@ export default function PublicBooking() {
     setSelectedSlotRange(range || [slot]);
   }
 
-  const allowedCoupons = [
-    "TES1342",
-    "GAMEHAUS25",
-    "GAMEHAUS50",
-    "HH99",
-    "NIT50",
-    "ALMA50",
-    "AXEIST",
-  ];
-
-  function validateStudentID() {
-    return window.confirm(
-      "🎓 GAMEHAUS50 is for other college & school students ONLY.\nShow a valid student ID card during your visit for this discount. Apply?"
-    );
-  }
-
-  function removeCoupon(key: string) {
-    setAppliedCoupons((prev) => {
-      const c = { ...prev };
-      delete c[key];
-      return c;
-    });
+  function removeCoupon() {
+    setAppliedCoupon(null);
   }
 
   function applyCoupon(raw: string) {
     const code = (raw || "").toUpperCase().trim();
-    if (!allowedCoupons.includes(code)) {
+    if (!code) return;
+    const coupon = allowedCoupons.find((c) => c.code.toUpperCase() === code);
+    if (!coupon) {
       toast.error("🚫 Invalid coupon code. Please re-check and try again!");
       return;
     }
-
-    const selectedHas8Ball = selectedStations.some(
-      (id) => stations.find((s) => s.id === id && s.type === "8ball")
-    );
-    const selectedHasPS5 = selectedStations.some(
-      (id) => stations.find((s) => s.id === id && s.type === "ps5")
-    );
-    const selectedHasFoosball = selectedStations.some(
-      (id) => stations.find((s) => s.id === id && s.type === "foosball")
-    );
-    const happyHourActive = isHappyHour(selectedDate, selectedSlot);
-
-    if (code === "TES1342") {
-      setAppliedCoupons({ all: "TES1342" });
-      toast.success("🧪 TES1342 applied: Test coupon - Price set to ₹1 for payment testing!");
-      return;
-    }
-
-    if (code === "GAMEHAUS50") {
-      if (!validateStudentID()) return;
-      setAppliedCoupons({ all: "GAMEHAUS50" });
-      toast.success(
-        "📚 GAMEHAUS50 applied: 50% OFF for students with valid ID!\nShow your student ID when you visit! 🤝"
-      );
-      return;
-    }
-
-    if (code === "AXEIST") {
-      const ok = window.confirm(
-        "🥷 AXEIST grants 100% OFF for close friends. Apply?"
-      );
-      if (!ok) return;
-      setAppliedCoupons({ all: "AXEIST" });
-      toast.success("🥷 AXEIST applied! 100% OFF — Loyalty matters.");
-      return;
-    }
-
-    if (code === "GAMEHAUS25") {
-      setAppliedCoupons({ all: "GAMEHAUS25" });
-      toast.success("🎉 GAMEHAUS25 applied: 25% OFF! Book more, play more! 🕹️");
-      return;
-    }
-
-    if (code === "HH99") {
-      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasFoosball)) {
-        toast.error("⏰ HH99 applies to PS5, Tables, and Foosball during Happy Hours.");
-        return;
-      }
-      if (!happyHourActive) {
-        toast.error("🕒 HH99 valid only Mon–Fri 11 AM to 4 PM (Happy Hours).");
-        return;
-      }
-      setAppliedCoupons((prev) => {
-        let updated = { ...prev };
-        if (selectedHas8Ball) updated["8ball"] = "HH99";
-        if (selectedHasPS5) updated["ps5"] = "HH99";
-        if (selectedHasFoosball) updated["foosball"] = "HH99";
-        return updated;
-      });
-      toast.success(
-        "⏰ HH99 applied! PS5, Tables & Foosball at ₹99/hour during Happy Hours! ✨"
-      );
-      return;
-    }
-
-    if (code === "NIT50") {
-      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasFoosball)) {
-        toast.error(
-          "NIT50 can be applied to PS5, Tables, or Foosball stations in your selection."
-        );
-        return;
-      }
-      setAppliedCoupons((prev) => {
-        let updated = { ...prev };
-        if (selectedHasPS5) updated["ps5"] = "NIT50";
-        if (selectedHas8Ball) updated["8ball"] = prev["8ball"] === "HH99" ? "HH99" : "NIT50";
-        if (selectedHasFoosball) updated["foosball"] = "NIT50";
-        return updated;
-      });
-      let msg = "🎓 NIT50 applied! 50% OFF for ";
-      const types = [];
-      if (selectedHasPS5) types.push("PS5");
-      if (selectedHas8Ball) types.push("8-Ball");
-      if (selectedHasFoosball) types.push("Foosball");
-      msg += types.join(" & ") + " stations!";
-      toast.success(msg);
-      return;
-    }
-
-    if (code === "ALMA50") {
-      if (!(selectedHas8Ball || selectedHasPS5 || selectedHasFoosball)) {
-        toast.error(
-          "ALMA50 can be applied to PS5, Tables, or Foosball stations in your selection."
-        );
-        return;
-      }
-      setAppliedCoupons((prev) => {
-        let updated = { ...prev };
-        if (selectedHasPS5) updated["ps5"] = "ALMA50";
-        if (selectedHas8Ball) updated["8ball"] = "ALMA50";
-        if (selectedHasFoosball) updated["foosball"] = "ALMA50";
-        return updated;
-      });
-      let msg = "🏫 ALMA50 applied! 50% OFF for ";
-      const types = [];
-      if (selectedHasPS5) types.push("PS5");
-      if (selectedHas8Ball) types.push("8-Ball");
-      if (selectedHasFoosball) types.push("Foosball");
-      msg += types.join(" & ") + " stations!";
-      toast.success(msg);
-      return;
-    }
+    setAppliedCoupon(coupon);
+    toast.success(`✅ ${coupon.code} applied${coupon.description ? `: ${coupon.description}` : ""}`);
   }
 
   const handleCouponApply = () => {
@@ -887,129 +747,17 @@ export default function PublicBooking() {
     return stationPrice * numberOfSlots;
   };
 
-  const calculateDiscount = () => {
+  const calculateDiscount = (): number => {
     const original = calculateOriginalPrice();
-    if (original === 0) return { total: 0, breakdown: {} as Record<string, number> };
-    if (!Object.keys(appliedCoupons).length)
-      return { total: 0, breakdown: {} as Record<string, number> };
-
-    if (appliedCoupons["all"]) {
-      if (appliedCoupons["all"] === "AXEIST")
-        return { total: original, breakdown: { all: original } };
-      if (appliedCoupons["all"] === "TES1342") {
-        // Test coupon: Set price to ₹1 (discount = original - 1)
-        const disc = Math.max(original - 1, 0);
-        return { total: disc, breakdown: { all: disc } };
-      }
-      if (appliedCoupons["all"] === "GAMEHAUS25") {
-        const disc = original * 0.25;
-        return { total: disc, breakdown: { all: disc } };
-      }
-      if (appliedCoupons["all"] === "GAMEHAUS50") {
-        const disc = original * 0.5;
-        return { total: disc, breakdown: { all: disc } };
-      }
-      return { total: 0, breakdown: {} as Record<string, number> };
+    if (original === 0 || !appliedCoupon) return 0;
+    if (appliedCoupon.discount_type === "percentage") {
+      return original * (appliedCoupon.discount_value / 100);
     }
-
-    let totalDiscount = 0;
-    const breakdown: Record<string, number> = {};
-
-    if (
-      appliedCoupons["8ball"] === "HH99" &&
-      appliedCoupons["ps5"] === "NIT50"
-    ) {
-      const eightBalls = stations.filter(
-        (s) => selectedStations.includes(s.id) && s.type === "8ball"
-      );
-      const sum = eightBalls.reduce((x, s) => x + s.hourly_rate, 0);
-      const d = sum - eightBalls.length * 99;
-      if (d > 0) {
-        totalDiscount += d;
-        breakdown["8-Ball (HH99)"] = d;
-      }
-      const ps5s = stations.filter(
-        (s) => selectedStations.includes(s.id) && s.type === "ps5"
-      );
-      const sum2 = ps5s.reduce((x, s) => x + s.hourly_rate, 0);
-      const d2 = sum2 - ps5s.length * 75;
-      totalDiscount += d2;
-      breakdown["PS5 (HH99+NIT50)"] = d2;
-    } else {
-      if (appliedCoupons["8ball"] === "HH99") {
-        const eightBalls = stations.filter(
-          (s) => selectedStations.includes(s.id) && s.type === "8ball"
-        );
-        const sum = eightBalls.reduce((x, s) => x + s.hourly_rate, 0);
-        const d = sum - eightBalls.length * 99;
-        if (d > 0) {
-          totalDiscount += d;
-          breakdown["8-Ball (HH99)"] = d;
-        }
-      }
-
-      if (appliedCoupons["ps5"] === "HH99") {
-        const ps5s = stations.filter(
-          (s) => selectedStations.includes(s.id) && s.type === "ps5"
-        );
-        const sum = ps5s.reduce((x, s) => x + s.hourly_rate, 0);
-        const d = sum - ps5s.length * 99;
-        if (d > 0) {
-          totalDiscount += d;
-          breakdown["PS5 (HH99)"] = d;
-        }
-      }
-
-      if (appliedCoupons["foosball"] === "HH99") {
-        const foosballs = stations.filter(
-          (s) => selectedStations.includes(s.id) && s.type === "foosball"
-        );
-        const sum = foosballs.reduce((x, s) => x + s.hourly_rate, 0);
-        const d = sum - foosballs.length * 99;
-        if (d > 0) {
-          totalDiscount += d;
-          breakdown["Foosball (HH99)"] = d;
-        }
-      }
-
-      if (appliedCoupons["8ball"] === "NIT50" || appliedCoupons["8ball"] === "ALMA50") {
-        const balls = stations.filter(
-          (s) => selectedStations.includes(s.id) && s.type === "8ball"
-        );
-        const sum = balls.reduce((x, s) => x + s.hourly_rate, 0);
-        const d = sum * 0.5;
-        totalDiscount += d;
-        breakdown[`8-Ball (${appliedCoupons["8ball"]})`] = d;
-      }
-
-      if (appliedCoupons["ps5"] === "NIT50" || appliedCoupons["ps5"] === "ALMA50") {
-        const ps5s = stations.filter(
-          (s) => selectedStations.includes(s.id) && s.type === "ps5"
-        );
-        const sum = ps5s.reduce((x, s) => x + s.hourly_rate, 0);
-        const d = sum * 0.5;
-        totalDiscount += d;
-        breakdown[`PS5 (${appliedCoupons["ps5"]})`] = d;
-      }
-
-      if (appliedCoupons["foosball"] === "NIT50" || appliedCoupons["foosball"] === "ALMA50") {
-        const foosballs = stations.filter(
-          (s) => selectedStations.includes(s.id) && s.type === "foosball"
-        );
-        const sum = foosballs.reduce((x, s) => x + s.hourly_rate, 0);
-        const d = sum * 0.5;
-        totalDiscount += d;
-        breakdown[`Foosball (${appliedCoupons["foosball"]})`] = d;
-      }
-    }
-
-    return { total: totalDiscount, breakdown };
+    return Math.min(appliedCoupon.discount_value, original);
   };
 
   const originalPrice = calculateOriginalPrice();
-  const discountObj = calculateDiscount();
-  const discount = discountObj.total;
-  const discountBreakdown = discountObj.breakdown;
+  const discount = calculateDiscount();
   const finalPrice = Math.max(originalPrice - discount, 0);
 
   // Calculate number of selected slots
@@ -1092,7 +840,7 @@ export default function PublicBooking() {
         }
       }
 
-      const couponCodes = Object.values(appliedCoupons).join(",");
+      const couponCodes = appliedCoupon ? appliedCoupon.code : "";
       const bookingDuration = 30; // 30 minutes per slot
       
       // Validate booking slots for conflicts BEFORE creating
@@ -1250,7 +998,7 @@ export default function PublicBooking() {
       setIsReturningCustomer(false);
       setHasSearched(false);
       setCouponCode("");
-      setAppliedCoupons({});
+      setAppliedCoupon(null);
       setAvailableSlots([]);
     } catch (e) {
       console.error(e);
@@ -1302,7 +1050,7 @@ export default function PublicBooking() {
           original: originalPrice,
           discount: discount,
           final: totalPrice,
-          coupons: Object.values(appliedCoupons).join(","),
+          coupons: appliedCoupon ? appliedCoupon.code : "",
         },
       };
       localStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
@@ -2099,44 +1847,35 @@ export default function PublicBooking() {
                     All discounts and totals are calculated in INR (₹).
                   </p>
 
-                  {Object.entries(appliedCoupons).length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {Object.entries(appliedCoupons).map(([key, val]) => {
-                        let emoji = "🏷️";
-                        if (val === "HH99") emoji = "⏰";
-                        else if (val === "NIT50") emoji = "🎓";
-                        else if (val === "GAMEHAUS25") emoji = "🎉";
-                        else if (val === "GAMEHAUS50") emoji = "📚";
-                        else if (val === "ALMA50") emoji = "🏫";
-                        else if (val === "AXEIST") emoji = "🥷";
-                        return (
-                          <div
-                            key={key}
-                            className="flex items-center justify-between px-4 py-2 rounded-xl shadow-sm font-semibold"
-                            style={{
-                              background: "linear-gradient(90deg,#231743 10%,#181121 100%)",
-                              border: "1px solid #A37CFF",
-                              color: "#F7CBFF",
-                              letterSpacing: "1.5px"
-                            }}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="text-xl">{emoji}</span>
-                              <span className="font-extrabold uppercase tracking-widest">{val}</span>
-                              <span className="ml-2 text-xs font-semibold text-green-400">
-                                Applied!
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => removeCoupon(key)}
-                              aria-label="Remove coupon"
-                              className="ml-2 p-1 hover:bg-[#3B2159] rounded-full"
-                            >
-                              <X className="h-4 w-4 text-purple-200" />
-                            </button>
-                          </div>
-                        );
-                      })}
+                  {appliedCoupon && (
+                    <div className="mt-2">
+                      <div
+                        className="flex items-center justify-between px-4 py-2 rounded-xl shadow-sm font-semibold"
+                        style={{
+                          background: "linear-gradient(90deg,#231743 10%,#181121 100%)",
+                          border: "1px solid #A37CFF",
+                          color: "#F7CBFF",
+                          letterSpacing: "1.5px"
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">🏷️</span>
+                          <span className="font-extrabold uppercase tracking-widest">{appliedCoupon.code}</span>
+                          {appliedCoupon.description && (
+                            <span className="ml-2 text-xs text-gray-300 truncate max-w-[140px]" title={appliedCoupon.description}>
+                              {appliedCoupon.description}
+                            </span>
+                          )}
+                          <span className="ml-2 text-xs font-semibold text-green-400">Applied!</span>
+                        </div>
+                        <button
+                          onClick={() => removeCoupon()}
+                          aria-label="Remove coupon"
+                          className="ml-2 p-1 hover:bg-[#3B2159] rounded-full"
+                        >
+                          <X className="h-4 w-4 text-purple-200" />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -2230,31 +1969,15 @@ export default function PublicBooking() {
                         </span>
                       </div>
 
-                      {/* Discount Breakdown - Hidden for now */}
                       {discount > 0 && (
-                        <div className="hidden">
-                          <div className="border p-2 rounded bg-black/10 text-green-400">
-                            <Label className="font-semibold text-xs uppercase">
-                              Discount Breakdown
-                            </Label>
-                            <ul className="list-disc ml-5 mt-1 text-sm">
-                              {Object.entries(discountBreakdown).map(([k, v]) => (
-                                <li key={k}>
-                                  {k}: -{INR(v)}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                        <>
                           <div className="flex justify-between items-center">
-                            <Label className="text-sm text-green-400">
-                              Total Discount
-                            </Label>
+                            <Label className="text-sm text-green-400">Discount</Label>
                             <span className="text-sm text-green-400">-{INR(discount)}</span>
                           </div>
-                        </div>
+                          <Separator className="bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                        </>
                       )}
-
-                      <Separator className="bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
                       <div className="flex justify-between items-center">
                         <Label className="text-base font-semibold text-gray-100">
