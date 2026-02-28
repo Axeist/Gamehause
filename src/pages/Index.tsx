@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from '@/hooks/use-mobile';
-import { BRAND_NAME, LOGO_PATH, PUBLIC_BOOKING_URL, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY, ADDRESS } from '@/config/brand';
+import { BRAND_NAME, LOGO_PATH, PUBLIC_BOOKING_URL, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY, ADDRESS, BUSINESS_HOURS, GOOGLE_MAPS_LINK } from '@/config/brand';
 import NeonMarquee from "@/components/marketing/NeonMarquee";
 import ExperienceShowcase from "@/components/marketing/ExperienceShowcase";
 import TestimonialsSection from "@/components/marketing/TestimonialsSection";
@@ -300,7 +300,7 @@ const Index: React.FC = () => {
           </Badge>
           <Badge className="bg-black/40 text-gray-200 border border-gamehaus-purple/30 backdrop-blur-sm hover:bg-black/50 transition-colors">
             <MapPin className="h-3 w-3 mr-1.5 text-gamehaus-magenta" />
-            T. Nagar, Chennai
+            Thousand Lights, Chennai
           </Badge>
         </div>
 
@@ -743,6 +743,92 @@ const Index: React.FC = () => {
 
         <div className="w-full mb-20">
           <TestimonialsSection />
+        </div>
+
+        {/* Find us – Location, hours, map */}
+        <div className="w-full max-w-6xl mx-auto mb-20 px-4">
+          <div className="rounded-3xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/70 via-gamehaus-purple/15 to-black/70 overflow-hidden backdrop-blur-md relative">
+            <div className="absolute inset-0 bg-grid-pattern opacity-[0.06] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gamehaus-purple/10 blur-[100px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gamehaus-magenta/10 blur-[80px] rounded-full pointer-events-none" />
+            <div className="relative z-10 p-6 sm:p-8 md:p-10">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                  Find us
+                </h2>
+                <p className="mt-2 text-gamehaus-lightpurple/90 text-lg">
+                  {BRAND_NAME} – Thousand Lights, Chennai
+                </p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="flex items-start gap-4 p-4 rounded-2xl border border-white/10 bg-black/30 hover:border-gamehaus-purple/30 transition-colors">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/20 flex items-center justify-center border border-gamehaus-purple/30 shrink-0">
+                      <MapPin className="h-6 w-6 text-gamehaus-lightpurple" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Address</p>
+                      <p className="text-gray-200 leading-relaxed">{ADDRESS}</p>
+                      <a
+                        href={GOOGLE_MAPS_LINK}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex items-center gap-1.5 mt-2 text-gamehaus-lightpurple hover:text-gamehaus-magenta text-sm font-medium transition-colors"
+                      >
+                        View on Google Maps
+                        <span aria-hidden>↗</span>
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 p-4 rounded-2xl border border-white/10 bg-black/30 hover:border-gamehaus-purple/30 transition-colors">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-gamehaus-magenta/25 to-gamehaus-purple/20 flex items-center justify-center border border-gamehaus-purple/30 shrink-0">
+                      <Phone className="h-6 w-6 text-gamehaus-lightpurple" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Phone</p>
+                      <a href={`tel:+91${SUPPORT_PHONE_PRIMARY}`} className="text-gray-200 hover:text-gamehaus-lightpurple transition-colors font-medium">
+                        +91 {SUPPORT_PHONE_PRIMARY.slice(0, 5)} {SUPPORT_PHONE_PRIMARY.slice(5)}
+                      </a>
+                      {SUPPORT_PHONE_SECONDARY && (
+                        <>
+                          <span className="text-gray-500 mx-2">/</span>
+                          <a href={`tel:+91${SUPPORT_PHONE_SECONDARY}`} className="text-gray-200 hover:text-gamehaus-lightpurple transition-colors font-medium">
+                            +91 {SUPPORT_PHONE_SECONDARY.slice(0, 5)} {SUPPORT_PHONE_SECONDARY.slice(5)}
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 p-4 rounded-2xl border border-white/10 bg-black/30 hover:border-gamehaus-purple/30 transition-colors">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/20 flex items-center justify-center border border-gamehaus-purple/30 shrink-0">
+                      <Clock className="h-6 w-6 text-gamehaus-lightpurple" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Business hours</p>
+                      <p className="text-gray-200 font-medium">{BUSINESS_HOURS}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="lg:col-span-3">
+                  <div className="rounded-2xl overflow-hidden border border-gamehaus-purple/30 bg-black/40 shadow-2xl shadow-black/40 aspect-[4/3] min-h-[280px]">
+                    <iframe
+                      title={`${BRAND_NAME} location on Google Maps`}
+                      src={`https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`}
+                      className="w-full h-full min-h-[280px] border-0"
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                  <p className="text-center text-sm text-gray-400 mt-3">
+                    <a href={GOOGLE_MAPS_LINK} target="_blank" rel="noreferrer noopener" className="text-gamehaus-lightpurple hover:underline">
+                      Open in Google Maps
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* How it works */}
@@ -1275,7 +1361,7 @@ const Index: React.FC = () => {
                 </div>
                 <div className="flex items-start gap-3">
                   <Clock className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />
-                  <span>Open daily</span>
+                  <span>{BUSINESS_HOURS}</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 text-gamehaus-lightpurple mt-0.5 shrink-0" />

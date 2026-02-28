@@ -1,4 +1,4 @@
-import { BRAND_NAME, PUBLIC_BOOKING_URL, SUPPORT_EMAIL, url } from "@/config/brand";
+import { BRAND_NAME, PUBLIC_BOOKING_URL, SUPPORT_EMAIL, ADDRESS, SUPPORT_PHONE_PRIMARY, url } from "@/config/brand";
 
 export type KnowledgeArticle = {
   id: string;
@@ -10,10 +10,8 @@ export type KnowledgeArticle = {
   answer: () => string;
 };
 
-export const GAMEHAUS_ADDRESS =
-  "40, S W Boag Rd, CIT Nagar West, T. Nagar, Chennai, Tamil Nadu 600035";
-
-export const GAMEHAUS_PHONE = "+91 93451 87098";
+export const GAMEHAUS_ADDRESS = ADDRESS;
+export const GAMEHAUS_PHONE = `+91 ${SUPPORT_PHONE_PRIMARY.slice(0, 5)} ${SUPPORT_PHONE_PRIMARY.slice(5)}`;
 
 export const QUICK_TILES: Array<{ id: string; label: string; prompt: string }> = [
   { id: "start", label: "Start booking", prompt: "book" },

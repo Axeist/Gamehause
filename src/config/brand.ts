@@ -8,7 +8,11 @@ export const SUPPORT_EMAIL = "contact@gamehaus.co.in" as const;
 export const SUPPORT_PHONE_PRIMARY = "9994166622" as const;
 export const SUPPORT_PHONE_SECONDARY = "9345187098" as const;
 export const ADDRESS =
-  "SILINGI BUILDINGS, NO.134, 4th Floor Greams Road Backside to IDBI Bank, Tamil Nadu 600006" as const;
+  "4th Floor, Silingi Building, 142, Greams Rd, Thousand Lights West, Thousand Lights, Chennai, Tamil Nadu 600006" as const;
+/** Display string for business hours (e.g. for footer and location section). */
+export const BUSINESS_HOURS = "12 PM – 2 AM" as const;
+/** Google Maps share link for the venue (open in Maps / get directions). */
+export const GOOGLE_MAPS_LINK = "https://share.google/5RwCdRAnT1Qdr4oq1" as const;
 export const LOGO_PATH = "/brand/gamehaus-logo.png" as const;
 
 /**
