@@ -32,6 +32,9 @@ import {
   X,
   CreditCard,
   Table2,
+  Ticket,
+  Percent,
+  BadgeDollarSign,
 } from "lucide-react";
 import { BASE_URL, BRAND_NAME, LOGO_PATH, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY } from "@/config/brand";
 import type { BookingCoupon } from "@/types/coupon.types";
@@ -1848,56 +1851,87 @@ export default function PublicBooking() {
                 )}
 
                 {/* Coupon Code Section */}
-                <div>
-                  <Label className="text-xs font-semibold text-gray-400 uppercase">
-                    Coupon Code
-                  </Label>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/20 border border-gamehaus-purple/40">
+                      <Ticket className="h-4 w-4 text-gamehaus-lightpurple" />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-white">Coupon Code</Label>
+                      <p className="text-[11px] text-gray-400">Save more on your booking</p>
+                    </div>
+                  </div>
+
                   {couponsShownOnBookingPage.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      <p className="text-[11px] text-gray-400">Available coupons — click Apply to use</p>
-                      <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
-                        {couponsShownOnBookingPage.map((c) => (
-                          <div
-                            key={c.code}
-                            className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <span className="font-semibold uppercase tracking-wide text-white">{c.code}</span>
-                              {c.description && (
-                                <span className="ml-2 text-xs text-gray-400 truncate block sm:inline" title={c.description}>
-                                  {c.description}
-                                </span>
-                              )}
-                            </div>
-                            <Button
-                              type="button"
-                              size="sm"
-                              className="rounded-lg bg-green-600 hover:bg-green-700 shrink-0"
-                              onClick={() => applyCoupon(c.code)}
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-gray-300 flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-gamehaus-lightpurple" />
+                        Available offers — tap Apply to use
+                      </p>
+                      <div className="flex flex-col gap-2.5 max-h-[220px] overflow-y-auto pr-0.5 scrollbar-thin">
+                        {couponsShownOnBookingPage.map((c) => {
+                          const discountLabel = c.discount_type === "percentage"
+                            ? `${c.discount_value}% off`
+                            : `₹${c.discount_value} off`;
+                          return (
+                            <div
+                              key={c.code}
+                              className="group relative flex items-center gap-3 rounded-xl border border-white/15 bg-gradient-to-r from-white/[0.06] to-white/[0.02] p-3 shadow-sm transition-all hover:border-gamehaus-purple/40 hover:from-gamehaus-purple/10 hover:to-gamehaus-magenta/5"
                             >
-                              Apply
-                            </Button>
-                          </div>
-                        ))}
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gamehaus-purple/20 border border-gamehaus-purple/30">
+                                {c.discount_type === "percentage" ? (
+                                  <Percent className="h-4 w-4 text-gamehaus-lightpurple" />
+                                ) : (
+                                  <BadgeDollarSign className="h-4 w-4 text-gamehaus-lightpurple" />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="font-bold uppercase tracking-wider text-white">{c.code}</span>
+                                  <span className="inline-flex items-center rounded-full bg-gamehaus-purple/25 px-2 py-0.5 text-[10px] font-semibold text-gamehaus-lightpurple ring-1 ring-gamehaus-purple/30">
+                                    {discountLabel}
+                                  </span>
+                                </div>
+                                {c.description && (
+                                  <p className="mt-0.5 text-xs text-gray-400 line-clamp-2" title={c.description}>
+                                    {c.description}
+                                  </p>
+                                )}
+                              </div>
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="shrink-0 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold shadow-md transition-all hover:scale-[1.02]"
+                                onClick={() => applyCoupon(c.code)}
+                              >
+                                Apply
+                              </Button>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      placeholder={couponsShownOnBookingPage.length > 0 ? "Or enter coupon code" : "Enter coupon code"}
-                      className="bg-black/30 border-white/10 text-white placeholder:text-gray-500 rounded-xl flex-1"
-                    />
-                    <Button
-                      onClick={handleCouponApply}
-                      size="sm"
-                      className="rounded-xl bg-green-600 hover:bg-green-700"
-                    >
-                      Apply
-                    </Button>
+
+                  <div className="rounded-xl border border-white/10 bg-black/20 p-2">
+                    <p className="mb-2 text-[11px] text-gray-400">Have a code? Enter it below</p>
+                    <div className="flex gap-2">
+                      <Input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder={couponsShownOnBookingPage.length > 0 ? "Or enter coupon code" : "Enter coupon code"}
+                        className="bg-black/40 border-white/15 text-white placeholder:text-gray-500 rounded-lg flex-1 focus-visible:ring-gamehaus-purple/50"
+                      />
+                      <Button
+                        onClick={handleCouponApply}
+                        size="sm"
+                        className="rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 font-semibold shrink-0"
+                      >
+                        Apply
+                      </Button>
+                    </div>
                   </div>
-                  <p className="mt-1 text-[11px] text-gray-400">
+                  <p className="text-[11px] text-gray-400">
                     All discounts and totals are calculated in INR (₹).
                   </p>
 
