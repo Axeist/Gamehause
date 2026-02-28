@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Monitor, Trophy, Users, Star, ShieldCheck, Sparkles, Calendar, LogIn, Gamepad2, Timer, Table2, Radio, CheckCircle2, XCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Mail, Phone, Clock, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +12,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BRAND_NAME, LOGO_PATH, PUBLIC_BOOKING_URL, SUPPORT_EMAIL, SUPPORT_PHONE_PRIMARY, SUPPORT_PHONE_SECONDARY, ADDRESS, BUSINESS_HOURS, GOOGLE_MAPS_LINK } from '@/config/brand';
-import NeonMarquee from "@/components/marketing/NeonMarquee";
-import ExperienceShowcase from "@/components/marketing/ExperienceShowcase";
-import TestimonialsSection from "@/components/marketing/TestimonialsSection";
+
+const NeonMarquee = lazy(() => import("@/components/marketing/NeonMarquee"));
+const ExperienceShowcase = lazy(() => import("@/components/marketing/ExperienceShowcase"));
+const TestimonialsSection = lazy(() => import("@/components/marketing/TestimonialsSection"));
 
 interface Station {
   id: string;
@@ -89,47 +89,18 @@ const Index: React.FC = () => {
     }
   }, [user, navigate]);
 
-  // High-tech cursor glow (desktop-first, lightweight)
+  // Defer station fetch so first paint is fast (avoids blocking main thread)
   useEffect(() => {
-    // Avoid heavy pointer glow on touch / reduced-motion devices (helps jitter)
-    if (typeof window === "undefined") return;
-    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    const finePointer = window.matchMedia?.("(pointer: fine)")?.matches;
-    if (reduceMotion || !finePointer) return;
-
-    const root = document.documentElement;
-    let raf = 0;
-    let latestX = 0;
-    let latestY = 0;
-
-    const apply = () => {
-      root.style.setProperty("--mx", `${latestX}px`);
-      root.style.setProperty("--my", `${latestY}px`);
-      raf = 0;
-    };
-
-    const onMove = (e: PointerEvent) => {
-      latestX = e.clientX;
-      latestY = e.clientY;
-      if (!raf) raf = window.requestAnimationFrame(apply);
-    };
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      if (raf) window.cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  // Fetch live station data
-  useEffect(() => {
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
     const fetchLiveStations = async () => {
       try {
         const { data, error } = await supabase
           .from('stations')
           .select('*')
           .order('name');
-        
+        if (cancelled) return;
         if (error) throw error;
         const normalized: Station[] = (data || []).map((row: any) => ({
           id: row.id,
@@ -140,32 +111,27 @@ const Index: React.FC = () => {
           is_public_booking: row.is_public_booking ?? true,
           is_occupied: row.is_occupied,
         }));
-        // Hide stations disabled from public booking
         setLiveStations(normalized.filter((s) => s.is_public_booking));
-        setStationsLoading(false);
       } catch (error) {
-        console.error('Error fetching stations:', error);
-        setStationsLoading(false);
+        if (!cancelled) console.error('Error fetching stations:', error);
+      } finally {
+        if (!cancelled) setStationsLoading(false);
       }
     };
-
-    fetchLiveStations();
-    
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchLiveStations, 30000);
-    
-    // Real-time subscription
-    const channel = supabase
-      .channel('stations-live')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'stations' },
-        () => fetchLiveStations()
-      )
-      .subscribe();
-
+    const id = window.setTimeout(() => {
+      if (cancelled) return;
+      fetchLiveStations();
+      interval = setInterval(fetchLiveStations, 30000);
+      channel = supabase
+        .channel('stations-live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'stations' }, fetchLiveStations)
+        .subscribe();
+    }, 150);
     return () => {
-      clearInterval(interval);
-      supabase.removeChannel(channel);
+      cancelled = true;
+      clearTimeout(id);
+      if (interval) clearInterval(interval);
+      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 
@@ -196,37 +162,15 @@ const Index: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#1a0f1a] to-[#1a1a1a] flex flex-col relative overflow-hidden">
-      {/* Elegant animated background */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* Premium grid + texture */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.06] pointer-events-none" />
-        <div className="absolute inset-0 bg-noise-soft opacity-[0.10] mix-blend-overlay pointer-events-none" />
-        <div className="absolute inset-0 bg-scanlines opacity-[0.04] mix-blend-overlay pointer-events-none" />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(650px circle at var(--mx, 50vw) var(--my, 30vh), rgba(255, 74, 26, 0.14), transparent 45%)",
-          }}
-        />
-        
-        {/* Elegant gradients */}
-        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] rounded-full bg-gradient-to-br from-gamehaus-purple/10 to-transparent blur-[120px] animate-float opacity-30"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-gamehaus-magenta/10 to-transparent blur-[100px] animate-float opacity-30" style={{animationDelay: '3s'}}></div>
-        
-        {/* Subtle light streaks */}
-        <div className="absolute top-[25%] w-full h-px bg-gradient-to-r from-transparent via-gamehaus-purple/15 to-transparent"></div>
-        <div className="absolute top-[65%] w-full h-px bg-gradient-to-r from-transparent via-gamehaus-magenta/15 to-transparent"></div>
-        
-        {/* Elegant floating particles */}
-        <div className="absolute w-2 h-2 bg-gamehaus-lightpurple/20 rounded-full top-1/4 left-1/4 animate-float"></div>
-        <div className="absolute w-2 h-2 bg-gamehaus-magenta/20 rounded-full top-3/4 right-1/4 animate-float" style={{animationDelay: '1.5s'}}></div>
-        <div className="absolute w-2 h-2 bg-gamehaus-lightpurple/20 rounded-full top-1/2 left-3/4 animate-float" style={{animationDelay: '2.5s'}}></div>
-        <div className="absolute w-1.5 h-1.5 bg-gamehaus-magenta/20 rounded-full top-1/3 right-1/3 animate-float" style={{animationDelay: '3.5s'}}></div>
+      {/* Lightweight static background (no pointer tracking or heavy blur for fast INP) */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.05]" />
+        <div className="absolute top-0 left-1/2 w-full max-w-2xl h-96 bg-gamehaus-purple/8 rounded-full blur-3xl -translate-x-1/2" />
+        <div className="absolute bottom-1/4 right-0 w-80 h-80 bg-gamehaus-magenta/8 rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
-      <header className="h-20 md:h-24 flex items-center px-4 md:px-8 border-b border-gamehaus-purple/30 relative z-10 backdrop-blur-md bg-black/40">
+      <header className="h-20 md:h-24 flex items-center px-4 md:px-8 border-b border-gamehaus-purple/30 relative z-10 bg-black/80">
         <Logo />
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           <Button
@@ -254,9 +198,8 @@ const Index: React.FC = () => {
 
       {/* Hero section */}
       <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-12 md:py-16 relative z-10">
-        <div className="mb-6 sm:mb-8 md:mb-10 animate-float-shadow">
+        <div className="mb-6 sm:mb-8 md:mb-10">
           <div className="relative">
-            <div className="absolute -inset-3 bg-gradient-to-r from-gamehaus-purple/30 to-gamehaus-magenta/30 rounded-full opacity-80 blur-2xl animate-pulse-glow"></div>
             <img
               src={LOGO_PATH}
               alt={`${BRAND_NAME} Logo`} 
@@ -268,7 +211,7 @@ const Index: React.FC = () => {
         
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-center text-white font-heading leading-tight mb-4 md:mb-6 tracking-tight px-2">
           Welcome to{" "}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple animate-text-gradient">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-gamehaus-lightpurple via-gamehaus-magenta to-gamehaus-purple">
             {BRAND_NAME}
           </span>
         </h1>
@@ -304,18 +247,19 @@ const Index: React.FC = () => {
           </Badge>
         </div>
 
-        <div className="mb-10 md:mb-14 w-full">
-          <NeonMarquee />
+        <div className="mb-10 md:mb-14 w-full" style={{ contentVisibility: 'auto' }}>
+          <Suspense fallback={null}>
+            <NeonMarquee />
+          </Suspense>
         </div>
         
         {/* Primary Booking CTA - Prominent */}
         <div className="mb-12 md:mb-16 flex flex-col items-center px-4">
           <Button
             size="lg"
-            className="bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-purple text-white hover:from-gamehaus-purple hover:via-gamehaus-magenta hover:to-gamehaus-purple shadow-2xl shadow-gamehaus-purple/50 transition-all duration-300 text-base sm:text-lg md:text-xl px-8 sm:px-12 py-5 sm:py-6 rounded-full group relative overflow-hidden animate-pulse-soft"
+            className="bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-purple text-white hover:opacity-95 shadow-xl shadow-gamehaus-purple/40 transition-opacity duration-200 text-base sm:text-lg md:text-xl px-8 sm:px-12 py-5 sm:py-6 rounded-full"
             onClick={() => window.open(PUBLIC_BOOKING_URL, '_blank')}
           >
-            <div className="absolute inset-0 w-full bg-gradient-to-r from-gamehaus-purple/0 via-white/20 to-gamehaus-purple/0 animate-shimmer pointer-events-none"></div>
             <Calendar className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:scale-110 transition-transform" />
             <span className="font-bold">Reserve a Slot</span>
           </Button>
@@ -329,43 +273,39 @@ const Index: React.FC = () => {
           <Button
             size="lg"
             variant="outline"
-            className="text-gamehaus-lightpurple border-gamehaus-purple/60 hover:bg-gamehaus-purple/30 hover:border-gamehaus-lightpurple/80 group relative overflow-hidden transition-all duration-300 text-lg px-8"
+            className="text-gamehaus-lightpurple border-gamehaus-purple/60 hover:bg-gamehaus-purple/30 hover:border-gamehaus-lightpurple/80 transition-colors duration-200 text-lg px-8"
             onClick={() => navigate('/public/stations')}
           >
-            <div className="absolute inset-0 w-full bg-gradient-to-r from-gamehaus-purple/0 via-gamehaus-lightpurple/20 to-gamehaus-purple/0 animate-shimmer pointer-events-none"></div>
-            <Monitor className="mr-2 h-5 w-5 animate-pulse-soft" />
+            <Monitor className="mr-2 h-5 w-5" />
             <span>View Table Availability</span>
           </Button>
 
           <Button
             size="lg"
             variant="outline"
-            className="text-gamehaus-lightpurple border-gamehaus-purple/60 hover:bg-gamehaus-purple/30 hover:border-gamehaus-lightpurple/80 group relative overflow-hidden transition-all duration-300 text-lg px-8"
+            className="text-gamehaus-lightpurple border-gamehaus-purple/60 hover:bg-gamehaus-purple/30 hover:border-gamehaus-lightpurple/80 transition-colors duration-200 text-lg px-8"
             onClick={() => navigate('/public/tournaments')}
           >
-            <div className="absolute inset-0 w-full bg-gradient-to-r from-gamehaus-magenta/0 via-gamehaus-lightpurple/15 to-gamehaus-magenta/0 animate-shimmer pointer-events-none"></div>
-            <Trophy className="mr-2 h-5 w-5 animate-pulse-soft" />
+            <Trophy className="mr-2 h-5 w-5" />
             <span>Explore Tournaments</span>
           </Button>
         </div>
 
         {/* Live Station Status Section */}
-        <div className="w-full max-w-6xl mx-auto mb-12 md:mb-20 px-4">
-          <div className="bg-gradient-to-br from-black/70 via-gamehaus-purple/20 to-black/70 border border-gamehaus-purple/50 rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12 relative overflow-hidden backdrop-blur-md">
-            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-            <div className="absolute top-0 right-0 h-96 w-96 bg-gamehaus-purple/10 blur-3xl rounded-full"></div>
-            <div className="absolute bottom-0 left-0 h-96 w-96 bg-gamehaus-magenta/10 blur-3xl rounded-full"></div>
+        <div className="w-full max-w-6xl mx-auto mb-12 md:mb-20 px-4" style={{ contentVisibility: 'auto' }}>
+          <div className="bg-black/60 border border-gamehaus-purple/50 rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12 relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
             
             <div className="relative z-10">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
                 <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                   <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-gamehaus-purple/30 to-gamehaus-magenta/30 border border-gamehaus-purple/40 shrink-0">
-                    <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-gamehaus-lightpurple animate-pulse" />
+                    <Radio className="h-5 w-5 sm:h-6 sm:w-6 text-gamehaus-lightpurple" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">Live Station Status</h2>
                     <p className="text-gray-400 text-xs sm:text-sm flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse shrink-0"></span>
+                      <span className="h-2 w-2 rounded-full bg-green-400 shrink-0"></span>
                       <span className="truncate">Real-time updates every 30 seconds</span>
                     </p>
                   </div>
@@ -500,7 +440,7 @@ const Index: React.FC = () => {
                                         className={
                                           station.is_occupied
                                             ? "bg-red-500/15 text-red-200 border-red-500/25"
-                                            : "bg-emerald-500/15 text-emerald-200 border-emerald-500/25 animate-pulse-soft"
+                                            : "bg-emerald-500/15 text-emerald-200 border-emerald-500/25"
                                         }
                                       >
                                         {station.is_occupied ? (
@@ -741,8 +681,10 @@ const Index: React.FC = () => {
 
         <Separator className="w-full max-w-6xl mx-auto mb-12 bg-gamehaus-purple/20" />
 
-        <div className="w-full mb-20">
-          <TestimonialsSection />
+        <div className="w-full mb-20" style={{ contentVisibility: 'auto' }}>
+          <Suspense fallback={null}>
+            <TestimonialsSection />
+          </Suspense>
         </div>
 
         {/* Find us – Location, hours, map */}
@@ -980,11 +922,10 @@ const Index: React.FC = () => {
             <div className="flex flex-col items-center gap-6">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-purple text-white hover:from-gamehaus-purple hover:via-gamehaus-magenta hover:to-gamehaus-purple shadow-2xl shadow-gamehaus-purple/50 group transition-all duration-300 text-xl px-12 py-6 rounded-full relative overflow-hidden animate-pulse-soft"
+                className="bg-gradient-to-r from-gamehaus-purple via-gamehaus-magenta to-gamehaus-purple text-white hover:opacity-95 shadow-xl shadow-gamehaus-purple/40 transition-opacity duration-200 text-xl px-12 py-6 rounded-full"
                 onClick={() => window.open(PUBLIC_BOOKING_URL, '_blank')}
               >
-                <div className="absolute inset-0 w-full bg-gradient-to-r from-gamehaus-purple/0 via-white/20 to-gamehaus-purple/0 animate-shimmer pointer-events-none"></div>
-                <Calendar className="mr-3 h-6 w-6 group-hover:scale-110 transition-transform" />
+                <Calendar className="mr-3 h-6 w-6" />
                 <span className="font-bold">Book a Slot Now</span>
               </Button>
               <p className="text-sm text-gray-400 text-center max-w-md">
@@ -1007,7 +948,7 @@ const Index: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 mt-auto border-t border-gamehaus-purple/25 bg-black/35 backdrop-blur-md pt-10 pb-20 sm:pb-12 pb-safe">
+      <footer className="relative z-10 mt-auto border-t border-gamehaus-purple/25 bg-black/70 pt-10 pb-20 sm:pb-12 pb-safe">
         <div className="absolute inset-0 bg-grid-pattern opacity-[0.05] pointer-events-none" />
         <div className="absolute inset-0 bg-noise-soft opacity-[0.08] mix-blend-overlay pointer-events-none" />
         <div className="pointer-events-none absolute -top-24 left-1/4 h-48 w-48 rounded-full bg-gradient-to-br from-gamehaus-purple/18 to-transparent blur-[70px]" />
@@ -1407,19 +1348,6 @@ const Index: React.FC = () => {
         </div>
       </footer>
       
-      {/* Elegant animated elements (hidden on small screens to avoid overlap with content/chat) */}
-      <div className="hidden md:block fixed top-[12%] left-[8%] text-gamehaus-lightpurple opacity-15 animate-float pointer-events-none">
-        <Trophy size={28} className="animate-wiggle" />
-      </div>
-      <div className="hidden md:block fixed bottom-[18%] right-[12%] text-gamehaus-magenta opacity-15 animate-float delay-300 pointer-events-none">
-        <Sparkles size={26} className="animate-pulse-soft" />
-      </div>
-      <div className="hidden md:block fixed top-[35%] right-[8%] text-gamehaus-lightpurple opacity-15 animate-float delay-150 pointer-events-none">
-        <Star size={24} className="animate-wiggle" />
-      </div>
-      <div className="hidden md:block fixed bottom-[30%] left-[15%] text-gamehaus-magenta opacity-15 animate-float delay-200 pointer-events-none">
-        <Trophy size={22} className="animate-pulse-soft" />
-      </div>
     </div>
   );
 };
