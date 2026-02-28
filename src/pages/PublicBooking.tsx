@@ -772,13 +772,14 @@ export default function PublicBooking() {
   const calculateDiscount = (): number => {
     if (!appliedCoupon) return 0;
     const numberOfSlots = selectedSlotRange.length > 0 ? selectedSlotRange.length : 1;
+    const hours = numberOfSlots * 0.5; // 30-min slots → hours
     const selectedStationsList = stations.filter((s) => selectedStations.includes(s.id));
     let totalDiscount = 0;
     for (const s of selectedStationsList) {
       const price = (s.hourly_rate / 2) * numberOfSlots;
       if (price <= 0) continue;
       const { discount_type, discount_value } = getCouponDiscountForStation(appliedCoupon, s.id);
-      totalDiscount += computeDiscountAmount(price, discount_type, discount_value);
+      totalDiscount += computeDiscountAmount(price, discount_type, discount_value, hours);
     }
     return totalDiscount;
   };

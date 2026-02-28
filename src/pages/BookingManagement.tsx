@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,7 @@ import {
   format, subDays, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, subYears, isToday, isYesterday, isTomorrow
 } from 'date-fns';
 import { PUBLIC_BOOKING_URL } from '@/config/brand';
+import { getPublicBookingEnabled, setPublicBookingEnabled } from '@/services/bookingCouponConfig';
 
 interface BookingView {
   id: string;
@@ -297,6 +299,30 @@ export default function BookingManagement() {
   const [calendarView, setCalendarView] = useState(false);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [expandedCalendarBookings, setExpandedCalendarBookings] = useState<Set<string>>(new Set());
+
+  // Public booking page access (enable/disable for customers)
+  const [publicBookingEnabled, setPublicBookingEnabledState] = useState(true);
+  const [publicBookingSaving, setPublicBookingSaving] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    getPublicBookingEnabled().then((enabled) => {
+      if (!cancelled) setPublicBookingEnabledState(enabled);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+  const handlePublicBookingToggle = async (checked: boolean) => {
+    setPublicBookingEnabledState(checked);
+    setPublicBookingSaving(true);
+    try {
+      await setPublicBookingEnabled(checked);
+      toast.success(checked ? 'Public booking page enabled' : 'Public booking page disabled');
+    } catch (e) {
+      setPublicBookingEnabledState(!checked);
+      toast.error('Failed to update. Please try again.');
+    } finally {
+      setPublicBookingSaving(false);
+    }
+  };
 
   const extractCouponCodes = (coupon_code: string) =>
     coupon_code.split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
@@ -1831,29 +1857,47 @@ export default function BookingManagement() {
             Comprehensive booking analytics and marketing campaign insights
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => setCalendarView(!calendarView)} 
-            variant={calendarView ? "default" : "outline"} 
-            className="flex items-center gap-2"
-          >
-            {calendarView ? <Minimize2 className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
-            {calendarView ? 'List View' : 'Calendar View'}
-          </Button>
-          <Button onClick={exportBookings} variant="outline" className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Button>
-          <Button onClick={fetchBookings} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          <Button
-            className="flex items-center gap-2"
-            onClick={() => window.open(PUBLIC_BOOKING_URL, '_blank', 'noopener,noreferrer')}
-          >
-            <Plus className="h-4 w-4" />
-            New Booking
-          </Button>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+            {publicBookingSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            <Label htmlFor="public-booking-toggle" className="text-sm font-medium whitespace-nowrap cursor-pointer">
+              Public booking page
+            </Label>
+            <Switch
+              id="public-booking-toggle"
+              checked={publicBookingEnabled}
+              onCheckedChange={handlePublicBookingToggle}
+              disabled={publicBookingSaving}
+              className="data-[state=checked]:bg-gamehaus-purple"
+            />
+            <span className="text-xs text-muted-foreground">
+              {publicBookingEnabled ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setCalendarView(!calendarView)}
+              variant={calendarView ? "default" : "outline"}
+              className="flex items-center gap-2"
+            >
+              {calendarView ? <Minimize2 className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
+              {calendarView ? 'List View' : 'Calendar View'}
+            </Button>
+            <Button onClick={exportBookings} variant="outline" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+            <Button onClick={fetchBookings} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <Button
+              className="flex items-center gap-2"
+              onClick={() => window.open(PUBLIC_BOOKING_URL, '_blank', 'noopener,noreferrer')}
+            >
+              <Plus className="h-4 w-4" />
+              New Booking
+            </Button>
+          </div>
         </div>
       </div>
 

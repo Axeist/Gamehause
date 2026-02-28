@@ -12,14 +12,21 @@ export function getCouponDiscountForStation(
   return { discount_type: coupon.discount_type, discount_value: coupon.discount_value };
 }
 
-/** Compute discount amount for a given price using type and value. */
+/**
+ * Compute discount amount for a given price.
+ * - Percentage: discount_value % of price.
+ * - Fixed: discount_value is per hour; pass hours (e.g. numberOfSlots * 0.5 for 30-min slots) so discount = discount_value * hours, capped by price.
+ *   If hours is omitted, treats as 1 hour (single-session use).
+ */
 export function computeDiscountAmount(
   price: number,
   discount_type: "percentage" | "fixed",
-  discount_value: number
+  discount_value: number,
+  hours?: number
 ): number {
   if (discount_type === "percentage") return price * (discount_value / 100);
-  return Math.min(discount_value, price);
+  const effectiveHours = hours ?? 1;
+  return Math.min(discount_value * effectiveHours, price);
 }
 
 export async function getBookingCouponsConfig(): Promise<BookingCoupon[]> {
