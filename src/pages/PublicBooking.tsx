@@ -231,20 +231,20 @@ export default function PublicBooking() {
   const bookingSummaryRef = useRef<HTMLDivElement | null>(null);
   const didAutoScrollRef = useRef(false);
 
-  // Pay Online (Razorpay) commented out for now – enable later when needed
-  // useEffect(() => {
-  //   if (!(window as any).Razorpay) {
-  //     const script = document.createElement("script");
-  //     script.src = "https://checkout.razorpay.com/v1/checkout.js";
-  //     script.async = true;
-  //     script.onload = () => console.log("✅ Razorpay script loaded");
-  //     script.onerror = () => {
-  //       console.error("❌ Failed to load Razorpay script");
-  //       toast.error("Failed to load payment gateway. Please refresh the page.");
-  //     };
-  //     document.body.appendChild(script);
-  //   }
-  // }, []);
+  // Load Razorpay checkout script
+  useEffect(() => {
+    if (!(window as any).Razorpay) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => console.log("✅ Razorpay script loaded");
+      script.onerror = () => {
+        console.error("❌ Failed to load Razorpay script");
+        toast.error("Failed to load payment gateway. Please refresh the page.");
+      };
+      document.body.appendChild(script);
+    }
+  }, []);
 
   // Prefill from query params (used by Gameboy chatbot)
   useEffect(() => {
@@ -1225,16 +1225,10 @@ export default function PublicBooking() {
       return;
     }
 
-    // Pay Online commented out for now – only Pay at Venue
-    // if (paymentMethod === "razorpay") {
-    //   setShowPaymentWarning(true);
-    // }
-
     if (paymentMethod === "venue") {
       await createVenueBooking();
     } else {
-      // await initiateRazorpay(); // Re-enable when Pay Online is turned back on
-      await createVenueBooking(); // fallback to venue for now
+      await initiateRazorpay();
     }
   }
 
@@ -1980,9 +1974,9 @@ export default function PublicBooking() {
                     Payment Method
                   </Label>
                   <div className="mt-2">
-                    {/* Pay at Venue enabled; Pay Online (Razorpay) commented out for now – re-enable later */}
+                    {/* Payment method toggle: Pay at Venue + Pay Online (Razorpay) */}
                     {payAtVenueEnabled ? (
-                      <div className="grid grid-cols-1 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => setPaymentMethod("venue")}
                           className={cn(
@@ -1994,7 +1988,6 @@ export default function PublicBooking() {
                         >
                           Pay at Venue
                         </button>
-                        {/* Pay Online – commented out for now
                         <button
                           onClick={() => setPaymentMethod("razorpay")}
                           className={cn(
@@ -2006,10 +1999,8 @@ export default function PublicBooking() {
                         >
                           Pay Online
                         </button>
-                        */}
                       </div>
                     ) : (
-                      /* Pay at Venue only for now; Razorpay block commented out – re-enable when Pay Online is needed
                       <div className="rounded-lg border border-blue-500/30 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -2039,15 +2030,6 @@ export default function PublicBooking() {
                           <span>•</span>
                           <span>Instant Confirmation</span>
                         </div>
-                      </div>
-                      */
-                      <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-white">Pay at Venue</span>
-                        </div>
-                        <p className="text-[11px] text-gray-300 leading-relaxed mt-1">
-                          Payment will be collected when you arrive at the venue.
-                        </p>
                       </div>
                     )}
                   </div>
