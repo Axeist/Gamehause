@@ -10,7 +10,7 @@ export const SUPPORT_PHONE_SECONDARY = "9345187098" as const;
 export const ADDRESS =
   "4th Floor, Silingi Building, 142, Greams Rd, Thousand Lights West, Thousand Lights, Chennai, Tamil Nadu 600006" as const;
 /** Display string for business hours (e.g. for footer and location section). */
-export const BUSINESS_HOURS = "12 PM – 2 AM" as const;
+export const BUSINESS_HOURS = "1 PM – 2 AM" as const;
 /** Google Maps share link for the venue (open in Maps / get directions). */
 export const GOOGLE_MAPS_LINK = "https://share.google/5RwCdRAnT1Qdr4oq1" as const;
 export const LOGO_PATH = "/brand/gamehaus-logo.png" as const;
