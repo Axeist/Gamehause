@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
-import { Monitor, Trophy, Users, Star, ShieldCheck, Sparkles, Calendar, LogIn, Gamepad2, Timer, Table2, Radio, CheckCircle2, XCircle } from 'lucide-react';
+import { Monitor, Trophy, Users, Star, ShieldCheck, Sparkles, Calendar, LogIn, Gamepad2, Timer, Table2, Radio, CheckCircle2, XCircle, MessageCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Mail, Phone, Clock, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -138,6 +138,9 @@ const Index: React.FC = () => {
   const totalStations = liveStations.length;
   const availableStations = liveStations.filter((s) => !s.is_occupied).length;
   const occupiedStations = totalStations - availableStations;
+  const scrollToContact = () => {
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const groupedStations = (() => {
     const groups = new Map<Station["type"], Station[]>();
@@ -175,13 +178,14 @@ const Index: React.FC = () => {
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           <Button
             variant="outline"
-            size={isMobile ? "icon" : "default"}
-            className="text-gamehaus-lightpurple border-gamehaus-purple/50 hover:bg-gamehaus-purple/30 hover:border-gamehaus-purple/70 transition-all duration-300"
-            onClick={() => navigate('/login')}
-            title="Management Login"
+            size={isMobile ? "sm" : "default"}
+            className="text-gamehaus-lightpurple border-gamehaus-purple/50 hover:bg-gamehaus-purple/30 hover:border-gamehaus-purple/70 hover:shadow-lg hover:shadow-gamehaus-magenta/20 hover:scale-[1.02] transition-all duration-300"
+            onClick={scrollToContact}
+            aria-label="Scroll to contact section"
+            title="Contact Us"
           >
-            <LogIn className="h-4 w-4 md:mr-2" />
-            {!isMobile && <span>Management Login</span>}
+            <MessageCircle className="h-4 w-4 md:mr-2" />
+            <span>Contact Us</span>
           </Button>
           <Button
             variant="default"
@@ -269,7 +273,18 @@ const Index: React.FC = () => {
         </div>
         
         {/* Secondary Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-20 justify-center">
+        <div className="flex flex-col items-center gap-4 mb-20 justify-center">
+          <Button
+            size="lg"
+            variant="outline"
+            className="text-gamehaus-lightpurple border-gamehaus-purple/60 hover:bg-gamehaus-purple/30 hover:border-gamehaus-lightpurple/80 hover:shadow-lg hover:shadow-gamehaus-magenta/20 hover:scale-[1.02] transition-all duration-300 text-lg px-8"
+            onClick={scrollToContact}
+            aria-label="Scroll to contact section"
+          >
+            <MessageCircle className="mr-2 h-5 w-5" />
+            <span>Contact Us</span>
+          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             size="lg"
             variant="outline"
@@ -289,6 +304,7 @@ const Index: React.FC = () => {
             <Trophy className="mr-2 h-5 w-5" />
             <span>Explore Tournaments</span>
           </Button>
+          </div>
         </div>
 
         {/* Live Station Status Section */}
@@ -900,7 +916,7 @@ const Index: React.FC = () => {
                     I’m staff/admin—where do I sign in?
                   </AccordionTrigger>
                   <AccordionContent className="text-gray-300">
-                    Use “Management Login” at the top-right. The portal is for internal operations like bookings, billing, and station management.
+                    Use “Management Login” in the footer. The portal is for internal operations like bookings, billing, and station management.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -1002,9 +1018,16 @@ const Index: React.FC = () => {
                 <button type="button" className="footer-link" onClick={() => navigate("/public/tournaments")}>
                   Tournaments
                 </button>
-                <button type="button" className="footer-link" onClick={() => navigate("/login")}>
-                  Management login
-                </button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-start mt-2 text-gamehaus-lightpurple border-gamehaus-purple/50 hover:bg-gamehaus-purple/30 hover:border-gamehaus-purple/70 transition-all duration-300"
+                  onClick={() => navigate('/login')}
+                  title="Management Login"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  <span>Management Login</span>
+                </Button>
               </div>
             </div>
 
@@ -1279,7 +1302,7 @@ const Index: React.FC = () => {
             </div>
 
             {/* Contact */}
-            <div>
+            <div id="contact">
               <p className="text-xs tracking-[0.25em] text-gray-400">CONTACT</p>
               <div className="mt-4 space-y-3 text-sm text-gray-300">
                 <div className="flex items-start gap-3">
