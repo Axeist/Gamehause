@@ -1,4 +1,23 @@
-import { supabase } from "@/integrations/supabase/client";
+import { createClient } from "@supabase/supabase-js";
+
+function getEnv(name: string): string | undefined {
+  if (typeof process !== "undefined" && process.env) {
+    return (process.env as Record<string, string | undefined>)[name];
+  }
+  const fromDeno = (globalThis as any)?.Deno?.env?.get?.(name);
+  return fromDeno;
+}
+
+const supabaseUrl = getEnv("VITE_SUPABASE_URL") || getEnv("SUPABASE_URL");
+const supabaseKey = getEnv("VITE_SUPABASE_PUBLISHABLE_KEY") || getEnv("SUPABASE_ANON_KEY");
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    "Missing Supabase environment variables. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY."
+  );
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 function j(res: unknown, status = 200) {
   return new Response(JSON.stringify(res), {
