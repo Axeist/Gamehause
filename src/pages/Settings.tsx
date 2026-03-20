@@ -268,6 +268,12 @@ const Settings = () => {
             <Calendar className="h-4 w-4" />
             Booking Settings
           </TabsTrigger>
+          <TabsTrigger value="loyalty" className="flex items-center gap-2 shrink-0">
+            <span className="text-base leading-none" aria-hidden>
+              🎯
+            </span>
+            Loyalty Points
+          </TabsTrigger>
           <TabsTrigger value="tournaments" className="flex items-center gap-2 shrink-0">
             <Trophy className="h-4 w-4" />
             Tournaments
