@@ -5,7 +5,7 @@ import StationInfo from '@/components/station/StationInfo';
 import StationTimer from '@/components/station/StationTimer';
 import StationActions from '@/components/station/StationActions';
 import { Button } from '@/components/ui/button';
-import { Trash2, Edit2, Tag, Users, AlertTriangle, ShieldAlert, Loader2, Wrench } from 'lucide-react';
+import { Trash2, Edit2, Tag, AlertTriangle, ShieldAlert, Loader2, Wrench } from 'lucide-react';
 import EditStationDialog from './EditStationDialog';
 import {
   Dialog,
@@ -164,18 +164,8 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
             <div className="absolute w-full h-[1px] top-10 bg-gradient-to-r from-transparent via-[#9b87f5]/30 to-transparent" />
             <div className="absolute left-4 bottom-3 w-1 h-1 rounded-full bg-cuephoria-orange animate-pulse-soft" />
             <div className="absolute left-7 bottom-3 w-1 h-1 rounded-full bg-[#9b87f5] animate-pulse-soft delay-100" />
-            {/* Players badge — only show when meaningful */}
-            {station.isOccupied && effectivePlayerCount !== undefined && effectivePlayerCount > 1 ? (
-              <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-[#9b87f5]/30 border border-[#9b87f5]/50 text-[#9b87f5] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                <Users className="h-2.5 w-2.5" />
-                {effectivePlayerCount} players
-              </div>
-            ) : !station.isOccupied && station.maxPlayers && station.maxPlayers > 1 ? (
-              <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-[#9b87f5]/20 border border-[#9b87f5]/30 text-[#9b87f5] text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                <Users className="h-2.5 w-2.5" />
-                Up to {station.maxPlayers} players
-              </div>
-            ) : null}
+            {/* No absolute players badge — player info shown inline in StationInfo */}
+          
           </>
         )}
 
