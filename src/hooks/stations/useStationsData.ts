@@ -308,41 +308,68 @@ export const useStationsData = () => {
   };
 
   /**
-   * Check what's blocking deletion of a station.
-   * Returns: { sessions: number, billItems: number }
+   * Check what's attached to a station so we can show the right warning.
+   * Returns: { sessions, billItems, bookings }
    */
-  const checkDeleteBlockers = async (stationId: string): Promise<{ sessions: number; billItems: number }> => {
+  const checkDeleteBlockers = async (stationId: string): Promise<{ sessions: number; billItems: number; bookings: number }> => {
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stationId);
-    if (!isValidUUID) return { sessions: 0, billItems: 0 };
+    if (!isValidUUID) return { sessions: 0, billItems: 0, bookings: 0 };
 
-    const { data: sessionsData } = await supabase
-      .from('sessions')
-      .select('id')
-      .eq('station_id', stationId);
+    const [{ data: sessionsData }, { data: bookingsData }] = await Promise.all([
+      supabase.from('sessions').select('id').eq('station_id', stationId),
+      supabase.from('bookings').select('id').eq('station_id', stationId),
+    ]);
 
-    const sessionCount = sessionsData?.length ?? 0;
-    if (sessionCount === 0) return { sessions: 0, billItems: 0 };
+    const sessionIds = (sessionsData ?? []).map(s => s.id);
+    let billItemCount = 0;
+    if (sessionIds.length > 0) {
+      const { data: billItemsData } = await supabase
+        .from('bill_items')
+        .select('id')
+        .in('item_id', sessionIds)
+        .eq('item_type', 'session');
+      billItemCount = billItemsData?.length ?? 0;
+    }
 
-    const sessionIds = sessionsData!.map(s => s.id);
-    const { data: billItemsData } = await supabase
-      .from('bill_items')
-      .select('bill_id')
-      .in('item_id', sessionIds)
-      .eq('item_type', 'session');
-
-    return { sessions: sessionCount, billItems: billItemsData?.length ?? 0 };
+    return {
+      sessions: sessionsData?.length ?? 0,
+      billItems: billItemCount,
+      bookings: bookingsData?.length ?? 0,
+    };
   };
 
   /**
-   * Force-delete a station by first deleting its orphaned sessions (no billing),
-   * then deleting the station itself. Call only after checkDeleteBlockers confirms billItems === 0.
+   * Fully cascade-delete a station:
+   *   bill_items → sessions → bookings → station
+   * Works regardless of whether sessions have billing transactions.
    */
   const forceDeleteStation = async (stationId: string) => {
     try {
-      // Delete orphaned sessions first
+      // 1. Get all session IDs for this station
+      const { data: sessionsData } = await supabase
+        .from('sessions')
+        .select('id')
+        .eq('station_id', stationId);
+
+      const sessionIds = (sessionsData ?? []).map(s => s.id);
+
+      // 2. Delete bill_items linked to these sessions
+      if (sessionIds.length > 0) {
+        const { error: biErr } = await supabase
+          .from('bill_items')
+          .delete()
+          .in('item_id', sessionIds)
+          .eq('item_type', 'session');
+        if (biErr) console.error('bill_items delete error (non-fatal):', biErr);
+      }
+
+      // 3. Delete all sessions for this station
       await supabase.from('sessions').delete().eq('station_id', stationId);
 
-      // Now delete the station
+      // 4. Delete all bookings for this station
+      await supabase.from('bookings').delete().eq('station_id', stationId);
+
+      // 5. Delete the station itself
       const { error } = await supabase.from('stations').delete().eq('id', stationId);
       if (error) {
         toast({ title: 'Database Error', description: `Failed to delete station: ${error.message}`, variant: 'destructive' });
@@ -350,7 +377,7 @@ export const useStationsData = () => {
       }
 
       setStations(prev => prev.filter(s => s.id !== stationId));
-      toast({ title: 'Station Deleted', description: 'Station and its sessions have been removed.' });
+      toast({ title: 'Station Deleted', description: 'Station and all associated data have been removed.' });
       return true;
     } catch (error) {
       console.error('Error in forceDeleteStation:', error);

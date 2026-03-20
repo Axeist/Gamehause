@@ -143,7 +143,7 @@ export interface POSContextType {
   startSession: (stationId: string, customerId: string, hourlyRate?: number, couponCode?: string) => Promise<void>;
   endSession: (stationId: string) => Promise<void>;
   deleteStation: (stationId: string) => Promise<boolean>;
-  checkDeleteBlockers: (stationId: string) => Promise<{ sessions: number; billItems: number }>;
+  checkDeleteBlockers: (stationId: string) => Promise<{ sessions: number; billItems: number; bookings: number }>;
   forceDeleteStation: (stationId: string) => Promise<boolean>;
   updateStation: (stationId: string, name: string, hourlyRate: number) => Promise<boolean>;
   updateStationImage: (stationId: string, imageUrl: string | null) => Promise<boolean>;

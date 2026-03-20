@@ -263,15 +263,15 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                           <Loader2 className="h-4 w-4 animate-spin" />
                           Checking station data…
                         </>
-                      ) : deleteBlockers?.billItems ? (
+                      ) : deleteBlockers && (deleteBlockers.billItems > 0) ? (
                         <>
                           <ShieldAlert className="h-5 w-5 text-destructive" />
-                          Cannot Delete Station
+                          Delete {station.name}
                         </>
-                      ) : deleteBlockers?.sessions ? (
+                      ) : deleteBlockers && (deleteBlockers.sessions > 0 || deleteBlockers.bookings > 0) ? (
                         <>
                           <AlertTriangle className="h-5 w-5 text-orange-400" />
-                          Orphaned Sessions Found
+                          Delete {station.name}
                         </>
                       ) : (
                         <>
@@ -285,26 +285,31 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                       <DialogDescription asChild>
                         <div className="space-y-3 pt-1">
                           {deleteBlockers.billItems > 0 ? (
-                            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-                              <p className="font-semibold mb-1">This station cannot be deleted.</p>
-                              <p>
-                                It has <strong>{deleteBlockers.sessions} session{deleteBlockers.sessions !== 1 ? 's' : ''}</strong> linked
-                                to <strong>{deleteBlockers.billItems} billing transaction{deleteBlockers.billItems !== 1 ? 's' : ''}</strong>.
-                              </p>
-                              <p className="mt-2 text-xs text-muted-foreground">
-                                Deleting would corrupt your financial history. Archive or reassign this station instead.
+                            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive space-y-2">
+                              <p className="font-semibold">⚠️ This will permanently delete all associated data:</p>
+                              <ul className="list-disc list-inside space-y-1 text-xs">
+                                <li><strong>{deleteBlockers.sessions}</strong> session{deleteBlockers.sessions !== 1 ? 's' : ''}</li>
+                                <li><strong>{deleteBlockers.billItems}</strong> billing transaction{deleteBlockers.billItems !== 1 ? 's' : ''}</li>
+                                {deleteBlockers.bookings > 0 && (
+                                  <li><strong>{deleteBlockers.bookings}</strong> booking{deleteBlockers.bookings !== 1 ? 's' : ''}</li>
+                                )}
+                              </ul>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Billing history for this station will be lost. This cannot be undone.
                               </p>
                             </div>
-                          ) : deleteBlockers.sessions > 0 ? (
-                            <div className="rounded-lg border border-orange-500/40 bg-orange-500/10 p-3 text-sm text-orange-300">
-                              <p>
-                                This station has <strong>{deleteBlockers.sessions} orphaned session{deleteBlockers.sessions !== 1 ? 's' : ''}</strong> with
-                                no billing transactions attached.
-                              </p>
-                              <p className="mt-2">
-                                These sessions will be <strong>permanently deleted</strong> along with the station.
-                                This cannot be undone.
-                              </p>
+                          ) : deleteBlockers.sessions > 0 || deleteBlockers.bookings > 0 ? (
+                            <div className="rounded-lg border border-orange-500/40 bg-orange-500/10 p-3 text-sm text-orange-300 space-y-2">
+                              <p className="font-medium">The following data will also be deleted:</p>
+                              <ul className="list-disc list-inside space-y-1 text-xs">
+                                {deleteBlockers.sessions > 0 && (
+                                  <li><strong>{deleteBlockers.sessions}</strong> session{deleteBlockers.sessions !== 1 ? 's' : ''}</li>
+                                )}
+                                {deleteBlockers.bookings > 0 && (
+                                  <li><strong>{deleteBlockers.bookings}</strong> booking{deleteBlockers.bookings !== 1 ? 's' : ''}</li>
+                                )}
+                              </ul>
+                              <p className="text-xs text-muted-foreground">This cannot be undone.</p>
                             </div>
                           ) : (
                             <p className="text-sm text-muted-foreground">
@@ -323,26 +328,19 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                     </Button>
 
                     {!deleteChecking && deleteBlockers && (
-                      <>
-                        {deleteBlockers.billItems > 0 ? null : deleteBlockers.sessions > 0 ? (
-                          <Button
-                            variant="destructive"
-                            onClick={handleForceDelete}
-                            disabled={isForceDeleting}
-                          >
-                            {isForceDeleting ? (
-                              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Deleting…</>
-                            ) : (
-                              <><Trash2 className="h-4 w-4 mr-2" />Delete Station & Sessions</>
-                            )}
-                          </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={deleteBlockers.sessions > 0 || deleteBlockers.billItems > 0 || deleteBlockers.bookings > 0
+                          ? handleForceDelete
+                          : handleConfirmSimpleDelete}
+                        disabled={isForceDeleting}
+                      >
+                        {isForceDeleting ? (
+                          <><Loader2 className="h-4 w-4 animate-spin mr-2" />Deleting…</>
                         ) : (
-                          <Button variant="destructive" onClick={handleConfirmSimpleDelete}>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Station
-                          </Button>
+                          <><Trash2 className="h-4 w-4 mr-2" />Delete Everything</>
                         )}
-                      </>
+                      </Button>
                     )}
                   </DialogFooter>
                 </DialogContent>
