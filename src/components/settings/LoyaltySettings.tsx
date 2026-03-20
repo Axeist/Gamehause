@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useLoyaltyConfig } from '@/hooks/useLoyaltyConfig';
-import { Loader2, Target } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { calculateLoyaltyPointsEarned } from '@/utils/loyaltyPoints';
 import type { LoyaltyConfig } from '@/types/loyalty.types';
 
@@ -82,10 +82,7 @@ const LoyaltySettings = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Target className="h-5 w-5" />
-          Loyalty Points
-        </CardTitle>
+        <CardTitle>Loyalty Points</CardTitle>
         <CardDescription>
           Configure earning rules for completed payments. Updates apply only to future transactions.
         </CardDescription>
