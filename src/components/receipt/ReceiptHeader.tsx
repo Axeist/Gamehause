@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Bill, Customer } from '@/types/pos.types';
-import { BRAND_NAME_UPPER, SUPPORT_EMAIL } from '@/config/brand';
+import { BRAND_NAME_UPPER, LOGO_PATH, SUPPORT_EMAIL } from '@/config/brand';
 
 interface ReceiptHeaderProps {
   bill: Bill;
@@ -8,6 +8,7 @@ interface ReceiptHeaderProps {
 }
 
 const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill, customer }) => {
+  const [logoVisible, setLogoVisible] = useState(true);
   const billDate = new Date(bill.createdAt);
   const isComplimentary = bill.paymentMethod?.toLowerCase() === 'complimentary';
   const dateStr = billDate.toLocaleDateString('en-IN', {
@@ -23,16 +24,23 @@ const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill, customer }) => {
 
   return (
     <div className="receipt-header invoice-header inv-header no-break">
-      <div className="inv-header-row">
-        <div className="inv-brand-col">
-          <h1 className="inv-brand-title">{BRAND_NAME_UPPER}</h1>
-          <p className="inv-tagline">Premier Snooker &amp; Gaming Lounge</p>
-        </div>
-        <div className="inv-doc-col">
-          <h2 className="inv-doc-title">
-            {isComplimentary ? 'COMPLIMENTARY RECEIPT' : 'TAX INVOICE'}
-          </h2>
-        </div>
+      <div className="inv-brand-hero">
+        {logoVisible && (
+          <img
+            src={LOGO_PATH}
+            alt=""
+            className="inv-brand-logo"
+            width={220}
+            height={100}
+            aria-hidden
+            onError={() => setLogoVisible(false)}
+          />
+        )}
+        <h1 className="inv-brand-title">{BRAND_NAME_UPPER}</h1>
+        <p className="inv-tagline">Premier Snooker &amp; Gaming Lounge</p>
+        <h2 className="inv-doc-title">
+          {isComplimentary ? 'COMPLIMENTARY RECEIPT' : 'TAX INVOICE'}
+        </h2>
       </div>
 
       <p className="inv-address">

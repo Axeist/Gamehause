@@ -212,12 +212,14 @@ export const handlePrint = (printContent: string): void => {
             .invoice-container,
             .receipt-container {
               width: 100%;
-              max-width: 800px;
+              max-width: 100%;
               margin: 0 auto;
-              padding: 8px 12px;
+              padding: 12px 16px 0;
               background: white;
-              page-break-inside: avoid;
-              break-inside: avoid;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              min-height: 257mm;
             }
 
             .no-break {
@@ -226,64 +228,75 @@ export const handlePrint = (printContent: string): void => {
             }
 
             .receipt-header.inv-header {
-              text-align: left;
+              text-align: center;
               border-bottom: 1px solid #eee;
-              padding-bottom: 8px;
-              margin-bottom: 8px;
+              padding-bottom: 16px;
+              margin-bottom: 16px;
             }
 
-            .inv-header-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              gap: 8px;
-              margin-bottom: 8px;
+            .inv-brand-hero {
+              text-align: center;
+              padding: 8px 0 20px;
+            }
+
+            img.inv-brand-logo {
+              display: block;
+              margin: 0 auto 14px;
+              max-height: 100px;
+              width: auto;
+              max-width: 280px;
+              height: auto;
+              object-fit: contain;
             }
 
             .inv-brand-title {
-              font-size: 20px;
-              font-weight: 700;
+              font-size: 52px;
+              font-weight: 800;
               color: #ff4a1a;
               margin: 0;
-              line-height: 1.2;
+              line-height: 1.05;
+              letter-spacing: -0.03em;
             }
 
             .inv-tagline {
-              font-size: 10px;
+              font-size: 15px;
               color: #6b7280;
-              margin: 4px 0 0 0;
+              margin: 10px 0 0 0;
+              font-weight: 500;
             }
 
-            .inv-doc-col { text-align: right; flex-shrink: 0; }
-
             .inv-doc-title {
-              font-size: 14px;
+              font-size: 22px;
               font-weight: 700;
               color: #1f2937;
-              margin: 0;
+              margin: 14px 0 0 0;
               text-transform: uppercase;
-              letter-spacing: 0.05em;
+              letter-spacing: 0.12em;
             }
 
             .inv-address {
-              font-size: 10px;
+              font-size: 13px;
               color: #6b7280;
-              line-height: 1.4;
-              margin: 0 0 8px 0;
+              line-height: 1.5;
+              margin: 0 auto 16px;
+              max-width: 48rem;
+              text-align: center;
             }
 
             .inv-meta-grid {
               display: grid;
               grid-template-columns: 1fr 1fr;
-              gap: 6px 16px;
-              font-size: 12px;
+              gap: 12px 28px;
+              font-size: 15px;
               color: #1f2937;
+              text-align: left;
             }
 
             .inv-muted {
               color: #6b7280;
               display: block;
-              font-size: 11px;
+              font-size: 13px;
+              font-weight: 500;
             }
 
             .inv-meta-grid p {
@@ -308,27 +321,27 @@ export const handlePrint = (printContent: string): void => {
             }
 
             .inv-items-section-title {
-              font-size: 14px;
+              font-size: 18px;
               font-weight: 600;
               color: #1f2937;
               border-bottom: 1px solid #eee;
-              padding-bottom: 4px;
-              margin-bottom: 4px;
+              padding-bottom: 8px;
+              margin-bottom: 8px;
             }
 
             .inv-items-table {
               width: 100%;
               border-collapse: collapse;
-              font-size: 12px;
-              margin-bottom: 8px;
+              font-size: 15px;
+              margin-bottom: 16px;
             }
 
             .inv-items-table th {
-              font-size: 12px;
+              font-size: 14px;
               font-weight: 600;
               color: #374151;
               text-align: left;
-              padding: 3px 6px 3px 0;
+              padding: 10px 10px 10px 0;
               border-bottom: 1px solid #eee;
             }
 
@@ -339,10 +352,10 @@ export const handlePrint = (printContent: string): void => {
             }
 
             .inv-items-table td {
-              padding: 3px 6px 3px 0;
+              padding: 10px 10px 10px 0;
               border-bottom: 1px solid #eee;
               vertical-align: top;
-              line-height: 1.3;
+              line-height: 1.4;
             }
 
             .inv-items-table td:nth-child(2),
@@ -356,20 +369,20 @@ export const handlePrint = (printContent: string): void => {
 
             .inv-summary {
               margin-left: auto;
-              max-width: 280px;
+              max-width: 360px;
               width: 100%;
-              margin-top: 8px;
-              font-size: 12px;
+              margin-top: 16px;
+              font-size: 15px;
             }
 
             .inv-summary-head {
               border-bottom: 1px solid #eee;
-              padding-bottom: 4px;
-              margin-bottom: 4px;
+              padding-bottom: 8px;
+              margin-bottom: 8px;
             }
 
             .inv-summary-title {
-              font-size: 14px;
+              font-size: 17px;
               font-weight: 600;
               color: #1f2937;
             }
@@ -378,7 +391,7 @@ export const handlePrint = (printContent: string): void => {
               display: flex;
               justify-content: space-between;
               gap: 8px;
-              margin-bottom: 3px;
+              margin-bottom: 8px;
             }
 
             .inv-discount { color: #059669; }
@@ -389,34 +402,34 @@ export const handlePrint = (printContent: string): void => {
               justify-content: space-between;
               align-items: baseline;
               gap: 8px;
-              padding-top: 6px;
-              margin-top: 6px;
+              padding-top: 10px;
+              margin-top: 10px;
               border-top: 1px solid #eee;
-              font-size: 18px;
+              font-size: 28px;
               font-weight: 700;
               color: #ff4a1a;
             }
 
             .inv-total-row .inv-total-amt {
-              font-size: 18px !important;
+              font-size: 28px !important;
               font-weight: 700 !important;
               color: #ff4a1a !important;
             }
 
             .inv-loyalty-foot {
-              font-size: 10px;
+              font-size: 12px;
               color: #6b7280;
               text-align: right;
-              padding-top: 4px;
+              padding-top: 8px;
             }
 
             .inv-num { font-variant-numeric: tabular-nums; }
 
             .inv-payment {
               border-top: 1px solid #eee;
-              padding: 6px 0;
-              margin-top: 6px;
-              font-size: 12px;
+              padding: 14px 0;
+              margin-top: 16px;
+              font-size: 15px;
               color: #1f2937;
             }
 
@@ -425,29 +438,30 @@ export const handlePrint = (printContent: string): void => {
 
             .inv-footer {
               border-top: 1px solid #eee;
-              padding-top: 6px;
-              margin-top: 6px;
+              padding-top: 16px;
+              margin-top: auto;
+              padding-bottom: 10mm;
               text-align: center;
             }
 
             .inv-footer-terms {
-              font-size: 10px;
+              font-size: 12px;
               color: #4b5563;
-              line-height: 1.4;
-              max-width: 36rem;
-              margin: 0 auto 6px;
+              line-height: 1.5;
+              max-width: 42rem;
+              margin: 0 auto 12px;
             }
 
             .inv-footer-line {
-              font-size: 10px;
+              font-size: 12px;
               color: #6b7280;
               margin: 0;
             }
 
             .inv-footer-support {
-              font-size: 10px;
+              font-size: 11px;
               color: #9ca3af;
-              margin: 4px 0 0 0;
+              margin: 8px 0 0 0;
             }
 
             .receipt-item {
@@ -464,6 +478,11 @@ export const handlePrint = (printContent: string): void => {
 
             svg, .no-print, button, .edit-button {
               display: none !important;
+            }
+
+            img {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
 
             .receipt-header,
@@ -488,7 +507,8 @@ export const handlePrint = (printContent: string): void => {
               .invoice-container,
               .receipt-container {
                 max-width: 100%;
-                padding: 0;
+                min-height: 257mm;
+                padding: 0 4mm;
               }
 
               * {
