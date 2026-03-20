@@ -7,7 +7,7 @@ import { Monitor, GamepadIcon, Table2, Users } from 'lucide-react';
 interface Station {
   id: string;
   name: string;
-  type: 'ps5' | '8ball' | 'foosball';
+  type: 'ps5' | '8ball' | 'foosball' | 'misc';
   hourly_rate: number;
   image_url?: string | null;
   max_players?: number | null;

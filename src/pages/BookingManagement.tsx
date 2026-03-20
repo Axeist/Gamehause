@@ -3647,6 +3647,16 @@ export default function BookingManagement() {
                                                         <Badge variant="outline" className="text-xs">
                                                           {getStationTypeLabel(stationType)}
                                                         </Badge>
+                                                        {stationBookings.some(b => !!b.booking_group_id) && (
+                                                          <>
+                                                            <Badge className="text-xs bg-blue-500/15 text-blue-300 border border-blue-400/30">
+                                                              Multi-Game Booking
+                                                            </Badge>
+                                                            <Badge variant="secondary" className="text-xs font-mono">
+                                                              Group: {(stationBookings.find(b => b.booking_group_id)?.booking_group_id || '').slice(0, 8)}
+                                                            </Badge>
+                                                          </>
+                                                        )}
                                                         {/* Player count badge — PS5 only */}
                                                         {stationType === 'ps5' && (() => {
                                                           const playerCounts = [...new Set(stationBookings.map(b => b.player_count ?? 1))];

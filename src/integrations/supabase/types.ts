@@ -1800,6 +1800,19 @@ export type Database = {
       }
     }
     Functions: {
+      create_group_booking: {
+        Args: {
+          p_group_id: string
+          p_customer_id: string
+          p_booking_date: string
+          p_notes?: string | null
+          p_bookings?: Json
+        }
+        Returns: {
+          booking_id: string
+          station_id: string
+        }[]
+      }
       check_stations_availability: {
         Args: {
           p_date: string

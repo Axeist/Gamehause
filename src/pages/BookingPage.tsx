@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,11 +7,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { StationSelector } from '@/components/booking/StationSelector';
 import { TimeSlotPicker } from '@/components/booking/TimeSlotPicker';
-import { CalendarIcon, Clock, MapPin, Phone, Mail, User } from 'lucide-react';
+import { CalendarIcon, CheckCircle2, Circle, MapPin, User } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Station {
@@ -38,10 +39,15 @@ interface CustomerInfo {
 export default function BookingPage() {
   const [stations, setStations] = useState<Station[]>([]);
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
+  const [selectedGames, setSelectedGames] = useState<Station[]>([]);
+  const [activeGame, setActiveGame] = useState<Station | null>(null);
   const [playerCounts, setPlayerCounts] = useState<Record<string, number>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  const [availableSlotsByGame, setAvailableSlotsByGame] = useState<Record<string, TimeSlot[]>>({});
+  const [slotsLoadingByGame, setSlotsLoadingByGame] = useState<Record<string, boolean>>({});
+  const [gameSlots, setGameSlots] = useState<Record<string, TimeSlot | undefined>>({});
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [validationError, setValidationError] = useState<string>('');
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     phone: '',
@@ -49,22 +55,29 @@ export default function BookingPage() {
     notes: ''
   });
   const [loading, setLoading] = useState(false);
-  const [slotsLoading, setSlotsLoading] = useState(false);
 
   // Fetch stations on component mount
   useEffect(() => {
     fetchStations();
   }, []);
 
-  // Fetch available slots when date or stations change
+  // Keep selected game metadata in sync with selected station IDs
   useEffect(() => {
-    if (selectedStations.length > 0 && selectedDate) {
-      fetchAvailableSlots();
-    } else {
-      setAvailableSlots([]);
-      setSelectedSlot(null);
+    const games = stations.filter((s) => selectedStations.includes(s.id));
+    setSelectedGames(games);
+    if (!games.length) {
+      setActiveGame(null);
+      return;
     }
-  }, [selectedStations, selectedDate]);
+    if (!activeGame || !games.some((g) => g.id === activeGame.id)) {
+      setActiveGame(games[0]);
+    }
+  }, [stations, selectedStations, activeGame]);
+
+  useEffect(() => {
+    if (!activeGame || !selectedDate) return;
+    fetchAvailableSlots(activeGame.id);
+  }, [activeGame?.id, selectedDate]);
 
   const fetchStations = async () => {
     try {
@@ -82,14 +95,10 @@ export default function BookingPage() {
     }
   };
 
-  const fetchAvailableSlots = async () => {
-    if (selectedStations.length === 0) return;
-
-    setSlotsLoading(true);
+  const fetchAvailableSlots = async (stationId: string) => {
+    if (!stationId) return;
+    setSlotsLoadingByGame((prev) => ({ ...prev, [stationId]: true }));
     try {
-      // For simplicity, get slots for the first selected station
-      // In a real app, you might want to show common available slots across all selected stations
-      const stationId = selectedStations[0];
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
       const { data, error } = await supabase
@@ -100,12 +109,12 @@ export default function BookingPage() {
         });
 
       if (error) throw error;
-      setAvailableSlots(data || []);
+      setAvailableSlotsByGame((prev) => ({ ...prev, [stationId]: data || [] }));
     } catch (error) {
       console.error('Error fetching available slots:', error);
       toast.error('Failed to load available time slots');
     } finally {
-      setSlotsLoading(false);
+      setSlotsLoadingByGame((prev) => ({ ...prev, [stationId]: false }));
     }
   };
 
@@ -118,6 +127,16 @@ export default function BookingPage() {
           delete next[stationId];
           return next;
         });
+        setGameSlots((prev) => {
+          const next = { ...prev };
+          delete next[stationId];
+          return next;
+        });
+        setAvailableSlotsByGame((prev) => {
+          const next = { ...prev };
+          delete next[stationId];
+          return next;
+        });
         return prev.filter(id => id !== stationId);
       }
       const st = stations.find(s => s.id === stationId);
@@ -126,7 +145,7 @@ export default function BookingPage() {
       }
       return [...prev, stationId];
     });
-    setSelectedSlot(null);
+    setValidationError('');
   };
 
   const handlePlayerCountChange = (stationId: string, delta: number) => {
@@ -139,18 +158,69 @@ export default function BookingPage() {
     }));
   };
 
-  const handleSlotSelect = (slot: TimeSlot) => {
-    setSelectedSlot(slot);
+  const handleSlotSelect = (slot: TimeSlot | null) => {
+    if (!activeGame) return;
+    setGameSlots((prev) => {
+      const next = { ...prev };
+      if (!slot) {
+        delete next[activeGame.id];
+      } else {
+        next[activeGame.id] = slot;
+      }
+      return next;
+    });
+    setValidationError('');
   };
 
-  const calculateTotalPrice = () => {
-    if (selectedStations.length === 0 || !selectedSlot) return 0;
-    return stations
-      .filter(s => selectedStations.includes(s.id))
-      .reduce((sum, station) => {
-        const count = station.type === 'ps5' ? (playerCounts[station.id] ?? 1) : 1;
-        return sum + station.hourly_rate * count;
-      }, 0);
+  const applySameTimeToAll = () => {
+    if (!selectedGames.length) return;
+    const firstGameSlot = gameSlots[selectedGames[0].id];
+    if (!firstGameSlot) {
+      toast.error('Select a time for at least one game first');
+      return;
+    }
+
+    const updated: Record<string, TimeSlot> = {};
+    selectedGames.forEach((game) => {
+      updated[game.id] = firstGameSlot;
+    });
+    setGameSlots(updated);
+    setValidationError('');
+    toast.success('Applied the same time to all selected games');
+  };
+
+  const isAllGamesAssigned = useMemo(
+    () => selectedGames.length > 0 && selectedGames.every((game) => !!gameSlots[game.id]),
+    [selectedGames, gameSlots]
+  );
+
+  const calculateTotalPrice = () =>
+    selectedGames.reduce((sum, station) => {
+      const count = station.type === 'ps5' ? (playerCounts[station.id] ?? 1) : 1;
+      const slot = gameSlots[station.id];
+      const durationInHours = slot
+        ? (new Date(`2000-01-01T${slot.end_time}`).getTime() - new Date(`2000-01-01T${slot.start_time}`).getTime()) / (1000 * 60 * 60)
+        : 0;
+      return sum + station.hourly_rate * count * Math.max(durationInHours, 0);
+    }, 0);
+
+  const canGoStep2 = selectedGames.length > 0;
+
+  const goToStep2 = () => {
+    if (!canGoStep2) {
+      toast.error('Please select at least one game');
+      return;
+    }
+    setCurrentStep(2);
+  };
+
+  const goToStep3 = () => {
+    if (!isAllGamesAssigned) {
+      setValidationError('Please select time for all selected games');
+      toast.error('Please select time for all selected games');
+      return;
+    }
+    setCurrentStep(3);
   };
 
   const handleBookingSubmit = async () => {
@@ -159,8 +229,8 @@ export default function BookingPage() {
       toast.error('Please select at least one station');
       return;
     }
-    if (!selectedSlot) {
-      toast.error('Please select a time slot');
+    if (!isAllGamesAssigned) {
+      toast.error('Please select time for all selected games');
       return;
     }
     if (!customerInfo.name.trim()) {
@@ -203,27 +273,23 @@ export default function BookingPage() {
         customerId = newCustomer.id;
       }
 
-      // Create bookings for each selected station
-      const bookings = selectedStations.map(stationId => {
-        const st = stations.find(s => s.id === stationId);
-        const pCount = st?.type === 'ps5' ? (playerCounts[stationId] ?? 1) : 1;
+      const groupId = crypto.randomUUID();
+      const bookings = selectedGames.map((game) => {
+        const slot = gameSlots[game.id]!;
         return {
-          station_id: stationId,
-          customer_id: customerId,
-          booking_date: format(selectedDate, 'yyyy-MM-dd'),
-          start_time: selectedSlot.start_time,
-          end_time: selectedSlot.end_time,
-          duration: 60,
-          status: 'confirmed',
-          player_count: pCount,
-          notes: customerInfo.notes || null,
-          final_price: st ? st.hourly_rate * pCount : 0,
+          station_id: game.id,
+          start_time: slot.start_time,
+          end_time: slot.end_time,
+          player_count: game.type === 'ps5' ? (playerCounts[game.id] ?? 1) : 1
         };
       });
-
-      const { error: bookingError } = await supabase
-        .from('bookings')
-        .insert(bookings);
+      const { error: bookingError } = await supabase.rpc('create_group_booking' as any, {
+        p_group_id: groupId,
+        p_customer_id: customerId,
+        p_booking_date: format(selectedDate, 'yyyy-MM-dd'),
+        p_notes: customerInfo.notes || null,
+        p_bookings: bookings
+      } as any);
 
       if (bookingError) throw bookingError;
 
@@ -231,10 +297,14 @@ export default function BookingPage() {
       
       // Reset form
       setSelectedStations([]);
+      setSelectedGames([]);
+      setActiveGame(null);
       setPlayerCounts({});
-      setSelectedSlot(null);
+      setGameSlots({});
       setCustomerInfo({ name: '', phone: '', email: '', notes: '' });
-      setAvailableSlots([]);
+      setAvailableSlotsByGame({});
+      setCurrentStep(1);
+      setValidationError('');
       
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -246,6 +316,16 @@ export default function BookingPage() {
 
   const today = new Date();
   const totalPrice = calculateTotalPrice();
+  const activeGameSlots = activeGame ? (availableSlotsByGame[activeGame.id] || []) : [];
+  const activeGameSelection = activeGame ? gameSlots[activeGame.id] || null : null;
+  const activeGameLoading = activeGame ? !!slotsLoadingByGame[activeGame.id] : false;
+
+  const formatTimeLabel = (time: string) =>
+    new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -254,12 +334,31 @@ export default function BookingPage() {
         <p className="text-muted-foreground">
           Reserve PlayStation 5 or Pool Table sessions at Cuephoria
         </p>
+        <div className="flex items-center justify-center gap-4 text-sm pt-2">
+          {[
+            { id: 1, label: 'Select Games' },
+            { id: 2, label: 'Assign Time' },
+            { id: 3, label: 'Review & Confirm' }
+          ].map((step) => (
+            <div key={step.id} className="flex items-center gap-2">
+              {currentStep >= (step.id as 1 | 2 | 3) ? (
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+              ) : (
+                <Circle className="h-4 w-4 text-muted-foreground" />
+              )}
+              <span className={currentStep === step.id ? 'font-medium text-primary' : 'text-muted-foreground'}>
+                Step {step.id}: {step.label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Booking Form */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Station Selection */}
+          {/* Step 1: Station Selection */}
+          {currentStep === 1 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -275,18 +374,28 @@ export default function BookingPage() {
                 playerCounts={playerCounts}
                 onPlayerCountChange={handlePlayerCountChange}
               />
+              <div className="mt-4 flex justify-end">
+                <Button onClick={goToStep2} disabled={!canGoStep2}>
+                  Next: Assign Time
+                </Button>
+              </div>
             </CardContent>
           </Card>
+          )}
 
-          {/* Date & Time Selection */}
+          {/* Step 2: Time assignment per selected game */}
+          {currentStep === 2 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarIcon className="h-5 w-5" />
-                Select Date & Time
+                Assign Time to Each Game
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              <p className="text-sm text-muted-foreground">
+                Select each game and assign its time slot. You must assign time for all selected games.
+              </p>
               <div>
                 <Label className="text-base font-medium">Choose Date</Label>
                 <div className="mt-2">
@@ -300,28 +409,91 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {selectedStations.length > 0 && (
+              {selectedGames.length > 0 && (
                 <div>
+                  {selectedGames.length > 1 && (
+                    <div className="mb-4">
+                      <Label className="text-base font-medium">Select Game to Assign Time</Label>
+                      <Select
+                        value={activeGame?.id}
+                        onValueChange={(value) => {
+                          const game = selectedGames.find((g) => g.id === value) || null;
+                          setActiveGame(game);
+                        }}
+                      >
+                        <SelectTrigger className="mt-2">
+                          <SelectValue placeholder="Choose game" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedGames.map((game) => (
+                            <SelectItem key={game.id} value={game.id}>
+                              {game.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 mb-3">
+                    <Button type="button" variant="secondary" onClick={applySameTimeToAll}>
+                      Apply Same Time to All
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setCurrentStep(1)}>
+                      Back
+                    </Button>
+                  </div>
+
                   <Label className="text-base font-medium">Available Time Slots</Label>
                   <div className="mt-2">
                     <TimeSlotPicker
-                      slots={availableSlots}
-                      selectedSlot={selectedSlot}
+                      slots={activeGameSlots}
+                      selectedSlot={activeGameSelection}
                       onSlotSelect={handleSlotSelect}
-                      loading={slotsLoading}
+                      loading={activeGameLoading}
                     />
                   </div>
                 </div>
               )}
+
+              {selectedGames.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Assignment Status</Label>
+                  {selectedGames.map((game) => (
+                    <div key={game.id} className="flex items-center justify-between text-sm border rounded-md p-2">
+                      <span>{game.name}</span>
+                      {gameSlots[game.id] ? (
+                        <Badge variant="default">
+                          {formatTimeLabel(gameSlots[game.id]!.start_time)} - {formatTimeLabel(gameSlots[game.id]!.end_time)}
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive">Time Not Assigned</Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {validationError && (
+                <p className="text-sm text-destructive">{validationError}</p>
+              )}
+
+              <div className="flex justify-end">
+                <Button onClick={goToStep3} disabled={!isAllGamesAssigned}>
+                  Next: Review & Confirm
+                </Button>
+              </div>
             </CardContent>
           </Card>
+          )}
 
-          {/* Customer Information */}
+          {/* Step 3: Review and customer information */}
+          {currentStep === 3 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Your Information
+                Review & Your Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -365,8 +537,20 @@ export default function BookingPage() {
                   rows={3}
                 />
               </div>
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setCurrentStep(2)}>
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleBookingSubmit}
+                  disabled={!isAllGamesAssigned || selectedStations.length === 0 || loading}
+                >
+                  {loading ? 'Creating Group Booking...' : 'Confirm Group Booking'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* Booking Summary */}
@@ -376,17 +560,16 @@ export default function BookingPage() {
               <CardTitle>Booking Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {selectedStations.length > 0 && (
+              {selectedGames.length > 0 && (
                 <div>
-                  <Label className="text-sm font-medium">Selected Stations</Label>
+                  <Label className="text-sm font-medium">Selected Games</Label>
                   <div className="mt-1 space-y-1">
-                    {selectedStations.map(stationId => {
-                      const station = stations.find(s => s.id === stationId);
-                      return station ? (
-                        <Badge key={stationId} variant="secondary" className="mr-1">
-                          {station.name}
+                    {selectedGames.map((game) => {
+                      return (
+                        <Badge key={game.id} variant="secondary" className="mr-1">
+                          {game.name}
                         </Badge>
-                      ) : null;
+                      );
                     })}
                   </div>
                 </div>
@@ -401,20 +584,18 @@ export default function BookingPage() {
                 </div>
               )}
 
-              {selectedSlot && (
+              {selectedGames.length > 0 && (
                 <div>
-                  <Label className="text-sm font-medium">Time</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(`2000-01-01T${selectedSlot.start_time}`).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true
-                    })} - {new Date(`2000-01-01T${selectedSlot.end_time}`).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true
-                    })}
-                  </p>
+                  <Label className="text-sm font-medium">Game Time Assignments</Label>
+                  <div className="space-y-1 mt-1">
+                    {selectedGames.map((game) => (
+                      <p key={game.id} className="text-sm text-muted-foreground">
+                        {game.name}: {gameSlots[game.id]
+                          ? `${formatTimeLabel(gameSlots[game.id]!.start_time)} - ${formatTimeLabel(gameSlots[game.id]!.end_time)}`
+                          : 'Not assigned'}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -428,14 +609,22 @@ export default function BookingPage() {
                 </>
               )}
 
-              <Button 
-                onClick={handleBookingSubmit}
-                disabled={!selectedSlot || selectedStations.length === 0 || loading}
-                className="w-full"
-                size="lg"
-              >
-                {loading ? 'Creating Booking...' : 'Confirm Booking'}
-              </Button>
+              {currentStep !== 3 && (
+                <Button 
+                  onClick={() => setCurrentStep(3)}
+                  disabled={!isAllGamesAssigned || selectedStations.length === 0 || loading}
+                  className="w-full"
+                  size="lg"
+                >
+                  Proceed to Checkout
+                </Button>
+              )}
+
+              {!isAllGamesAssigned && selectedGames.length > 0 && (
+                <p className="text-xs text-destructive text-center">
+                  Please select time for all selected games
+                </p>
+              )}
 
               <p className="text-xs text-muted-foreground text-center">
                 Payment will be collected at the venue
