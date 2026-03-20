@@ -273,12 +273,7 @@ export const useStationsData = () => {
     try {
       const station = stations.find(s => s.id === stationId);
       if (!station) {
-        console.error('Station not found:', stationId);
-        toast({
-          title: 'Error',
-          description: 'Station not found',
-          variant: 'destructive'
-        });
+        toast({ title: 'Error', description: 'Station not found', variant: 'destructive' });
         return false;
       }
       
@@ -294,90 +289,72 @@ export const useStationsData = () => {
       const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stationId);
       
       if (isValidUUID) {
-        const { data: sessionsData, error: sessionsError } = await supabase
-          .from('sessions')
-          .select('id')
-          .eq('station_id', stationId);
-          
-        if (sessionsError) {
-          console.error('Error checking sessions:', sessionsError);
-          toast({
-            title: 'Database Error',
-            description: 'Failed to check for existing sessions',
-            variant: 'destructive'
-          });
-          return false;
-        }
-        
-        if (sessionsData && sessionsData.length > 0) {
-          const sessionIds = sessionsData.map(session => session.id);
-          
-          const { data: billItemsData, error: billItemsError } = await supabase
-            .from('bill_items')
-            .select('bill_id')
-            .in('item_id', sessionIds)
-            .eq('item_type', 'session');
-            
-          if (billItemsError) {
-            console.error('Error checking bill items:', billItemsError);
-            toast({
-              title: 'Database Error',
-              description: 'Failed to check for related transactions',
-              variant: 'destructive'
-            });
-            return false;
-          }
-          
-          if (billItemsData && billItemsData.length > 0) {
-            toast({
-              title: 'Cannot Delete Station',
-              description: `This station has ${sessionsData.length} session(s) with ${billItemsData.length} related transaction(s). Please delete the transactions first.`,
-              variant: 'destructive'
-            });
-            return false;
-          }
-          
-          toast({
-            title: 'Sessions Found',
-            description: `This station has ${sessionsData.length} session(s) that will be deleted. Please delete sessions manually first.`,
-            variant: 'destructive'
-          });
-          return false;
-        }
-        
-        const { error } = await supabase
-          .from('stations')
-          .delete()
-          .eq('id', stationId);
+        const { error } = await supabase.from('stations').delete().eq('id', stationId);
           
         if (error) {
-          console.error('Error deleting station from Supabase:', error);
-          toast({
-            title: 'Database Error',
-            description: `Failed to delete station: ${error.message}`,
-            variant: 'destructive'
-          });
+          toast({ title: 'Database Error', description: `Failed to delete station: ${error.message}`, variant: 'destructive' });
           return false;
         }
-      } else {
-        console.log('Skipping Supabase delete for non-UUID station ID:', stationId);
       }
       
-      setStations(prev => prev.filter(station => station.id !== stationId));
-      
-      toast({
-        title: 'Station Deleted',
-        description: 'The station has been removed successfully',
-      });
-      
+      setStations(prev => prev.filter(s => s.id !== stationId));
+      toast({ title: 'Station Deleted', description: 'The station has been removed successfully.' });
       return true;
     } catch (error) {
       console.error('Error in deleteStation:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to delete station',
-        variant: 'destructive'
-      });
+      toast({ title: 'Error', description: 'Failed to delete station', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  /**
+   * Check what's blocking deletion of a station.
+   * Returns: { sessions: number, billItems: number }
+   */
+  const checkDeleteBlockers = async (stationId: string): Promise<{ sessions: number; billItems: number }> => {
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stationId);
+    if (!isValidUUID) return { sessions: 0, billItems: 0 };
+
+    const { data: sessionsData } = await supabase
+      .from('sessions')
+      .select('id')
+      .eq('station_id', stationId);
+
+    const sessionCount = sessionsData?.length ?? 0;
+    if (sessionCount === 0) return { sessions: 0, billItems: 0 };
+
+    const sessionIds = sessionsData!.map(s => s.id);
+    const { data: billItemsData } = await supabase
+      .from('bill_items')
+      .select('bill_id')
+      .in('item_id', sessionIds)
+      .eq('item_type', 'session');
+
+    return { sessions: sessionCount, billItems: billItemsData?.length ?? 0 };
+  };
+
+  /**
+   * Force-delete a station by first deleting its orphaned sessions (no billing),
+   * then deleting the station itself. Call only after checkDeleteBlockers confirms billItems === 0.
+   */
+  const forceDeleteStation = async (stationId: string) => {
+    try {
+      // Delete orphaned sessions first
+      await supabase.from('sessions').delete().eq('station_id', stationId);
+
+      // Now delete the station
+      const { error } = await supabase.from('stations').delete().eq('id', stationId);
+      if (error) {
+        toast({ title: 'Database Error', description: `Failed to delete station: ${error.message}`, variant: 'destructive' });
+        return false;
+      }
+
+      setStations(prev => prev.filter(s => s.id !== stationId));
+      toast({ title: 'Station Deleted', description: 'Station and its sessions have been removed.' });
+      return true;
+    } catch (error) {
+      console.error('Error in forceDeleteStation:', error);
+      toast({ title: 'Error', description: 'Failed to delete station', variant: 'destructive' });
       return false;
     }
   };
@@ -393,6 +370,8 @@ export const useStationsData = () => {
     stationsError,
     refreshStations,
     deleteStation,
+    checkDeleteBlockers,
+    forceDeleteStation,
     updateStation,
     updateStationImage,
     updateStationPublicBooking

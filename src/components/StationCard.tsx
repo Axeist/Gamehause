@@ -5,7 +5,7 @@ import StationInfo from '@/components/station/StationInfo';
 import StationTimer from '@/components/station/StationTimer';
 import StationActions from '@/components/station/StationActions';
 import { Button } from '@/components/ui/button';
-import { Trash2, Edit2, Tag, TrendingDown } from 'lucide-react';
+import { Trash2, Edit2, Tag, TrendingDown, AlertTriangle, ShieldAlert, Loader2 } from 'lucide-react';
 import EditStationDialog from './EditStationDialog';
 import {
   AlertDialog,
@@ -18,18 +18,58 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface StationCardProps {
   station: Station;
 }
 
 const StationCard: React.FC<StationCardProps> = ({ station }) => {
-  const { stations, customers, startSession, endSession, deleteStation, updateStation, updateStationImage, updateStationPublicBooking } = usePOS();
+  const { stations, customers, startSession, endSession, deleteStation, checkDeleteBlockers, forceDeleteStation, updateStation, updateStationImage, updateStationPublicBooking } = usePOS();
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
   const isPs5 = station.type === 'ps5';
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [publicBookingUpdating, setPublicBookingUpdating] = useState(false);
+  const [safeDeleteOpen, setSafeDeleteOpen] = useState(false);
+  const [deleteChecking, setDeleteChecking] = useState(false);
+  const [deleteBlockers, setDeleteBlockers] = useState<{ sessions: number; billItems: number } | null>(null);
+  const [isForceDeleting, setIsForceDeleting] = useState(false);
+
+  const handleDeleteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (station.isOccupied) return;
+    setDeleteChecking(true);
+    setDeleteBlockers(null);
+    setSafeDeleteOpen(true);
+    const blockers = await checkDeleteBlockers(station.id);
+    setDeleteBlockers(blockers);
+    setDeleteChecking(false);
+  };
+
+  const handleConfirmSimpleDelete = async () => {
+    setSafeDeleteOpen(false);
+    await deleteStation(station.id);
+  };
+
+  const handleForceDelete = async () => {
+    setIsForceDeleting(true);
+    await forceDeleteStation(station.id);
+    setIsForceDeleting(false);
+    setSafeDeleteOpen(false);
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditDialogOpen(true);
+  };
 
   const getFallbackImageSrc = () => {
     if (station.type === 'foosball') return '/Foosball.jpeg';
@@ -69,9 +109,8 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const originalRate = session?.originalRate || station.hourlyRate;
   const isDiscounted = hasCoupon && discountedRate !== originalRate;
     
-  const handleDeleteStation = async () => {
-    await deleteStation(station.id);
-  };
+  const handleDeleteStation = () => {};
+
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -196,43 +235,118 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
               >
                 <Edit2 className="h-4 w-4" />
               </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className={`
-                      h-8 w-8 shrink-0 
-                      ${isPoolTable 
-                        ? 'text-green-300 hover:text-red-500 hover:bg-green-950/50' 
-                        : isFoosballTable
-                          ? 'text-amber-300 hover:text-red-500 hover:bg-amber-950/40'
-                          : 'text-[#9b87f5] hover:text-destructive hover:bg-[#6E59A5]/20'
-                      }
-                    `}
-                    disabled={station.isOccupied}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className={isPoolTable ? 'border-green-500' : isFoosballTable ? 'border-amber-500' : 'border-[#9b87f5]'}>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Station</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete {station.name}? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleDeleteStation}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={`
+                    h-8 w-8 shrink-0 
+                    ${isPoolTable 
+                      ? 'text-green-300 hover:text-red-500 hover:bg-green-950/50' 
+                      : isFoosballTable
+                        ? 'text-amber-300 hover:text-red-500 hover:bg-amber-950/40'
+                        : 'text-[#9b87f5] hover:text-destructive hover:bg-[#6E59A5]/20'
+                    }
+                  `}
+                  disabled={station.isOccupied}
+                  onClick={handleDeleteClick}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+
+              {/* Safe Delete Dialog */}
+              <Dialog open={safeDeleteOpen} onOpenChange={setSafeDeleteOpen}>
+                <DialogContent className={`max-w-md ${isPoolTable ? 'border-green-500' : isFoosballTable ? 'border-amber-500' : 'border-[#9b87f5]'}`}>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      {deleteChecking ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Checking station data…
+                        </>
+                      ) : deleteBlockers?.billItems ? (
+                        <>
+                          <ShieldAlert className="h-5 w-5 text-destructive" />
+                          Cannot Delete Station
+                        </>
+                      ) : deleteBlockers?.sessions ? (
+                        <>
+                          <AlertTriangle className="h-5 w-5 text-orange-400" />
+                          Orphaned Sessions Found
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="h-5 w-5 text-destructive" />
+                          Delete {station.name}
+                        </>
+                      )}
+                    </DialogTitle>
+
+                    {!deleteChecking && deleteBlockers && (
+                      <DialogDescription asChild>
+                        <div className="space-y-3 pt-1">
+                          {deleteBlockers.billItems > 0 ? (
+                            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                              <p className="font-semibold mb-1">This station cannot be deleted.</p>
+                              <p>
+                                It has <strong>{deleteBlockers.sessions} session{deleteBlockers.sessions !== 1 ? 's' : ''}</strong> linked
+                                to <strong>{deleteBlockers.billItems} billing transaction{deleteBlockers.billItems !== 1 ? 's' : ''}</strong>.
+                              </p>
+                              <p className="mt-2 text-xs text-muted-foreground">
+                                Deleting would corrupt your financial history. Archive or reassign this station instead.
+                              </p>
+                            </div>
+                          ) : deleteBlockers.sessions > 0 ? (
+                            <div className="rounded-lg border border-orange-500/40 bg-orange-500/10 p-3 text-sm text-orange-300">
+                              <p>
+                                This station has <strong>{deleteBlockers.sessions} orphaned session{deleteBlockers.sessions !== 1 ? 's' : ''}</strong> with
+                                no billing transactions attached.
+                              </p>
+                              <p className="mt-2">
+                                These sessions will be <strong>permanently deleted</strong> along with the station.
+                                This cannot be undone.
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              Are you sure you want to delete <strong>{station.name}</strong>?
+                              This action cannot be undone.
+                            </p>
+                          )}
+                        </div>
+                      </DialogDescription>
+                    )}
+                  </DialogHeader>
+
+                  <DialogFooter className="gap-2">
+                    <Button variant="outline" onClick={() => setSafeDeleteOpen(false)}>
+                      Cancel
+                    </Button>
+
+                    {!deleteChecking && deleteBlockers && (
+                      <>
+                        {deleteBlockers.billItems > 0 ? null : deleteBlockers.sessions > 0 ? (
+                          <Button
+                            variant="destructive"
+                            onClick={handleForceDelete}
+                            disabled={isForceDeleting}
+                          >
+                            {isForceDeleting ? (
+                              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Deleting…</>
+                            ) : (
+                              <><Trash2 className="h-4 w-4 mr-2" />Delete Station & Sessions</>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button variant="destructive" onClick={handleConfirmSimpleDelete}>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Station
+                          </Button>
+                        )}
+                      </>
+                    )}
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardHeader>

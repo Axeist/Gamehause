@@ -54,6 +54,8 @@ const POSContext = createContext<POSContextType>({
   startSession: async () => {},
   endSession: async () => {},
   deleteStation: async () => false,
+  checkDeleteBlockers: async () => ({ sessions: 0, billItems: 0 }),
+  forceDeleteStation: async () => false,
   updateStation: async () => false,
   updateStationImage: async () => false,
   updateStationPublicBooking: async () => false,
@@ -126,6 +128,8 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     startSession: startSessionBase, 
     endSession: endSessionBase,
     deleteStation,
+    checkDeleteBlockers,
+    forceDeleteStation,
     updateStation,
     updateStationImage
     ,updateStationPublicBooking
@@ -803,6 +807,8 @@ export const POSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         startSession,
         endSession,
         deleteStation,
+        checkDeleteBlockers,
+        forceDeleteStation,
         updateStation,
         updateStationImage,
         updateStationPublicBooking,

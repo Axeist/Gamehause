@@ -14,6 +14,8 @@ export const useStations = (initialStations: Station[] = [], updateCustomer: (cu
     stationsError,
     refreshStations,
     deleteStation,
+    checkDeleteBlockers,
+    forceDeleteStation,
     updateStation,
     updateStationImage,
     updateStationPublicBooking
@@ -86,6 +88,8 @@ export const useStations = (initialStations: Station[] = [], updateCustomer: (cu
     startSession,
     endSession,
     deleteStation,
+    checkDeleteBlockers,
+    forceDeleteStation,
     updateStation,
     updateStationImage,
     updateStationPublicBooking,
