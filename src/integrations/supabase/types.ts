@@ -1124,6 +1124,7 @@ export type Database = {
         Row: {
           created_at: string
           customer_id: string | null
+          deleted_station_name: string | null
           duration: number | null
           end_time: string | null
           id: string
@@ -1132,13 +1133,14 @@ export type Database = {
           paused_at: string | null
           price: number | null
           start_time: string
-          station_id: string
+          station_id: string | null
           status: string | null
           total_paused_time: number | null
         }
         Insert: {
           created_at?: string
           customer_id?: string | null
+          deleted_station_name?: string | null
           duration?: number | null
           end_time?: string | null
           id?: string
@@ -1147,13 +1149,14 @@ export type Database = {
           paused_at?: string | null
           price?: number | null
           start_time?: string
-          station_id: string
+          station_id?: string | null
           status?: string | null
           total_paused_time?: number | null
         }
         Update: {
           created_at?: string
           customer_id?: string | null
+          deleted_station_name?: string | null
           duration?: number | null
           end_time?: string | null
           id?: string
@@ -1162,7 +1165,7 @@ export type Database = {
           paused_at?: string | null
           price?: number | null
           start_time?: string
-          station_id?: string
+          station_id?: string | null
           status?: string | null
           total_paused_time?: number | null
         }

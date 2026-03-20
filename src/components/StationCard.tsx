@@ -265,7 +265,7 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                         </>
                       ) : deleteBlockers && (deleteBlockers.billItems > 0) ? (
                         <>
-                          <ShieldAlert className="h-5 w-5 text-destructive" />
+                          <ShieldAlert className="h-5 w-5 text-green-400" />
                           Delete {station.name}
                         </>
                       ) : deleteBlockers && (deleteBlockers.sessions > 0 || deleteBlockers.bookings > 0) ? (
@@ -285,31 +285,43 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
                       <DialogDescription asChild>
                         <div className="space-y-3 pt-1">
                           {deleteBlockers.billItems > 0 ? (
-                            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive space-y-2">
-                              <p className="font-semibold">⚠️ This will permanently delete all associated data:</p>
-                              <ul className="list-disc list-inside space-y-1 text-xs">
-                                <li><strong>{deleteBlockers.sessions}</strong> session{deleteBlockers.sessions !== 1 ? 's' : ''}</li>
-                                <li><strong>{deleteBlockers.billItems}</strong> billing transaction{deleteBlockers.billItems !== 1 ? 's' : ''}</li>
-                                {deleteBlockers.bookings > 0 && (
-                                  <li><strong>{deleteBlockers.bookings}</strong> booking{deleteBlockers.bookings !== 1 ? 's' : ''}</li>
-                                )}
-                              </ul>
-                              <p className="text-xs text-muted-foreground mt-2">
-                                Billing history for this station will be lost. This cannot be undone.
-                              </p>
+                            <div className="space-y-2">
+                              <div className="rounded-lg border border-green-500/40 bg-green-500/10 p-3 text-sm text-green-300 space-y-1">
+                                <p className="font-semibold flex items-center gap-1.5">
+                                  ✅ Billing transactions will be preserved
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {deleteBlockers.billItems} transaction{deleteBlockers.billItems !== 1 ? 's' : ''} across{' '}
+                                  {deleteBlockers.sessions} session{deleteBlockers.sessions !== 1 ? 's' : ''} will be kept —
+                                  the station name "<strong>{station.name}</strong>" will be recorded on each.
+                                </p>
+                              </div>
+                              {(deleteBlockers.sessions - deleteBlockers.billItems > 0 || deleteBlockers.bookings > 0) && (
+                                <div className="rounded-lg border border-orange-500/30 bg-orange-500/8 p-3 text-sm text-orange-300 space-y-1">
+                                  <p className="font-medium">The following will be permanently deleted:</p>
+                                  <ul className="list-disc list-inside text-xs space-y-0.5">
+                                    {deleteBlockers.sessions > deleteBlockers.billItems && (
+                                      <li>{deleteBlockers.sessions - Math.floor(deleteBlockers.billItems)} orphaned session{deleteBlockers.sessions - Math.floor(deleteBlockers.billItems) !== 1 ? 's' : ''} (no billing)</li>
+                                    )}
+                                    {deleteBlockers.bookings > 0 && (
+                                      <li>{deleteBlockers.bookings} booking{deleteBlockers.bookings !== 1 ? 's' : ''}</li>
+                                    )}
+                                  </ul>
+                                </div>
+                              )}
                             </div>
                           ) : deleteBlockers.sessions > 0 || deleteBlockers.bookings > 0 ? (
-                            <div className="rounded-lg border border-orange-500/40 bg-orange-500/10 p-3 text-sm text-orange-300 space-y-2">
-                              <p className="font-medium">The following data will also be deleted:</p>
-                              <ul className="list-disc list-inside space-y-1 text-xs">
+                            <div className="rounded-lg border border-orange-500/40 bg-orange-500/10 p-3 text-sm text-orange-300 space-y-1">
+                              <p className="font-medium">The following will be permanently deleted:</p>
+                              <ul className="list-disc list-inside text-xs space-y-0.5">
                                 {deleteBlockers.sessions > 0 && (
-                                  <li><strong>{deleteBlockers.sessions}</strong> session{deleteBlockers.sessions !== 1 ? 's' : ''}</li>
+                                  <li>{deleteBlockers.sessions} session{deleteBlockers.sessions !== 1 ? 's' : ''} (no billing attached)</li>
                                 )}
                                 {deleteBlockers.bookings > 0 && (
-                                  <li><strong>{deleteBlockers.bookings}</strong> booking{deleteBlockers.bookings !== 1 ? 's' : ''}</li>
+                                  <li>{deleteBlockers.bookings} booking{deleteBlockers.bookings !== 1 ? 's' : ''}</li>
                                 )}
                               </ul>
-                              <p className="text-xs text-muted-foreground">This cannot be undone.</p>
+                              <p className="text-xs text-muted-foreground mt-1">This cannot be undone.</p>
                             </div>
                           ) : (
                             <p className="text-sm text-muted-foreground">

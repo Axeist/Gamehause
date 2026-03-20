@@ -310,6 +310,8 @@ export const useStationsData = () => {
   /**
    * Check what's attached to a station so we can show the right warning.
    * Returns: { sessions, billItems, bookings }
+   * - sessions with billItems → will be PRESERVED (station_id nulled, name kept)
+   * - sessions without billItems → will be DELETED
    */
   const checkDeleteBlockers = async (stationId: string): Promise<{ sessions: number; billItems: number; bookings: number }> => {
     const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stationId);
@@ -339,12 +341,19 @@ export const useStationsData = () => {
   };
 
   /**
-   * Fully cascade-delete a station:
-   *   bill_items → sessions → bookings → station
-   * Works regardless of whether sessions have billing transactions.
+   * Fully delete a station with correct data preservation:
+   * - Sessions WITH billing transactions → station_id nulled, station name saved in deleted_station_name
+   * - Sessions WITHOUT billing transactions → deleted
+   * - Bookings → deleted
+   * - Station → deleted
+   *
+   * This means billing history is NEVER lost when a station is deleted.
    */
   const forceDeleteStation = async (stationId: string) => {
     try {
+      const station = stations.find(s => s.id === stationId);
+      const stationName = station?.name ?? 'Deleted Station';
+
       // 1. Get all session IDs for this station
       const { data: sessionsData } = await supabase
         .from('sessions')
@@ -353,23 +362,38 @@ export const useStationsData = () => {
 
       const sessionIds = (sessionsData ?? []).map(s => s.id);
 
-      // 2. Delete bill_items linked to these sessions
       if (sessionIds.length > 0) {
-        const { error: biErr } = await supabase
+        // 2. Find which sessions have billing transactions
+        const { data: billedItems } = await supabase
           .from('bill_items')
-          .delete()
+          .select('item_id')
           .in('item_id', sessionIds)
           .eq('item_type', 'session');
-        if (biErr) console.error('bill_items delete error (non-fatal):', biErr);
+
+        const billedSessionIds = new Set((billedItems ?? []).map(b => b.item_id));
+        const orphanedSessionIds = sessionIds.filter(id => !billedSessionIds.has(id));
+
+        // 3. Preserve billed sessions: null out station_id and record the station name
+        if (billedSessionIds.size > 0) {
+          await supabase
+            .from('sessions')
+            .update({
+              station_id: null,
+              deleted_station_name: stationName,
+            })
+            .in('id', [...billedSessionIds]);
+        }
+
+        // 4. Delete orphaned sessions (no billing history — safe to remove)
+        if (orphanedSessionIds.length > 0) {
+          await supabase.from('sessions').delete().in('id', orphanedSessionIds);
+        }
       }
 
-      // 3. Delete all sessions for this station
-      await supabase.from('sessions').delete().eq('station_id', stationId);
-
-      // 4. Delete all bookings for this station
+      // 5. Delete all bookings for this station (booking history is in BookingManagement already)
       await supabase.from('bookings').delete().eq('station_id', stationId);
 
-      // 5. Delete the station itself
+      // 6. Delete the station itself
       const { error } = await supabase.from('stations').delete().eq('id', stationId);
       if (error) {
         toast({ title: 'Database Error', description: `Failed to delete station: ${error.message}`, variant: 'destructive' });
@@ -377,7 +401,7 @@ export const useStationsData = () => {
       }
 
       setStations(prev => prev.filter(s => s.id !== stationId));
-      toast({ title: 'Station Deleted', description: 'Station and all associated data have been removed.' });
+      toast({ title: 'Station Deleted', description: 'Station deleted. Billing transactions have been preserved.' });
       return true;
     } catch (error) {
       console.error('Error in forceDeleteStation:', error);
