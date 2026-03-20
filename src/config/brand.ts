@@ -7,6 +7,9 @@ export const BASE_URL = "https://gamehaus.co.in" as const;
 export const SUPPORT_EMAIL = "contact@gamehaus.co.in" as const;
 export const SUPPORT_PHONE_PRIMARY = "9994166622" as const;
 export const SUPPORT_PHONE_SECONDARY = "9345187098" as const;
+/** Printed on invoices (both numbers, exact formatting). */
+export const INVOICE_PHONES_DISPLAY =
+  "+91 99941 66622/+91 93451 87098" as const;
 export const ADDRESS =
   "4th Floor, Silingi Building, 142, Greams Rd, Thousand Lights West, Thousand Lights, Chennai, Tamil Nadu 600006" as const;
 /** Display string for business hours (e.g. for footer and location section). */

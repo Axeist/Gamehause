@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { Bill, Customer } from '@/types/pos.types';
-import { BRAND_NAME_UPPER, LOGO_PATH, SUPPORT_EMAIL } from '@/config/brand';
+import {
+  ADDRESS,
+  BRAND_NAME_UPPER,
+  BUSINESS_HOURS,
+  INVOICE_PHONES_DISPLAY,
+  LOGO_PATH,
+  SUPPORT_EMAIL,
+} from '@/config/brand';
 
 interface ReceiptHeaderProps {
   bill: Bill;
@@ -44,7 +51,7 @@ const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill, customer }) => {
       </div>
 
       <p className="inv-address">
-        40, S W Boag Rd, CIT Nagar West, T. Nagar, Chennai 600035 · +91 93451 87098 · {SUPPORT_EMAIL} · 11:00 AM – 11:00 PM daily
+        {ADDRESS} · {INVOICE_PHONES_DISPLAY} · {SUPPORT_EMAIL} · {BUSINESS_HOURS}
       </p>
 
       <div className="inv-meta-grid">
