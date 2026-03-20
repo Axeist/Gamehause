@@ -206,19 +206,31 @@ const ReceiptItems: React.FC<ReceiptItemsProps> = ({ bill, onUpdateItems, editab
   };
 
   if (!editable) {
-    // Original read-only version
     return (
-      <div className="space-y-1 mb-4">
-        <div className="text-sm font-medium border-b pb-1 mb-2">Items</div>
-        {items.map((item, index) => (
-          <div key={index} className="receipt-item text-sm">
-            <div>
-              <span>{item.name}</span>
-              {item.quantity > 1 && <span className="text-gray-600"> x{item.quantity}</span>}
-            </div>
-            <CurrencyDisplay amount={item.total} />
-          </div>
-        ))}
+      <div className="invoice-items-wrap inv-items-wrap no-break">
+        <h3 className="inv-items-section-title">Items</h3>
+        <table className="invoice-items-table inv-items-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Duration</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, index) => (
+              <tr key={index}>
+                <td>{item.name}</td>
+                <td>{item.quantity}</td>
+                <td className="inv-dur">—</td>
+                <td className="indian-rupee inv-amt">
+                  {Math.round(item.total).toLocaleString('en-IN')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }

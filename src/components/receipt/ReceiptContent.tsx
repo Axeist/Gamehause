@@ -63,7 +63,10 @@ const ReceiptContent: React.FC<ReceiptContentProps> = ({
   // Check if bill is valid
   if (!bill || !bill.id) {
     return (
-      <div ref={receiptRef} className="p-6 text-black max-h-[calc(100vh-250px)] overflow-auto">
+      <div
+        ref={receiptRef}
+        className="invoice-container p-4 sm:p-6 text-black max-h-[calc(100vh-250px)] overflow-auto"
+      >
         <div className="text-center py-8">
           <h3 className="text-xl font-bold">Error: Invalid Bill Data</h3>
           <p className="mt-2">Unable to display receipt. Bill information is missing or invalid.</p>
@@ -358,7 +361,10 @@ const ReceiptContent: React.FC<ReceiptContentProps> = ({
   const isComplimentary = bill.paymentMethod?.toLowerCase() === 'complimentary';
 
   return (
-    <div ref={receiptRef} className="p-6 text-black max-h-[calc(100vh-250px)] overflow-auto">
+    <div
+      ref={receiptRef}
+      className="invoice-container p-4 sm:p-6 text-black max-h-[calc(100vh-250px)] overflow-auto"
+    >
       {/* Edit Button - Only visible on screen, not in print */}
       {allowEdit && (
         <div className="flex justify-end mb-3 no-print">
@@ -399,7 +405,7 @@ const ReceiptContent: React.FC<ReceiptContentProps> = ({
       )}
       
       {/* Professional Receipt Content */}
-      <ReceiptHeader bill={bill} />
+      <ReceiptHeader bill={bill} customer={customer} />
       <CustomerInfo customer={customer} />
       <ReceiptItems 
         bill={bill} 
@@ -413,32 +419,26 @@ const ReceiptContent: React.FC<ReceiptContentProps> = ({
         editable={isEditing}
       />
       
-      {/* Payment Method Badge - With page-break protection */}
+      {/* Payment — compact single line for print */}
       {!isComplimentary && (
-        <div className="mt-4 mb-6 flex items-center justify-between border-t border-gray-300 pt-3 payment-method-section">
-          <span className="text-sm font-semibold text-gray-700">Payment Method:</span>
-          <div className="flex items-center gap-2">
-            {bill.isSplitPayment ? (
-              <div className="text-xs space-y-1 text-right">
-                <div className="bg-green-100 text-green-800 px-3 py-1 rounded font-semibold">
-                  Cash: ₹{bill.cashAmount?.toLocaleString('en-IN') || 0}
-                </div>
-                <div className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded font-semibold">
-                  UPI: ₹{bill.upiAmount?.toLocaleString('en-IN') || 0}
-                </div>
-              </div>
-            ) : (
-              <span className={`px-4 py-1 rounded-full font-semibold text-sm ${
-                bill.paymentMethod === 'cash' 
-                  ? 'bg-green-100 text-green-800' 
-                  : bill.paymentMethod === 'upi'
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-orange-100 text-orange-800'
-              }`}>
-                {bill.paymentMethod === 'cash' ? 'CASH' : bill.paymentMethod === 'upi' ? 'UPI' : 'CREDIT'}
-              </span>
-            )}
-          </div>
+        <div className="invoice-payment inv-payment payment-method-section no-break">
+          <span className="inv-pay-label">Payment: </span>
+          {bill.isSplitPayment ? (
+            <span>
+              Cash <span className="indian-rupee">{Math.round(bill.cashAmount ?? 0).toLocaleString('en-IN')}</span>
+              {' | '}
+              UPI <span className="indian-rupee">{Math.round(bill.upiAmount ?? 0).toLocaleString('en-IN')}</span>
+            </span>
+          ) : (
+            <span>
+              {bill.paymentMethod === 'cash' && 'Cash'}
+              {bill.paymentMethod === 'upi' && 'UPI'}
+              {bill.paymentMethod === 'credit' && 'Credit'}
+              {bill.paymentMethod === 'split' && 'Split'}
+              {' '}
+              <span className="indian-rupee inv-pay-total">{Math.round(bill.total).toLocaleString('en-IN')}</span>
+            </span>
+          )}
         </div>
       )}
       

@@ -194,69 +194,46 @@ const ReceiptSummary: React.FC<ReceiptSummaryProps> = ({
   // Read-only view
   if (!editable || !isEditing) {
     return (
-      <div className="space-y-1 text-sm">
-        <div className="flex justify-between items-center">
-          <div className="text-sm font-medium">Payment Summary</div>
+      <div className="invoice-summary inv-summary no-break">
+        <div className="inv-summary-head flex justify-between items-center">
+          <span className="inv-summary-title">Summary</span>
           {editable && !isEditing && (
-            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleEditToggle}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs no-print" onClick={handleEditToggle}>
               <Pencil className="h-3 w-3 mr-1" /> Edit
             </Button>
           )}
         </div>
-        
-        <div className="receipt-item">
-          <span>Subtotal:</span>
-          <CurrencyDisplay amount={bill.subtotal} />
+
+        <div className="receipt-item inv-sum-row">
+          <span>Subtotal</span>
+          <span className="indian-rupee inv-num">{Math.round(bill.subtotal).toLocaleString('en-IN')}</span>
         </div>
-        
+
         {bill.discount > 0 && (
-          <div className="receipt-item text-emerald-500">
-            <span>
-              Discount {bill.discountType === 'percentage' ? `(${bill.discount}%)` : ''}:
-            </span>
-            <CurrencyDisplay amount={bill.discountValue} className="text-emerald-500" />
+          <div className="receipt-item inv-sum-row inv-discount">
+            <span>Discount{bill.discountType === 'percentage' ? ` (${bill.discount}%)` : ''}</span>
+            <span className="indian-rupee inv-num">{Math.round(bill.discountValue).toLocaleString('en-IN')}</span>
           </div>
         )}
-        
+
         {bill.loyaltyPointsUsed > 0 && (
-          <div className="receipt-item text-green-500">
-            <span>Loyalty Points:</span>
-            <CurrencyDisplay amount={bill.loyaltyPointsUsed} className="text-green-500" />
+          <div className="receipt-item inv-sum-row inv-loyalty">
+            <span>Loyalty points</span>
+            <span className="indian-rupee inv-num">{Math.round(bill.loyaltyPointsUsed).toLocaleString('en-IN')}</span>
           </div>
         )}
-        
-        <div className="receipt-total flex justify-between font-bold">
-          <span>Total:</span>
-          <CurrencyDisplay amount={bill.total} />
+
+        <div className="inv-total-row">
+          <span>Total</span>
+          <CurrencyDisplay amount={bill.total} className="inv-total-amt" />
         </div>
-        
-        <div className="text-xs text-gray-600 mt-4">
-          {bill.isSplitPayment ? (
-            <div>
-              <div>Payment Method: Split Payment</div>
-              <div className="ml-2 mt-1">
-                <div>Cash: <CurrencyDisplay amount={bill.cashAmount || 0} /></div>
-                <div>UPI: <CurrencyDisplay amount={bill.upiAmount || 0} /></div>
-              </div>
-            </div>
-          ) : (
-            <div>Payment Method: {bill.paymentMethod.toUpperCase()}</div>
-          )}
-          
-          {bill.loyaltyPointsEarned > 0 && (
-            <div className="mt-1">Points Earned: {bill.loyaltyPointsEarned} 
-              <span className="text-xs text-gray-500 ml-1">
-                ({customer?.isMember ? '5 points' : '2 points'} per ₹100)
-              </span>
-            </div>
-          )}
-          
-          {customer && (
-            <div className="mt-1">
-              <span className="text-xs">Available Points: {customer.loyaltyPoints}</span>
-            </div>
-          )}
-        </div>
+
+        {(bill.loyaltyPointsEarned > 0 || customer) && (
+          <div className="inv-loyalty-foot">
+            {bill.loyaltyPointsEarned > 0 && <div>Points earned: {bill.loyaltyPointsEarned}</div>}
+            {customer && <div>Balance points: {customer.loyaltyPoints}</div>}
+          </div>
+        )}
       </div>
     );
   }

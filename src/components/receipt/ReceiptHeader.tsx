@@ -1,91 +1,69 @@
 import React from 'react';
-import { Bill } from '@/types/pos.types';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { Bill, Customer } from '@/types/pos.types';
 import { BRAND_NAME_UPPER, SUPPORT_EMAIL } from '@/config/brand';
 
 interface ReceiptHeaderProps {
   bill: Bill;
+  customer: Customer;
 }
 
-const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill }) => {
+const ReceiptHeader: React.FC<ReceiptHeaderProps> = ({ bill, customer }) => {
   const billDate = new Date(bill.createdAt);
   const isComplimentary = bill.paymentMethod?.toLowerCase() === 'complimentary';
-  
+  const dateStr = billDate.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  const timeStr = billDate.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
   return (
-    <div className="border-b-2 border-dashed border-gray-400 pb-4 mb-4">
-      {/* Company Logo/Name */}
-      <div className="text-center mb-4">
-        <h1 className="text-4xl font-bold text-gamehaus-purple mb-1" style={{ fontFamily: 'Arial Black, sans-serif' }}>
-          {BRAND_NAME_UPPER}
-        </h1>
-        <p className="text-sm text-gray-600 uppercase tracking-wider">
-          Premier Snooker & Gaming Lounge
-        </p>
-      </div>
-      
-      {/* Contact Information */}
-      <div className="text-center space-y-1 text-xs text-gray-700 mb-4">
-        <div className="flex items-center justify-center gap-1">
-          <MapPin className="h-3 w-3 text-gamehaus-purple" />
-          <p>
-            40, S W Boag Rd, CIT Nagar West,<br />
-            T. Nagar, Chennai, Tamil Nadu 600035
-          </p>
+    <div className="receipt-header invoice-header inv-header no-break">
+      <div className="inv-header-row">
+        <div className="inv-brand-col">
+          <h1 className="inv-brand-title">{BRAND_NAME_UPPER}</h1>
+          <p className="inv-tagline">Premier Snooker &amp; Gaming Lounge</p>
         </div>
-        
-        <div className="flex items-center justify-center gap-3 mt-2">
-          <div className="flex items-center gap-1">
-            <Phone className="h-3 w-3 text-gamehaus-purple" />
-            <span>+91 93451 87098</span>
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-center gap-1">
-          <Mail className="h-3 w-3 text-gamehaus-purple" />
-          <span>{SUPPORT_EMAIL}</span>
-        </div>
-        
-        <div className="flex items-center justify-center gap-1">
-          <Clock className="h-3 w-3 text-gamehaus-purple" />
-          <span>11:00 AM - 11:00 PM, Every day</span>
+        <div className="inv-doc-col">
+          <h2 className="inv-doc-title">
+            {isComplimentary ? 'COMPLIMENTARY RECEIPT' : 'TAX INVOICE'}
+          </h2>
         </div>
       </div>
-      
-      {/* Invoice Title */}
-      <div className="text-center mb-3">
-        <h2 className="text-2xl font-bold text-gray-800">
-          {isComplimentary ? 'COMPLIMENTARY RECEIPT' : 'TAX INVOICE'}
-        </h2>
-      </div>
-      
-      {/* Bill Details */}
-      <div className="grid grid-cols-2 gap-2 text-xs">
+
+      <p className="inv-address">
+        40, S W Boag Rd, CIT Nagar West, T. Nagar, Chennai 600035 · +91 93451 87098 · {SUPPORT_EMAIL} · 11:00 AM – 11:00 PM daily
+      </p>
+
+      <div className="inv-meta-grid">
         <div>
-          <p className="text-gray-600">Invoice No:</p>
-          <p className="font-semibold font-mono">{bill.id.substring(0, 12).toUpperCase()}</p>
+          <span className="inv-muted">Invoice No</span>
+          <p className="font-mono">{bill.id.substring(0, 12).toUpperCase()}</p>
         </div>
         <div className="text-right">
-          <p className="text-gray-600">Date & Time:</p>
-          <p className="font-semibold">
-            {billDate.toLocaleDateString('en-IN', { 
-              day: '2-digit', 
-              month: 'short', 
-              year: 'numeric' 
-            })}
-            {' '}
-            {billDate.toLocaleTimeString('en-IN', {
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: true
-            })}
+          <span className="inv-muted">Date &amp; time</span>
+          <p>
+            {dateStr} {timeStr}
           </p>
         </div>
+        <div>
+          <span className="inv-muted">Customer</span>
+          <p title={customer.name}>{customer.name}</p>
+        </div>
+        <div className="text-right">
+          <span className="inv-muted">Phone</span>
+          <p>{customer.phone}</p>
+        </div>
       </div>
-      
+
       {isComplimentary && bill.compNote && (
-        <div className="mt-3 bg-amber-50 border border-amber-300 rounded p-2">
-          <p className="text-xs text-gray-600">Reason:</p>
-          <p className="text-xs font-medium text-amber-800 italic">{bill.compNote}</p>
+        <div className="inv-comp-note">
+          <p className="inv-muted">Reason</p>
+          <p className="inv-comp-text">{bill.compNote}</p>
         </div>
       )}
     </div>

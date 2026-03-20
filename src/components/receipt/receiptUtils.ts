@@ -174,298 +174,344 @@ export const handlePrint = (printContent: string): void => {
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Cuephoria Receipt</title>
+          <title>Gamehaus — Invoice</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
           <style>
             * {
               margin: 0;
               padding: 0;
               box-sizing: border-box;
             }
-            
+
             @page {
               size: A4;
-              margin: 15mm;
+              margin: 10mm;
             }
-            
+
             html, body {
-              width: 100%;
-              height: 100%;
-              font-family: 'Arial', 'Helvetica', sans-serif;
+              font-family: 'Inter', sans-serif;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
-              color: #000;
+              color: #1f2937;
+              background: #fff;
             }
-            
-            body { 
-              background: white;
-              padding: 0;
+
+            body {
               margin: 0;
+              padding: 0;
             }
-            
+
+            .indian-rupee::before {
+              content: "₹";
+              display: inline-block;
+              margin-right: 2px;
+            }
+
+            .invoice-container,
             .receipt-container {
-              max-width: 190mm;
-              margin: 0 auto;
-              padding: 10mm;
-              background: white;
-            }
-            
-            h1 {
-              font-size: 36px;
-              font-weight: bold;
-              color: #FF4A1A !important;
-              text-align: center;
-              margin-bottom: 5px;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            
-            h2 {
-              font-size: 24px;
-              font-weight: bold;
-              text-align: center;
-              margin: 15px 0;
-            }
-            
-            h3 {
-              font-size: 18px;
-              font-weight: bold;
-              margin: 10px 0;
-            }
-            
-            h4 {
-              font-size: 14px;
-              font-weight: 600;
-              margin: 8px 0;
-            }
-            
-            p {
-              margin: 4px 0;
-              line-height: 1.5;
-            }
-            
-            .border-b-2 {
-              border-bottom: 2px solid #333;
-            }
-            
-            .border-t-2 {
-              border-top: 2px solid #333;
-              page-break-inside: avoid;
-            }
-            
-            .border-dashed {
-              border-style: dashed !important;
-            }
-            
-            .border-gray-400 {
-              border-color: #9ca3af;
-            }
-            
-            .mb-1 { margin-bottom: 4px; }
-            .mb-2 { margin-bottom: 8px; }
-            .mb-3 { margin-bottom: 12px; }
-            .mb-4 { margin-bottom: 16px; }
-            .mb-6 { margin-bottom: 24px; }
-            .mt-1 { margin-top: 4px; }
-            .mt-2 { margin-top: 8px; }
-            .mt-3 { margin-top: 12px; }
-            .mt-4 { margin-top: 16px; }
-            .mt-6 { margin-top: 24px; }
-            .pb-2 { padding-bottom: 8px; }
-            .pb-3 { padding-bottom: 12px; }
-            .pb-4 { padding-bottom: 16px; }
-            .pt-2 { padding-top: 8px; }
-            .pt-3 { padding-top: 12px; }
-            .pt-4 { padding-top: 16px; }
-            .p-2 { padding: 8px; }
-            .p-3 { padding: 12px; }
-            
-            .text-center { text-align: center; }
-            .text-right { text-align: right; }
-            .text-left { text-align: left; }
-            
-            .text-xs { font-size: 11px; }
-            .text-sm { font-size: 13px; }
-            .text-base { font-size: 15px; }
-            .text-lg { font-size: 17px; }
-            .text-xl { font-size: 20px; }
-            .text-2xl { font-size: 24px; }
-            .text-3xl { font-size: 30px; }
-            .text-4xl { font-size: 36px; }
-            
-            .font-medium { font-weight: 500; }
-            .font-semibold { font-weight: 600; }
-            .font-bold { font-weight: 700; }
-            
-            .text-gray-600 { color: #4b5563; }
-            .text-gray-700 { color: #374151; }
-            .text-gray-800 { color: #1f2937; }
-            
-            .bg-gray-50 { 
-              background-color: #f9fafb;
-              page-break-inside: avoid;
-            }
-            .bg-amber-50 { background-color: #fffbeb; }
-            .bg-green-100 { background-color: #dcfce7; }
-            .bg-blue-100 { background-color: #dbeafe; }
-            .bg-orange-100 { background-color: #ffedd5; }
-            
-            .text-green-800 { color: #166534; }
-            .text-blue-800 { color: #1e40af; }
-            .text-orange-800 { color: #9a3412; }
-            
-            .flex {
-              display: flex;
-            }
-            
-            .items-center {
-              align-items: center;
-            }
-            
-            .justify-center {
-              justify-content: center;
-            }
-            
-            .justify-between {
-              justify-content: space-between;
-            }
-            
-            .gap-1 { gap: 4px; }
-            .gap-2 { gap: 8px; }
-            .gap-3 { gap: 12px; }
-            
-            .grid {
-              display: grid;
-            }
-            
-            .grid-cols-2 {
-              grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .space-y-1 > * + * { margin-top: 4px; }
-            .space-y-2 > * + * { margin-top: 8px; }
-            
-            table {
               width: 100%;
-              border-collapse: collapse;
-              margin: 15px 0;
-              page-break-inside: auto;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 8px 12px;
+              background: white;
+              page-break-inside: avoid;
+              break-inside: avoid;
             }
-            
-            table th,
-            table td {
+
+            .no-break {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+
+            .receipt-header.inv-header {
               text-align: left;
-              padding: 10px 8px;
-              border-bottom: 1px solid #e5e7eb;
-              font-size: 13px;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 8px;
+              margin-bottom: 8px;
             }
-            
-            table th {
-              background-color: #f3f4f6;
-              font-weight: 600;
+
+            .inv-header-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              gap: 8px;
+              margin-bottom: 8px;
             }
-            
-            table tr {
-              page-break-inside: avoid;
-              page-break-after: auto;
+
+            .inv-brand-title {
+              font-size: 20px;
+              font-weight: 700;
+              color: #ff4a1a;
+              margin: 0;
+              line-height: 1.2;
             }
-            
-            table tr:last-child td {
-              border-bottom: none;
+
+            .inv-tagline {
+              font-size: 10px;
+              color: #6b7280;
+              margin: 4px 0 0 0;
             }
-            
-            .rounded { 
-              border-radius: 4px;
-            }
-            .rounded-lg { 
-              border-radius: 8px;
-            }
-            .rounded-full {
-              border-radius: 9999px;
-            }
-            
-            ul {
-              list-style-position: inside;
-              padding-left: 0;
-              page-break-inside: avoid;
-            }
-            
-            ul li {
-              margin: 4px 0;
-            }
-            
-            svg {
-              display: none;
-            }
-            
-            .no-print,
-            button,
-            .edit-button {
-              display: none !important;
-            }
-            
-            .uppercase {
+
+            .inv-doc-col { text-align: right; flex-shrink: 0; }
+
+            .inv-doc-title {
+              font-size: 14px;
+              font-weight: 700;
+              color: #1f2937;
+              margin: 0;
               text-transform: uppercase;
-            }
-            
-            .tracking-wider {
               letter-spacing: 0.05em;
             }
-            
-            .font-mono {
-              font-family: 'Courier New', monospace;
+
+            .inv-address {
+              font-size: 10px;
+              color: #6b7280;
+              line-height: 1.4;
+              margin: 0 0 8px 0;
             }
-            
-            .italic {
+
+            .inv-meta-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 6px 16px;
+              font-size: 12px;
+              color: #1f2937;
+            }
+
+            .inv-muted {
+              color: #6b7280;
+              display: block;
+              font-size: 11px;
+            }
+
+            .inv-meta-grid p {
+              margin: 2px 0 0 0;
+              font-weight: 600;
+            }
+
+            .inv-comp-note {
+              margin-top: 8px;
+              padding: 8px;
+              background: #fffbeb;
+              border: 1px solid #fcd34d;
+              border-radius: 4px;
+            }
+
+            .inv-comp-text {
+              font-size: 11px;
+              font-weight: 500;
+              color: #92400e;
               font-style: italic;
+              margin: 4px 0 0 0;
             }
-            
-            .border {
-              border: 1px solid #d1d5db;
+
+            .inv-items-section-title {
+              font-size: 14px;
+              font-weight: 600;
+              color: #1f2937;
+              border-bottom: 1px solid #eee;
+              padding-bottom: 4px;
+              margin-bottom: 4px;
             }
-            
-            .border-amber-300 {
-              border-color: #fcd34d;
+
+            .inv-items-table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 12px;
+              margin-bottom: 8px;
             }
-            
-            .border-gray-200 {
-              border-color: #e5e7eb;
+
+            .inv-items-table th {
+              font-size: 12px;
+              font-weight: 600;
+              color: #374151;
+              text-align: left;
+              padding: 3px 6px 3px 0;
+              border-bottom: 1px solid #eee;
             }
-            
-            .border-gray-300 {
-              border-color: #d1d5db;
+
+            .inv-items-table th:nth-child(2),
+            .inv-items-table th:nth-child(3),
+            .inv-items-table th:nth-child(4) {
+              text-align: right;
             }
-            
+
+            .inv-items-table td {
+              padding: 3px 6px 3px 0;
+              border-bottom: 1px solid #eee;
+              vertical-align: top;
+              line-height: 1.3;
+            }
+
+            .inv-items-table td:nth-child(2),
+            .inv-items-table td:nth-child(3),
+            .inv-items-table td:nth-child(4) {
+              text-align: right;
+              font-variant-numeric: tabular-nums;
+            }
+
+            .inv-dur { color: #6b7280; }
+
+            .inv-summary {
+              margin-left: auto;
+              max-width: 280px;
+              width: 100%;
+              margin-top: 8px;
+              font-size: 12px;
+            }
+
+            .inv-summary-head {
+              border-bottom: 1px solid #eee;
+              padding-bottom: 4px;
+              margin-bottom: 4px;
+            }
+
+            .inv-summary-title {
+              font-size: 14px;
+              font-weight: 600;
+              color: #1f2937;
+            }
+
+            .inv-sum-row {
+              display: flex;
+              justify-content: space-between;
+              gap: 8px;
+              margin-bottom: 3px;
+            }
+
+            .inv-discount { color: #059669; }
+            .inv-loyalty { color: #15803d; }
+
+            .inv-total-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: baseline;
+              gap: 8px;
+              padding-top: 6px;
+              margin-top: 6px;
+              border-top: 1px solid #eee;
+              font-size: 18px;
+              font-weight: 700;
+              color: #ff4a1a;
+            }
+
+            .inv-total-row .inv-total-amt {
+              font-size: 18px !important;
+              font-weight: 700 !important;
+              color: #ff4a1a !important;
+            }
+
+            .inv-loyalty-foot {
+              font-size: 10px;
+              color: #6b7280;
+              text-align: right;
+              padding-top: 4px;
+            }
+
+            .inv-num { font-variant-numeric: tabular-nums; }
+
+            .inv-payment {
+              border-top: 1px solid #eee;
+              padding: 6px 0;
+              margin-top: 6px;
+              font-size: 12px;
+              color: #1f2937;
+            }
+
+            .inv-pay-label { font-weight: 600; color: #374151; }
+            .inv-pay-total { font-weight: 700; color: #ff4a1a; }
+
+            .inv-footer {
+              border-top: 1px solid #eee;
+              padding-top: 6px;
+              margin-top: 6px;
+              text-align: center;
+            }
+
+            .inv-footer-terms {
+              font-size: 10px;
+              color: #4b5563;
+              line-height: 1.4;
+              max-width: 36rem;
+              margin: 0 auto 6px;
+            }
+
+            .inv-footer-line {
+              font-size: 10px;
+              color: #6b7280;
+              margin: 0;
+            }
+
+            .inv-footer-support {
+              font-size: 10px;
+              color: #9ca3af;
+              margin: 4px 0 0 0;
+            }
+
+            .receipt-item {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 0.25rem;
+            }
+
+            .flex { display: flex; }
+            .justify-between { justify-content: space-between; }
+            .items-center { align-items: center; }
+            .text-right { text-align: right; }
+            .font-mono { font-family: ui-monospace, monospace; }
+
+            svg, .no-print, button, .edit-button {
+              display: none !important;
+            }
+
             .receipt-header,
-            .payment-summary,
+            .payment-method-section,
             .terms-section,
-            .payment-method-section {
+            .inv-summary,
+            .inv-items-wrap {
               page-break-inside: avoid !important;
               break-inside: avoid !important;
             }
-            
-            tbody {
-              page-break-inside: auto;
-            }
-            
+
             @media print {
               body {
                 margin: 0;
                 padding: 0;
               }
-              
-              .receipt-container {
-                padding: 5mm;
+
+              html, body {
+                height: auto;
               }
-              
+
+              .invoice-container,
+              .receipt-container {
+                max-width: 100%;
+                padding: 0;
+              }
+
               * {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+
+              table, thead, tbody, tr, td, th {
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+              }
+
+              tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
               }
             }
           </style>
         </head>
         <body>
-          <div class="receipt-container">
+          <div class="invoice-container receipt-container">
             ${printContent}
           </div>
           <script>

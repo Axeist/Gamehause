@@ -33,11 +33,9 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ customer }) => {
   };
 
   return (
-    <div className="mb-4">
-      <p className="font-medium text-sm">Customer: {customer.name}</p>
-      <p className="text-xs text-gray-600">{customer.phone}</p>
-      
-      <div className="mt-2 border-t pt-2">
+    <div className="mb-4 no-print">
+      <p className="text-xs font-semibold text-gray-700 mb-2">Membership &amp; loyalty</p>
+      <div className="border-t border-[#eee] pt-2">
         <p className="text-xs flex items-center">
           <Award className="h-3 w-3 mr-1" />
           <span className="font-medium">Status:</span> 
