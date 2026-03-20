@@ -39,10 +39,14 @@ const StationInfo: React.FC<StationInfoProps> = ({
   const effectivePlayerCount: number | undefined = (() => {
     if (!isPs5 || !station.isOccupied || !station.currentSession) return undefined;
     if (sessionPlayerCount !== undefined) return sessionPlayerCount;
-    const totalRate = station.currentSession.originalRate ?? station.currentSession.hourlyRate;
-    if (!totalRate || station.hourlyRate <= 0) return undefined;
+    if (station.hourlyRate <= 0) return undefined;
+    const sess = station.currentSession;
+    const sessionRate = sess.hourlyRate ?? station.hourlyRate;
+    const origRate = sess.originalRate;
+    // Use the higher value — robust to old sessions where originalRate = per-player base
+    const totalRate = Math.max(sessionRate, origRate ?? sessionRate);
     const derived = Math.round(totalRate / station.hourlyRate);
-    return derived >= 2 ? derived : 1;
+    return derived >= 1 ? derived : undefined;
   })();
 
   const accentColor = isPoolTable
@@ -106,27 +110,21 @@ const StationInfo: React.FC<StationInfoProps> = ({
           <CurrencyDisplay amount={station.hourlyRate} />
         </div>
 
-        {/* PS5 player info — always visible */}
+        {/* PS5 player info — always visible for multi-player */}
         {isPs5 && (
-          station.isOccupied && effectivePlayerCount !== undefined ? (
-            // Occupied: show active player breakdown
-            <div className={`flex justify-between items-center text-xs rounded-md px-2 py-1.5 ${
-              effectivePlayerCount > 1
-                ? 'bg-[#9b87f5]/15 border border-[#9b87f5]/30 text-[#9b87f5]'
-                : 'bg-white/5 border border-white/10 text-gray-400'
-            }`}>
+          station.isOccupied && effectivePlayerCount !== undefined && effectivePlayerCount > 1 ? (
+            // Occupied multi-player: show active player breakdown
+            <div className="flex justify-between items-center text-xs rounded-md px-2 py-1.5 bg-[#9b87f5]/15 border border-[#9b87f5]/30 text-[#9b87f5]">
               <span className="flex items-center gap-1.5 font-medium">
                 <Users className="h-3.5 w-3.5" />
-                {effectivePlayerCount} player{effectivePlayerCount !== 1 ? 's' : ''} active
+                {effectivePlayerCount} players active
               </span>
-              {effectivePlayerCount > 1 && (
-                <span className="text-[#9b87f5]/80">
-                  {effectivePlayerCount} × ₹{perPlayerRate}/hr
-                </span>
-              )}
+              <span className="text-[#9b87f5]/80">
+                {effectivePlayerCount} × ₹{perPlayerRate}/hr
+              </span>
             </div>
-          ) : !station.isOccupied && station.maxPlayers ? (
-            // Available: show capacity
+          ) : !station.isOccupied && station.maxPlayers && station.maxPlayers > 1 ? (
+            // Available: show capacity hint
             <div className="flex justify-between items-center text-xs text-[#9b87f5]/70">
               <span className="flex items-center gap-1">
                 <Users className="h-3 w-3" />

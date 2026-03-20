@@ -92,16 +92,18 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const session = station.currentSession;
   const hasCoupon = session?.couponCode;
   const sessionRate = session?.hourlyRate ?? station.hourlyRate;
-  const originalRate = session?.originalRate;   // pre-coupon total (already player-multiplied)
+  const originalRate = session?.originalRate;
   const sessionPlayerCount = session?.playerCount;
   const isDiscounted = hasCoupon && originalRate !== undefined && originalRate > sessionRate;
 
-  // Derive player count from rates for backwards-compat (older sessions without playerCount stored)
+  // Derive player count from rates — robust to old sessions where originalRate was
+  // wrongly stored as per-player base (₹150) instead of the total (₹600).
+  // Using Math.max(sessionRate, originalRate) always gives the highest = pre-discount total.
   const effectivePlayerCount: number | undefined = (() => {
     if (!isPs5 || !station.isOccupied || !session) return undefined;
     if (sessionPlayerCount !== undefined) return sessionPlayerCount;
-    const totalRate = originalRate ?? sessionRate;
-    if (!totalRate || station.hourlyRate <= 0) return undefined;
+    if (station.hourlyRate <= 0) return undefined;
+    const totalRate = Math.max(sessionRate, originalRate ?? sessionRate);
     const derived = Math.round(totalRate / station.hourlyRate);
     return derived >= 1 ? derived : undefined;
   })();
@@ -162,13 +164,13 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
             <div className="absolute w-full h-[1px] top-10 bg-gradient-to-r from-transparent via-[#9b87f5]/30 to-transparent" />
             <div className="absolute left-4 bottom-3 w-1 h-1 rounded-full bg-cuephoria-orange animate-pulse-soft" />
             <div className="absolute left-7 bottom-3 w-1 h-1 rounded-full bg-[#9b87f5] animate-pulse-soft delay-100" />
-            {/* Players badge — always visible, changes text based on state */}
-            {station.isOccupied && effectivePlayerCount !== undefined ? (
+            {/* Players badge — only show when meaningful */}
+            {station.isOccupied && effectivePlayerCount !== undefined && effectivePlayerCount > 1 ? (
               <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-[#9b87f5]/30 border border-[#9b87f5]/50 text-[#9b87f5] text-[10px] font-bold px-2 py-0.5 rounded-full">
                 <Users className="h-2.5 w-2.5" />
                 {effectivePlayerCount} players
               </div>
-            ) : !station.isOccupied && station.maxPlayers ? (
+            ) : !station.isOccupied && station.maxPlayers && station.maxPlayers > 1 ? (
               <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-[#9b87f5]/20 border border-[#9b87f5]/30 text-[#9b87f5] text-[10px] font-semibold px-2 py-0.5 rounded-full">
                 <Users className="h-2.5 w-2.5" />
                 Up to {station.maxPlayers} players
