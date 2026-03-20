@@ -3643,9 +3643,25 @@ export default function BookingManagement() {
                                                     <MapPin className="h-4 w-4 text-blue-500" />
                                                     <div>
                                                       <div className="font-semibold text-sm">{stationName}</div>
-                                                      <Badge variant="outline" className="text-xs mt-0.5">
-                                                        {getStationTypeLabel(stationType)}
-                                                      </Badge>
+                                                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                                        <Badge variant="outline" className="text-xs">
+                                                          {getStationTypeLabel(stationType)}
+                                                        </Badge>
+                                                        {/* Player count badge — PS5 only */}
+                                                        {stationType === 'ps5' && (() => {
+                                                          const playerCounts = [...new Set(stationBookings.map(b => b.player_count ?? 1))];
+                                                          const allSame = playerCounts.length === 1;
+                                                          const maxCount = Math.max(...playerCounts);
+                                                          if (maxCount > 1) {
+                                                            return (
+                                                              <Badge className="text-xs bg-[#9b87f5]/20 text-[#9b87f5] border border-[#9b87f5]/30">
+                                                                👥 {allSame ? `${maxCount} players` : `${Math.min(...playerCounts)}–${maxCount} players`}
+                                                              </Badge>
+                                                            );
+                                                          }
+                                                          return null;
+                                                        })()}
+                                                      </div>
                                                     </div>
                                                   </div>
                                                   <div className="flex items-center gap-3">
@@ -3717,13 +3733,25 @@ export default function BookingManagement() {
                                                         </div>
 
                                                         {/* Pricing */}
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                          {/* Player count for PS5 */}
+                                                          {booking.station.type === 'ps5' && (booking.player_count ?? 1) > 1 && (
+                                                            <Badge className="text-xs bg-[#9b87f5]/15 text-[#9b87f5] border border-[#9b87f5]/30">
+                                                              👥 {booking.player_count}p
+                                                            </Badge>
+                                                          )}
                                                           {booking.original_price && booking.original_price !== booking.final_price && (
                                                             <span className="text-xs text-muted-foreground line-through">
                                                               ₹{booking.original_price}
                                                             </span>
                                                           )}
                                                           <span className="font-semibold text-sm">₹{booking.final_price || 0}</span>
+                                                          {/* Per-player rate for PS5 multi-player bookings */}
+                                                          {booking.station.type === 'ps5' && (booking.player_count ?? 1) > 1 && booking.original_price && booking.duration && (
+                                                            <span className="text-xs text-muted-foreground">
+                                                              ({booking.player_count} × ₹{Math.round(booking.original_price / (booking.player_count ?? 1) / (booking.duration / 60))}/hr)
+                                                            </span>
+                                                          )}
                                                           {booking.discount_percentage && (
                                                             <Badge variant="destructive" className="text-xs">
                                                               {Math.round(booking.discount_percentage)}% OFF
