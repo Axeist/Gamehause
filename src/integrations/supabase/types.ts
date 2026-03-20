@@ -202,6 +202,7 @@ export type Database = {
           id: string
           notes: string | null
           original_price: number | null
+          player_count: number
           start_time: string
           station_id: string
           status: string
@@ -221,6 +222,7 @@ export type Database = {
           id?: string
           notes?: string | null
           original_price?: number | null
+          player_count?: number
           start_time: string
           station_id: string
           status?: string
@@ -240,6 +242,7 @@ export type Database = {
           id?: string
           notes?: string | null
           original_price?: number | null
+          player_count?: number
           start_time?: string
           station_id?: string
           status?: string
@@ -1358,6 +1361,7 @@ export type Database = {
           is_public_booking: boolean
           is_controller: boolean | null
           is_occupied: boolean
+          max_players: number | null
           name: string
           parent_station_id: string | null
           type: string
@@ -1371,6 +1375,7 @@ export type Database = {
           is_public_booking?: boolean
           is_controller?: boolean | null
           is_occupied?: boolean
+          max_players?: number | null
           name: string
           parent_station_id?: string | null
           type: string
@@ -1384,6 +1389,7 @@ export type Database = {
           is_public_booking?: boolean
           is_controller?: boolean | null
           is_occupied?: boolean
+          max_players?: number | null
           name?: string
           parent_station_id?: string | null
           type?: string

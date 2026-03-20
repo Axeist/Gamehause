@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Monitor, GamepadIcon, Table2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Monitor, GamepadIcon, Table2, Users } from 'lucide-react';
 
 interface Station {
   id: string;
@@ -9,12 +10,15 @@ interface Station {
   type: 'ps5' | '8ball' | 'foosball';
   hourly_rate: number;
   image_url?: string | null;
+  max_players?: number | null;
 }
 
 interface StationSelectorProps {
   stations: Station[];
   selectedStations: string[];
   onStationToggle: (stationId: string) => void;
+  playerCounts?: Record<string, number>;
+  onPlayerCountChange?: (stationId: string, delta: number) => void;
   loading?: boolean;
 }
 
@@ -22,7 +26,9 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
   stations,
   selectedStations,
   onStationToggle,
-  loading = false
+  playerCounts = {},
+  onPlayerCountChange,
+  loading = false,
 }) => {
   const getStationIcon = (type: string) => {
     switch (type) {
@@ -38,7 +44,7 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
   const getStationTypeLabel = (type: string) => {
     switch (type) {
       case 'ps5':
-        return 'PlayStation';
+        return 'PlayStation 5';
       case 'foosball':
         return 'Foosball Table';
       default:
@@ -57,8 +63,15 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
     }
   };
 
-  const getPriceDisplay = (station: Station) => {
-    return `₹${station.hourly_rate}/hour`;
+  const getPriceDisplay = (station: Station, count: number) => {
+    if (station.type === 'ps5') {
+      const total = station.hourly_rate * count;
+      if (count > 1) {
+        return `₹${station.hourly_rate}/hr × ${count} = ₹${total}/hr`;
+      }
+      return `₹${station.hourly_rate}/hr per player`;
+    }
+    return `₹${station.hourly_rate}/hr`;
   };
 
   const getFallbackImageSrc = (station: Station): string | null => {
@@ -88,22 +101,26 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
         const Icon = getStationIcon(station.type);
         const isSelected = selectedStations.includes(station.id);
         const imageSrc = station.image_url ?? getFallbackImageSrc(station);
-        
+        const isPs5 = station.type === 'ps5';
+        const maxP = station.max_players ?? (isPs5 ? 4 : 1);
+        const count = playerCounts[station.id] ?? 1;
+
         return (
           <Card
             key={station.id}
-            className={`cursor-pointer transition-all duration-200 hover:shadow-md border-white/10 bg-white/5 backdrop-blur-sm ${
-              isSelected 
-                ? 'ring-2 ring-cuephoria-purple bg-cuephoria-purple/10' 
-                : 'hover:bg-white/10'
+            className={`transition-all duration-200 hover:shadow-md border-white/10 bg-white/5 backdrop-blur-sm ${
+              isSelected
+                ? 'ring-2 ring-cuephoria-purple bg-cuephoria-purple/10'
+                : 'hover:bg-white/10 cursor-pointer'
             }`}
-            onClick={() => onStationToggle(station.id)}
+            onClick={!isSelected ? () => onStationToggle(station.id) : undefined}
           >
             <CardHeader className="pb-3">
               {imageSrc && (
                 <div
-                  className="relative mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/25"
-                  style={{ aspectRatio: "16 / 9" }}
+                  className="relative mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/25 cursor-pointer"
+                  onClick={() => onStationToggle(station.id)}
+                  style={{ aspectRatio: '16 / 9' }}
                 >
                   <img
                     src={imageSrc}
@@ -115,29 +132,83 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                 </div>
               )}
-              <div className="flex items-center justify-between">
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => onStationToggle(station.id)}
+              >
                 <CardTitle className="text-base flex items-center gap-2 text-white">
                   <Icon className="h-5 w-5" />
                   {station.name}
                 </CardTitle>
-                {isSelected && (
+                {isSelected ? (
                   <Badge variant="default" className="text-xs bg-cuephoria-purple text-white">
                     Selected
                   </Badge>
-                )}
+                ) : isPs5 && maxP > 1 ? (
+                  <Badge variant="secondary" className="text-xs flex items-center gap-1 bg-[#9b87f5]/15 text-[#9b87f5] border-[#9b87f5]/20">
+                    <Users className="h-3 w-3" />
+                    Up to {maxP}
+                  </Badge>
+                ) : null}
               </div>
             </CardHeader>
+
             <CardContent className="pt-0">
               <div className="space-y-2">
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className={`text-xs border ${getStationTypeBadgeColor(station.type)}`}
                 >
                   {getStationTypeLabel(station.type)}
                 </Badge>
+
                 <div className="text-sm font-medium text-cuephoria-lightpurple">
-                  {getPriceDisplay(station)}
+                  {getPriceDisplay(station, isSelected && isPs5 ? count : 1)}
                 </div>
+
+                {/* Player count picker — only when selected and PS5 */}
+                {isSelected && isPs5 && onPlayerCountChange && (
+                  <div
+                    className="flex items-center gap-3 pt-2 border-t border-white/10 mt-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      Players:
+                    </span>
+                    <div className="flex items-center gap-2 ml-auto">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6 text-xs rounded-full border-white/20"
+                        onClick={() => onPlayerCountChange(station.id, -1)}
+                        disabled={count <= 1}
+                      >
+                        −
+                      </Button>
+                      <span className="text-base font-bold text-white w-5 text-center">{count}</span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-6 w-6 text-xs rounded-full border-white/20"
+                        onClick={() => onPlayerCountChange(station.id, 1)}
+                        disabled={count >= maxP}
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Deselect button when selected */}
+                {isSelected && (
+                  <button
+                    className="w-full mt-1 text-xs text-muted-foreground hover:text-red-400 transition-colors"
+                    onClick={(e) => { e.stopPropagation(); onStationToggle(station.id); }}
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             </CardContent>
           </Card>

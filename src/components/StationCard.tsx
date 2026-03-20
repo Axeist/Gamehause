@@ -129,6 +129,12 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
             <div className="absolute w-full h-[1px] top-10 bg-gradient-to-r from-transparent via-[#9b87f5]/30 to-transparent"></div>
             <div className="absolute left-4 bottom-3 w-1 h-1 rounded-full bg-cuephoria-orange animate-pulse-soft"></div>
             <div className="absolute left-7 bottom-3 w-1 h-1 rounded-full bg-[#9b87f5] animate-pulse-soft delay-100"></div>
+            {station.maxPlayers && !station.isOccupied && (
+              <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-[#9b87f5]/20 border border-[#9b87f5]/30 text-[#9b87f5] text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                <TrendingDown className="h-2.5 w-2.5" />
+                Up to {station.maxPlayers} players
+              </div>
+            )}
           </>
         )}
 

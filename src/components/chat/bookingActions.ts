@@ -8,6 +8,7 @@ export type StationLite = {
   name: string;
   type: StationType;
   hourly_rate: number;
+  max_players?: number | null;
 };
 
 export type TimeSlot = {
@@ -52,7 +53,9 @@ export async function lookupCustomerByPhone(phone: string): Promise<CustomerLite
 export async function fetchStations(): Promise<StationLite[]> {
   const { data, error } = await supabase
     .from("stations")
-    .select("id, name, type, hourly_rate")
+    .select("id, name, type, hourly_rate, max_players, is_public_booking")
+    .eq("is_public_booking", true)
+    .or("is_controller.is.null,is_controller.eq.false")
     .order("name");
   if (error) throw error;
 
@@ -61,6 +64,7 @@ export async function fetchStations(): Promise<StationLite[]> {
     name: s.name,
     type: s.type === "ps5" || s.type === "8ball" || s.type === "foosball" ? s.type : "ps5",
     hourly_rate: Number(s.hourly_rate ?? 0),
+    max_players: s.max_players ?? null,
   }));
 
   return normalized;

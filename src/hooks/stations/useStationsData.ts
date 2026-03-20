@@ -18,10 +18,11 @@ export const useStationsData = () => {
     setStationsError(null);
     
     try {
-      // Fetch stations from Supabase
+      // Fetch stations from Supabase — exclude individual controller rows (soft-hidden)
       const { data, error } = await supabase
         .from('stations')
-        .select('*');
+        .select('*')
+        .or('is_controller.is.null,is_controller.eq.false');
         
       if (error) {
         console.error('Error fetching stations:', error);
@@ -79,7 +80,8 @@ export const useStationsData = () => {
             imageUrl: item.image_url ?? null,
             isPublicBooking: item.is_public_booking ?? true,
             isOccupied: item.is_occupied,
-            currentSession: currentSession
+            currentSession: currentSession,
+            maxPlayers: item.max_players ?? null,
           };
         });
         

@@ -43,6 +43,7 @@ export interface Station {
   isPublicBooking?: boolean;
   isOccupied: boolean;
   currentSession: Session | null;
+  maxPlayers?: number | null;
 }
 
 export interface Session {

@@ -55,6 +55,7 @@ interface Booking {
   status_updated_by?: string | null;
   payment_mode?: string | null;
   payment_txn_id?: string | null;
+  player_count?: number;
   station: {
     name: string;
     type: string;
@@ -472,6 +473,7 @@ export default function BookingManagement() {
         status_updated_by,
         payment_mode,
         payment_txn_id,
+        player_count,
         station_id,
         customer_id,
         created_at,
@@ -529,6 +531,7 @@ export default function BookingManagement() {
         status_updated_by: b.status_updated_by ?? null,
         payment_mode: b.payment_mode ?? null,
         payment_txn_id: b.payment_txn_id ?? null,
+        player_count: (b as any).player_count ?? 1,
         created_at: b.created_at,
         booking_views: b.booking_views || [],
         station: { name: station?.name || 'Unknown', type: station?.type || 'unknown' },
@@ -873,6 +876,11 @@ export default function BookingManagement() {
                                 </div>
                                 <div className="text-xs text-muted-foreground truncate">
                                   {booking.station.name}
+                                  {booking.station.type === 'ps5' && (booking.player_count ?? 1) > 1 && (
+                                    <span className="ml-1 text-[#9b87f5] font-semibold">
+                                      · {booking.player_count}p
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="text-xs font-medium flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
@@ -929,7 +937,14 @@ export default function BookingManagement() {
                                 </div>
                                 <div>
                                   <span className="text-muted-foreground">Station:</span>
-                                  <div className="font-medium">{booking.station.name}</div>
+                                  <div className="font-medium">
+                                    {booking.station.name}
+                                    {booking.station.type === 'ps5' && (booking.player_count ?? 1) > 1 && (
+                                      <span className="ml-1.5 text-xs text-[#9b87f5] font-semibold">
+                                        {booking.player_count} players
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                                 <div>
                                   <span className="text-muted-foreground">Duration:</span>

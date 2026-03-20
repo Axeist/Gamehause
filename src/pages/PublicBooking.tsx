@@ -67,6 +67,7 @@ interface Station {
   hourly_rate: number;
   is_public_booking?: boolean;
   image_url?: string | null;
+  max_players?: number | null;
 }
 interface TimeSlot {
   start_time: string;
@@ -153,6 +154,7 @@ export default function PublicBooking() {
   const [stations, setStations] = useState<Station[]>([]);
   const [stationType, setStationType] = useState<"all" | StationType>("all");
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
+  const [playerCounts, setPlayerCounts] = useState<Record<string, number>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -451,8 +453,9 @@ export default function PublicBooking() {
     try {
       const { data, error } = await supabase
         .from("stations")
-        .select("id, name, type, hourly_rate, is_public_booking, image_url")
+        .select("id, name, type, hourly_rate, is_public_booking, image_url, max_players")
         .eq("is_public_booking", true)
+        .or("is_controller.is.null,is_controller.eq.false")
         .order("name");
       if (error) throw error;
       // Sort stations: 8ball (Tables) first, then PS5, then Foosball
@@ -463,12 +466,12 @@ export default function PublicBooking() {
         if (aOrder !== bOrder) {
           return aOrder - bOrder;
         }
-        // If same type, sort by name
         return a.name.localeCompare(b.name);
       });
       setStations(sortedStations.map(station => ({
         ...station,
-        type: station.type === "ps5" || station.type === "8ball" || station.type === "foosball" ? station.type : "ps5"
+        type: station.type === "ps5" || station.type === "8ball" || station.type === "foosball" ? station.type : "ps5",
+        max_players: station.max_players ?? null,
       })));
     } catch (e) {
       console.error(e);
@@ -654,11 +657,35 @@ export default function PublicBooking() {
     const station = stations.find(s => s.id === id);
     if (!station) return;
     
-    setSelectedStations((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedStations((prev) => {
+      const isRemoving = prev.includes(id);
+      if (isRemoving) {
+        // Clean up player count for this station
+        setPlayerCounts((counts) => {
+          const next = { ...counts };
+          delete next[id];
+          return next;
+        });
+        return prev.filter((x) => x !== id);
+      }
+      // Default player count for PS5 consoles is 1
+      if (station.type === 'ps5') {
+        setPlayerCounts((counts) => ({ ...counts, [id]: counts[id] ?? 1 }));
+      }
+      return [...prev, id];
+    });
     setSelectedSlot(null);
     setSelectedSlotRange([]);
+  };
+
+  const handlePlayerCountChange = (stationId: string, delta: number) => {
+    const station = stations.find(s => s.id === stationId);
+    if (!station) return;
+    const maxP = station.max_players ?? 4;
+    setPlayerCounts((prev) => ({
+      ...prev,
+      [stationId]: Math.max(1, Math.min(maxP, (prev[stationId] ?? 1) + delta)),
+    }));
   };
 
   async function filterStationsForSlot(slot: TimeSlot) {
@@ -763,8 +790,9 @@ export default function PublicBooking() {
     const stationPrice = stations
       .filter((s) => selectedStations.includes(s.id))
       .reduce((sum, s) => {
-        // Price per 30-minute slot (half of hourly rate)
-        return sum + (s.hourly_rate / 2);
+        // For PS5 consoles, multiply by player count; others are fixed per station
+        const count = s.type === 'ps5' ? (playerCounts[s.id] ?? 1) : 1;
+        return sum + (s.hourly_rate / 2) * count;
       }, 0);
     return stationPrice * numberOfSlots;
   };
@@ -772,11 +800,12 @@ export default function PublicBooking() {
   const calculateDiscount = (): number => {
     if (!appliedCoupon) return 0;
     const numberOfSlots = selectedSlotRange.length > 0 ? selectedSlotRange.length : 1;
-    const hours = numberOfSlots * 0.5; // 30-min slots → hours
+    const hours = numberOfSlots * 0.5;
     const selectedStationsList = stations.filter((s) => selectedStations.includes(s.id));
     let totalDiscount = 0;
     for (const s of selectedStationsList) {
-      const price = (s.hourly_rate / 2) * numberOfSlots;
+      const count = s.type === 'ps5' ? (playerCounts[s.id] ?? 1) : 1;
+      const price = (s.hourly_rate / 2) * count * numberOfSlots;
       if (price <= 0) continue;
       const { discount_type, discount_value } = getCouponDiscountForStation(appliedCoupon, s.id);
       totalDiscount += computeDiscountAmount(price, discount_type, discount_value, hours);
@@ -954,6 +983,8 @@ export default function PublicBooking() {
       const rows: any[] = [];
       slotsToBook.forEach((slot) => {
         selectedStations.forEach((stationId) => {
+          const station = stations.find(s => s.id === stationId);
+          const pCount = station?.type === 'ps5' ? (playerCounts[stationId] ?? 1) : 1;
           rows.push({
             station_id: stationId,
             customer_id: customerId!,
@@ -962,6 +993,7 @@ export default function PublicBooking() {
             end_time: slot.end_time,
             duration: bookingDuration,
             status: "confirmed",
+            player_count: pCount,
             original_price: originalPrice / slotsToBook.length / selectedStations.length,
             discount_percentage: discount > 0 ? (discount / originalPrice) * 100 : null,
             final_price: finalPrice / slotsToBook.length / selectedStations.length,
@@ -1066,6 +1098,7 @@ export default function PublicBooking() {
       const bookingDuration = getBookingDuration(selectedStations, stations);
       const pendingBooking = {
         selectedStations,
+        playerCounts,
         selectedDateISO: format(selectedDate, "yyyy-MM-dd"),
         slots: slotsToBook.map(slot => ({
           start_time: slot.start_time,
@@ -1689,6 +1722,8 @@ export default function PublicBooking() {
                       }
                       selectedStations={selectedStations}
                       onStationToggle={handleStationToggle}
+                      playerCounts={playerCounts}
+                      onPlayerCountChange={handlePlayerCountChange}
                     />
                   </div>
                 )}
@@ -1782,6 +1817,7 @@ export default function PublicBooking() {
                       {selectedStations.map((id) => {
                         const s = stations.find((x) => x.id === id);
                         if (!s) return null;
+                        const pCount = s.type === 'ps5' ? (playerCounts[id] ?? 1) : null;
                         return (
                           <div key={id} className="flex items-center gap-2">
                             <div className="w-5 h-5 rounded-md bg-gamehaus-purple/20 border border-white/10 flex items-center justify-center">
@@ -1795,6 +1831,11 @@ export default function PublicBooking() {
                             </div>
                             <Badge className="bg-white/5 border-white/10 text-gray-200 rounded-full px-2.5 py-1">
                               {s.name}
+                              {pCount !== null && pCount > 0 && (
+                                <span className="ml-1.5 text-[#9b87f5] font-semibold">
+                                  {pCount} player{pCount > 1 ? 's' : ''}
+                                </span>
+                              )}
                             </Badge>
                           </div>
                         );

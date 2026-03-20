@@ -17,8 +17,9 @@ import { format } from 'date-fns';
 interface Station {
   id: string;
   name: string;
-  type: 'ps5' | '8ball';
+  type: 'ps5' | '8ball' | 'foosball';
   hourly_rate: number;
+  max_players?: number | null;
 }
 
 interface TimeSlot {
@@ -37,6 +38,7 @@ interface CustomerInfo {
 export default function BookingPage() {
   const [stations, setStations] = useState<Station[]>([]);
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
+  const [playerCounts, setPlayerCounts] = useState<Record<string, number>>({});
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -68,11 +70,12 @@ export default function BookingPage() {
     try {
       const { data, error } = await supabase
         .from('stations')
-        .select('id, name, type, hourly_rate')
+        .select('id, name, type, hourly_rate, max_players')
+        .or('is_controller.is.null,is_controller.eq.false')
         .order('name');
 
       if (error) throw error;
-      setStations((data || []) as Station[]);
+      setStations((data || []).map(s => ({ ...s, max_players: s.max_players ?? null })) as Station[]);
     } catch (error) {
       console.error('Error fetching stations:', error);
       toast.error('Failed to load stations');
@@ -107,12 +110,33 @@ export default function BookingPage() {
   };
 
   const handleStationToggle = (stationId: string) => {
-    setSelectedStations(prev => 
-      prev.includes(stationId)
-        ? prev.filter(id => id !== stationId)
-        : [...prev, stationId]
-    );
-    setSelectedSlot(null); // Reset slot when stations change
+    setSelectedStations(prev => {
+      const isRemoving = prev.includes(stationId);
+      if (isRemoving) {
+        setPlayerCounts((counts) => {
+          const next = { ...counts };
+          delete next[stationId];
+          return next;
+        });
+        return prev.filter(id => id !== stationId);
+      }
+      const st = stations.find(s => s.id === stationId);
+      if (st?.type === 'ps5') {
+        setPlayerCounts((counts) => ({ ...counts, [stationId]: counts[stationId] ?? 1 }));
+      }
+      return [...prev, stationId];
+    });
+    setSelectedSlot(null);
+  };
+
+  const handlePlayerCountChange = (stationId: string, delta: number) => {
+    const station = stations.find(s => s.id === stationId);
+    if (!station) return;
+    const maxP = station.max_players ?? 4;
+    setPlayerCounts((prev) => ({
+      ...prev,
+      [stationId]: Math.max(1, Math.min(maxP, (prev[stationId] ?? 1) + delta)),
+    }));
   };
 
   const handleSlotSelect = (slot: TimeSlot) => {
@@ -121,11 +145,12 @@ export default function BookingPage() {
 
   const calculateTotalPrice = () => {
     if (selectedStations.length === 0 || !selectedSlot) return 0;
-    
-    const selectedStationObjects = stations.filter(s => selectedStations.includes(s.id));
-    const totalHourlyRate = selectedStationObjects.reduce((sum, station) => sum + station.hourly_rate, 0);
-    
-    return totalHourlyRate; // For 1-hour slots
+    return stations
+      .filter(s => selectedStations.includes(s.id))
+      .reduce((sum, station) => {
+        const count = station.type === 'ps5' ? (playerCounts[station.id] ?? 1) : 1;
+        return sum + station.hourly_rate * count;
+      }, 0);
   };
 
   const handleBookingSubmit = async () => {
@@ -179,17 +204,22 @@ export default function BookingPage() {
       }
 
       // Create bookings for each selected station
-      const bookings = selectedStations.map(stationId => ({
-        station_id: stationId,
-        customer_id: customerId,
-        booking_date: format(selectedDate, 'yyyy-MM-dd'),
-        start_time: selectedSlot.start_time,
-        end_time: selectedSlot.end_time,
-        duration: 60, // 1 hour slots
-        status: 'confirmed',
-        notes: customerInfo.notes || null,
-        final_price: calculateTotalPrice()
-      }));
+      const bookings = selectedStations.map(stationId => {
+        const st = stations.find(s => s.id === stationId);
+        const pCount = st?.type === 'ps5' ? (playerCounts[stationId] ?? 1) : 1;
+        return {
+          station_id: stationId,
+          customer_id: customerId,
+          booking_date: format(selectedDate, 'yyyy-MM-dd'),
+          start_time: selectedSlot.start_time,
+          end_time: selectedSlot.end_time,
+          duration: 60,
+          status: 'confirmed',
+          player_count: pCount,
+          notes: customerInfo.notes || null,
+          final_price: st ? st.hourly_rate * pCount : 0,
+        };
+      });
 
       const { error: bookingError } = await supabase
         .from('bookings')
@@ -201,6 +231,7 @@ export default function BookingPage() {
       
       // Reset form
       setSelectedStations([]);
+      setPlayerCounts({});
       setSelectedSlot(null);
       setCustomerInfo({ name: '', phone: '', email: '', notes: '' });
       setAvailableSlots([]);
@@ -241,6 +272,8 @@ export default function BookingPage() {
                 stations={stations}
                 selectedStations={selectedStations}
                 onStationToggle={handleStationToggle}
+                playerCounts={playerCounts}
+                onPlayerCountChange={handlePlayerCountChange}
               />
             </CardContent>
           </Card>

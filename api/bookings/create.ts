@@ -26,6 +26,7 @@ export default async function handler(req: Request) {
       finalPrice, 
       appliedCoupons,
       orderId,
+      playerCounts = {},
       payment_mode = "venue"
     } = payload;
 
@@ -152,10 +153,11 @@ export default async function handler(req: Request) {
       station_id: stationId,
       customer_id: customerId,
       booking_date: selectedDate,
-      start_time: selectedSlot.start_time, // Fixed field name
-      end_time: selectedSlot.end_time, // Fixed field name
+      start_time: selectedSlot.start_time,
+      end_time: selectedSlot.end_time,
       duration: 60,
       status: "confirmed",
+      player_count: (playerCounts[stationId] ?? 1),
       original_price: originalPrice || 0,
       discount_percentage: discount > 0 ? (discount / originalPrice) * 100 : null,
       final_price: finalPrice || 0,

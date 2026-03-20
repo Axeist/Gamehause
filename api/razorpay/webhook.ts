@@ -194,6 +194,7 @@ async function createBookingFromWebhook(paymentId: string, orderId: string, book
   
   bookingData.selectedStations.forEach((station_id: string) => {
     bookingData.slots.forEach((slot: any) => {
+      const playerCount = (bookingData.playerCounts && bookingData.playerCounts[station_id]) ?? 1;
       rows.push({
         station_id,
         customer_id: customerId!,
@@ -202,6 +203,7 @@ async function createBookingFromWebhook(paymentId: string, orderId: string, book
         end_time: slot.end_time,
         duration: bookingData.duration,
         status: "confirmed",
+        player_count: playerCount,
         original_price: bookingData.pricing.original / totalBookings,
         discount_percentage: bookingData.pricing.discount > 0 
           ? (bookingData.pricing.discount / bookingData.pricing.original) * 100 

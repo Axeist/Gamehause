@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Tag, Clock, User as UserIcon } from 'lucide-react';
+import { Search, Tag, Clock, User as UserIcon, Users } from 'lucide-react';
 import { usePOS, Customer } from '@/context/POSContext';
 import { useToast } from '@/hooks/use-toast';
 import { CurrencyDisplay } from '@/components/ui/currency';
@@ -16,6 +16,8 @@ interface StartSessionDialogProps {
   onOpenChange: (open: boolean) => void;
   stationId: string;
   stationName: string;
+  stationType?: string;
+  maxPlayers?: number | null;
   baseRate: number;
   onConfirm: (customerId: string, customerName: string, finalRate: number, couponCode?: string) => void;
 }
@@ -25,17 +27,25 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
   onOpenChange,
   stationId,
   stationName,
+  stationType,
+  maxPlayers,
   baseRate,
   onConfirm,
 }) => {
   const { customers } = usePOS();
   const { toast } = useToast();
+  const isPs5 = stationType === 'ps5';
+  const playerLimit = maxPlayers ?? (isPs5 ? 4 : 1);
   
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedCouponCode, setSelectedCouponCode] = useState<string>('none');
+  const [playerCount, setPlayerCount] = useState(1);
   const [finalRate, setFinalRate] = useState(baseRate);
   const [coupons, setCoupons] = useState<BookingCoupon[]>([]);
+
+  // Effective base rate after applying player count
+  const effectiveBaseRate = isPs5 ? baseRate * playerCount : baseRate;
 
   const filteredCustomers = customerSearchQuery.trim() === ''
     ? customers.slice(0, 10)
@@ -44,19 +54,25 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
         customer.phone.includes(customerSearchQuery)
       ).slice(0, 10);
 
-  // Load enabled coupons from Settings config when dialog opens
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     getEnabledBookingCoupons()
-      .then((list) => {
-        if (!cancelled) setCoupons(list);
-      })
+      .then((list) => { if (!cancelled) setCoupons(list); })
       .catch(() => {});
     return () => { cancelled = true; };
   }, [open]);
 
-  // Compute final rate: use station override if present, else global discount
+  // Reset player count when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setPlayerCount(1);
+      setSelectedCustomer(null);
+      setSelectedCouponCode('none');
+      setCustomerSearchQuery('');
+    }
+  }, [open]);
+
   const getFinalRate = (price: number, coupon: BookingCoupon | null): number => {
     if (!coupon) return price;
     const { discount_type, discount_value } = getCouponDiscountForStation(coupon, stationId);
@@ -68,10 +84,10 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
     ? null
     : coupons.find((c) => c.code.toUpperCase() === selectedCouponCode.toUpperCase()) ?? null;
 
-  // Recompute final rate when coupon or base rate changes
+  // Recompute final rate when coupon, base rate, or player count changes
   useEffect(() => {
-    setFinalRate(getFinalRate(baseRate, selectedCoupon));
-  }, [selectedCouponCode, baseRate, selectedCoupon, coupons]);
+    setFinalRate(getFinalRate(effectiveBaseRate, selectedCoupon));
+  }, [selectedCouponCode, effectiveBaseRate, selectedCoupon, coupons]);
 
   const handleSelectCustomer = (customer: Customer) => {
     setSelectedCustomer(customer);
@@ -94,10 +110,10 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
       selectedCouponCode !== 'none' ? selectedCouponCode : undefined
     );
     
-    // Reset state
     setSelectedCustomer(null);
     setSelectedCouponCode('none');
     setCustomerSearchQuery('');
+    setPlayerCount(1);
     onOpenChange(false);
   };
 
@@ -105,10 +121,10 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
     setSelectedCustomer(null);
     setSelectedCouponCode('none');
     setCustomerSearchQuery('');
+    setPlayerCount(1);
     onOpenChange(false);
   };
 
-  // Show discount for this station (station-wise override or global); avoid "0% OFF" when station-wise; cap percentage at 100%
   const couponLabel = (c: BookingCoupon): string => {
     const { discount_type, discount_value } = getCouponDiscountForStation(c, stationId);
     const hasStationOverrides = c.station_overrides && Object.keys(c.station_overrides).length > 0;
@@ -121,13 +137,12 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
     return `${c.code} - ${discountText}${c.description ? ` (${c.description})` : ''}`;
   };
 
-  // Effective discount for selected coupon on this station (for display); percentage capped at 100%
   const effectiveDiscountForStation = selectedCoupon
     ? getCouponDiscountForStation(selectedCoupon, stationId)
     : null;
 
-  const appliedDiscountAmount = selectedCoupon && baseRate > 0
-    ? computeDiscountAmount(baseRate, effectiveDiscountForStation!.discount_type, effectiveDiscountForStation!.discount_value)
+  const appliedDiscountAmount = selectedCoupon && effectiveBaseRate > 0
+    ? computeDiscountAmount(effectiveBaseRate, effectiveDiscountForStation!.discount_type, effectiveDiscountForStation!.discount_value)
     : 0;
 
   return (
@@ -139,7 +154,7 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
             Start Session - {stationName}
           </DialogTitle>
           <DialogDescription>
-            Select customer and apply coupon if applicable
+            Select customer{isPs5 ? ', player count,' : ''} and apply coupon if applicable
           </DialogDescription>
         </DialogHeader>
 
@@ -203,17 +218,52 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
                       </span>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedCustomer(null)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedCustomer(null)}>
                     Change
                   </Button>
                 </div>
               </div>
             )}
           </div>
+
+          {/* Player Count — PS5 only */}
+          {isPs5 && (
+            <div className="space-y-3">
+              <Label className="text-base font-medium flex items-center gap-2">
+                <Users className="h-4 w-4 text-cuephoria-purple" />
+                Number of Players
+              </Label>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => setPlayerCount(Math.max(1, playerCount - 1))}
+                  disabled={playerCount <= 1}
+                >
+                  −
+                </Button>
+                <span className="text-2xl font-bold w-8 text-center">{playerCount}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => setPlayerCount(Math.min(playerLimit, playerCount + 1))}
+                  disabled={playerCount >= playerLimit}
+                >
+                  +
+                </Button>
+                <span className="text-sm text-muted-foreground ml-2">
+                  (max {playerLimit})
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                ₹{baseRate}/hr per player × {playerCount} = ₹{effectiveBaseRate}/hr total
+              </p>
+            </div>
+          )}
 
           {/* Coupon Selection */}
           {selectedCustomer && (
@@ -238,9 +288,7 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
               </Select>
 
               {selectedCoupon && selectedCoupon.description && (
-                <p className="text-sm text-muted-foreground">
-                  {selectedCoupon.description}
-                </p>
+                <p className="text-sm text-muted-foreground">{selectedCoupon.description}</p>
               )}
             </div>
           )}
@@ -249,10 +297,23 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
           {selectedCustomer && (
             <div className="border rounded-lg p-4 bg-gradient-to-r from-cuephoria-purple/10 to-transparent">
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Base Rate</span>
-                  <CurrencyDisplay amount={baseRate} className="text-sm" />
-                </div>
+                {isPs5 && playerCount > 1 ? (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Rate per player</span>
+                      <CurrencyDisplay amount={baseRate} className="text-sm" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">{playerCount} players</span>
+                      <CurrencyDisplay amount={effectiveBaseRate} className="text-sm font-medium" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Base Rate</span>
+                    <CurrencyDisplay amount={effectiveBaseRate} className="text-sm" />
+                  </div>
+                )}
 
                 {effectiveDiscountForStation && (
                   <div className="text-xs text-muted-foreground">
@@ -260,11 +321,8 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
                     {effectiveDiscountForStation.discount_value === 0
                       ? 'No discount (as configured)'
                       : effectiveDiscountForStation.discount_type === 'percentage'
-                        ? (effectiveDiscountForStation.discount_value > 100
-                            ? `100% off (configured ${effectiveDiscountForStation.discount_value}%, max 100% applied)`
-                            : `${effectiveDiscountForStation.discount_value}% off`)
+                        ? `${Math.min(effectiveDiscountForStation.discount_value, 100)}% off`
                         : `₹${effectiveDiscountForStation.discount_value} off`}
-                    {effectiveDiscountForStation.discount_value !== 0 && effectiveDiscountForStation.discount_type === 'percentage' && effectiveDiscountForStation.discount_value <= 100 && ' (as configured)'}
                   </div>
                 )}
                 
