@@ -159,19 +159,16 @@ export const useEndSession = ({
       
       console.log("Created cart item for ended session:", sessionCartItem);
       
-      // Update customer's total play time
+      // Update customer's total play time (silently — user doesn't need a toast for this)
       if (customer) {
         const updatedCustomer = {
           ...customer,
           totalPlayTime: (customer.totalPlayTime || 0) + durationMinutes
         };
-        updateCustomer(updatedCustomer);
+        updateCustomer(updatedCustomer, true);
       }
       
-      toast({
-        title: 'Success',
-        description: 'Session ended successfully',
-      });
+      console.log("Session ended, cart item created:", sessionCartItem.name);
       
       return { 
         updatedSession, 

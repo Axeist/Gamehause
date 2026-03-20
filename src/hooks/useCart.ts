@@ -55,17 +55,23 @@ export const useCart = () => {
             : i
         );
         setCart(updatedCart);
-        toast({
-          title: "Item Updated",
-          description: `Increased quantity of ${item.name}`,
-        });
+        // Only show for product items — session items are added programmatically
+        if (item.type !== 'session') {
+          toast({
+            title: "Item Updated",
+            description: `Increased quantity of ${item.name}`,
+          });
+        }
       } else {
         const newItem = { ...item, total: item.quantity * item.price };
         setCart([...cart, newItem]);
-        toast({
-          title: "Item Added",
-          description: `Added ${item.name} to cart`,
-        });
+        // Only show for product items — session items are added programmatically
+        if (item.type !== 'session') {
+          toast({
+            title: "Item Added",
+            description: `Added ${item.name} to cart`,
+          });
+        }
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -131,10 +137,7 @@ export const useCart = () => {
     setDiscountAmount(0);
     setLoyaltyPointsUsedAmount(0);
     resetPaymentInfo();
-    toast({
-      title: "Cart Cleared",
-      description: "All items removed from cart",
-    });
+    // No toast — clearCart is always called programmatically (e.g., on session end)
   };
   
   const setDiscount = (amount: number, type: 'percentage' | 'fixed') => {

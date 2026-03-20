@@ -152,7 +152,7 @@ export interface POSContextType {
   updateStationPublicBooking: (stationId: string, enabled: boolean) => Promise<boolean>;
   
   addCustomer: (customer: Omit<Customer, 'id' | 'createdAt'>) => void;
-  updateCustomer: (customer: Customer) => void;
+  updateCustomer: (customer: Customer, silent?: boolean) => void;
   updateCustomerMembership: (customerId: string, membershipData: {
     membershipPlan?: string;
     membershipDuration?: 'weekly' | 'monthly';

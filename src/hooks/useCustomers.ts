@@ -318,7 +318,7 @@ export const useCustomers = (initialCustomers: Customer[]) => {
   };
   
   // ✅ UPDATED: Update customer with duplicate checking
-  const updateCustomer = async (customer: Customer) => {
+  const updateCustomer = async (customer: Customer, silent = false) => {
     try {
       const existingCustomer = customers.find(c => c.id === customer.id);
       
@@ -408,10 +408,12 @@ export const useCustomers = (initialCustomers: Customer[]) => {
       
       console.log('useCustomers: Customer updated successfully in state and database');
       
-      toast({
-        title: 'Success',
-        description: 'Customer updated successfully',
-      });
+      if (!silent) {
+        toast({
+          title: 'Success',
+          description: 'Customer updated successfully',
+        });
+      }
       
       return customer;
     } catch (error) {
