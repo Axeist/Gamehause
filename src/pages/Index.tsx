@@ -139,7 +139,7 @@ const Index: React.FC = () => {
   const availableStations = liveStations.filter((s) => !s.is_occupied).length;
   const occupiedStations = totalStations - availableStations;
   const scrollToContact = () => {
-    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("find-us")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const groupedStations = (() => {
@@ -704,7 +704,7 @@ const Index: React.FC = () => {
         </div>
 
         {/* Find us – Location, hours, map */}
-        <div className="w-full max-w-6xl mx-auto mb-20 px-4">
+        <div id="find-us" className="w-full max-w-6xl mx-auto mb-20 px-4">
           <div className="rounded-3xl border border-gamehaus-purple/40 bg-gradient-to-br from-black/70 via-gamehaus-purple/15 to-black/70 overflow-hidden backdrop-blur-md relative">
             <div className="absolute inset-0 bg-grid-pattern opacity-[0.06] pointer-events-none" />
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gamehaus-purple/10 blur-[100px] rounded-full pointer-events-none" />
