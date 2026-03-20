@@ -109,14 +109,6 @@ const StationCard: React.FC<StationCardProps> = ({ station }) => {
   const originalRate = session?.originalRate || station.hourlyRate;
   const isDiscounted = hasCoupon && discountedRate !== originalRate;
     
-  const handleDeleteStation = () => {};
-
-
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditDialogOpen(true);
-  };
-
   return (
     <>
       <Card 
