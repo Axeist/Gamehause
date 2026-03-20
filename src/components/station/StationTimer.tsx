@@ -200,32 +200,74 @@ const StationTimer: React.FC<StationTimerProps> = ({ station }) => {
     return null;
   }
 
-  // ✅ NEW: Check if coupon discount is applied
   const hasCoupon = station.currentSession?.couponCode;
   const sessionRate = station.currentSession?.hourlyRate || station.hourlyRate;
-  const isDiscounted = hasCoupon && sessionRate !== station.hourlyRate;
+  const originalRate = station.currentSession?.originalRate;
+  const playerCount = station.currentSession?.playerCount;
+  const perPlayerRate = station.currentSession?.perPlayerRate ?? station.hourlyRate;
+
+  // Has a real coupon discount (originalRate > sessionRate means discount was applied)
+  const isDiscounted = hasCoupon && originalRate !== undefined && originalRate > sessionRate;
+  // Has multiple players (rate was multiplied)
+  const isMultiPlayer = playerCount !== undefined && playerCount > 1;
 
   return (
-    <div className="space-y-4 bg-black/70 p-3 rounded-lg">
+    <div className="space-y-3 bg-black/70 p-3 rounded-lg">
+      {/* Timer */}
       <div className="text-center">
         <span className="font-mono text-2xl bg-black px-4 py-2 rounded-lg text-white font-bold inline-block w-full">
           {formatTimeDisplay()}
         </span>
       </div>
+
+      {/* Current cost */}
       <div className="flex justify-between items-center">
-        <span className="text-white">Current Cost:</span>
+        <span className="text-white text-sm">Current Cost:</span>
         <CurrencyDisplay 
           amount={cost} 
           className={`font-bold text-lg ${isDiscounted ? 'text-orange-400' : 'text-cuephoria-orange'}`} 
         />
       </div>
-      {/* ✅ NEW: Show rate information with discount indicator */}
-      <div className="text-xs text-gray-400 text-center">
-        @ ₹{sessionRate}/hr
-        {isDiscounted && (
-          <span className="ml-1 line-through text-gray-500">
-            ₹{station.hourlyRate}/hr
-          </span>
+
+      {/* Rate breakdown */}
+      <div className="rounded-md bg-white/5 border border-white/10 px-3 py-2 space-y-1 text-xs">
+        {isMultiPlayer ? (
+          <>
+            <div className="flex justify-between text-gray-400">
+              <span>{playerCount} players × ₹{perPlayerRate}/hr</span>
+              <span className="text-gray-300 font-medium">₹{playerCount * perPlayerRate}/hr</span>
+            </div>
+            {isDiscounted && originalRate !== undefined && (
+              <div className="flex justify-between text-orange-400">
+                <span>Coupon ({hasCoupon})</span>
+                <span>−₹{originalRate - sessionRate}/hr</span>
+              </div>
+            )}
+            <div className="flex justify-between border-t border-white/10 pt-1 font-semibold text-white">
+              <span>Effective rate</span>
+              <span>₹{sessionRate}/hr</span>
+            </div>
+          </>
+        ) : isDiscounted && originalRate !== undefined ? (
+          <>
+            <div className="flex justify-between text-gray-400">
+              <span>Base rate</span>
+              <span className="line-through">₹{originalRate}/hr</span>
+            </div>
+            <div className="flex justify-between text-orange-400">
+              <span>Coupon ({hasCoupon})</span>
+              <span>−₹{originalRate - sessionRate}/hr</span>
+            </div>
+            <div className="flex justify-between border-t border-white/10 pt-1 font-semibold text-white">
+              <span>Effective rate</span>
+              <span>₹{sessionRate}/hr</span>
+            </div>
+          </>
+        ) : (
+          <div className="flex justify-between text-gray-400">
+            <span>Rate</span>
+            <span className="text-gray-200">₹{sessionRate}/hr</span>
+          </div>
         )}
       </div>
     </div>

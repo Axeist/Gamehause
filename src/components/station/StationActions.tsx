@@ -10,7 +10,7 @@ import StartSessionDialog from '@/components/StartSessionDialog';
 interface StationActionsProps {
   station: Station;
   customers: Customer[];
-  onStartSession: (stationId: string, customerId: string, hourlyRate?: number, couponCode?: string) => Promise<void>;
+  onStartSession: (stationId: string, customerId: string, hourlyRate?: number, couponCode?: string, originalRate?: number, playerCount?: number) => Promise<void>;
   onEndSession: (stationId: string) => Promise<void>;
 }
 
@@ -33,13 +33,15 @@ const StationActions: React.FC<StationActionsProps> = ({
     customerId: string,
     customerName: string,
     finalRate: number,
-    couponCode?: string
+    couponCode?: string,
+    originalRate?: number,
+    playerCount?: number
   ) => {
     try {
       setIsLoading(true);
-      console.log(`Starting session - Station ID: ${station.id}, Customer ID: ${customerId}, Rate: ${finalRate}, Coupon: ${couponCode || 'none'}`);
+      console.log(`Starting session - Station ID: ${station.id}, Customer ID: ${customerId}, Rate: ${finalRate}, Coupon: ${couponCode || 'none'}, Players: ${playerCount ?? 1}`);
       
-      await onStartSession(station.id, customerId, finalRate, couponCode);
+      await onStartSession(station.id, customerId, finalRate, couponCode, originalRate, playerCount);
       
       setIsStartDialogOpen(false);
       

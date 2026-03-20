@@ -17,7 +17,7 @@ import { format } from 'date-fns';
 interface Station {
   id: string;
   name: string;
-  type: 'ps5' | '8ball' | 'foosball';
+  type: 'ps5' | '8ball' | 'foosball' | 'misc';
   hourly_rate: number;
   max_players?: number | null;
 }

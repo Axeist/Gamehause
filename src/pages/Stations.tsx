@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { usePOS } from '@/context/POSContext';
 import StationCard from '@/components/StationCard';
 import { Card, CardContent } from '@/components/ui/card';
-import { Gamepad2, Plus, Table2 } from 'lucide-react';
+import { Gamepad2, Plus, Table2, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddStationDialog from '@/components/AddStationDialog';
 import PinVerificationDialog from '@/components/PinVerificationDialog';
@@ -12,22 +12,23 @@ const Stations = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openPinDialog, setOpenPinDialog] = useState(false);
 
-  // Separate stations by type
   const ps5Stations = stations.filter(station => station.type === 'ps5');
   const ballStations = stations.filter(station => station.type === '8ball');
   const foosballStations = stations.filter(station => station.type === 'foosball');
+  const miscStations = stations.filter(station => station.type === 'misc');
 
-  // Count active stations
   const activePs5 = ps5Stations.filter(s => s.isOccupied).length;
   const activeBall = ballStations.filter(s => s.isOccupied).length;
   const activeFoosball = foosballStations.filter(s => s.isOccupied).length;
+  const activeMisc = miscStations.filter(s => s.isOccupied).length;
 
-  const handleAddStationClick = () => {
-    setOpenPinDialog(true);
-  };
+  const handleAddStationClick = () => setOpenPinDialog(true);
+  const handlePinSuccess = () => setOpenAddDialog(true);
 
-  const handlePinSuccess = () => {
-    setOpenAddDialog(true);
+  const sortByNumber = (a: { name: string }, b: { name: string }) => {
+    const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
+    const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
+    return numA - numB;
   };
 
   return (
@@ -35,7 +36,7 @@ const Stations = () => {
       <div className="flex items-center justify-between animate-slide-down">
         <h2 className="text-3xl font-bold tracking-tight gradient-text font-heading">Gaming Stations</h2>
         <div className="flex space-x-2">
-          <Button 
+          <Button
             className="bg-cuephoria-purple hover:bg-cuephoria-purple/80"
             onClick={handleAddStationClick}
           >
@@ -44,22 +45,18 @@ const Stations = () => {
         </div>
       </div>
 
-      {/* PIN Verification Dialog */}
-      <PinVerificationDialog 
-        open={openPinDialog} 
+      <PinVerificationDialog
+        open={openPinDialog}
         onOpenChange={setOpenPinDialog}
         onSuccess={handlePinSuccess}
         title="Admin Access Required"
         description="Enter the admin PIN to add a new game station"
       />
 
-      {/* Add Station Dialog */}
-      <AddStationDialog 
-        open={openAddDialog} 
-        onOpenChange={setOpenAddDialog} 
-      />
+      <AddStationDialog open={openAddDialog} onOpenChange={setOpenAddDialog} />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-slide-up">
+      {/* Stats row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-slide-up">
         <Card className="bg-gradient-to-r from-green-900/20 to-green-700/10 border-green-500/30 border animate-fade-in">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -71,7 +68,7 @@ const Stations = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-gradient-to-r from-cuephoria-purple/20 to-cuephoria-lightpurple/20 border-cuephoria-purple/30 border animate-fade-in delay-100">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -83,7 +80,7 @@ const Stations = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-gradient-to-r from-amber-900/20 to-amber-700/10 border-amber-500/30 border animate-fade-in delay-200">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -95,85 +92,100 @@ const Stations = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Card className="bg-gradient-to-r from-slate-800/40 to-slate-700/20 border-slate-600/30 border animate-fade-in delay-300">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Misc / Other</p>
+              <p className="text-2xl font-bold">{activeMisc} / {miscStations.length} Active</p>
+            </div>
+            <div className="rounded-full bg-slate-700/30 p-3">
+              <Wrench className="h-6 w-6 text-slate-400" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-6">
-        {/* Pool Tables Section - First */}
-        <div className="animate-slide-up delay-200">
-          <div className="flex items-center mb-4">
-            <Table2 className="h-5 w-5 text-green-500 mr-2" />
-            <h3 className="text-xl font-semibold font-heading">Pool Tables</h3>
-            <span className="ml-2 bg-green-800/30 text-green-400 text-xs px-2 py-1 rounded-full">
-              {activeBall} active
-            </span>
-          </div>
-          
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-            {ballStations
-              .sort((a, b) => {
-                const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-                const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-                return numA - numB;
-              })
-              .map((station, index) => (
-                <div key={station.id} className="animate-scale-in" style={{animationDelay: `${index * 100}ms`}}>
+        {/* Pool Tables */}
+        {ballStations.length > 0 && (
+          <div className="animate-slide-up delay-200">
+            <div className="flex items-center mb-4">
+              <Table2 className="h-5 w-5 text-green-500 mr-2" />
+              <h3 className="text-xl font-semibold font-heading">Pool Tables</h3>
+              <span className="ml-2 bg-green-800/30 text-green-400 text-xs px-2 py-1 rounded-full">
+                {activeBall} active
+              </span>
+            </div>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+              {ballStations.sort(sortByNumber).map((station, index) => (
+                <div key={station.id} className="animate-scale-in" style={{ animationDelay: `${index * 100}ms` }}>
                   <StationCard station={station} />
                 </div>
-              ))
-            }
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* PlayStation Section - Second */}
-        <div className="animate-slide-up delay-300">
-          <div className="flex items-center mb-4">
-            <Gamepad2 className="h-5 w-5 text-cuephoria-lightpurple mr-2" />
-            <h3 className="text-xl font-semibold font-heading">PlayStation Consoles</h3>
-            <span className="ml-2 bg-cuephoria-purple/20 text-cuephoria-lightpurple text-xs px-2 py-1 rounded-full">
-              {activePs5} active
-            </span>
-          </div>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {ps5Stations
-              .sort((a, b) => {
-                const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-                const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-                return numA - numB;
-              })
-              .map((station, index) => (
-                <div key={station.id} className="animate-scale-in" style={{animationDelay: `${(index + ballStations.length) * 100}ms`}}>
+        {/* PlayStation Consoles */}
+        {ps5Stations.length > 0 && (
+          <div className="animate-slide-up delay-300">
+            <div className="flex items-center mb-4">
+              <Gamepad2 className="h-5 w-5 text-cuephoria-lightpurple mr-2" />
+              <h3 className="text-xl font-semibold font-heading">PlayStation Consoles</h3>
+              <span className="ml-2 bg-cuephoria-purple/20 text-cuephoria-lightpurple text-xs px-2 py-1 rounded-full">
+                {activePs5} active
+              </span>
+            </div>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {ps5Stations.sort(sortByNumber).map((station, index) => (
+                <div key={station.id} className="animate-scale-in" style={{ animationDelay: `${(index + ballStations.length) * 100}ms` }}>
                   <StationCard station={station} />
                 </div>
-              ))
-            }
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Foosball Section - Third */}
-        <div className="animate-slide-up delay-400">
-          <div className="flex items-center mb-4">
-            <Table2 className="h-5 w-5 text-amber-400 mr-2" />
-            <h3 className="text-xl font-semibold font-heading">Foosball Tables</h3>
-            <span className="ml-2 bg-amber-800/30 text-amber-300 text-xs px-2 py-1 rounded-full">
-              {activeFoosball} active
-            </span>
-          </div>
-          
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {foosballStations
-              .sort((a, b) => {
-                const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
-                const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
-                return numA - numB;
-              })
-              .map((station, index) => (
-                <div key={station.id} className="animate-scale-in" style={{animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms`}}>
+        {/* Foosball Tables */}
+        {foosballStations.length > 0 && (
+          <div className="animate-slide-up delay-400">
+            <div className="flex items-center mb-4">
+              <Table2 className="h-5 w-5 text-amber-400 mr-2" />
+              <h3 className="text-xl font-semibold font-heading">Foosball Tables</h3>
+              <span className="ml-2 bg-amber-800/30 text-amber-300 text-xs px-2 py-1 rounded-full">
+                {activeFoosball} active
+              </span>
+            </div>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {foosballStations.sort(sortByNumber).map((station, index) => (
+                <div key={station.id} className="animate-scale-in" style={{ animationDelay: `${(index + ps5Stations.length + ballStations.length) * 100}ms` }}>
                   <StationCard station={station} />
                 </div>
-              ))
-            }
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Misc / Other */}
+        {miscStations.length > 0 && (
+          <div className="animate-slide-up delay-500">
+            <div className="flex items-center mb-4">
+              <Wrench className="h-5 w-5 text-slate-400 mr-2" />
+              <h3 className="text-xl font-semibold font-heading">Misc / Other</h3>
+              <span className="ml-2 bg-slate-700/30 text-slate-300 text-xs px-2 py-1 rounded-full">
+                {activeMisc} active
+              </span>
+            </div>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {miscStations.sort(sortByNumber).map((station, index) => (
+                <div key={station.id} className="animate-scale-in" style={{ animationDelay: `${(index + ps5Stations.length + ballStations.length + foosballStations.length) * 100}ms` }}>
+                  <StationCard station={station} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

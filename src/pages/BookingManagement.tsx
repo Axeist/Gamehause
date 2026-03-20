@@ -1821,8 +1821,8 @@ export default function BookingManagement() {
       hour12: true 
     });
 
-  const getStationTypeLabel = (type: string) => 
-    type === 'ps5' ? 'PlayStation 5' : type === '8ball' ? '8-Ball Pool' : type === 'foosball' ? 'Foosball Table' : type;
+  const getStationTypeLabel = (type: string) =>
+    type === 'ps5' ? 'PlayStation 5' : type === '8ball' ? '8-Ball Pool' : type === 'foosball' ? 'Foosball Table' : type === 'misc' ? 'Misc / Other' : type;
 
   const getDateLabel = (dateString: string) => {
     const date = new Date(dateString);
@@ -2014,6 +2014,8 @@ export default function BookingManagement() {
                       <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="ps5">🎮 PlayStation 5</SelectItem>
                       <SelectItem value="8ball">🎱 8-Ball Pool</SelectItem>
+                      <SelectItem value="foosball">⚽ Foosball</SelectItem>
+                      <SelectItem value="misc">🔧 Misc / Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

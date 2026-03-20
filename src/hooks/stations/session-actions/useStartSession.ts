@@ -20,11 +20,13 @@ export const useStartSession = ({
     stationId: string, 
     customerId: string,
     finalRate?: number,
-    couponCode?: string
+    couponCode?: string,
+    preDiscountRate?: number,   // effective base rate before coupon (perPlayer × count)
+    playerCount?: number
   ): Promise<Session | undefined> => {
     try {
       console.log("🚀 Starting session for station:", stationId, "for customer:", customerId);
-      console.log("🎟️ Coupon details:", { finalRate, couponCode });
+      console.log("🎟️ Coupon details:", { finalRate, couponCode, preDiscountRate, playerCount });
       
       const station = stations.find(s => s.id === stationId);
       if (!station) {
@@ -52,7 +54,10 @@ export const useStartSession = ({
       console.log("🆔 Generated session ID:", sessionId);
       
       const sessionRate = finalRate !== undefined ? finalRate : station.hourlyRate;
-      const originalRate = station.hourlyRate;
+      // originalRate = pre-coupon effective total (playerCount × perPlayerRate)
+      // If not passed, fall back to station.hourlyRate (no multiplier, no coupon scenario)
+      const originalRate = preDiscountRate !== undefined ? preDiscountRate : station.hourlyRate;
+      const perPlayerRate = playerCount && playerCount > 1 ? station.hourlyRate : undefined;
       const discountAmount = originalRate - sessionRate;
       
       console.log("💰 Rate calculation:", {
@@ -68,9 +73,11 @@ export const useStartSession = ({
         customerId,
         startTime,
         hourlyRate: sessionRate,
-        originalRate: originalRate,
-        couponCode: couponCode,
-        discountAmount: discountAmount,
+        originalRate,
+        couponCode,
+        discountAmount,
+        playerCount,
+        perPlayerRate,
       };
       
       console.log("📦 Created new session object:", JSON.stringify(newSession, null, 2));

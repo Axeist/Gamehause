@@ -3,7 +3,7 @@ import React from 'react';
 import { Station } from '@/context/POSContext';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Gamepad2, CircleOff, Table2, UserCheck, User } from 'lucide-react';
+import { Gamepad2, CircleOff, Table2, UserCheck, User, Wrench, Users } from 'lucide-react';
 import { CurrencyDisplay } from '@/components/ui/currency';
 import { Customer } from '@/types/pos.types';
 import { isMembershipActive, getMembershipBadgeText } from '@/utils/membership.utils';
@@ -23,112 +23,132 @@ const StationInfo: React.FC<StationInfoProps> = ({
   onPublicBookingToggle,
   publicBookingUpdating = false,
 }) => {
-  // Different styling based on station type
   const isPoolTable = station.type === '8ball';
   const isFoosballTable = station.type === 'foosball';
+  const isPs5 = station.type === 'ps5';
+  const isMisc = station.type === 'misc';
   const isPublicBooking = station.isPublicBooking !== false;
-  
-  // Check if customer is a member and membership is active
+
   const isMember = customerData ? isMembershipActive(customerData) : false;
   const membershipText = customerData && customerData.isMember ? getMembershipBadgeText(customerData) : 'Non-Member';
-  
+
+  const playerCount = station.currentSession?.playerCount;
+  const perPlayerRate = station.currentSession?.perPlayerRate;
+
+  const accentColor = isPoolTable
+    ? 'text-green-500'
+    : isFoosballTable
+    ? 'text-amber-300'
+    : isMisc
+    ? 'text-slate-300'
+    : 'text-cuephoria-lightpurple';
+
+  const occupiedBadgeClass = 'bg-cuephoria-orange text-white animate-pulse';
+  const availableBadgeClass = isPoolTable
+    ? 'bg-green-500 text-white'
+    : isFoosballTable
+    ? 'bg-amber-500 text-white'
+    : isMisc
+    ? 'bg-slate-500 text-white'
+    : 'bg-cuephoria-lightpurple text-white';
+
   return (
     <>
       <div className="flex justify-between items-center">
         <div className="flex items-center text-lg font-heading">
           {isPoolTable ? (
             <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-800 to-green-900 rounded-md"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-800 to-green-900 rounded-md" />
               <CircleOff className="h-6 w-6 text-green-300 z-10" />
-              <div className="absolute inset-0 border-2 border-green-700 rounded-md"></div>
+              <div className="absolute inset-0 border-2 border-green-700 rounded-md" />
             </div>
           ) : isFoosballTable ? (
             <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-800 to-amber-950 rounded-md"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-800 to-amber-950 rounded-md" />
               <Table2 className="h-6 w-6 text-amber-200 z-10" />
-              <div className="absolute inset-0 border-2 border-amber-700 rounded-md"></div>
+              <div className="absolute inset-0 border-2 border-amber-700 rounded-md" />
+            </div>
+          ) : isMisc ? (
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900 rounded-md" />
+              <Wrench className="h-6 w-6 text-slate-300 z-10" />
+              <div className="absolute inset-0 border-2 border-slate-600 rounded-md" />
             </div>
           ) : (
             <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black rounded-md"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black rounded-md" />
               <Gamepad2 className="h-6 w-6 text-cuephoria-lightpurple z-10" />
-              <div className="absolute bottom-0 h-1 w-8 mx-auto bg-cuephoria-purple rounded-t-lg"></div>
+              <div className="absolute bottom-0 h-1 w-8 mx-auto bg-cuephoria-purple rounded-t-lg" />
             </div>
           )}
-          <span className={`ml-2 font-bold ${isPoolTable ? 'text-green-500' : isFoosballTable ? 'text-amber-300' : 'text-cuephoria-lightpurple'}`}>
-            {station.name}
-          </span>
+          <span className={`ml-2 font-bold ${accentColor}`}>{station.name}</span>
         </div>
-        <Badge 
-          className={`
-            ${station.isOccupied 
-              ? 'bg-cuephoria-orange text-white' 
-              : isPoolTable 
-                ? 'bg-green-500 text-white' 
-                : isFoosballTable
-                  ? 'bg-amber-500 text-white'
-                  : 'bg-cuephoria-lightpurple text-white'
-            } 
-            ${station.isOccupied ? 'animate-pulse' : ''}
-          `}
-        >
+
+        <Badge className={station.isOccupied ? occupiedBadgeClass : availableBadgeClass}>
           {station.isOccupied ? 'Occupied' : 'Available'}
         </Badge>
       </div>
-      
+
       <div className="flex flex-col space-y-2 mt-2">
+        {/* Rate row */}
         <div className="flex justify-between text-sm">
-          <span>Hourly Rate:</span>
+          <span>{isPs5 ? 'Rate / player:' : 'Hourly Rate:'}</span>
           <CurrencyDisplay amount={station.hourlyRate} />
         </div>
 
-        {/* Live on public booking toggle */}
+        {/* PS5 multi-player rate hint when occupied */}
+        {isPs5 && station.isOccupied && playerCount !== undefined && playerCount > 1 && (
+          <div className="flex justify-between text-xs text-cuephoria-lightpurple/80">
+            <span className="flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {playerCount} players × <CurrencyDisplay amount={perPlayerRate ?? station.hourlyRate} className="inline" />
+            </span>
+            <span className="font-semibold">
+              = <CurrencyDisplay amount={(perPlayerRate ?? station.hourlyRate) * playerCount} className="inline" />/hr
+            </span>
+          </div>
+        )}
+
+        {/* Public booking toggle */}
         {onPublicBookingToggle && (
           <div className="flex items-center justify-between gap-3 pt-1">
             <div className="flex items-center gap-2 min-w-0">
-              <span
-                className={`h-2 w-2 rounded-full ${isPublicBooking ? "bg-green-500" : "bg-red-500"}`}
-              />
+              <span className={`h-2 w-2 rounded-full ${isPublicBooking ? 'bg-green-500' : 'bg-red-500'}`} />
               <span className="text-xs text-gray-400 truncate">
-                {isPublicBooking ? "Live on public booking" : "Disabled on public booking"}
+                {isPublicBooking ? 'Live on public booking' : 'Disabled on public booking'}
               </span>
             </div>
             <Switch
               checked={isPublicBooking}
               disabled={publicBookingUpdating}
               onCheckedChange={(checked) => onPublicBookingToggle(checked)}
-              className={publicBookingUpdating ? "opacity-70" : ""}
+              className={publicBookingUpdating ? 'opacity-70' : ''}
             />
           </div>
         )}
-        
+
         {station.isOccupied && station.currentSession && (
           <>
             <div className="flex justify-between text-sm">
               <span>Customer:</span>
               <span className="font-semibold">{customerName}</span>
             </div>
-            
-            {/* Membership indicator */}
+
             <div className="flex justify-between items-center text-sm">
               <span>Status:</span>
-              <Badge 
-                className={`
-                  ${isMember
+              <Badge
+                className={`${
+                  isMember
                     ? 'bg-green-600 text-white border-green-700'
                     : 'bg-gray-600 text-white border-gray-700'
-                  }
-                  flex items-center gap-1
-                `}
+                } flex items-center gap-1`}
               >
                 {isMember ? <UserCheck className="h-3 w-3" /> : <User className="h-3 w-3" />}
                 {membershipText}
               </Badge>
             </div>
             {isMember && (
-              <div className="text-xs text-right mt-0 text-green-500">
-                50% discount applied
-              </div>
+              <div className="text-xs text-right mt-0 text-green-500">50% discount applied</div>
             )}
           </>
         )}

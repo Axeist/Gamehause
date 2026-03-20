@@ -19,7 +19,7 @@ interface StartSessionDialogProps {
   stationType?: string;
   maxPlayers?: number | null;
   baseRate: number;
-  onConfirm: (customerId: string, customerName: string, finalRate: number, couponCode?: string) => void;
+  onConfirm: (customerId: string, customerName: string, finalRate: number, couponCode?: string, originalRate?: number, playerCount?: number) => void;
 }
 
 const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
@@ -107,7 +107,9 @@ const StartSessionDialog: React.FC<StartSessionDialogProps> = ({
       selectedCustomer.id,
       selectedCustomer.name,
       finalRate,
-      selectedCouponCode !== 'none' ? selectedCouponCode : undefined
+      selectedCouponCode !== 'none' ? selectedCouponCode : undefined,
+      effectiveBaseRate,   // pre-coupon total (playerCount × perPlayerRate)
+      isPs5 ? playerCount : undefined
     );
     
     setSelectedCustomer(null);

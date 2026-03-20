@@ -51,7 +51,7 @@ const PublicStations = () => {
         const transformedStations: Station[] = stationsData?.map(item => ({
           id: item.id,
           name: item.name,
-          type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' ? item.type : 'ps5',
+          type: item.type === 'ps5' || item.type === '8ball' || item.type === 'foosball' || item.type === 'misc' ? item.type : 'ps5',
           hourlyRate: item.hourly_rate,
           imageUrl: item.image_url ?? null,
           isPublicBooking: item.is_public_booking ?? true,

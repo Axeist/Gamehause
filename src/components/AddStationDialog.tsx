@@ -15,7 +15,7 @@ import { generateId } from '@/utils/pos.utils';
 
 const stationSchema = z.object({
   name: z.string().min(2, { message: 'Station name must be at least 2 characters.' }),
-  type: z.enum(['ps5', '8ball', 'foosball'], { 
+  type: z.enum(['ps5', '8ball', 'foosball', 'misc'], { 
     required_error: 'Please select a station type.' 
   }),
   hourlyRate: z.coerce.number()
@@ -145,8 +145,9 @@ const AddStationDialog: React.FC<AddStationDialogProps> = ({ open, onOpenChange 
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="ps5">PlayStation 5 Console</SelectItem>
-                      <SelectItem value="8ball">8-Ball Table</SelectItem>
+                      <SelectItem value="8ball">8-Ball Pool Table</SelectItem>
                       <SelectItem value="foosball">Foosball Table</SelectItem>
+                      <SelectItem value="misc">Misc / Other</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

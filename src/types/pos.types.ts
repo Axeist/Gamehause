@@ -37,7 +37,7 @@ export interface Customer {
 export interface Station {
   id: string;
   name: string;
-  type: 'ps5' | '8ball' | 'foosball';
+  type: 'ps5' | '8ball' | 'foosball' | 'misc';
   hourlyRate: number;
   imageUrl?: string | null;
   isPublicBooking?: boolean;
@@ -53,10 +53,12 @@ export interface Session {
   startTime: Date;
   endTime?: Date;
   duration?: number;
-  hourlyRate?: number;          // ADDED: To store the rate used for this session
-  couponCode?: string;          // ADDED: Coupon applied to session
-  originalRate?: number;        // ADDED: Original rate before discount
-  discountAmount?: number;      // ADDED: Amount discounted
+  hourlyRate?: number;          // Final rate used for billing (player-multiplied + coupon-discounted)
+  couponCode?: string;          // Coupon applied to session
+  originalRate?: number;        // Pre-coupon total rate (perPlayerRate × playerCount)
+  discountAmount?: number;      // Amount discounted by coupon
+  playerCount?: number;         // Number of players (PS5 only)
+  perPlayerRate?: number;       // Per-player base hourly rate (PS5 only)
 }
 
 export interface CartItem {
@@ -139,8 +141,8 @@ export interface POSContextType {
   updateCategory: (oldCategory: string, newCategory: string) => void;
   deleteCategory: (category: string) => void;
   
-  // UPDATED: Added hourlyRate and couponCode parameters
-  startSession: (stationId: string, customerId: string, hourlyRate?: number, couponCode?: string) => Promise<void>;
+  // UPDATED: Added originalRate and playerCount parameters for PS5 bifurcation
+  startSession: (stationId: string, customerId: string, hourlyRate?: number, couponCode?: string, originalRate?: number, playerCount?: number) => Promise<void>;
   endSession: (stationId: string) => Promise<void>;
   deleteStation: (stationId: string) => Promise<boolean>;
   checkDeleteBlockers: (stationId: string) => Promise<{ sessions: number; billItems: number; bookings: number }>;
