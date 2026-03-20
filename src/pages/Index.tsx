@@ -139,7 +139,18 @@ const Index: React.FC = () => {
   const availableStations = liveStations.filter((s) => !s.is_occupied).length;
   const occupiedStations = totalStations - availableStations;
   const scrollToContact = () => {
-    document.getElementById("find-us")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById("find-us");
+    if (!target) return;
+
+    const scrollToFindUs = () => {
+      const headerOffset = isMobile ? 88 : 104;
+      const targetTop = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
+    };
+
+    // First scroll immediately, then once more after layout settles (lazy sections above can shift height).
+    scrollToFindUs();
+    window.setTimeout(scrollToFindUs, 320);
   };
 
   const groupedStations = (() => {
