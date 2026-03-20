@@ -53,6 +53,30 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_config: {
+        Row: {
+          id: string
+          is_enabled: boolean
+          spend_threshold: number
+          points_per_threshold: number
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          is_enabled?: boolean
+          spend_threshold?: number
+          points_per_threshold?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          is_enabled?: boolean
+          spend_threshold?: number
+          points_per_threshold?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bill_items: {
         Row: {
           bill_id: string

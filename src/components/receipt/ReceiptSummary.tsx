@@ -3,6 +3,8 @@ import { Bill, Customer } from '@/types/pos.types';
 import { CurrencyDisplay } from '@/components/ui/currency';
 import { Button } from '@/components/ui/button';
 import { Pencil, Save, X } from 'lucide-react';
+import { useLoyaltyConfig } from '@/hooks/useLoyaltyConfig';
+import { calculateLoyaltyPointsEarned } from '@/utils/loyaltyPoints';
 
 interface ReceiptSummaryProps {
   bill: Bill;
@@ -29,12 +31,12 @@ const ReceiptSummary: React.FC<ReceiptSummaryProps> = ({
     upiAmount: bill.upiAmount || 0
   });
 
-  // Calculate loyalty points based on correct formula
-  const calculateLoyaltyPoints = (total: number, isMember: boolean): number => {
-    // Members: 5 points per ₹100 spent
-    // Non-members: 2 points per ₹100 spent
-    const pointsRate = isMember ? 5 : 2;
-    return Math.floor((total / 100) * pointsRate);
+  const { config: loyaltyConfig } = useLoyaltyConfig();
+
+  const loyaltyEarnedForTotal = (total: number) => {
+    const isComplimentary =
+      bill.status === 'complimentary' || bill.paymentMethod === 'complimentary';
+    return calculateLoyaltyPointsEarned(total, loyaltyConfig, { isComplimentary });
   };
 
   const handleEditToggle = () => {
@@ -230,8 +232,8 @@ const ReceiptSummary: React.FC<ReceiptSummaryProps> = ({
 
         {(bill.loyaltyPointsEarned > 0 || customer) && (
           <div className="inv-loyalty-foot">
-            {bill.loyaltyPointsEarned > 0 && <div>Points earned: {bill.loyaltyPointsEarned}</div>}
-            {customer && <div>Balance points: {customer.loyaltyPoints}</div>}
+            <div>Points Earned: {bill.loyaltyPointsEarned}</div>
+            {customer && <div>Total Points: {customer.loyaltyPoints}</div>}
           </div>
         )}
       </div>

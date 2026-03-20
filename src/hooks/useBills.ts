@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Bill, CartItem, Customer, Product } from '@/types/pos.types';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchLoyaltyConfig } from '@/services/loyaltyConfig';
+import { calculateLoyaltyPointsEarned } from '@/utils/loyaltyPoints';
 
 export const useBills = (
   updateCustomer: (customer: Customer) => void,
@@ -9,11 +11,6 @@ export const useBills = (
 ) => {
   const [bills, setBills] = useState<Bill[]>([]);
   const { toast } = useToast();
-
-  const calculateLoyaltyPoints = (total: number, isMember: boolean): number => {
-    const pointsRate = isMember ? 5 : 2;
-    return Math.floor((total / 100) * pointsRate);
-  };
 
   useEffect(() => {
     const loadBills = async () => {
@@ -128,8 +125,14 @@ export const useBills = (
       }
       
       const total = calculateTotal();
-      
-      const loyaltyPointsEarned = status === 'complimentary' ? 0 : calculateLoyaltyPoints(total, customer.isMember);
+
+      const loyaltyConfig = await fetchLoyaltyConfig();
+      const loyaltyPointsEarned =
+        status === 'complimentary'
+          ? 0
+          : calculateLoyaltyPointsEarned(total, loyaltyConfig, {
+              isComplimentary: false,
+            });
 
       console.log('Calculated values:', { subtotal, discountValue, total, loyaltyPointsEarned, status });
 
@@ -315,7 +318,13 @@ export const useBills = (
       }
       
       const total = subtotal - discountValue - loyaltyPointsUsed;
-      const loyaltyPointsEarned = calculateLoyaltyPoints(total, customer.isMember);
+
+      const loyaltyConfig = await fetchLoyaltyConfig();
+      const isComplimentary =
+        originalBill.status === 'complimentary' || originalBill.paymentMethod === 'complimentary';
+      const loyaltyPointsEarned = calculateLoyaltyPointsEarned(total, loyaltyConfig, {
+        isComplimentary,
+      });
 
       const finalPaymentMethod = isSplitPayment ? 'split' : (paymentMethod || originalBill.paymentMethod);
 

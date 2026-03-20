@@ -7,6 +7,7 @@ import { Settings as SettingsIcon, Users, Shield, Trophy, Plus, ExternalLink, Hi
 import TournamentManagement from '@/components/tournaments/TournamentManagement';
 import GeneralSettings from '@/components/settings/GeneralSettings';
 import BookingSettings from '@/components/settings/BookingSettings';
+import LoyaltySettings from '@/components/settings/LoyaltySettings';
 import TournamentLeaderboard from '@/components/tournaments/TournamentLeaderboard';
 import TournamentHistoryDialog from '@/components/tournaments/TournamentHistoryDialog';
 import TournamentImageUpload from '@/components/tournaments/TournamentImageUpload';
@@ -384,6 +385,10 @@ const Settings = () => {
 
         <TabsContent value="booking" className="space-y-4">
           <BookingSettings />
+        </TabsContent>
+
+        <TabsContent value="loyalty" className="space-y-4">
+          <LoyaltySettings />
         </TabsContent>
 
         <TabsContent value="leaderboard" className="space-y-4">

@@ -27,7 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ReceiptItemsProps {
   bill: Bill;
-  onUpdateItems?: (items: CartItem[]) => void;
+  onUpdateItems?: (items: CartItem[]) => void | Promise<void>;
   editable?: boolean;
 }
 

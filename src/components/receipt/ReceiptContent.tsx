@@ -11,6 +11,8 @@ import { Edit2, Save, RotateCcw } from 'lucide-react';
 import { usePOS } from '@/context/POSContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchLoyaltyConfig } from '@/services/loyaltyConfig';
+import { calculateLoyaltyPointsEarned } from '@/utils/loyaltyPoints';
 
 interface BillEditInfo {
   editorName: string;
@@ -75,27 +77,31 @@ const ReceiptContent: React.FC<ReceiptContentProps> = ({
     );
   }
 
-  const handleItemsUpdate = (updatedItems: CartItem[]) => {
-    // Recalculate subtotal based on updated items
+  const handleItemsUpdate = async (updatedItems: CartItem[]) => {
     const subtotal = updatedItems.reduce((sum, item) => sum + item.total, 0);
-    
-    // Recalculate discount value based on type
+
     let discountValue = 0;
     if (bill.discountType === 'percentage') {
       discountValue = subtotal * (bill.discount / 100);
     } else {
       discountValue = bill.discount;
     }
-    
-    // Calculate new total
+
     const total = Math.max(0, subtotal - discountValue - bill.loyaltyPointsUsed);
-    
+    const isComplimentary =
+      bill.status === 'complimentary' || bill.paymentMethod === 'complimentary';
+    const loyaltyConfig = await fetchLoyaltyConfig();
+    const loyaltyPointsEarned = calculateLoyaltyPointsEarned(total, loyaltyConfig, {
+      isComplimentary,
+    });
+
     setBill({
       ...bill,
       items: updatedItems,
       subtotal,
       discountValue,
-      total
+      total,
+      loyaltyPointsEarned,
     });
   };
 

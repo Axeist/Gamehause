@@ -370,15 +370,10 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ className, bill
     }
     
     const total = Math.max(0, subtotal - discountValue - editingLoyaltyPointsUsed);
-    
+
     return { subtotal, discountValue, total };
   };
-  
-  const calculateLoyaltyPointsEarned = (total: number, isMember: boolean) => {
-    const pointsRate = isMember ? 5 : 2;
-    return Math.floor((total / 100) * pointsRate);
-  };
-  
+
   const handleSaveChanges = async () => {
     if (!editingBill || !editingCustomer) return;
     
