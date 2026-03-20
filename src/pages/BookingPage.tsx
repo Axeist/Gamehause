@@ -448,9 +448,12 @@ export default function BookingPage() {
                   <div className="mt-2">
                     <TimeSlotPicker
                       slots={activeGameSlots}
+                      resourceId={activeGame.id}
+                      date={format(selectedDate, 'yyyy-MM-dd')}
                       selectedSlot={activeGameSelection}
                       onSlotSelect={handleSlotSelect}
                       loading={activeGameLoading}
+                      maxSelections={1}
                     />
                   </div>
                 </div>

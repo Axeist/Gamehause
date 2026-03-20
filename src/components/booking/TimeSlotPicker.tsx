@@ -1,26 +1,10 @@
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface TimeSlot {
-  start_time: string; // e.g., "11:00"
-  end_time: string;   // e.g., "12:00"
-  is_available: boolean;
-}
-
-interface TimeSlotPickerProps {
-  slots: TimeSlot[];
-  selectedSlot: TimeSlot | null;
-  selectedSlotRange?: TimeSlot[];
-  onSlotSelect: (slot: TimeSlot, range?: TimeSlot[]) => void;
-  loading?: boolean;
-  payAtVenueEnabled?: boolean;
-}
-
-// Helper to format a "HH:mm" string into a localized time (e.g., 11:00 AM)
-const formatTime = (timeString: string) => {
-  // Safely construct a Date at an arbitrary fixed date with the given time
+const formatTimeLabel = (timeString: string) => {
   const [h, m] = timeString.split(":").map(Number);
   const d = new Date(2000, 0, 1, h || 0, m || 0, 0, 0);
   return d.toLocaleTimeString("en-US", {
@@ -30,80 +14,233 @@ const formatTime = (timeString: string) => {
   });
 };
 
+export interface TimeSlot {
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+  status?: "available" | "booked" | "elapsed";
+}
+
+export type SelectedSlot = TimeSlot & {
+  id: string;
+  resourceId: string;
+  date: string;
+};
+
+export function makeSlotId(
+  resourceId: string,
+  date: string,
+  startTime: string,
+  endTime: string
+): string {
+  return `${resourceId}-${date}-${startTime}-${endTime}`;
+}
+
+function stripToTimeSlot(s: SelectedSlot): TimeSlot {
+  const { id: _id, resourceId: _r, date: _d, ...rest } = s;
+  return rest;
+}
+
+function isSlotDisabled(slot: TimeSlot): boolean {
+  return !slot.is_available || slot.status === "elapsed";
+}
+
+/** Longest contiguous run by time (each end matches next start). */
+function longestContiguousSorted(sorted: TimeSlot[]): TimeSlot[] {
+  if (sorted.length === 0) return [];
+  let best: TimeSlot[] = [];
+  let cur: TimeSlot[] = [sorted[0]];
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i - 1].end_time === sorted[i].start_time) {
+      cur.push(sorted[i]);
+    } else {
+      if (cur.length > best.length) best = cur;
+      cur = [sorted[i]];
+    }
+  }
+  if (cur.length > best.length) best = cur;
+  return best.length ? best : [sorted[0]];
+}
+
+interface TimeSlotPickerProps {
+  slots: TimeSlot[];
+  /** Used in every slot id: `${resourceId}-${date}-${start}-${end}` */
+  resourceId: string;
+  /** yyyy-MM-dd */
+  date: string;
+  selectedSlot: TimeSlot | null;
+  selectedSlotRange?: TimeSlot[];
+  onSlotSelect: (slot: TimeSlot | null, range?: TimeSlot[]) => void;
+  loading?: boolean;
+  payAtVenueEnabled?: boolean;
+  /** When 1, only one slot can be selected (toggle replaces). Default: unlimited. */
+  maxSelections?: number;
+  /** Light: spec colors. Dark: for PublicBooking on dark cards. */
+  variant?: "light" | "dark";
+}
+
 export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
   slots,
+  resourceId,
+  date,
   selectedSlot,
   selectedSlotRange = [],
   onSlotSelect,
   loading = false,
   payAtVenueEnabled = false,
+  maxSelections = Number.POSITIVE_INFINITY,
+  variant = "light",
 }) => {
-  const [startSlot, setStartSlot] = React.useState<TimeSlot | null>(null);
+  const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
+  const lastShiftIndexRef = useRef<number | null>(null);
+  const dragActiveRef = useRef(false);
+  const dragAnchorIndexRef = useRef<number | null>(null);
 
-  // Helper to check if a slot is in the selected range
-  const isInRange = (slot: TimeSlot) => {
-    if (selectedSlotRange.length === 0) return false;
-    return selectedSlotRange.some(s => s.start_time === slot.start_time);
-  };
+  const enrich = useCallback(
+    (slot: TimeSlot): SelectedSlot => ({
+      ...slot,
+      resourceId,
+      date,
+      id: makeSlotId(resourceId, date, slot.start_time, slot.end_time),
+    }),
+    [resourceId, date]
+  );
 
-  // Helper to get consecutive available slots from start to end
-  const getConsecutiveSlots = (start: TimeSlot): TimeSlot[] => {
-    const result: TimeSlot[] = [start];
-    let current = start;
-    
-    while (true) {
-      // Find the next slot that starts where current ends
-      const next = slots.find(s => 
-        s.start_time === current.end_time && 
-        s.is_available
-      );
-      
-      if (!next) break;
-      result.push(next);
-      current = next;
+  const emitParent = useCallback(
+    (next: SelectedSlot[]) => {
+      if (next.length === 0) {
+        onSlotSelect(null, []);
+        return;
+      }
+      const sorted = [...next].sort((a, b) => a.start_time.localeCompare(b.start_time));
+      const plain = sorted.map(stripToTimeSlot);
+      const range = longestContiguousSorted(plain);
+      const first = range[0];
+      if (!first) {
+        onSlotSelect(null, []);
+        return;
+      }
+      onSlotSelect(first, range);
+    },
+    [onSlotSelect]
+  );
+
+  const externalSyncKey = useMemo(() => {
+    const s = selectedSlot
+      ? `${selectedSlot.start_time}|${selectedSlot.end_time}`
+      : "";
+    const r = (selectedSlotRange ?? [])
+      .map((x) => `${x.start_time}|${x.end_time}`)
+      .join(";");
+    return `${resourceId}|${date}|${s}|${r}`;
+  }, [resourceId, date, selectedSlot, selectedSlotRange]);
+
+  useEffect(() => {
+    if (!resourceId || !date) {
+      setSelectedSlots([]);
+      return;
     }
-    
-    return result;
-  };
+    const fromRange =
+      selectedSlotRange.length > 0 ? selectedSlotRange : selectedSlot ? [selectedSlot] : [];
+    setSelectedSlots(fromRange.map((s) => enrich(s)));
+  }, [externalSyncKey, enrich, resourceId, date]);
 
-  const handleSlotClick = (slot: TimeSlot) => {
-    if (!slot.is_available) return;
+  const handleSlotClick = (
+    slot: TimeSlot,
+    index: number,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (isSlotDisabled(slot)) return;
 
-    // Check if clicking on the first slot of an existing range - if so, deselect
-    if (selectedSlotRange.length > 0 && selectedSlotRange[0].start_time === slot.start_time) {
-      // Deselect by passing null and empty range
-      setStartSlot(null);
-      onSlotSelect(null!, []);
+    const slotId = makeSlotId(resourceId, date, slot.start_time, slot.end_time);
+
+    if (e.shiftKey && lastShiftIndexRef.current !== null && maxSelections !== 1) {
+      const from = Math.min(lastShiftIndexRef.current, index);
+      const to = Math.max(lastShiftIndexRef.current, index);
+      const slice = slots.slice(from, to + 1).filter((s) => !isSlotDisabled(s));
+      const enriched = slice.map((s) => enrich(s));
+      flushSync(() => {
+        setSelectedSlots(enriched);
+      });
+      emitParent(enriched);
       return;
     }
 
-    if (!startSlot) {
-      // First click - set as start
-      setStartSlot(slot);
-      onSlotSelect(slot, [slot]);
-    } else {
-      // Second click - check if it's a valid end slot
-      const range = getConsecutiveSlots(startSlot);
-      const endIndex = range.findIndex(s => s.start_time === slot.start_time);
-      
-      if (endIndex >= 0) {
-        // Valid range - select all slots from start to end
-        const selectedRange = range.slice(0, endIndex + 1);
-        onSlotSelect(startSlot, selectedRange);
-      } else {
-        // Invalid - reset and set new start
-        setStartSlot(slot);
-        onSlotSelect(slot, [slot]);
-      }
-    }
+    let next: SelectedSlot[] = [];
+    flushSync(() => {
+      setSelectedSlots((prev) => {
+        const exists = prev.find((s) => s.id === slotId);
+
+        if (exists) {
+          next = prev.filter((s) => s.id !== slotId);
+          return next;
+        }
+
+        if (maxSelections === 1) {
+          next = [enrich(slot)];
+          return next;
+        }
+
+        if (prev.length >= maxSelections) {
+          next = prev;
+          return prev;
+        }
+
+        next = [...prev, enrich(slot)];
+        return next;
+      });
+    });
+    emitParent(next);
+
+    lastShiftIndexRef.current = index;
   };
 
-  React.useEffect(() => {
-    // Reset start slot when selectedSlot changes externally
-    if (!selectedSlot) {
-      setStartSlot(null);
-    }
-  }, [selectedSlot]);
+  const clearSelection = () => {
+    flushSync(() => setSelectedSlots([]));
+    onSlotSelect(null, []);
+    lastShiftIndexRef.current = null;
+  };
+
+  useEffect(() => {
+    const endDrag = () => {
+      dragActiveRef.current = false;
+      dragAnchorIndexRef.current = null;
+    };
+    window.addEventListener("mouseup", endDrag);
+    window.addEventListener("blur", endDrag);
+    return () => {
+      window.removeEventListener("mouseup", endDrag);
+      window.removeEventListener("blur", endDrag);
+    };
+  }, []);
+
+  const applyDragRange = (fromIdx: number, toIdx: number) => {
+    if (maxSelections === 1) return;
+    const from = Math.min(fromIdx, toIdx);
+    const to = Math.max(fromIdx, toIdx);
+    const slice = slots.slice(from, to + 1).filter((s) => !isSlotDisabled(s));
+    const enriched = slice.map((s) => enrich(s));
+    flushSync(() => {
+      setSelectedSlots(enriched);
+    });
+    emitParent(enriched);
+  };
+
+  const onSlotMouseDown = (
+    slot: TimeSlot,
+    index: number,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (e.button !== 0 || isSlotDisabled(slot)) return;
+    dragActiveRef.current = true;
+    dragAnchorIndexRef.current = index;
+    lastShiftIndexRef.current = index;
+  };
+
+  const onSlotMouseEnter = (index: number) => {
+    if (!dragActiveRef.current || dragAnchorIndexRef.current === null) return;
+    applyDragRange(dragAnchorIndexRef.current, index);
+  };
 
   if (loading) {
     return (
@@ -112,6 +249,14 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
           <div key={i} className="h-12 bg-muted/50 rounded-md animate-pulse" />
         ))}
       </div>
+    );
+  }
+
+  if (!resourceId || !date) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Select a game or resource to load time slots.
+      </p>
     );
   }
 
@@ -124,81 +269,109 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
     );
   }
 
-  const numberOfSelectedSlots = selectedSlotRange.length > 0 ? selectedSlotRange.length : (selectedSlot ? 1 : 0);
+  const numberOfSelectedSlots = selectedSlots.length;
+  const contiguousForBooking = longestContiguousSorted(
+    [...selectedSlots].sort((a, b) => a.start_time.localeCompare(b.start_time)).map(stripToTimeSlot)
+  );
+  const resolvedRangeForWarning =
+    selectedSlotRange.length > 0
+      ? selectedSlotRange
+      : selectedSlot
+        ? [selectedSlot]
+        : [];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
+        Click a slot to select. Click again to deselect.
+      </p>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={clearSelection}>
+          Clear Selection
+        </Button>
+        {numberOfSelectedSlots > 0 && (
+          <span className="text-xs text-muted-foreground">
+            {numberOfSelectedSlots} slot{numberOfSelectedSlots !== 1 ? "s" : ""} selected
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-primary rounded-sm" />
+          <div className="w-3 h-3 rounded-sm bg-blue-500 border border-blue-600" />
+          <span>Selected</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-sm bg-white border border-gray-200" />
           <span>Available</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-muted border rounded-sm" />
-          <span>Booked</span>
+          <div className="w-3 h-3 rounded-sm bg-gray-200" />
+          <span>Unavailable</span>
         </div>
-        {selectedSlotRange.length > 1 && (
+        {resolvedRangeForWarning.length > 1 && (
           <div className="ml-auto text-xs text-primary font-medium">
-            {selectedSlotRange.length} slots selected ({formatTime(selectedSlotRange[0].start_time)} - {formatTime(selectedSlotRange[selectedSlotRange.length - 1].end_time)})
+            {resolvedRangeForWarning.length} slots (
+            {resolvedRangeForWarning[0].start_time} –{" "}
+            {resolvedRangeForWarning[resolvedRangeForWarning.length - 1].end_time})
           </div>
         )}
       </div>
-      
-      {selectedSlot && ((payAtVenueEnabled && numberOfSelectedSlots < 1) || (!payAtVenueEnabled && numberOfSelectedSlots < 2)) && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-md p-2 text-xs text-amber-400">
-          {payAtVenueEnabled 
-            ? "⚠️ Please select at least 1 slot (30 minutes)."
-            : "⚠️ Minimum booking is 2 slots (60 minutes). Click another consecutive slot to complete your selection."}
-        </div>
-      )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+      {selectedSlot &&
+        ((payAtVenueEnabled && contiguousForBooking.length < 1) ||
+          (!payAtVenueEnabled && contiguousForBooking.length < 2)) && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-md p-2 text-xs text-amber-700 dark:text-amber-400">
+            {payAtVenueEnabled
+              ? "Please select at least 1 slot (30 minutes)."
+              : "Minimum booking is 2 slots (60 minutes). Select another consecutive slot, or use Shift+click / drag across a range."}
+          </div>
+        )}
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 select-none">
         {slots.map((slot, index) => {
-          const isSelected = selectedSlot?.start_time === slot.start_time;
-          const inRange = isInRange(slot);
-          const isStart = startSlot?.start_time === slot.start_time;
+          const slotId = makeSlotId(resourceId, date, slot.start_time, slot.end_time);
+          const booked = isSlotDisabled(slot);
+          const isSelected = selectedSlots.some((s) => s.id === slotId);
 
           return (
-            <Button
-              key={index}
-              variant={
-                inRange 
-                  ? "default" 
-                  : isSelected 
-                    ? "default" 
-                    : slot.is_available 
-                      ? "outline" 
-                      : "ghost"
-              }
-              disabled={!slot.is_available}
-              onClick={() => handleSlotClick(slot)}
-              className={`h-12 flex flex-col items-center justify-center text-xs relative ${
-                !slot.is_available ? "opacity-50 cursor-not-allowed" : ""
-              } ${inRange ? "ring-2 ring-primary" : ""}`}
-              aria-pressed={isSelected || inRange}
+            <button
+              key={slotId}
+              type="button"
+              disabled={booked}
+              onClick={(e) => handleSlotClick(slot, index, e)}
+              onMouseDown={(e) => onSlotMouseDown(slot, index, e)}
+              onMouseEnter={() => onSlotMouseEnter(index)}
+              aria-pressed={isSelected}
+              className={cn(
+                "px-4 py-2 rounded-lg transition-all duration-200 border text-sm font-medium",
+                variant === "light" &&
+                  booked &&
+                  "bg-gray-200 text-gray-400 cursor-not-allowed border-transparent",
+                variant === "light" &&
+                  !booked &&
+                  !isSelected &&
+                  "bg-white hover:bg-gray-100 border-gray-200 text-gray-900",
+                variant === "light" &&
+                  !booked &&
+                  isSelected &&
+                  "bg-blue-500 text-white border-blue-600 shadow-sm",
+                variant === "dark" &&
+                  booked &&
+                  "bg-white/5 text-gray-500 cursor-not-allowed border-white/10",
+                variant === "dark" &&
+                  !booked &&
+                  !isSelected &&
+                  "bg-white/10 hover:bg-white/15 border-white/15 text-gray-100",
+                variant === "dark" &&
+                  !booked &&
+                  isSelected &&
+                  "bg-blue-500 text-white border-blue-600 shadow-sm"
+              )}
             >
-              <div className="font-medium">{formatTime(slot.start_time)}</div>
-              <div className="text-xs opacity-70">{formatTime(slot.end_time)}</div>
-
-              {inRange && !isStart && (
-                <div className="absolute -top-1 -right-1">
-                  <Badge className="text-xs px-1 py-0 text-[10px] leading-3 bg-primary">
-                    +
-                  </Badge>
-                </div>
-              )}
-
-              {!slot.is_available && (
-                <div className="absolute -top-1 -right-1">
-                  <Badge
-                    variant="destructive"
-                    className="text-xs px-1 py-0 text-[10px] leading-3"
-                  >
-                    Booked
-                  </Badge>
-                </div>
-              )}
-            </Button>
+              {formatTimeLabel(slot.start_time)} – {formatTimeLabel(slot.end_time)}
+            </button>
           );
         })}
       </div>

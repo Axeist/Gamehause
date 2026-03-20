@@ -1865,11 +1865,14 @@ export default function PublicBooking() {
                         <div className="mt-2">
                         <TimeSlotPicker
                           slots={availableSlots}
+                          resourceId={activeStationId ?? ''}
+                          date={format(selectedDate, 'yyyy-MM-dd')}
                           selectedSlot={selectedSlot}
                           selectedSlotRange={selectedSlotRange}
                           onSlotSelect={handleSlotSelect}
                           loading={slotsLoading}
                           payAtVenueEnabled={payAtVenueEnabled}
+                          variant="dark"
                         />
                         </div>
                         {bookingStepError && (
