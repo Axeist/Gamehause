@@ -229,15 +229,25 @@ function mergeContiguousBookingsForStaffList(sortedByStart: Booking[]): Booking[
   return out;
 }
 
-/** One “booking” = customer + station + day (not each 30‑min row). */
-function gameStationSessionKey(b: Booking): string {
-  const sid = b.station_id || `${b.station.name}::${b.station.type}`;
-  const cid = b.customer_id || b.customer?.phone || b.customer?.name || '';
-  return `${b.booking_date}::${cid}::${sid}`;
-}
-
-function countGameStationSessions(bookings: Booking[]): number {
-  return new Set(bookings.map(gameStationSessionKey)).size;
+/**
+ * Game-station booking count for the list header: each contiguous block at a station is one booking
+ * (not each 30‑min row). Matches merged rows under each customer in this view.
+ */
+function countGameStationBookingBlocks(bookings: Booking[]): number {
+  if (!bookings.length) return 0;
+  const buckets = new Map<string, Booking[]>();
+  for (const b of bookings) {
+    const ck = customerMergeKey(b) || b.customer?.name || 'Unknown';
+    const stationKey = `${b.station_id || ''}::${b.station.name}::${b.station.type}`;
+    const key = `${b.booking_date}::${ck}::${stationKey}`;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key)!.push(b);
+  }
+  let n = 0;
+  for (const group of buckets.values()) {
+    n += mergeContiguousBookingsForStaffList([...group].sort(compareBookingSlotIntervals)).length;
+  }
+  return n;
 }
 
 const getDateRangeFromPreset = (preset: string) => {
@@ -3852,7 +3862,7 @@ export default function BookingManagement() {
             <CardHeader>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <CardTitle>
-                  Bookings ({countGameStationSessions(bookings)})
+                  Game station bookings ({countGameStationBookingBlocks(bookings)})
                 </CardTitle>
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                   <div className="flex items-center gap-2">
@@ -3922,6 +3932,8 @@ export default function BookingManagement() {
                     .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
                     .map(([date, customerBookings]) => {
                       const isDateExpanded = expandedDates.has(date);
+                      const dayBookingsFlat = Object.values(customerBookings).flat();
+                      const dayStationBookingCount = countGameStationBookingBlocks(dayBookingsFlat);
                       return (
                       <Collapsible key={date} open={isDateExpanded}>
                         <CollapsibleTrigger 
@@ -3936,10 +3948,10 @@ export default function BookingManagement() {
                           <Calendar className="h-4 w-4" />
                           <span className="font-semibold">{getDateLabel(date)}</span>
                           <Badge variant="outline" className="ml-auto">
-                            {countGameStationSessions(Object.values(customerBookings).flat())} bookings
+                            {dayStationBookingCount} station booking{dayStationBookingCount !== 1 ? 's' : ''}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            {Object.values(customerBookings).flat().filter(b => b.coupon_code).length} with coupons
+                            {dayBookingsFlat.filter(b => b.coupon_code).length} with coupons
                           </Badge>
                         </CollapsibleTrigger>
                         
@@ -3949,7 +3961,7 @@ export default function BookingManagement() {
                               Object.entries(customerBookings).map(([customerName, bookingsForCustomer]) => {
                                 const key = `${date}::${customerName}`;
                                 const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
-                                const customerGameSessions = countGameStationSessions(bookingsForCustomer);
+                                const customerStationBookings = countGameStationBookingBlocks(bookingsForCustomer);
 
                                 const isCustomerExpanded = expandedCustomers.has(key);
                                 return (
@@ -3967,7 +3979,8 @@ export default function BookingManagement() {
                                       <span className="font-medium">{customerName}</span>
                                       <div className="ml-auto flex items-center gap-2">
                                         <Badge variant="secondary" className="text-xs">
-                                          {customerGameSessions} booking{customerGameSessions !== 1 ? 's' : ''}
+                                          {customerStationBookings} station booking
+                                          {customerStationBookings !== 1 ? 's' : ''}
                                         </Badge>
                                         {couponBookings.length > 0 && (
                                           <Badge variant="outline" className="text-xs flex items-center gap-1">
