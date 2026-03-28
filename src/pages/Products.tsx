@@ -146,7 +146,7 @@ const ProductsPage: React.FC = () => {
       setFormError(null);
       
       const { 
-        name, price, category, stock, originalPrice, offerPrice, 
+        name, price, category, stock, totalStock, originalPrice, offerPrice, 
         studentPrice, duration, membershipHours, buyingPrice, sellingPrice 
       } = formData;
       
@@ -160,11 +160,37 @@ const ProductsPage: React.FC = () => {
         return;
       }
       
+      const stockNum = Number(stock);
+      const totalStockNum =
+        category === 'membership' ? stockNum : Number(totalStock);
+
+      if (category !== 'membership') {
+        if (!totalStock || Number.isNaN(totalStockNum)) {
+          toast({
+            title: 'Error',
+            description: 'Please enter total stock capacity',
+            variant: 'destructive',
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        if (totalStockNum < stockNum) {
+          toast({
+            title: 'Error',
+            description: 'Total stock must be at least the remaining quantity',
+            variant: 'destructive',
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       const productData: Omit<Product, 'id'> = {
         name,
         price: Number(price),
         category: category as string,
-        stock: Number(stock),
+        stock: stockNum,
+        totalStock: totalStockNum,
       };
       
       // Add the new fields for buying price and profit only for applicable categories

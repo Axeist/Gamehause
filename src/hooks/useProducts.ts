@@ -42,6 +42,7 @@ export const useProducts = () => {
       const newProduct: Product = {
         ...product,
         id: newProductId,
+        totalStock: product.totalStock ?? product.stock,
         sellingPrice: product.sellingPrice || product.price,
         // Note: profit will be calculated by the database trigger
       };

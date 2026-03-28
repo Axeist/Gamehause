@@ -194,8 +194,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {product.category !== 'membership' && (
               <div className="flex justify-between text-sm">
                 <span>Available:</span>
-                <span className={remainingStock <= 10 ? 'text-red-500' : ''}>
-                  {remainingStock} / {product.stock}
+                <span className={remainingStock <= 10 ? 'text-red-500 dark:text-red-400' : 'text-foreground'}>
+                  {remainingStock} / {product.totalStock ?? product.stock}
                 </span>
               </div>
             )}

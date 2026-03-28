@@ -8,7 +8,10 @@ export interface Product {
   sellingPrice?: number;
   profit?: number;
   category: string;
+  /** Units left in inventory (decremented at checkout) */
   stock: number;
+  /** Total capacity for POS display: shown as remaining / total_stock */
+  totalStock: number;
   image?: string;
   originalPrice?: number;
   offerPrice?: number;

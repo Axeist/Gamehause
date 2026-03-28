@@ -62,6 +62,7 @@ export const convertFromSupabaseProduct = (item: any): any => {
     price: item.price,
     category: item.category,
     stock: item.stock,
+    totalStock: item.total_stock != null ? item.total_stock : item.stock,
     image: item.image || undefined,
     originalPrice: item.original_price || undefined,
     offerPrice: item.offer_price || undefined,
@@ -94,7 +95,12 @@ export const convertToSupabaseProduct = (product: any, includeId: boolean = fals
   if (product.price !== undefined) supabaseProduct.price = product.price;
   if (product.category !== undefined) supabaseProduct.category = product.category;
   if (product.stock !== undefined) supabaseProduct.stock = product.stock;
-  
+  if (product.totalStock !== undefined && product.totalStock !== null) {
+    supabaseProduct.total_stock = product.totalStock;
+  } else if (product.stock !== undefined) {
+    supabaseProduct.total_stock = product.stock;
+  }
+
   // Only add optional fields if they are defined (not undefined or null)
   if (product.image !== undefined && product.image !== null) {
     supabaseProduct.image = product.image;
