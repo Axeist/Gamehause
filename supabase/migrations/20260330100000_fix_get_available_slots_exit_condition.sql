@@ -1,4 +1,5 @@
--- Extend bookable window to 2:00 AM (after midnight): add 00:00–00:30 … 01:30–02:00
+-- Fix get_available_slots: `slot_end_time >= '02:00:00'` was wrong because TIME orders
+-- 02:00 before 11:30, so 11:30 >= 02:00 is TRUE and only the first slot was returned.
 CREATE OR REPLACE FUNCTION public.get_available_slots(p_date date, p_station_id uuid, p_slot_duration integer DEFAULT 60)
  RETURNS TABLE(start_time time without time zone, end_time time without time zone, is_available boolean)
  LANGUAGE plpgsql
@@ -39,8 +40,6 @@ BEGIN
 
     RETURN QUERY SELECT curr_time, slot_end_time, is_available;
 
-    -- Must compare to exact 02:00:00. Using >= closing would be wrong: TIME orders
-    -- 02:00 before noon, so e.g. 11:30 >= 02:00 is TRUE and the loop would exit after the first slot.
     EXIT WHEN slot_end_time = last_slot_end;
 
     curr_time := slot_end_time;
