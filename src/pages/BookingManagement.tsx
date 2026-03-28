@@ -30,6 +30,7 @@ import {
 import { PUBLIC_BOOKING_URL } from '@/config/brand';
 import { getPublicBookingEnabled, setPublicBookingEnabled } from '@/services/bookingCouponConfig';
 import { cn } from '@/lib/utils';
+import { areSlotTimesContiguous } from '@/utils/bookingSlotMerge';
 
 interface BookingView {
   id: string;
@@ -58,6 +59,9 @@ interface Booking {
   payment_txn_id?: string | null;
   player_count?: number;
   station_id?: string;
+  customer_id?: string;
+  /** Present only on merged staff-list rows: underlying DB bookings */
+  mergedSourceBookings?: Booking[];
   station: {
     name: string;
     type: string;
@@ -162,6 +166,64 @@ interface CalendarBooking extends Booking {
   endMinute: number;
   heightPercentage: number;
   topPercentage: number;
+}
+
+function customerMergeKey(b: Booking): string {
+  return b.customer_id || b.customer?.phone || b.customer?.name || '';
+}
+
+function staffBookingsMergeAllowed(a: Booking, b: Booking): boolean {
+  const dur = (x: Booking) => {
+    const d = Number(x.duration);
+    return d > 0 ? d : 30;
+  };
+  // Only chain raw half-hour rows. After two 30s become one 60-min display row, do not absorb the next 30
+  // (e.g. 1:00–2:00 + 2:00–2:30 stay two blocks even though times touch).
+  if (dur(a) !== 30 || dur(b) !== 30) return false;
+
+  return (
+    !!a.station_id &&
+    a.station_id === b.station_id &&
+    !!b.station_id &&
+    customerMergeKey(a) !== '' &&
+    customerMergeKey(a) === customerMergeKey(b) &&
+    a.booking_date === b.booking_date &&
+    a.status === b.status &&
+    (a.payment_txn_id || '') === (b.payment_txn_id || '') &&
+    areSlotTimesContiguous(a.end_time, b.start_time)
+  );
+}
+
+function finalizeContiguousBookingRun(run: Booking[]): Booking {
+  if (run.length === 1) return run[0];
+  const first = run[0];
+  const last = run[run.length - 1];
+  return {
+    ...first,
+    end_time: last.end_time,
+    duration: run.reduce((s, b) => s + (Number(b.duration) || 0), 0),
+    final_price: run.reduce((s, b) => s + (Number(b.final_price) || 0), 0),
+    original_price: run.reduce((s, b) => s + (Number(b.original_price) || 0), 0),
+    mergedSourceBookings: run,
+  };
+}
+
+/** One staff row per continuous block; underlying DB may still be 30-min rows. */
+function mergeContiguousBookingsForStaffList(sortedByStart: Booking[]): Booking[] {
+  if (!sortedByStart.length) return [];
+  const out: Booking[] = [];
+  let run: Booking[] = [sortedByStart[0]];
+  for (let i = 1; i < sortedByStart.length; i++) {
+    const cur = sortedByStart[i];
+    const last = run[run.length - 1];
+    if (staffBookingsMergeAllowed(last, cur)) run.push(cur);
+    else {
+      out.push(finalizeContiguousBookingRun(run));
+      run = [cur];
+    }
+  }
+  out.push(finalizeContiguousBookingRun(run));
+  return out;
 }
 
 const getDateRangeFromPreset = (preset: string) => {
@@ -553,6 +615,7 @@ export default function BookingManagement() {
         created_at: b.created_at,
         booking_views: b.booking_views || [],
         station_id: b.station_id,
+        customer_id: b.customer_id,
         station: { name: station?.name || 'Unknown', type: station?.type || 'unknown' },
         customer: { 
           name: customer?.name || 'Unknown', 
@@ -701,8 +764,20 @@ export default function BookingManagement() {
   // NEW: Process bookings for calendar view
   const calendarBookings = useMemo((): CalendarBooking[] => {
     const dayBookings = allBookings.filter(b => b.booking_date === selectedCalendarDate);
-    
-    return dayBookings.map(booking => {
+    const byStationCustomer = new Map<string, Booking[]>();
+    for (const b of dayBookings) {
+      const k = `${b.station_id || ''}::${customerMergeKey(b)}`;
+      if (!byStationCustomer.has(k)) byStationCustomer.set(k, []);
+      byStationCustomer.get(k)!.push(b);
+    }
+    const mergedDay: Booking[] = [];
+    for (const list of byStationCustomer.values()) {
+      list.sort((a, c) => a.start_time.localeCompare(c.start_time));
+      mergedDay.push(...mergeContiguousBookingsForStaffList(list));
+    }
+    mergedDay.sort((a, b) => a.start_time.localeCompare(b.start_time));
+
+    return mergedDay.map(booking => {
       const startTime = new Date(`2000-01-01T${booking.start_time}`);
       const endTime = new Date(`2000-01-01T${booking.end_time}`);
       
@@ -942,7 +1017,7 @@ export default function BookingManagement() {
                                 <div className="flex gap-1">
                                   <Button size="sm" variant="outline" onClick={(e) => {
                                     e.stopPropagation();
-                                    handleEditBooking(booking);
+                                    handleEditBooking(booking.mergedSourceBookings?.[0] ?? booking);
                                   }}>
                                     <Edit2 className="h-3 w-3" />
                                   </Button>
@@ -1868,9 +1943,17 @@ export default function BookingManagement() {
 
   const renderBookingTimelineRows = useCallback(
     (stationBookings: Booking[]) =>
-      stationBookings.map((booking, idx) => (
+      stationBookings.map((booking, idx) => {
+        const rowKey =
+          booking.mergedSourceBookings?.map((x) => x.id).join('-') || booking.id;
+        const idLabel =
+          booking.mergedSourceBookings && booking.mergedSourceBookings.length > 1
+            ? `${booking.mergedSourceBookings.length} segments`
+            : `${booking.id.substring(0, 8)}...`;
+        const editTarget = booking.mergedSourceBookings?.[0] ?? booking;
+        return (
         <div
-          key={booking.id}
+          key={rowKey}
           className="flex items-center justify-between p-2.5 rounded-md bg-background/50 border border-border/50 hover:bg-muted/30 transition-colors group"
         >
           <div className="flex items-center gap-4 flex-1">
@@ -1890,7 +1973,7 @@ export default function BookingManagement() {
             <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Hash className="h-3 w-3" />
-                {booking.id.substring(0, 8)}...
+                {idLabel}
               </div>
               {booking.booking_views && booking.booking_views.length > 0 && (
                 <div className="flex items-center gap-1 text-muted-foreground">
@@ -1944,7 +2027,7 @@ export default function BookingManagement() {
             </div>
           </div>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleEditBooking(booking)}>
+            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleEditBooking(editTarget)}>
               <Edit2 className="h-3.5 w-3.5" />
             </Button>
             <Button
@@ -1974,7 +2057,8 @@ export default function BookingManagement() {
             </TooltipProvider>
           )}
         </div>
-      )),
+        );
+      }),
     [handleEditBooking, handleDeleteBooking]
   );
 
@@ -3888,6 +3972,9 @@ export default function BookingManagement() {
 
                                           return Array.from(stationGroups.entries()).map(([stationKey, stationBookings]) => {
                                             const [stationName, stationType] = stationKey.split('::');
+                                            const displayStationBookings = mergeContiguousBookingsForStaffList(
+                                              [...stationBookings].sort((a, b) => a.start_time.localeCompare(b.start_time))
+                                            );
                                             const totalPrice = stationBookings.reduce((sum, b) => sum + (b.final_price || 0), 0);
                                             const hasUnpaid = stationBookings.some(
                                               b => !b.payment_mode && b.final_price && b.final_price > 0
@@ -3954,12 +4041,12 @@ export default function BookingManagement() {
                                                       variant={allPaid ? 'default' : hasUnpaid ? 'destructive' : 'secondary'}
                                                       className="text-xs"
                                                     >
-                                                      {stationBookings.length} slot{stationBookings.length !== 1 ? 's' : ''}
+                                                      {displayStationBookings.length} slot{displayStationBookings.length !== 1 ? 's' : ''}
                                                     </Badge>
                                                   </div>
                                                 </div>
 
-                                                <div className="p-3 space-y-2">{renderBookingTimelineRows(stationBookings)}</div>
+                                                <div className="p-3 space-y-2">{renderBookingTimelineRows(displayStationBookings)}</div>
 
                                                 {stationBookings[0]?.payment_txn_id && (
                                                   <div className="px-3 pb-2 text-xs text-muted-foreground font-mono border-t pt-2">
@@ -4032,8 +4119,10 @@ export default function BookingManagement() {
                                             .map(([customerName, custBookings]) => {
                                               const custKey = `${stationKey}::${customerName}`;
                                               const isCustOpen = expandedStationCustomers.has(custKey);
-                                              const slots = [...custBookings].sort((a, b) =>
-                                                a.start_time.localeCompare(b.start_time)
+                                              const slots = mergeContiguousBookingsForStaffList(
+                                                [...custBookings].sort((a, b) =>
+                                                  a.start_time.localeCompare(b.start_time)
+                                                )
                                               );
                                               const couponCount = custBookings.filter(b => b.coupon_code).length;
 
@@ -4055,7 +4144,7 @@ export default function BookingManagement() {
                                                     </span>
                                                     <div className="ml-auto flex items-center gap-1.5 shrink-0">
                                                       <Badge variant="secondary" className="text-xs">
-                                                        {custBookings.length} slot{custBookings.length !== 1 ? 's' : ''}
+                                                        {slots.length} slot{slots.length !== 1 ? 's' : ''}
                                                       </Badge>
                                                       {couponCount > 0 && (
                                                         <Badge variant="outline" className="text-xs">

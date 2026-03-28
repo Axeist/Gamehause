@@ -8,6 +8,8 @@ interface Booking {
   customer: {
     name: string;
   };
+  /** When set, delete all underlying rows (staff merged view of contiguous slots). */
+  mergedSourceBookings?: Array<{ id: string }>;
 }
 
 interface BookingDeleteDialogProps {
@@ -23,28 +25,30 @@ export function BookingDeleteDialog({ open, onOpenChange, booking, onBookingDele
   const handleDelete = async () => {
     if (!booking) return;
 
+    const ids =
+      booking.mergedSourceBookings && booking.mergedSourceBookings.length > 0
+        ? booking.mergedSourceBookings.map((b) => b.id)
+        : [booking.id];
+
     setLoading(true);
     try {
-      // First, delete any related booking_views records
-      const { error: viewsError } = await supabase
-        .from('booking_views')
-        .delete()
-        .eq('booking_id', booking.id);
+      for (const bid of ids) {
+        const { error: viewsError } = await supabase
+          .from('booking_views')
+          .delete()
+          .eq('booking_id', bid);
 
-      if (viewsError) {
-        console.warn('Error deleting booking views:', viewsError);
-        // Continue with booking deletion even if views deletion fails
+        if (viewsError) {
+          console.warn('Error deleting booking views:', viewsError);
+        }
+
+        const { error } = await supabase.from('bookings').delete().eq('id', bid);
+        if (error) throw error;
       }
 
-      // Then delete the booking
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', booking.id);
-
-      if (error) throw error;
-
-      toast.success('Booking deleted successfully');
+      toast.success(
+        ids.length > 1 ? `Deleted ${ids.length} connected time segments` : 'Booking deleted successfully'
+      );
       onBookingDeleted();
       onOpenChange(false);
     } catch (error) {
@@ -63,7 +67,10 @@ export function BookingDeleteDialog({ open, onOpenChange, booking, onBookingDele
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Booking</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete the booking for {booking.customer.name}? 
+            Are you sure you want to delete the booking for {booking.customer.name}?
+            {booking.mergedSourceBookings && booking.mergedSourceBookings.length > 1
+              ? ` This removes ${booking.mergedSourceBookings.length} connected time segments shown as one block.`
+              : ''}{' '}
             This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
