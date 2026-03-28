@@ -23,9 +23,9 @@ export interface ProductFormState {
   buyingPrice: string;
   sellingPrice: string;
   category: string;
-  /** Remaining units (decreases when sold on POS) */
+  /** Membership only: quantity. Non-membership: kept in sync on submit (not shown). */
   stock: string;
-  /** Total capacity shown as remaining / total on POS */
+  /** Non-membership: capacity (remaining / total on POS); new products also seed remaining from this. */
   totalStock: string;
   originalPrice: string;
   offerPrice: string;
@@ -216,22 +216,24 @@ const ProductForm: React.FC<ProductFormProps> = ({
     if (!formState.category) {
       errors.category = 'Category is required';
     }
-    if (!formState.stock) {
-      errors.stock = 'Remaining stock is required';
-    } else if (parseInt(formState.stock, 10) < 0) {
-      errors.stock = 'Remaining stock cannot be negative';
-    }
 
-    if (formState.category !== 'membership') {
+    if (formState.category === 'membership') {
+      if (!formState.stock) {
+        errors.stock = 'Stock is required';
+      } else if (parseInt(formState.stock, 10) < 0) {
+        errors.stock = 'Stock cannot be negative';
+      }
+    } else {
       if (!formState.totalStock) {
         errors.totalStock = 'Total stock is required';
       } else if (parseInt(formState.totalStock, 10) < 0) {
         errors.totalStock = 'Total stock cannot be negative';
       } else if (
-        formState.stock &&
-        parseInt(formState.totalStock, 10) < parseInt(formState.stock, 10)
+        isEditMode &&
+        selectedProduct &&
+        parseInt(formState.totalStock, 10) < selectedProduct.stock
       ) {
-        errors.totalStock = 'Total stock must be greater than or equal to remaining stock';
+        errors.totalStock = `Total stock must be at least current remaining (${selectedProduct.stock})`;
       }
     }
 
@@ -358,45 +360,29 @@ const ProductForm: React.FC<ProductFormProps> = ({
             {validationErrors.stock && <p className="text-xs text-destructive mt-1">{validationErrors.stock}</p>}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="stock" className={validationErrors.stock ? 'text-destructive' : ''}>
-                Remaining in stock*
-              </Label>
-              <Input
-                id="stock"
-                name="stock"
-                type="number"
-                value={formState.stock}
-                onChange={handleChange}
-                placeholder="Units left now"
-                className={validationErrors.stock ? 'border-destructive' : ''}
-                min="0"
-                required
-              />
-              {validationErrors.stock && <p className="text-xs text-destructive mt-1">{validationErrors.stock}</p>}
-              <p className="text-xs text-muted-foreground">Reduced automatically when sold on POS.</p>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="totalStock" className={validationErrors.totalStock ? 'text-destructive' : ''}>
-                Total stock (capacity)*
-              </Label>
-              <Input
-                id="totalStock"
-                name="totalStock"
-                type="number"
-                value={formState.totalStock}
-                onChange={handleChange}
-                placeholder="e.g. 20 for 17/20 display"
-                className={validationErrors.totalStock ? 'border-destructive' : ''}
-                min="0"
-                required
-              />
-              {validationErrors.totalStock && (
-                <p className="text-xs text-destructive mt-1">{validationErrors.totalStock}</p>
-              )}
-              <p className="text-xs text-muted-foreground">Shown as “remaining / total” on the POS grid.</p>
-            </div>
+          <div className="grid gap-2">
+            <Label htmlFor="totalStock" className={validationErrors.totalStock ? 'text-destructive' : ''}>
+              Total stock*
+            </Label>
+            <Input
+              id="totalStock"
+              name="totalStock"
+              type="number"
+              value={formState.totalStock}
+              onChange={handleChange}
+              placeholder={isEditMode ? 'Capacity (denominator on POS)' : 'Starting quantity (e.g. 20)'}
+              className={validationErrors.totalStock ? 'border-destructive' : ''}
+              min="0"
+              required
+            />
+            {validationErrors.totalStock && (
+              <p className="text-xs text-destructive mt-1">{validationErrors.totalStock}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {isEditMode
+                ? 'POS shows remaining / this total. Sales reduce remaining only; change this value to update capacity (not below current remaining).'
+                : 'Starts with full stock at this count. POS shows remaining / this total as items sell.'}
+            </p>
           </div>
         )}
 

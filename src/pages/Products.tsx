@@ -150,7 +150,7 @@ const ProductsPage: React.FC = () => {
         studentPrice, duration, membershipHours, buyingPrice, sellingPrice 
       } = formData;
       
-      if (!name || !price || !category || stock === undefined) {
+      if (!name || !price || !category) {
         toast({
           title: 'Error',
           description: 'Please fill out all required fields',
@@ -159,29 +159,46 @@ const ProductsPage: React.FC = () => {
         setIsSubmitting(false);
         return;
       }
-      
-      const stockNum = Number(stock);
-      const totalStockNum =
-        category === 'membership' ? stockNum : Number(totalStock);
 
-      if (category !== 'membership') {
-        if (!totalStock || Number.isNaN(totalStockNum)) {
+      let stockNum: number;
+      let totalStockNum: number;
+
+      if (category === 'membership') {
+        if (stock === undefined || stock === '') {
           toast({
             title: 'Error',
-            description: 'Please enter total stock capacity',
+            description: 'Please fill out all required fields',
             variant: 'destructive',
           });
           setIsSubmitting(false);
           return;
         }
-        if (totalStockNum < stockNum) {
+        stockNum = Number(stock);
+        totalStockNum = stockNum;
+      } else {
+        if (!totalStock || Number.isNaN(Number(totalStock))) {
           toast({
             title: 'Error',
-            description: 'Total stock must be at least the remaining quantity',
+            description: 'Please enter total stock',
             variant: 'destructive',
           });
           setIsSubmitting(false);
           return;
+        }
+        totalStockNum = Number(totalStock);
+        if (isEditMode && selectedProduct) {
+          stockNum = selectedProduct.stock;
+          if (totalStockNum < stockNum) {
+            toast({
+              title: 'Error',
+              description: `Total stock must be at least current remaining (${stockNum})`,
+              variant: 'destructive',
+            });
+            setIsSubmitting(false);
+            return;
+          }
+        } else {
+          stockNum = totalStockNum;
         }
       }
 
