@@ -58,6 +58,7 @@ import { format, parse } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { mergeContiguousSlots } from "@/utils/bookingSlotMerge";
 import { compareBookingSlotIntervals, isBookingSlotElapsed } from "@/utils/bookingSlotOrder";
+import { appendLateNight30MinSlotsIfNeeded } from "@/utils/extendLateNightBookingSlots";
 
 /* =========================
    Types
@@ -531,7 +532,12 @@ export default function PublicBooking() {
         console.error("Error fetching slots:", error);
         throw error;
       }
-      let slotsToSet = data || [];
+      let slotsToSet = await appendLateNight30MinSlotsIfNeeded((data || []) as TimeSlot[], {
+        supabase,
+        dateStr,
+        stationId: activeStationId,
+        isToday,
+      });
       if (isToday) {
         const now = new Date();
         slotsToSet = slotsToSet.map((slot: TimeSlot) => {
@@ -671,6 +677,7 @@ export default function PublicBooking() {
     
     const slotDuration = 30; // All slots are 30 minutes
     
+    const isTodaySlot = dateStr === format(new Date(), "yyyy-MM-dd");
     const checks = await Promise.all(
       selectedStations.map(async (stationId) => {
         const { data, error } = await supabase.rpc("get_available_slots", {
@@ -679,8 +686,15 @@ export default function PublicBooking() {
           p_slot_duration: slotDuration,
         });
         if (error) return { stationId, available: false };
-        const match = (data || []).find(
-          (s: any) =>
+        let rows = (data || []) as TimeSlot[];
+        rows = await appendLateNight30MinSlotsIfNeeded(rows, {
+          supabase,
+          dateStr,
+          stationId,
+          isToday: isTodaySlot,
+        });
+        const match = rows.find(
+          (s) =>
             s.start_time === slot.start_time &&
             s.end_time === slot.end_time &&
             s.is_available

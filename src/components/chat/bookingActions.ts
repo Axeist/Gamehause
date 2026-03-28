@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { isBookingSlotElapsed } from "@/utils/bookingSlotOrder";
+import { appendLateNight30MinSlotsIfNeeded } from "@/utils/extendLateNightBookingSlots";
 
 export type StationType = "ps5" | "8ball" | "foosball";
 
@@ -135,7 +136,14 @@ export async function getAvailableSlotsForStation(dateStr: string, stationId: st
     p_slot_duration: slotDuration,
   });
   if (error) throw error;
-  return (data || []) as TimeSlot[];
+  let slots = (data || []) as TimeSlot[];
+  slots = await appendLateNight30MinSlotsIfNeeded(slots, {
+    supabase,
+    dateStr,
+    stationId,
+    isToday: dateStr === format(new Date(), "yyyy-MM-dd"),
+  });
+  return slots;
 }
 
 export function markElapsedIfToday(dateStr: string, slots: TimeSlot[]): TimeSlot[] {
@@ -152,14 +160,24 @@ export function markElapsedIfToday(dateStr: string, slots: TimeSlot[]): TimeSlot
 export async function getAvailableSlotsUnion(dateStr: string, stationIds: string[]): Promise<TimeSlot[]> {
   if (stationIds.length === 0) return [];
 
+  const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
   const results = await Promise.all(
-    stationIds.map((id) =>
-      supabase.rpc("get_available_slots", {
+    stationIds.map(async (id) => {
+      const { data, error } = await supabase.rpc("get_available_slots", {
         p_date: dateStr,
         p_station_id: id,
         p_slot_duration: 30,
-      })
-    )
+      });
+      if (error) return { error, data: null as TimeSlot[] | null };
+      let slots = (data || []) as TimeSlot[];
+      slots = await appendLateNight30MinSlotsIfNeeded(slots, {
+        supabase,
+        dateStr,
+        stationId: id,
+        isToday,
+      });
+      return { error: null, data: slots };
+    })
   );
 
   const base = results.find((r) => !r.error && Array.isArray(r.data))?.data as TimeSlot[] | undefined;
