@@ -108,18 +108,17 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
         return (
           <Card
             key={station.id}
-            className={`transition-all duration-200 hover:shadow-md border-white/10 bg-white/5 backdrop-blur-sm ${
+            className={`transition-all duration-200 hover:shadow-md border-white/10 bg-white/5 backdrop-blur-sm cursor-pointer ${
               isSelected
                 ? 'ring-2 ring-cuephoria-purple bg-cuephoria-purple/10'
-                : 'hover:bg-white/10 cursor-pointer'
+                : 'hover:bg-white/10'
             }`}
-            onClick={!isSelected ? () => onStationToggle(station.id) : undefined}
+            onClick={() => onStationToggle(station.id)}
           >
             <CardHeader className="pb-3">
               {imageSrc && (
                 <div
-                  className="relative mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/25 cursor-pointer"
-                  onClick={() => onStationToggle(station.id)}
+                  className="relative mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/25"
                   style={{ aspectRatio: '16 / 9' }}
                 >
                   <img
@@ -127,15 +126,12 @@ export const StationSelector: React.FC<StationSelectorProps> = ({
                     alt={`${station.name} image`}
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover opacity-95"
+                    className="absolute inset-0 h-full w-full object-cover opacity-95 pointer-events-none"
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                 </div>
               )}
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => onStationToggle(station.id)}
-              >
+              <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2 text-white">
                   <Icon className="h-5 w-5" />
                   {station.name}
