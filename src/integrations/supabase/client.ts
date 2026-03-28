@@ -95,10 +95,10 @@ export const convertToSupabaseProduct = (product: any, includeId: boolean = fals
   if (product.price !== undefined) supabaseProduct.price = product.price;
   if (product.category !== undefined) supabaseProduct.category = product.category;
   if (product.stock !== undefined) supabaseProduct.stock = product.stock;
+  // Only send total_stock when explicitly set. Never default it from stock on update —
+  // that would overwrite capacity (e.g. 20) with remaining (e.g. 19) after each sale.
   if (product.totalStock !== undefined && product.totalStock !== null) {
     supabaseProduct.total_stock = product.totalStock;
-  } else if (product.stock !== undefined) {
-    supabaseProduct.total_stock = product.stock;
   }
 
   // Only add optional fields if they are defined (not undefined or null)
