@@ -109,6 +109,10 @@ const INR = (n: number) =>
 const genTxnId = () =>
   `CUE-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
+function countGameStationSessionsToday(rows: TodayBookingRow[]): number {
+  return new Set(rows.map((r) => `${r.customer_id}::${r.station_id}`)).size;
+}
+
 // ✅ NEW: Phone number normalization
 const normalizePhoneNumber = (phone: string): string => {
   return phone.replace(/\D/g, '');
@@ -1403,6 +1407,11 @@ export default function PublicBooking() {
     return entries;
   }, [todayRows]);
 
+  const todayGameStationSessions = useMemo(
+    () => countGameStationSessionsToday(todayRows),
+    [todayRows]
+  );
+
   const statusChip = (s: TodayBookingRow["status"]) => {
     const base = "px-2 py-0.5 rounded-full text-xs capitalize";
     switch (s) {
@@ -2283,7 +2292,7 @@ export default function PublicBooking() {
                 Today's Bookings
               </CardTitle>
               <span className="text-xs text-gray-300 rounded-full border border-white/10 px-2 py-0.5">
-                {todayRows.length} total
+                {todayGameStationSessions} total
               </span>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -2292,7 +2301,9 @@ export default function PublicBooking() {
               ) : groupedByTime.length === 0 ? (
                 <div className="text-sm text-gray-400">No bookings today.</div>
               ) : (
-                groupedByTime.map(([timeLabel, rows]) => (
+                groupedByTime.map(([timeLabel, rows]) => {
+                  const slotSessions = countGameStationSessionsToday(rows);
+                  return (
                   <details
                     key={timeLabel}
                     className="group rounded-xl border border-white/10 bg-black/30 open:bg-black/40"
@@ -2303,7 +2314,7 @@ export default function PublicBooking() {
                         <span className="font-medium">{timeLabel}</span>
                       </div>
                       <span className="text-xs text-gray-300 rounded-full border border-white/10 px-2 py-0.5">
-                        {rows.length} booking{rows.length !== 1 ? "s" : ""}
+                        {slotSessions} booking{slotSessions !== 1 ? "s" : ""}
                       </span>
                     </summary>
                     <div className="px-3 sm:px-4 pb-3 sm:pb-4 overflow-x-auto">
@@ -2334,7 +2345,8 @@ export default function PublicBooking() {
                       </table>
                     </div>
                   </details>
-                ))
+                  );
+                })
               )}
             </CardContent>
           </Card>

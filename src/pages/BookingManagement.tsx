@@ -226,6 +226,17 @@ function mergeContiguousBookingsForStaffList(sortedByStart: Booking[]): Booking[
   return out;
 }
 
+/** One “booking” = customer + station + day (not each 30‑min row). */
+function gameStationSessionKey(b: Booking): string {
+  const sid = b.station_id || `${b.station.name}::${b.station.type}`;
+  const cid = b.customer_id || b.customer?.phone || b.customer?.name || '';
+  return `${b.booking_date}::${cid}::${sid}`;
+}
+
+function countGameStationSessions(bookings: Booking[]): number {
+  return new Set(bookings.map(gameStationSessionKey)).size;
+}
+
 const getDateRangeFromPreset = (preset: string) => {
   const now = new Date();
   
@@ -3813,7 +3824,9 @@ export default function BookingManagement() {
           <Card>
             <CardHeader>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <CardTitle>Bookings ({bookings.length})</CardTitle>
+                <CardTitle>
+                  Bookings ({countGameStationSessions(bookings)})
+                </CardTitle>
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground whitespace-nowrap">Group by:</span>
@@ -3896,7 +3909,7 @@ export default function BookingManagement() {
                           <Calendar className="h-4 w-4" />
                           <span className="font-semibold">{getDateLabel(date)}</span>
                           <Badge variant="outline" className="ml-auto">
-                            {Object.values(customerBookings).flat().length} bookings
+                            {countGameStationSessions(Object.values(customerBookings).flat())} bookings
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
                             {Object.values(customerBookings).flat().filter(b => b.coupon_code).length} with coupons
@@ -3909,6 +3922,7 @@ export default function BookingManagement() {
                               Object.entries(customerBookings).map(([customerName, bookingsForCustomer]) => {
                                 const key = `${date}::${customerName}`;
                                 const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
+                                const customerGameSessions = countGameStationSessions(bookingsForCustomer);
 
                                 const isCustomerExpanded = expandedCustomers.has(key);
                                 return (
@@ -3926,7 +3940,7 @@ export default function BookingManagement() {
                                       <span className="font-medium">{customerName}</span>
                                       <div className="ml-auto flex items-center gap-2">
                                         <Badge variant="secondary" className="text-xs">
-                                          {bookingsForCustomer.length} booking{bookingsForCustomer.length !== 1 ? 's' : ''}
+                                          {customerGameSessions} booking{customerGameSessions !== 1 ? 's' : ''}
                                         </Badge>
                                         {couponBookings.length > 0 && (
                                           <Badge variant="outline" className="text-xs flex items-center gap-1">
@@ -4067,7 +4081,9 @@ export default function BookingManagement() {
                                 const stationKey = `${date}::${row.id}`;
                                 const isStationExpanded = expandedStations.has(stationKey);
                                 const n = row.bookings.length;
-                                const uniqueCustomers = new Set(row.bookings.map(b => b.customer.name || 'Unknown')).size;
+                                const uniqueCustomers = new Set(
+                                  row.bookings.map((b) => b.customer_id || b.customer.phone || b.customer.name || 'Unknown')
+                                ).size;
 
                                 return (
                                   <Collapsible key={stationKey} open={isStationExpanded}>
@@ -4092,11 +4108,11 @@ export default function BookingManagement() {
                                       </Badge>
                                       <div className="ml-auto flex items-center gap-2 shrink-0">
                                         <Badge variant="secondary" className="text-xs">
-                                          {n} booking{n !== 1 ? 's' : ''}
+                                          {uniqueCustomers} booking{uniqueCustomers !== 1 ? 's' : ''}
                                         </Badge>
-                                        {n > 0 && (
+                                        {n > 1 && uniqueCustomers < n && (
                                           <Badge variant="outline" className="text-xs">
-                                            {uniqueCustomers} customer{uniqueCustomers !== 1 ? 's' : ''}
+                                            {n} time segment{n !== 1 ? 's' : ''}
                                           </Badge>
                                         )}
                                       </div>
