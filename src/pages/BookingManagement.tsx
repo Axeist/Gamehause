@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ import {
 } from 'date-fns';
 import { PUBLIC_BOOKING_URL } from '@/config/brand';
 import { getPublicBookingEnabled, setPublicBookingEnabled } from '@/services/bookingCouponConfig';
+import { cn } from '@/lib/utils';
 
 interface BookingView {
   id: string;
@@ -56,6 +57,7 @@ interface Booking {
   payment_mode?: string | null;
   payment_txn_id?: string | null;
   player_count?: number;
+  station_id?: string;
   station: {
     name: string;
     type: string;
@@ -282,6 +284,10 @@ export default function BookingManagement() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
+  const [expandedStations, setExpandedStations] = useState<Set<string>>(new Set());
+  const [expandedStationCustomers, setExpandedStationCustomers] = useState<Set<string>>(new Set());
+  const [bookingsGroupBy, setBookingsGroupBy] = useState<'customer' | 'station'>('customer');
+  const [stationsCatalog, setStationsCatalog] = useState<Array<{ id: string; name: string; type: string }>>([]);
   
   // Payment Reconciliation state
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
@@ -489,11 +495,16 @@ export default function BookingManagement() {
       .order('booking_date', { ascending: false })
       .order('start_time', { ascending: false });
 
-    const { data: bookingsData, error } = await query;
+    const [{ data: bookingsData, error }, { data: allStationsRows, error: allStationsError }] =
+      await Promise.all([query, supabase.from('stations').select('id, name, type').order('name')]);
+
     if (error) throw error;
+    if (allStationsError) throw allStationsError;
+
+    setStationsCatalog(allStationsRows || []);
 
     if (!bookingsData || bookingsData.length === 0) {
-      setBookings([]);  // ← Clears bookings if none exist
+      setBookings([]);
       setAllBookings([]);
       setCouponOptions([]);
       return;
@@ -502,17 +513,24 @@ export default function BookingManagement() {
     const stationIds = [...new Set(bookingsData.map(b => b.station_id))];
     const customerIds = [...new Set(bookingsData.map(b => b.customer_id))];
 
-    const [{ data: stationsData, error: stationsError }, { data: customersData, error: customersError }] =
-      await Promise.all([
-        supabase.from('stations').select('id, name, type').in('id', stationIds),
-        supabase.from('customers').select('id, name, phone, email, created_at').in('id', customerIds)
-      ]);
+    const stationById = new Map((allStationsRows || []).map(s => [s.id, s]));
+    const missingStationIds = stationIds.filter(id => id && !stationById.has(id));
+    let extraStations: { id: string; name: string; type: string }[] = [];
+    if (missingStationIds.length > 0) {
+      const { data: extra } = await supabase.from('stations').select('id, name, type').in('id', missingStationIds);
+      extraStations = extra || [];
+      extraStations.forEach(s => stationById.set(s.id, s));
+    }
 
-    if (stationsError) throw stationsError;
+    const { data: customersData, error: customersError } = await supabase
+      .from('customers')
+      .select('id, name, phone, email, created_at')
+      .in('id', customerIds);
+
     if (customersError) throw customersError;
 
     const transformed = (bookingsData || []).map(b => {
-      const station = stationsData?.find(s => s.id === b.station_id);
+      const station = stationById.get(b.station_id);
       const customer = customersData?.find(c => c.id === b.customer_id);
       return {
         id: b.id,
@@ -534,6 +552,7 @@ export default function BookingManagement() {
         player_count: (b as any).player_count ?? 1,
         created_at: b.created_at,
         booking_views: b.booking_views || [],
+        station_id: b.station_id,
         station: { name: station?.name || 'Unknown', type: station?.type || 'unknown' },
         customer: { 
           name: customer?.name || 'Unknown', 
@@ -1503,6 +1522,8 @@ export default function BookingManagement() {
       if (next.has(date)) {
         next.delete(date);
         setExpandedCustomers(old => new Set(Array.from(old).filter(key => !key.startsWith(date + '::'))));
+        setExpandedStations(old => new Set(Array.from(old).filter(key => !key.startsWith(date + '::'))));
+        setExpandedStationCustomers(old => new Set(Array.from(old).filter(key => !key.startsWith(date + '::'))));
       } else {
         next.add(date);
       }
@@ -1515,6 +1536,30 @@ export default function BookingManagement() {
       const next = new Set(prev);
       if (next.has(dateCustomerKey)) next.delete(dateCustomerKey);
       else next.add(dateCustomerKey);
+      return next;
+    });
+  };
+
+  const toggleStationExpansion = (dateStationKey: string) => {
+    setExpandedStations(prev => {
+      const next = new Set(prev);
+      if (next.has(dateStationKey)) {
+        next.delete(dateStationKey);
+        setExpandedStationCustomers(old =>
+          new Set(Array.from(old).filter(k => !k.startsWith(dateStationKey + '::')))
+        );
+      } else {
+        next.add(dateStationKey);
+      }
+      return next;
+    });
+  };
+
+  const toggleStationCustomerExpansion = (key: string) => {
+    setExpandedStationCustomers(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
@@ -1821,6 +1866,118 @@ export default function BookingManagement() {
       hour12: true 
     });
 
+  const renderBookingTimelineRows = useCallback(
+    (stationBookings: Booking[]) =>
+      stationBookings.map((booking, idx) => (
+        <div
+          key={booking.id}
+          className="flex items-center justify-between p-2.5 rounded-md bg-background/50 border border-border/50 hover:bg-muted/30 transition-colors group"
+        >
+          <div className="flex items-center gap-4 flex-1">
+            <div className="flex flex-col items-center">
+              <div className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500' : 'bg-muted-foreground'}`} />
+              {idx < stationBookings.length - 1 && <div className="w-0.5 h-6 bg-border mt-1" />}
+            </div>
+            <div className="flex items-center gap-2 min-w-[140px]">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              <div>
+                <div className="font-medium text-sm">
+                  {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
+                </div>
+                <div className="text-xs text-muted-foreground">{booking.duration}min</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Hash className="h-3 w-3" />
+                {booking.id.substring(0, 8)}...
+              </div>
+              {booking.booking_views && booking.booking_views.length > 0 && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Eye className="h-3 w-3" />
+                  {booking.booking_views[0].access_code}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <BookingStatusBadge status={booking.status} />
+              {booking.payment_mode ? (
+                <Badge variant="default" className="text-xs">
+                  💳 Paid
+                </Badge>
+              ) : booking.final_price && booking.final_price > 0 ? (
+                <Badge variant="destructive" className="text-xs">
+                  ⚠️ Unpaid
+                </Badge>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {booking.station.type === 'ps5' && (booking.player_count ?? 1) > 1 && (
+                <Badge className="text-xs bg-[#9b87f5]/15 text-[#9b87f5] border border-[#9b87f5]/30">
+                  👥 {booking.player_count}p
+                </Badge>
+              )}
+              {booking.original_price && booking.original_price !== booking.final_price && (
+                <span className="text-xs text-muted-foreground line-through">₹{booking.original_price}</span>
+              )}
+              <span className="font-semibold text-sm">₹{booking.final_price || 0}</span>
+              {booking.station.type === 'ps5' &&
+                (booking.player_count ?? 1) > 1 &&
+                booking.original_price &&
+                booking.duration && (
+                  <span className="text-xs text-muted-foreground">
+                    ({booking.player_count} × ₹
+                    {Math.round(booking.original_price / (booking.player_count ?? 1) / (booking.duration / 60))}/hr)
+                  </span>
+                )}
+              {booking.discount_percentage && (
+                <Badge variant="destructive" className="text-xs">
+                  {Math.round(booking.discount_percentage)}% OFF
+                </Badge>
+              )}
+              {booking.coupon_code && (
+                <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                  <Gift className="h-2 w-2" />
+                  {booking.coupon_code}
+                </Badge>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleEditBooking(booking)}>
+              <Edit2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+              onClick={() => handleDeleteBooking(booking)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+          {booking.notes && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="ml-2">
+                    <Badge variant="outline" className="text-xs cursor-help">
+                      📝
+                    </Badge>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-medium mb-1">Notes:</p>
+                  <p className="text-sm">{booking.notes}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      )),
+    [handleEditBooking, handleDeleteBooking]
+  );
+
   const getStationTypeLabel = (type: string) =>
     type === 'ps5' ? 'PlayStation 5' : type === '8ball' ? '8-Ball Pool' : type === 'foosball' ? 'Foosball Table' : type === 'misc' ? 'Misc / Other' : type;
 
@@ -1853,8 +2010,80 @@ export default function BookingManagement() {
       byDate[d][cust] ||= [];
       byDate[d][cust].push(b);
     });
-    return byDate;
+    const sorted: Record<string, Record<string, Booking[]>> = {};
+    for (const d of Object.keys(byDate)) {
+      const custMap = byDate[d];
+      sorted[d] = {};
+      Object.keys(custMap)
+        .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+        .forEach(k => {
+          sorted[d][k] = custMap[k];
+        });
+    }
+    return sorted;
   }, [bookings]);
+
+  /** Per date: full station catalog + any bookings-only stations, each with that day's bookings */
+  const stationListRowsByDate = useMemo(() => {
+    const byDateStation = new Map<string, Map<string, Booking[]>>();
+    bookings.forEach(b => {
+      const d = b.booking_date;
+      const sid = b.station_id || '';
+      if (!byDateStation.has(d)) byDateStation.set(d, new Map());
+      const dm = byDateStation.get(d)!;
+      if (!dm.has(sid)) dm.set(sid, []);
+      dm.get(sid)!.push(b);
+    });
+
+    const catalogIds = new Set(stationsCatalog.map(s => s.id));
+    const out: Record<string, Array<{ id: string; name: string; type: string; bookings: Booking[] }>> = {};
+    const dates = [...new Set(bookings.map(b => b.booking_date))];
+
+    for (const d of dates) {
+      const dm = byDateStation.get(d);
+      if (stationsCatalog.length > 0) {
+        const baseRows = stationsCatalog.map(s => ({
+          id: s.id,
+          name: s.name,
+          type: s.type,
+          bookings: dm?.get(s.id) || []
+        }));
+        const extras: Array<{ id: string; name: string; type: string; bookings: Booking[] }> = [];
+        dm?.forEach((bs, sid) => {
+          if (!sid) {
+            if (bs.length) {
+              extras.push({ id: '_none', name: 'Unknown station', type: 'unknown', bookings: bs });
+            }
+            return;
+          }
+          if (!catalogIds.has(sid)) {
+            extras.push({
+              id: sid,
+              name: bs[0]?.station.name || 'Station',
+              type: bs[0]?.station.type || 'unknown',
+              bookings: bs
+            });
+          }
+        });
+        extras.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+        out[d] = [...baseRows, ...extras];
+      } else {
+        const rows: Array<{ id: string; name: string; type: string; bookings: Booking[] }> = [];
+        dm?.forEach((bs, sid) => {
+          if (!sid && !bs.length) return;
+          rows.push({
+            id: sid || '_none',
+            name: sid ? bs[0]?.station.name || 'Station' : 'Unknown station',
+            type: bs[0]?.station.type || 'unknown',
+            bookings: bs
+          });
+        });
+        rows.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+        out[d] = rows;
+      }
+    }
+    return out;
+  }, [bookings, stationsCatalog]);
 
   const topStations = Object.entries(analytics.stations.utilization)
     .sort((a, b) => b[1].revenue - a[1].revenue)
@@ -3499,16 +3728,53 @@ export default function BookingManagement() {
           {/* Bookings List */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <CardTitle>Bookings ({bookings.length})</CardTitle>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Gift className="h-4 w-4" />
-                    {analytics.coupons.totalCouponsUsed} with coupons
-                  </div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    {getDateRangeLabel()}
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">Group by:</span>
+                    <div
+                      className="inline-flex rounded-full bg-muted/70 dark:bg-muted/40 p-1 border border-border/70"
+                      role="group"
+                      aria-label="Group bookings by"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setBookingsGroupBy('customer')}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+                          bookingsGroupBy === 'customer'
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                        )}
+                      >
+                        <Users className="h-3.5 w-3.5 shrink-0" />
+                        Customer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBookingsGroupBy('station')}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+                          bookingsGroupBy === 'station'
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                        )}
+                      >
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        Station
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Gift className="h-4 w-4" />
+                      {analytics.coupons.totalCouponsUsed} with coupons
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      {getDateRangeLabel()}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3555,14 +3821,15 @@ export default function BookingManagement() {
                         
                         <CollapsibleContent>
                           <div key={`${date}-content`} className="ml-6 mt-2 space-y-2">
-                            {Object.entries(customerBookings).map(([customerName, bookingsForCustomer]) => {
-                              const key = `${date}::${customerName}`;
-                              const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
-                              
-                              const isCustomerExpanded = expandedCustomers.has(key);
-                              return (
+                            {bookingsGroupBy === 'customer' ? (
+                              Object.entries(customerBookings).map(([customerName, bookingsForCustomer]) => {
+                                const key = `${date}::${customerName}`;
+                                const couponBookings = bookingsForCustomer.filter(b => b.coupon_code);
+
+                                const isCustomerExpanded = expandedCustomers.has(key);
+                                return (
                                   <Collapsible key={key} open={isCustomerExpanded}>
-                                    <CollapsibleTrigger 
+                                    <CollapsibleTrigger
                                       onClick={() => toggleCustomerExpansion(key)}
                                       className="flex items-center gap-2 w-full p-2 text-left bg-background rounded border hover:bg-muted/50 transition-colors"
                                     >
@@ -3585,10 +3852,9 @@ export default function BookingManagement() {
                                         )}
                                       </div>
                                     </CollapsibleTrigger>
-                                    
+
                                     <CollapsibleContent>
                                       <div className="ml-6 mt-3 space-y-4">
-                                        {/* Customer Contact Info - Show once at top */}
                                         <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
                                           <div className="flex items-center gap-4 text-sm">
                                             <div className="flex items-center gap-2">
@@ -3604,10 +3870,8 @@ export default function BookingManagement() {
                                           </div>
                                         </div>
 
-                                        {/* Group bookings by station */}
                                         {(() => {
                                           const sortedBookings = [...bookingsForCustomer].sort((a, b) => {
-                                            // First sort by station name, then by time
                                             const stationCompare = a.station.name.localeCompare(b.station.name);
                                             if (stationCompare !== 0) return stationCompare;
                                             return a.start_time.localeCompare(b.start_time);
@@ -3625,19 +3889,20 @@ export default function BookingManagement() {
                                           return Array.from(stationGroups.entries()).map(([stationKey, stationBookings]) => {
                                             const [stationName, stationType] = stationKey.split('::');
                                             const totalPrice = stationBookings.reduce((sum, b) => sum + (b.final_price || 0), 0);
-                                            const hasUnpaid = stationBookings.some(b => !b.payment_mode && b.final_price && b.final_price > 0);
+                                            const hasUnpaid = stationBookings.some(
+                                              b => !b.payment_mode && b.final_price && b.final_price > 0
+                                            );
                                             const allPaid = stationBookings.every(b => b.payment_mode === 'razorpay');
-                                            
+
                                             return (
-                                              <div 
+                                              <div
                                                 key={stationKey}
                                                 className={`border rounded-lg bg-card shadow-sm overflow-hidden ${
-                                                  stationBookings.some(b => b.coupon_code) 
-                                                    ? 'ring-2 ring-orange-200 bg-orange-50/30 dark:bg-orange-950/30' 
+                                                  stationBookings.some(b => b.coupon_code)
+                                                    ? 'ring-2 ring-orange-200 bg-orange-50/30 dark:bg-orange-950/30'
                                                     : ''
                                                 }`}
                                               >
-                                                {/* Station Header */}
                                                 <div className="p-3 bg-muted/50 border-b flex items-center justify-between">
                                                   <div className="flex items-center gap-3">
                                                     <MapPin className="h-4 w-4 text-blue-500" />
@@ -3653,24 +3918,30 @@ export default function BookingManagement() {
                                                               Multi-Game Booking
                                                             </Badge>
                                                             <Badge variant="secondary" className="text-xs font-mono">
-                                                              Group: {(stationBookings.find(b => b.booking_group_id)?.booking_group_id || '').slice(0, 8)}
+                                                              Group:{' '}
+                                                              {(stationBookings.find(b => b.booking_group_id)?.booking_group_id || '').slice(0, 8)}
                                                             </Badge>
                                                           </>
                                                         )}
-                                                        {/* Player count badge — PS5 only */}
-                                                        {stationType === 'ps5' && (() => {
-                                                          const playerCounts = [...new Set(stationBookings.map(b => b.player_count ?? 1))];
-                                                          const allSame = playerCounts.length === 1;
-                                                          const maxCount = Math.max(...playerCounts);
-                                                          if (maxCount > 1) {
-                                                            return (
-                                                              <Badge className="text-xs bg-[#9b87f5]/20 text-[#9b87f5] border border-[#9b87f5]/30">
-                                                                👥 {allSame ? `${maxCount} players` : `${Math.min(...playerCounts)}–${maxCount} players`}
-                                                              </Badge>
-                                                            );
-                                                          }
-                                                          return null;
-                                                        })()}
+                                                        {stationType === 'ps5' &&
+                                                          (() => {
+                                                            const playerCounts = [
+                                                              ...new Set(stationBookings.map(b => b.player_count ?? 1))
+                                                            ];
+                                                            const allSame = playerCounts.length === 1;
+                                                            const maxCount = Math.max(...playerCounts);
+                                                            if (maxCount > 1) {
+                                                              return (
+                                                                <Badge className="text-xs bg-[#9b87f5]/20 text-[#9b87f5] border border-[#9b87f5]/30">
+                                                                  👥{' '}
+                                                                  {allSame
+                                                                    ? `${maxCount} players`
+                                                                    : `${Math.min(...playerCounts)}–${maxCount} players`}
+                                                                </Badge>
+                                                              );
+                                                            }
+                                                            return null;
+                                                          })()}
                                                       </div>
                                                     </div>
                                                   </div>
@@ -3679,136 +3950,17 @@ export default function BookingManagement() {
                                                       <div className="text-xs text-muted-foreground">Total</div>
                                                       <div className="font-semibold">₹{totalPrice}</div>
                                                     </div>
-                                                    <Badge variant={allPaid ? "default" : hasUnpaid ? "destructive" : "secondary"} className="text-xs">
+                                                    <Badge
+                                                      variant={allPaid ? 'default' : hasUnpaid ? 'destructive' : 'secondary'}
+                                                      className="text-xs"
+                                                    >
                                                       {stationBookings.length} slot{stationBookings.length !== 1 ? 's' : ''}
                                                     </Badge>
                                                   </div>
                                                 </div>
 
-                                                {/* Timeline of bookings for this station */}
-                                                <div className="p-3 space-y-2">
-                                                  {stationBookings.map((booking, idx) => (
-                                                    <div 
-                                                      key={booking.id}
-                                                      className="flex items-center justify-between p-2.5 rounded-md bg-background/50 border border-border/50 hover:bg-muted/30 transition-colors group"
-                                                    >
-                                                      <div className="flex items-center gap-4 flex-1">
-                                                        {/* Timeline connector */}
-                                                        <div className="flex flex-col items-center">
-                                                          <div className={`w-2 h-2 rounded-full ${
-                                                            idx === 0 ? 'bg-blue-500' : 'bg-muted-foreground'
-                                                          }`} />
-                                                          {idx < stationBookings.length - 1 && (
-                                                            <div className="w-0.5 h-6 bg-border mt-1" />
-                                                          )}
-                                                        </div>
+                                                <div className="p-3 space-y-2">{renderBookingTimelineRows(stationBookings)}</div>
 
-                                                        {/* Time slot */}
-                                                        <div className="flex items-center gap-2 min-w-[140px]">
-                                                          <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                                                          <div>
-                                                            <div className="font-medium text-sm">
-                                                              {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
-                                                            </div>
-                                                            <div className="text-xs text-muted-foreground">{booking.duration}min</div>
-                                                          </div>
-                                                        </div>
-
-                                                        {/* Booking ID & Access */}
-                                                        <div className="flex items-center gap-3 text-xs">
-                                                          <div className="flex items-center gap-1 text-muted-foreground">
-                                                            <Hash className="h-3 w-3" />
-                                                            {booking.id.substring(0, 8)}...
-                                                          </div>
-                                                          {booking.booking_views && booking.booking_views.length > 0 && (
-                                                            <div className="flex items-center gap-1 text-muted-foreground">
-                                                              <Eye className="h-3 w-3" />
-                                                              {booking.booking_views[0].access_code}
-                                                            </div>
-                                                          )}
-                                                        </div>
-
-                                                        {/* Status & Payment */}
-                                                        <div className="flex items-center gap-2">
-                                                          <BookingStatusBadge status={booking.status} />
-                                                          {booking.payment_mode ? (
-                                                            <Badge variant="default" className="text-xs">
-                                                              💳 Paid
-                                                            </Badge>
-                                                          ) : booking.final_price && booking.final_price > 0 ? (
-                                                            <Badge variant="destructive" className="text-xs">
-                                                              ⚠️ Unpaid
-                                                            </Badge>
-                                                          ) : null}
-                                                        </div>
-
-                                                        {/* Pricing */}
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                          {/* Player count for PS5 */}
-                                                          {booking.station.type === 'ps5' && (booking.player_count ?? 1) > 1 && (
-                                                            <Badge className="text-xs bg-[#9b87f5]/15 text-[#9b87f5] border border-[#9b87f5]/30">
-                                                              👥 {booking.player_count}p
-                                                            </Badge>
-                                                          )}
-                                                          {booking.original_price && booking.original_price !== booking.final_price && (
-                                                            <span className="text-xs text-muted-foreground line-through">
-                                                              ₹{booking.original_price}
-                                                            </span>
-                                                          )}
-                                                          <span className="font-semibold text-sm">₹{booking.final_price || 0}</span>
-                                                          {/* Per-player rate for PS5 multi-player bookings */}
-                                                          {booking.station.type === 'ps5' && (booking.player_count ?? 1) > 1 && booking.original_price && booking.duration && (
-                                                            <span className="text-xs text-muted-foreground">
-                                                              ({booking.player_count} × ₹{Math.round(booking.original_price / (booking.player_count ?? 1) / (booking.duration / 60))}/hr)
-                                                            </span>
-                                                          )}
-                                                          {booking.discount_percentage && (
-                                                            <Badge variant="destructive" className="text-xs">
-                                                              {Math.round(booking.discount_percentage)}% OFF
-                                                            </Badge>
-                                                          )}
-                                                          {booking.coupon_code && (
-                                                            <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                                                              <Gift className="h-2 w-2" />
-                                                              {booking.coupon_code}
-                                                            </Badge>
-                                                          )}
-                                                        </div>
-                                                      </div>
-
-                                                      {/* Actions */}
-                                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleEditBooking(booking)}>
-                                                          <Edit2 className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => handleDeleteBooking(booking)}>
-                                                          <Trash2 className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                      </div>
-
-                                                      {/* Notes indicator */}
-                                                      {booking.notes && (
-                                                        <TooltipProvider>
-                                                          <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                              <div className="ml-2">
-                                                                <Badge variant="outline" className="text-xs cursor-help">
-                                                                  📝
-                                                                </Badge>
-                                                              </div>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent className="max-w-xs">
-                                                              <p className="font-medium mb-1">Notes:</p>
-                                                              <p className="text-sm">{booking.notes}</p>
-                                                            </TooltipContent>
-                                                          </Tooltip>
-                                                        </TooltipProvider>
-                                                      )}
-                                                    </div>
-                                                  ))}
-                                                </div>
-
-                                                {/* Payment Transaction ID if shared */}
                                                 {stationBookings[0]?.payment_txn_id && (
                                                   <div className="px-3 pb-2 text-xs text-muted-foreground font-mono border-t pt-2">
                                                     Txn: {stationBookings[0].payment_txn_id.substring(0, 20)}...
@@ -3822,8 +3974,113 @@ export default function BookingManagement() {
                                     </CollapsibleContent>
                                   </Collapsible>
                                 );
-                              })}
-                            </div>
+                              })
+                            ) : (
+                              (stationListRowsByDate[date] || []).map(row => {
+                                const stationKey = `${date}::${row.id}`;
+                                const isStationExpanded = expandedStations.has(stationKey);
+                                const n = row.bookings.length;
+                                const uniqueCustomers = new Set(row.bookings.map(b => b.customer.name || 'Unknown')).size;
+
+                                return (
+                                  <Collapsible key={stationKey} open={isStationExpanded}>
+                                    <CollapsibleTrigger
+                                      onClick={() => toggleStationExpansion(stationKey)}
+                                      className={cn(
+                                        'flex items-center gap-2 w-full p-2 text-left rounded border transition-colors',
+                                        n === 0
+                                          ? 'bg-muted/20 border-dashed border-muted-foreground/25 opacity-80 hover:bg-muted/30'
+                                          : 'bg-background hover:bg-muted/50'
+                                      )}
+                                    >
+                                      {isStationExpanded ? (
+                                        <ChevronDown className="h-3 w-3" />
+                                      ) : (
+                                        <ChevronRight className="h-3 w-3" />
+                                      )}
+                                      <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                                      <span className="font-medium">{row.name}</span>
+                                      <Badge variant="outline" className="text-[10px] shrink-0">
+                                        {getStationTypeLabel(row.type)}
+                                      </Badge>
+                                      <div className="ml-auto flex items-center gap-2 shrink-0">
+                                        <Badge variant="secondary" className="text-xs">
+                                          {n} booking{n !== 1 ? 's' : ''}
+                                        </Badge>
+                                        {n > 0 && (
+                                          <Badge variant="outline" className="text-xs">
+                                            {uniqueCustomers} customer{uniqueCustomers !== 1 ? 's' : ''}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    </CollapsibleTrigger>
+
+                                    <CollapsibleContent>
+                                      {n === 0 ? (
+                                        <p className="text-sm text-muted-foreground py-2 pl-7">No bookings for this station on this date.</p>
+                                      ) : (
+                                        <div className="ml-4 mt-2 space-y-2 border-l border-border/60 pl-3">
+                                          {Array.from(
+                                            row.bookings.reduce((acc, b) => {
+                                              const name = b.customer.name || 'Unknown';
+                                              if (!acc.has(name)) acc.set(name, []);
+                                              acc.get(name)!.push(b);
+                                              return acc;
+                                            }, new Map<string, Booking[]>())
+                                          )
+                                            .sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+                                            .map(([customerName, custBookings]) => {
+                                              const custKey = `${stationKey}::${customerName}`;
+                                              const isCustOpen = expandedStationCustomers.has(custKey);
+                                              const slots = [...custBookings].sort((a, b) =>
+                                                a.start_time.localeCompare(b.start_time)
+                                              );
+                                              const couponCount = custBookings.filter(b => b.coupon_code).length;
+
+                                              return (
+                                                <Collapsible key={custKey} open={isCustOpen}>
+                                                  <CollapsibleTrigger
+                                                    onClick={() => toggleStationCustomerExpansion(custKey)}
+                                                    className="flex items-center gap-2 w-full p-2 text-left rounded-md bg-muted/25 border border-border/50 hover:bg-muted/40 transition-colors"
+                                                  >
+                                                    {isCustOpen ? (
+                                                      <ChevronDown className="h-3 w-3" />
+                                                    ) : (
+                                                      <ChevronRight className="h-3 w-3" />
+                                                    )}
+                                                    <Users className="h-3 w-3" />
+                                                    <span className="font-medium">{customerName}</span>
+                                                    <span className="text-xs text-muted-foreground truncate max-w-[140px] sm:max-w-[220px]">
+                                                      {custBookings[0]?.customer.phone}
+                                                    </span>
+                                                    <div className="ml-auto flex items-center gap-1.5 shrink-0">
+                                                      <Badge variant="secondary" className="text-xs">
+                                                        {custBookings.length} slot{custBookings.length !== 1 ? 's' : ''}
+                                                      </Badge>
+                                                      {couponCount > 0 && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                          <Gift className="h-2 w-2 inline mr-0.5" />
+                                                          {couponCount}
+                                                        </Badge>
+                                                      )}
+                                                    </div>
+                                                  </CollapsibleTrigger>
+                                                  <CollapsibleContent>
+                                                    <div className="mt-2 space-y-2 rounded-md border border-border/40 bg-card/30 p-2">
+                                                      {renderBookingTimelineRows(slots)}
+                                                    </div>
+                                                  </CollapsibleContent>
+                                                </Collapsible>
+                                              );
+                                            })}
+                                        </div>
+                                      )}
+                                    </CollapsibleContent>
+                                  </Collapsible>
+                                );
+                              })
+                            )}
+                          </div>
                         </CollapsibleContent>
                       </Collapsible>
                       );
