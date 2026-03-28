@@ -11,11 +11,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  buildBookingRowsFromRazorpayPayload,
+  getSlotsPerStation,
+} from "@/utils/bookingSlotMerge";
 
 type PendingBooking = {
   selectedStations: string[];
   selectedDateISO: string;
-  slots: Array<{ start_time: string; end_time: string }>;
+  /** Legacy: same slots applied to every station */
+  slots?: Array<{ start_time: string; end_time: string }>;
+  slotsByStation?: Record<string, Array<{ start_time: string; end_time: string }>>;
+  playerCounts?: Record<string, number>;
   duration: number;
   customer: { id?: string; name: string; phone: string; email?: string };
   pricing: { original: number; discount: number; final: number; coupons: string };
@@ -381,9 +388,9 @@ export default function PublicPaymentSuccess() {
         }
       }
       
-      // Validate booking slots for conflicts BEFORE creating
+      const slotsByStationForCheck = getSlotsPerStation(pb);
       for (const station_id of pb.selectedStations) {
-        for (const slot of pb.slots) {
+        for (const slot of slotsByStationForCheck[station_id] || []) {
           const { data: hasOverlap, error: overlapError } = await (supabase as any).rpc('check_booking_overlap', {
             p_station_id: station_id,
             p_booking_date: pb.selectedDateISO,
@@ -394,58 +401,33 @@ export default function PublicPaymentSuccess() {
 
           if (overlapError) {
             console.error("Error checking booking overlap:", overlapError);
-            // Continue - database trigger will catch it
           } else if (hasOverlap === true) {
-            // Check if it's the same payment
             const { data: existingBooking } = await supabase
               .from("bookings")
               .select("id, payment_txn_id")
               .eq("station_id", station_id)
               .eq("booking_date", pb.selectedDateISO)
-              .eq("start_time", slot.start_time)
-              .eq("end_time", slot.end_time)
               .eq("payment_txn_id", paymentId)
               .in("status", ["confirmed", "in-progress"])
               .limit(1)
               .maybeSingle();
 
             if (existingBooking) {
-              // Same payment, booking already exists
               console.log("✅ Booking already exists for this payment");
-              // Reload to show existing booking
               window.location.reload();
               return;
-            } else {
-              // Real conflict - show error
-              setStatus("failed");
-              setMsg(`This time slot is already booked. Please contact support.`);
-              return;
             }
+            setStatus("failed");
+            setMsg(`This time slot is already booked. Please contact support.`);
+            return;
           }
         }
       }
 
-      const rows: any[] = [];
-      const totalBookings = pb.selectedStations.length * pb.slots.length;
-      pb.selectedStations.forEach((station_id) => {
-        pb.slots.forEach((slot) => {
-          rows.push({
-            station_id,
-            customer_id: customerId!,
-            booking_date: pb.selectedDateISO,
-            start_time: slot.start_time,
-            end_time: slot.end_time,
-            duration: pb.duration,
-            status: "confirmed",
-            original_price: pb.pricing.original / totalBookings,
-            discount_percentage: pb.pricing.discount > 0 ? (pb.pricing.discount / pb.pricing.original) * 100 : null,
-            final_price: pb.pricing.final / totalBookings,
-            coupon_code: pb.pricing.coupons || null,
-            payment_mode: "razorpay",
-            payment_txn_id: paymentId,
-            notes: `Razorpay Order ID: ${orderId}`,
-          });
-        });
+      const rows = buildBookingRowsFromRazorpayPayload(pb, customerId!, {
+        payment_mode: "razorpay",
+        payment_txn_id: paymentId,
+        notes: `Razorpay Order ID: ${orderId}`,
       });
 
       const { error: bErr, data: insertedBookings } = await supabase
@@ -526,9 +508,12 @@ export default function PublicPaymentSuccess() {
 
       const stationNames = stationsData?.map(s => s.name) || pb.selectedStations;
 
-      // 7) Prepare confirmation data
-      const firstSlot = pb.slots[0];
-      const lastSlot = pb.slots[pb.slots.length - 1];
+      // 7) Prepare confirmation data (overall time span from raw half-hour selections)
+      const sortedSlots = Object.values(getSlotsPerStation(pb))
+        .flat()
+        .sort((a, b) => a.start_time.localeCompare(b.start_time));
+      const firstSlot = sortedSlots[0];
+      const lastSlot = sortedSlots[sortedSlots.length - 1];
       
       const confirmationData = {
         bookingId: insertedBookings?.[0]?.id.substring(0, 8).toUpperCase() || "N/A",

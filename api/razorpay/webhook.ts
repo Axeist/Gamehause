@@ -1,4 +1,6 @@
 // Using Node.js runtime to use Razorpay SDK and Supabase client
+import { buildBookingRowsFromRazorpayPayload } from "../lib/bookingSlotMerge";
+
 export const config = {
   maxDuration: 30, // 30 seconds
 };
@@ -188,33 +190,11 @@ async function createBookingFromWebhook(paymentId: string, orderId: string, book
     return { success: true, bookingId: existingBooking.id, alreadyExists: true };
   }
   
-  // 3. Create bookings (one per station per slot)
-  const rows: any[] = [];
-  const totalBookings = bookingData.selectedStations.length * bookingData.slots.length;
-  
-  bookingData.selectedStations.forEach((station_id: string) => {
-    bookingData.slots.forEach((slot: any) => {
-      const playerCount = (bookingData.playerCounts && bookingData.playerCounts[station_id]) ?? 1;
-      rows.push({
-        station_id,
-        customer_id: customerId!,
-        booking_date: bookingData.selectedDateISO,
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-        duration: bookingData.duration,
-        status: "confirmed",
-        player_count: playerCount,
-        original_price: bookingData.pricing.original / totalBookings,
-        discount_percentage: bookingData.pricing.discount > 0 
-          ? (bookingData.pricing.discount / bookingData.pricing.original) * 100 
-          : null,
-        final_price: bookingData.pricing.final / totalBookings,
-        coupon_code: bookingData.pricing.coupons || null,
-        payment_mode: "razorpay",
-        payment_txn_id: paymentId,
-        notes: `Razorpay Order ID: ${orderId}`,
-      });
-    });
+  // 3. Create bookings — one row per contiguous block per station (e.g. two 30-min → one 60-min row)
+  const rows = buildBookingRowsFromRazorpayPayload(bookingData, customerId!, {
+    payment_mode: "razorpay",
+    payment_txn_id: paymentId,
+    notes: `Razorpay Order ID: ${orderId}`,
   });
   
   const { error: bErr, data: insertedBookings } = await supabase

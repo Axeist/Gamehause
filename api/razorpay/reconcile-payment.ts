@@ -1,6 +1,8 @@
 // Reconciliation API - Verifies payment status with Razorpay and creates booking if successful
 // This is the core solution: check Razorpay API directly instead of relying on webhooks
 // Using Node.js runtime to use Razorpay SDK and Supabase client
+import { buildBookingRowsFromRazorpayPayload, getSlotsPerStation } from "../lib/bookingSlotMerge";
+
 export const config = {
   maxDuration: 30, // 30 seconds
 };
@@ -209,9 +211,10 @@ async function createBookingFromPayment(pendingPayment: any) {
     return { success: true, bookingId: existingBooking.id, alreadyExists: true };
   }
   
-  // 3. Validate booking slots for conflicts BEFORE creating
+  // 3. Validate booking slots for conflicts BEFORE creating (per raw 30-min segment)
+  const slotsByStationForCheck = getSlotsPerStation(bookingData);
   for (const station_id of bookingData.selectedStations) {
-    for (const slot of bookingData.slots) {
+    for (const slot of slotsByStationForCheck[station_id] || []) {
       const { data: hasOverlap, error: overlapError } = await (supabase as any).rpc('check_booking_overlap', {
         p_station_id: station_id,
         p_booking_date: bookingData.selectedDateISO,
@@ -225,19 +228,18 @@ async function createBookingFromPayment(pendingPayment: any) {
         // Continue anyway - database trigger will catch it
       } else if (hasOverlap === true) {
         console.log("⚠️ Booking conflict detected, checking if it's the same payment...");
-        // Check if conflict is from the same payment (already created)
+        // Any row for this payment on this station/date (covers merged multi-slot bookings from webhook)
         const { data: existingBooking } = await supabase
           .from("bookings")
           .select("id, payment_txn_id")
           .eq("station_id", station_id)
           .eq("booking_date", bookingData.selectedDateISO)
-          .eq("start_time", slot.start_time)
-          .eq("end_time", slot.end_time)
+          .eq("payment_txn_id", pendingPayment.razorpay_payment_id)
           .in("status", ["confirmed", "in-progress"])
           .limit(1)
           .maybeSingle();
 
-        if (existingBooking && existingBooking.payment_txn_id === pendingPayment.razorpay_payment_id) {
+        if (existingBooking) {
           console.log("✅ Conflict is from same payment (already created), skipping...");
           // Update pending payment status - INCLUDING expired payments
           // This fixes the issue where expired payments with successful bookings show as expired
@@ -299,33 +301,11 @@ async function createBookingFromPayment(pendingPayment: any) {
     }
   }
 
-  // 4. Create bookings (one per station per slot)
-  const rows: any[] = [];
-  const totalBookings = bookingData.selectedStations.length * bookingData.slots.length;
-  
-  bookingData.selectedStations.forEach((station_id: string) => {
-    bookingData.slots.forEach((slot: any) => {
-      const playerCount = (bookingData.playerCounts && bookingData.playerCounts[station_id]) ?? 1;
-      rows.push({
-        station_id,
-        customer_id: customerId!,
-        booking_date: bookingData.selectedDateISO,
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-        duration: bookingData.duration,
-        status: "confirmed",
-        player_count: playerCount,
-        original_price: bookingData.pricing.original / totalBookings,
-        discount_percentage: bookingData.pricing.discount > 0 
-          ? (bookingData.pricing.discount / bookingData.pricing.original) * 100 
-          : null,
-        final_price: bookingData.pricing.final / totalBookings,
-        coupon_code: bookingData.pricing.coupons || null,
-        payment_mode: "razorpay",
-        payment_txn_id: pendingPayment.razorpay_payment_id,
-        notes: `Razorpay Order ID: ${pendingPayment.razorpay_order_id}`,
-      });
-    });
+  // 4. Create bookings — contiguous 30-min slots merged into one row per block per station
+  const rows = buildBookingRowsFromRazorpayPayload(bookingData, customerId!, {
+    payment_mode: "razorpay",
+    payment_txn_id: pendingPayment.razorpay_payment_id,
+    notes: `Razorpay Order ID: ${pendingPayment.razorpay_order_id}`,
   });
   
   // Double-check before inserting (race condition protection)

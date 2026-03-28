@@ -56,6 +56,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format, parse } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { mergeContiguousSlots } from "@/utils/bookingSlotMerge";
 
 /* =========================
    Types
@@ -905,7 +906,6 @@ export default function PublicBooking() {
       }
 
       const couponCodes = appliedCoupon ? appliedCoupon.code : "";
-      const bookingDuration = 30; // 30 minutes per slot
       
       // Validate booking slots for conflicts BEFORE creating
       for (const stationId of selectedStations) {
@@ -994,27 +994,31 @@ export default function PublicBooking() {
         return sum + count;
       }, 0);
 
-      // Create booking rows by station-specific slot selection
+      // One DB row per contiguous block (e.g. 1:00–1:30 + 1:30–2:00 → 1:00–2:00, 60 min)
       const rows: any[] = [];
       selectedStations.forEach((stationId) => {
         const slotsToBook = stationSlotRanges[stationId]?.length
           ? stationSlotRanges[stationId]
           : (stationSlotSelections[stationId] ? [stationSlotSelections[stationId]!] : []);
-        slotsToBook.forEach((slot) => {
-          const station = stations.find(s => s.id === stationId);
-          const pCount = station?.type === 'ps5' ? (playerCounts[stationId] ?? 1) : 1;
+        const merged = mergeContiguousSlots(
+          slotsToBook.map((s) => ({ start_time: s.start_time, end_time: s.end_time }))
+        );
+        const station = stations.find((s) => s.id === stationId);
+        const pCount = station?.type === "ps5" ? (playerCounts[stationId] ?? 1) : 1;
+        merged.forEach((block) => {
           rows.push({
             station_id: stationId,
             customer_id: customerId!,
             booking_date: format(selectedDate, "yyyy-MM-dd"),
-            start_time: slot.start_time,
-            end_time: slot.end_time,
-            duration: bookingDuration,
+            start_time: block.start_time,
+            end_time: block.end_time,
+            duration: 30 * block.slotCount,
             status: "confirmed",
             player_count: pCount,
-            original_price: totalSlots > 0 ? originalPrice / totalSlots : 0,
+            original_price:
+              totalSlots > 0 ? (originalPrice / totalSlots) * block.slotCount : 0,
             discount_percentage: discount > 0 ? (discount / originalPrice) * 100 : null,
-            final_price: totalSlots > 0 ? finalPrice / totalSlots : 0,
+            final_price: totalSlots > 0 ? (finalPrice / totalSlots) * block.slotCount : 0,
             coupon_code: couponCodes || null,
           });
         });

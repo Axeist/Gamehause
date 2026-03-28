@@ -1,4 +1,6 @@
 // Using Node.js runtime to use Razorpay SDK and Supabase client
+import { buildBookingRowsFromRazorpayPayload, getSlotsPerStation } from "../lib/bookingSlotMerge";
+
 export const config = {
   maxDuration: 30, // 30 seconds
 };
@@ -188,11 +190,9 @@ async function createBookingInCallback(paymentId: string, orderId: string) {
       }
     }
     
-    // Create bookings
-    const rows: any[] = [];
-    // Validate booking slots for conflicts BEFORE creating
+    const slotsByStationForCheck = getSlotsPerStation(bookingData);
     for (const station_id of bookingData.selectedStations) {
-      for (const slot of bookingData.slots) {
+      for (const slot of slotsByStationForCheck[station_id] || []) {
         const { data: hasOverlap, error: overlapError } = await (supabase as any).rpc('check_booking_overlap', {
           p_station_id: station_id,
           p_booking_date: bookingData.selectedDateISO,
@@ -203,57 +203,31 @@ async function createBookingInCallback(paymentId: string, orderId: string) {
 
         if (overlapError) {
           console.error("Error checking booking overlap:", overlapError);
-          // Continue - database trigger will catch it
         } else if (hasOverlap === true) {
-          // Check if it's the same payment
           const { data: existingBooking } = await supabase
             .from("bookings")
             .select("id, payment_txn_id")
             .eq("station_id", station_id)
             .eq("booking_date", bookingData.selectedDateISO)
-            .eq("start_time", slot.start_time)
-            .eq("end_time", slot.end_time)
             .eq("payment_txn_id", paymentId)
             .in("status", ["confirmed", "in-progress"])
             .limit(1)
             .maybeSingle();
 
           if (existingBooking) {
-            // Same payment, booking already exists
             console.log("✅ Booking already exists for this payment in callback");
             return { success: true, bookingId: existingBooking.id, alreadyExists: true };
-          } else {
-            // Real conflict
-            console.error("❌ Booking conflict in callback: Another booking exists");
-            return { success: false, error: "Booking conflict: Time slot is already booked" };
           }
+          console.error("❌ Booking conflict in callback: Another booking exists");
+          return { success: false, error: "Booking conflict: Time slot is already booked" };
         }
       }
     }
 
-    const totalBookings = bookingData.selectedStations.length * bookingData.slots.length;
-    
-    bookingData.selectedStations.forEach((station_id: string) => {
-      bookingData.slots.forEach((slot: any) => {
-        rows.push({
-          station_id,
-          customer_id: customerId!,
-          booking_date: bookingData.selectedDateISO,
-          start_time: slot.start_time,
-          end_time: slot.end_time,
-          duration: bookingData.duration,
-          status: "confirmed",
-          original_price: bookingData.pricing.original / totalBookings,
-          discount_percentage: bookingData.pricing.discount > 0 
-            ? (bookingData.pricing.discount / bookingData.pricing.original) * 100 
-            : null,
-          final_price: bookingData.pricing.final / totalBookings,
-          coupon_code: bookingData.pricing.coupons || null,
-          payment_mode: "razorpay",
-          payment_txn_id: paymentId,
-          notes: `Razorpay Order ID: ${orderId}`,
-        });
-      });
+    const rows = buildBookingRowsFromRazorpayPayload(bookingData, customerId!, {
+      payment_mode: "razorpay",
+      payment_txn_id: paymentId,
+      notes: `Razorpay Order ID: ${orderId}`,
     });
     
     const { error: bErr, data: insertedBookings } = await supabase

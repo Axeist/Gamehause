@@ -3,6 +3,8 @@
 // Checks all pending payments and reconciles them automatically
 // Using Node.js runtime to use Razorpay SDK and Supabase client
 // Note: This is NOT a Vercel Cron job - it's called from the browser
+import { buildBookingRowsFromRazorpayPayload, getSlotsPerStation } from "../lib/bookingSlotMerge";
+
 export const config = {
   maxDuration: 60, // 60 seconds for batch processing
 };
@@ -212,8 +214,9 @@ async function createBookingFromPayment(pendingPayment: any) {
   }
   
   // 3. Validate booking slots for conflicts BEFORE creating
+  const slotsByStationForCheck = getSlotsPerStation(bookingData);
   for (const station_id of bookingData.selectedStations) {
-    for (const slot of bookingData.slots) {
+    for (const slot of slotsByStationForCheck[station_id] || []) {
       const { data: hasOverlap, error: overlapError } = await (supabase as any).rpc('check_booking_overlap', {
         p_station_id: station_id,
         p_booking_date: bookingData.selectedDateISO,
@@ -226,14 +229,11 @@ async function createBookingFromPayment(pendingPayment: any) {
         console.error("Error checking booking overlap:", overlapError);
         // Continue - database trigger will catch it
       } else if (hasOverlap === true) {
-        // Check if it's the same payment
         const { data: existingBooking } = await supabase
           .from("bookings")
           .select("id, payment_txn_id")
           .eq("station_id", station_id)
           .eq("booking_date", bookingData.selectedDateISO)
-          .eq("start_time", slot.start_time)
-          .eq("end_time", slot.end_time)
           .eq("payment_txn_id", pendingPayment.razorpay_payment_id)
           .in("status", ["confirmed", "in-progress"])
           .limit(1)
@@ -267,31 +267,11 @@ async function createBookingFromPayment(pendingPayment: any) {
     }
   }
 
-  // 4. Create bookings
-  const rows: any[] = [];
-  const totalBookings = bookingData.selectedStations.length * bookingData.slots.length;
-  
-  bookingData.selectedStations.forEach((station_id: string) => {
-    bookingData.slots.forEach((slot: any) => {
-      rows.push({
-        station_id,
-        customer_id: customerId!,
-        booking_date: bookingData.selectedDateISO,
-        start_time: slot.start_time,
-        end_time: slot.end_time,
-        duration: bookingData.duration,
-        status: "confirmed",
-        original_price: bookingData.pricing.original / totalBookings,
-        discount_percentage: bookingData.pricing.discount > 0 
-          ? (bookingData.pricing.discount / bookingData.pricing.original) * 100 
-          : null,
-        final_price: bookingData.pricing.final / totalBookings,
-        coupon_code: bookingData.pricing.coupons || null,
-        payment_mode: "razorpay",
-        payment_txn_id: pendingPayment.razorpay_payment_id,
-        notes: `Razorpay Order ID: ${pendingPayment.razorpay_order_id}`,
-      });
-    });
+  // 4. Create bookings — contiguous slots merged per station
+  const rows = buildBookingRowsFromRazorpayPayload(bookingData, customerId!, {
+    payment_mode: "razorpay",
+    payment_txn_id: pendingPayment.razorpay_payment_id,
+    notes: `Razorpay Order ID: ${pendingPayment.razorpay_order_id}`,
   });
   
   const { error: bErr, data: insertedBookings } = await supabase

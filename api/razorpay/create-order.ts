@@ -1,6 +1,8 @@
 // Using Node.js runtime to use Razorpay SDK
 // export const config = { runtime: "edge" };
 // Increase timeout to 30 seconds to handle Razorpay API calls
+import { getSlotsPerStation } from "../lib/bookingSlotMerge";
+
 export const config = {
   maxDuration: 30, // 30 seconds (default is 10s, max is 60s for Pro plan)
 };
@@ -248,11 +250,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
           }
           
-          // Format timeslots for display
-          const timeslots = bookingData.slots ? bookingData.slots.map((slot: any) => ({
+          const slotsByStation = getSlotsPerStation(bookingData);
+          const timeslots = Object.values(slotsByStation).flat().map((slot) => ({
             start_time: slot.start_time,
             end_time: slot.end_time,
-          })) : [];
+          }));
           
           const { error: pendingError } = await supabase
             .from("pending_payments")
