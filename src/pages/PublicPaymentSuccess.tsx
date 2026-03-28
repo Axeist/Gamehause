@@ -15,6 +15,7 @@ import {
   buildBookingRowsFromRazorpayPayload,
   getSlotsPerStation,
 } from "@/utils/bookingSlotMerge";
+import { compareBookingSlotIntervals } from "@/utils/bookingSlotOrder";
 
 type PendingBooking = {
   selectedStations: string[];
@@ -511,7 +512,7 @@ export default function PublicPaymentSuccess() {
       // 7) Prepare confirmation data (overall time span from raw half-hour selections)
       const sortedSlots = Object.values(getSlotsPerStation(pb))
         .flat()
-        .sort((a, b) => a.start_time.localeCompare(b.start_time));
+        .sort(compareBookingSlotIntervals);
       const firstSlot = sortedSlots[0];
       const lastSlot = sortedSlots[sortedSlots.length - 1];
       

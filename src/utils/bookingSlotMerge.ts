@@ -3,6 +3,8 @@
  * so staff/admin see one booking row (e.g. 1:00–2:00 PM) while customers still pick half-hour slots.
  */
 
+import { compareBookingSlotIntervals } from "@/utils/bookingSlotOrder";
+
 /** True when end of slot A is exactly the start of slot B (handles fractional seconds). */
 export function areSlotTimesContiguous(endTime: string, startTime: string): boolean {
   const toSecs = (t: string) => {
@@ -19,7 +21,7 @@ export type SlotInterval = { start_time: string; end_time: string };
 export type MergedSlot = SlotInterval & { slotCount: number };
 
 function sortByStart(a: SlotInterval, b: SlotInterval): number {
-  return a.start_time.localeCompare(b.start_time);
+  return compareBookingSlotIntervals(a, b);
 }
 
 /** Deduplicate by start+end, then merge runs where end_time === next start_time. */

@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { isBookingSlotElapsed } from "@/utils/bookingSlotOrder";
 
 export type StationType = "ps5" | "8ball" | "foosball";
 
@@ -142,15 +143,8 @@ export function markElapsedIfToday(dateStr: string, slots: TimeSlot[]): TimeSlot
   if (dateStr !== todayStr) return slots;
 
   const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-
   return slots.map((slot) => {
-    const [hhS, mmS] = slot.start_time.split(":");
-    const hh = Number(hhS);
-    const mm = Number(mmS);
-    const isPast = hh < currentHour || (hh === currentHour && mm <= currentMinute);
-    if (!isPast) return slot;
+    if (!isBookingSlotElapsed(dateStr, slot.start_time, now)) return slot;
     return { ...slot, is_available: false, status: "elapsed" };
   });
 }

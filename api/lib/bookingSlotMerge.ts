@@ -1,6 +1,14 @@
 /**
  * Keep in sync with src/utils/bookingSlotMerge.ts (serverless cannot import from src reliably).
  */
+function bookingSlotSortMinutes(timeStr: string): number {
+  const clean = (timeStr || "").trim().replace(/\.\d+/, "");
+  const [h = 0, m = 0] = clean.split(":").map((x) => parseInt(x, 10) || 0);
+  let mins = h * 60 + m;
+  if (h < 11) mins += 24 * 60;
+  return mins;
+}
+
 export function areSlotTimesContiguous(endTime: string, startTime: string): boolean {
   const toSecs = (t: string) => {
     const clean = (t || "").trim().replace(/\.\d+/, "").replace(/Z$/i, "");
@@ -16,7 +24,7 @@ export type SlotInterval = { start_time: string; end_time: string };
 export type MergedSlot = SlotInterval & { slotCount: number };
 
 function sortByStart(a: SlotInterval, b: SlotInterval): number {
-  return a.start_time.localeCompare(b.start_time);
+  return bookingSlotSortMinutes(a.start_time) - bookingSlotSortMinutes(b.start_time);
 }
 
 export function mergeContiguousSlots(slots: SlotInterval[]): MergedSlot[] {

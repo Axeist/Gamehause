@@ -31,6 +31,7 @@ import { PUBLIC_BOOKING_URL } from '@/config/brand';
 import { getPublicBookingEnabled, setPublicBookingEnabled } from '@/services/bookingCouponConfig';
 import { cn } from '@/lib/utils';
 import { areSlotTimesContiguous } from '@/utils/bookingSlotMerge';
+import { compareBookingSlotIntervals, minutesFromBookingDayOpen } from '@/utils/bookingSlotOrder';
 
 interface BookingView {
   id: string;
@@ -166,6 +167,8 @@ interface CalendarBooking extends Booking {
   endMinute: number;
   heightPercentage: number;
   topPercentage: number;
+  viewStartMin: number;
+  viewEndMin: number;
 }
 
 function customerMergeKey(b: Booking): string {
@@ -758,7 +761,7 @@ export default function BookingManagement() {
 
   // NEW: Function to generate calendar time slots
   const generateTimeSlots = () => {
-    const slots = [];
+    const slots: { hour: number; label: string; fullLabel: string; rowKey: string }[] = [];
     for (let hour = 11; hour <= 23; hour++) {
       const displayHour = hour > 12 ? hour - 12 : hour;
       const ampm = hour < 12 ? 'AM' : 'PM';
@@ -766,7 +769,17 @@ export default function BookingManagement() {
       slots.push({
         hour,
         label: timeLabel,
-        fullLabel: `${hour.toString().padStart(2, '0')}:00:00`
+        fullLabel: `${hour.toString().padStart(2, '0')}:00:00`,
+        rowKey: `d${hour}`,
+      });
+    }
+    for (const hour of [0, 1, 2] as const) {
+      const label = hour === 0 ? '12:00 AM' : `${hour}:00 AM`;
+      slots.push({
+        hour,
+        label,
+        fullLabel: `${String(hour).padStart(2, '0')}:00:00`,
+        rowKey: `n${hour}`,
       });
     }
     return slots;
@@ -783,38 +796,51 @@ export default function BookingManagement() {
     }
     const mergedDay: Booking[] = [];
     for (const list of byStationCustomer.values()) {
-      list.sort((a, c) => a.start_time.localeCompare(c.start_time));
+      list.sort(compareBookingSlotIntervals);
       mergedDay.push(...mergeContiguousBookingsForStaffList(list));
     }
-    mergedDay.sort((a, b) => a.start_time.localeCompare(b.start_time));
+    mergedDay.sort(compareBookingSlotIntervals);
 
-    return mergedDay.map(booking => {
-      const startTime = new Date(`2000-01-01T${booking.start_time}`);
-      const endTime = new Date(`2000-01-01T${booking.end_time}`);
-      
-      const startHour = startTime.getHours();
-      const endHour = endTime.getHours();
-      const startMinute = startTime.getMinutes();
-      const endMinute = endTime.getMinutes();
-      
-      // Calculate position and height as percentage of the calendar view (11 AM to 11 PM = 12 hours)
-      const startMinutesFromEleven = (startHour - 11) * 60 + startMinute;
-      const endMinutesFromEleven = (endHour - 11) * 60 + endMinute;
-      const totalMinutesInView = 12 * 60; // 11 AM to 11 PM
-      
-      const topPercentage = Math.max(0, (startMinutesFromEleven / totalMinutesInView) * 100);
-      const heightPercentage = Math.min(100 - topPercentage, ((endMinutesFromEleven - startMinutesFromEleven) / totalMinutesInView) * 100);
-      
-      return {
-        ...booking,
-        startHour,
-        endHour,
-        startMinute,
-        endMinute,
-        topPercentage,
-        heightPercentage
-      };
-    }).filter(booking => booking.startHour >= 11 && booking.startHour <= 23);
+    const totalMinutesInView = 15 * 60; // 11:00 → 02:00
+
+    return mergedDay
+      .map((booking) => {
+        const viewStartMin = minutesFromBookingDayOpen(booking.start_time);
+        const viewEndMin = Math.max(
+          viewStartMin,
+          minutesFromBookingDayOpen(booking.end_time)
+        );
+
+        const startTime = new Date(`2000-01-01T${booking.start_time}`);
+        const endTime = new Date(`2000-01-01T${booking.end_time}`);
+
+        const startHour = startTime.getHours();
+        const endHour = endTime.getHours();
+        const startMinute = startTime.getMinutes();
+        const endMinute = endTime.getMinutes();
+
+        const topPercentage = Math.max(0, (viewStartMin / totalMinutesInView) * 100);
+        const rawHeight = ((viewEndMin - viewStartMin) / totalMinutesInView) * 100;
+        const heightPercentage = Math.min(100 - topPercentage, Math.max(0, rawHeight));
+
+        return {
+          ...booking,
+          startHour,
+          endHour,
+          startMinute,
+          endMinute,
+          topPercentage,
+          heightPercentage,
+          viewStartMin,
+          viewEndMin,
+        };
+      })
+      .filter(
+        (booking) =>
+          booking.viewEndMin > 0 &&
+          booking.viewStartMin < totalMinutesInView &&
+          booking.viewEndMin > booking.viewStartMin
+      );
   }, [allBookings, selectedCalendarDate]);
 
   const toggleCalendarBookingExpansion = (bookingId: string) => {
@@ -896,7 +922,7 @@ export default function BookingManagement() {
               <div className="w-20 border-r border-border bg-muted/20">
                 <div className="h-12 border-b border-border"></div> {/* Header spacer */}
                 {timeSlots.map(slot => (
-                  <div key={slot.hour} className="h-16 border-b border-border flex items-start justify-end pr-3 pt-1">
+                  <div key={slot.rowKey} className="h-16 border-b border-border flex items-start justify-end pr-3 pt-1">
                     <span className="text-sm font-medium text-muted-foreground">
                       {slot.label}
                     </span>
@@ -910,7 +936,7 @@ export default function BookingManagement() {
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="h-12 border-b border-border bg-muted/10"></div> {/* Header spacer */}
                   {timeSlots.map(slot => (
-                    <div key={slot.hour} className="h-16 border-b border-border"></div>
+                    <div key={slot.rowKey} className="h-16 border-b border-border"></div>
                   ))}
                 </div>
                 
@@ -919,11 +945,12 @@ export default function BookingManagement() {
                   const now = new Date();
                   const currentHour = now.getHours();
                   const currentMinute = now.getMinutes();
-                  
-                  if (currentHour >= 11 && currentHour <= 23) {
-                    const minutesFromEleven = (currentHour - 11) * 60 + currentMinute;
-                    const topPosition = ((minutesFromEleven / (12 * 60)) * 100) + 3; // +3 for header offset
-                    
+                  const dayMins = 15 * 60;
+                  const nowMins = minutesFromBookingDayOpen(
+                    `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}:00`
+                  );
+                  if (nowMins >= 0 && nowMins <= dayMins) {
+                    const topPosition = (nowMins / dayMins) * 100;
                     return (
                       <div 
                         className="absolute left-0 right-0 h-0.5 bg-red-500 z-30 shadow-sm"
@@ -940,13 +967,13 @@ export default function BookingManagement() {
                 })()}
                 
                 {/* Bookings */}
-                <div className="relative" style={{ paddingTop: '3rem', height: `${12 * 4}rem` }}>
+                <div className="relative" style={{ paddingTop: '3rem', height: `${timeSlots.length * 4}rem` }}>
                   {calendarBookings.map((booking, index) => {
                     const isExpanded = expandedCalendarBookings.has(booking.id);
                     const overlappingBookings = calendarBookings.filter(b => 
                       b.id !== booking.id &&
-                      ((b.startHour < booking.endHour && b.endHour > booking.startHour) ||
-                       (booking.startHour < b.endHour && booking.endHour > b.startHour))
+                      b.viewStartMin < booking.viewEndMin &&
+                      booking.viewStartMin < b.viewEndMin
                     );
                     
                     const overlapCount = overlappingBookings.length;
@@ -3972,7 +3999,7 @@ export default function BookingManagement() {
                                           const sortedBookings = [...bookingsForCustomer].sort((a, b) => {
                                             const stationCompare = a.station.name.localeCompare(b.station.name);
                                             if (stationCompare !== 0) return stationCompare;
-                                            return a.start_time.localeCompare(b.start_time);
+                                            return compareBookingSlotIntervals(a, b);
                                           });
 
                                           const stationGroups = new Map<string, Booking[]>();
@@ -3987,7 +4014,7 @@ export default function BookingManagement() {
                                           return Array.from(stationGroups.entries()).map(([stationKey, stationBookings]) => {
                                             const [stationName, stationType] = stationKey.split('::');
                                             const displayStationBookings = mergeContiguousBookingsForStaffList(
-                                              [...stationBookings].sort((a, b) => a.start_time.localeCompare(b.start_time))
+                                              [...stationBookings].sort(compareBookingSlotIntervals)
                                             );
                                             const totalPrice = stationBookings.reduce((sum, b) => sum + (b.final_price || 0), 0);
                                             const hasUnpaid = stationBookings.some(
@@ -4136,9 +4163,7 @@ export default function BookingManagement() {
                                               const custKey = `${stationKey}::${customerName}`;
                                               const isCustOpen = expandedStationCustomers.has(custKey);
                                               const slots = mergeContiguousBookingsForStaffList(
-                                                [...custBookings].sort((a, b) =>
-                                                  a.start_time.localeCompare(b.start_time)
-                                                )
+                                                [...custBookings].sort(compareBookingSlotIntervals)
                                               );
                                               const couponCount = custBookings.filter(b => b.coupon_code).length;
 

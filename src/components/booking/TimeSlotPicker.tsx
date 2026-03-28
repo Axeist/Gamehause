@@ -3,6 +3,7 @@ import { flushSync } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { compareBookingSlotStart } from "@/utils/bookingSlotOrder";
 
 const formatTimeLabel = (timeString: string) => {
   const [h, m] = timeString.split(":").map(Number);
@@ -46,8 +47,9 @@ function isSlotDisabled(slot: TimeSlot): boolean {
 }
 
 /** Longest contiguous run by time (each end matches next start). */
-function longestContiguousSorted(sorted: TimeSlot[]): TimeSlot[] {
-  if (sorted.length === 0) return [];
+function longestContiguousSorted(slots: TimeSlot[]): TimeSlot[] {
+  if (slots.length === 0) return [];
+  const sorted = [...slots].sort((a, b) => compareBookingSlotStart(a.start_time, b.start_time));
   let best: TimeSlot[] = [];
   let cur: TimeSlot[] = [sorted[0]];
   for (let i = 1; i < sorted.length; i++) {
@@ -112,7 +114,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
         onSlotSelect(null, []);
         return;
       }
-      const sorted = [...next].sort((a, b) => a.start_time.localeCompare(b.start_time));
+      const sorted = [...next].sort((a, b) => compareBookingSlotStart(a.start_time, b.start_time));
       const plain = sorted.map(stripToTimeSlot);
       const range = longestContiguousSorted(plain);
       const first = range[0];
@@ -271,7 +273,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
 
   const numberOfSelectedSlots = selectedSlots.length;
   const contiguousForBooking = longestContiguousSorted(
-    [...selectedSlots].sort((a, b) => a.start_time.localeCompare(b.start_time)).map(stripToTimeSlot)
+    [...selectedSlots].sort((a, b) => compareBookingSlotStart(a.start_time, b.start_time)).map(stripToTimeSlot)
   );
   const resolvedRangeForWarning =
     selectedSlotRange.length > 0

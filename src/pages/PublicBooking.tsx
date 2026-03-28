@@ -57,6 +57,7 @@ import { cn } from "@/lib/utils";
 import { format, parse } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { mergeContiguousSlots } from "@/utils/bookingSlotMerge";
+import { compareBookingSlotIntervals, isBookingSlotElapsed } from "@/utils/bookingSlotOrder";
 
 /* =========================
    Types
@@ -533,11 +534,8 @@ export default function PublicBooking() {
       let slotsToSet = data || [];
       if (isToday) {
         const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
         slotsToSet = slotsToSet.map((slot: TimeSlot) => {
-          const [slotHour, slotMinute] = slot.start_time.split(":").map(Number);
-          const isPast = slotHour < currentHour || (slotHour === currentHour && slotMinute <= currentMinute);
+          const isPast = isBookingSlotElapsed(dateStr, slot.start_time, now);
           return isPast ? { ...slot, is_available: false, status: "elapsed" as const } : slot;
         });
       }
@@ -1051,7 +1049,7 @@ export default function PublicBooking() {
           ? stationSlotRanges[stationId]
           : (stationSlotSelections[stationId] ? [stationSlotSelections[stationId]!] : []);
         return slotsToBook;
-      }).sort((a, b) => a.start_time.localeCompare(b.start_time));
+      }).sort(compareBookingSlotIntervals);
       
       setBookingConfirmationData({
         bookingId: inserted[0].id.slice(0, 8).toUpperCase(),
