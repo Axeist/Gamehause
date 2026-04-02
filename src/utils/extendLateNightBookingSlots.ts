@@ -82,6 +82,13 @@ async function hasActiveOpenSessionOnDate(
   });
 }
 
+function currentBookingDayMinutes(now: Date): number {
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+  return minutesFromBookingDayOpen(`${hh}:${mm}:${ss}`);
+}
+
 /**
  * If the server only returns slots through 11:30 PM–12:00 AM, append 12:00 AM–2:00 AM
  * and set availability from bookings + open session (matches get_available_slots rules).
@@ -116,11 +123,13 @@ export async function appendLateNight30MinSlotsIfNeeded<
   const bIntervals = (bookings || []).map((b) => bookingWallInterval(b as { start_time: string; end_time: string }));
 
   const sessionBlocks = isToday ? await hasActiveOpenSessionOnDate(supabase, stationId, dateStr) : false;
+  const nowMins = isToday ? currentBookingDayMinutes(new Date()) : -1;
 
   const extra: T[] = LATE_NIGHT_30_MIN.map(([start, end]) => {
     const [s0, s1] = slotWallInterval(start, end);
     let is_available = true;
-    if (sessionBlocks) {
+    const sessionBlocksThisSlot = sessionBlocks && nowMins >= s0 && nowMins < s1;
+    if (sessionBlocksThisSlot) {
       is_available = false;
     } else {
       for (const [b0, b1] of bIntervals) {
