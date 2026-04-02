@@ -841,6 +841,7 @@ export default function PublicBooking() {
   const originalPrice = calculateOriginalPrice();
   const discount = calculateDiscount();
   const finalPrice = Math.max(originalPrice - discount, 0);
+  const couponRequiresOnlinePayment = Boolean(appliedCoupon);
 
   const isAllStationsAssigned = selectedStations.length > 0 && selectedStations.every((id) => !!stationSlotSelections[id]);
   const minSlotsRequired = payAtVenueEnabled ? 1 : 2;
@@ -854,6 +855,12 @@ export default function PublicBooking() {
   const isStationSelectionAvailable = () => isCustomerInfoComplete();
   const isTimeSelectionAvailable = () =>
     isStationSelectionAvailable() && selectedStations.length > 0;
+
+  useEffect(() => {
+    if (couponRequiresOnlinePayment && paymentMethod !== "razorpay") {
+      setPaymentMethod("razorpay");
+    }
+  }, [couponRequiresOnlinePayment, paymentMethod]);
 
   // ✅ UPDATED: createVenueBooking with duplicate check and Customer ID
   async function createVenueBooking() {
@@ -1319,6 +1326,11 @@ export default function PublicBooking() {
     }
     if (!customerInfo.name.trim()) {
       toast.error("Please enter your name");
+      return;
+    }
+    if (couponRequiresOnlinePayment && paymentMethod !== "razorpay") {
+      toast.error("Coupon bookings must be paid online.");
+      setPaymentMethod("razorpay");
       return;
     }
 
@@ -2128,9 +2140,15 @@ export default function PublicBooking() {
                     {payAtVenueEnabled ? (
                       <div className="grid grid-cols-2 gap-2">
                         <button
-                          onClick={() => setPaymentMethod("venue")}
+                          onClick={() => {
+                            if (!couponRequiresOnlinePayment) {
+                              setPaymentMethod("venue");
+                            }
+                          }}
+                          disabled={couponRequiresOnlinePayment}
                           className={cn(
                             "rounded-lg px-3 py-2 text-sm border transition-colors",
+                            couponRequiresOnlinePayment && "opacity-50 cursor-not-allowed",
                             paymentMethod === "venue"
                               ? "bg-white/10 border-white/20 text-white"
                               : "bg-black/20 border-white/10 text-gray-300 hover:bg-black/30"
@@ -2181,6 +2199,12 @@ export default function PublicBooking() {
                           <span>Instant Confirmation</span>
                         </div>
                       </div>
+                    )}
+                    {couponRequiresOnlinePayment && (
+                      <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                        Coupon applied: this booking is eligible for discount only with{" "}
+                        <span className="font-semibold text-amber-100">Pay Online</span>.
+                      </p>
                     )}
                   </div>
                 </div>
