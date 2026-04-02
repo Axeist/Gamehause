@@ -55,7 +55,6 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format, parse } from "date-fns";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { mergeContiguousSlots } from "@/utils/bookingSlotMerge";
 import { compareBookingSlotIntervals, isBookingSlotElapsed } from "@/utils/bookingSlotOrder";
 import { appendLateNight30MinSlotsIfNeeded } from "@/utils/extendLateNightBookingSlots";
@@ -156,7 +155,6 @@ const getBookingDuration = (stationIds: string[], stations: Station[]) => {
    Component
    ========================= */
 export default function PublicBooking() {
-  const isMobile = useIsMobile();
   const { hasBookingAccess, isLoading: subscriptionLoading } = useSubscription();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
@@ -244,7 +242,6 @@ export default function PublicBooking() {
   const prefillSpanRef = useRef<number | null>(null);
   const prefillNameRef = useRef<string | null>(null);
   const bookingSummaryRef = useRef<HTMLDivElement | null>(null);
-  const didAutoScrollRef = useRef(false);
 
   // Load Razorpay checkout script
   useEffect(() => {
@@ -367,18 +364,6 @@ export default function PublicBooking() {
       prefillSpanRef.current = null;
     }
   }, [availableSlots, selectedSlot]);
-
-  // If coming from chatbot on mobile, scroll to Booking Summary once slot is selected
-  useEffect(() => {
-    if (!isMobile) return;
-    if (!prefillAppliedRef.current) return;
-    if (didAutoScrollRef.current) return;
-    if (!selectedSlot) return;
-    didAutoScrollRef.current = true;
-    window.setTimeout(() => {
-      bookingSummaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 250);
-  }, [isMobile, selectedSlot]);
 
   useEffect(() => {
     const ch = supabase
