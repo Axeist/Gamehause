@@ -4171,7 +4171,15 @@ export default function BookingManagement() {
                                               return acc;
                                             }, new Map<string, Booking[]>())
                                           )
-                                            .sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+                                            .sort(([aName, aBookings], [bName, bBookings]) => {
+                                              const aFirst =
+                                                [...aBookings].sort(compareBookingSlotIntervals)[0]?.start_time ?? '';
+                                              const bFirst =
+                                                [...bBookings].sort(compareBookingSlotIntervals)[0]?.start_time ?? '';
+                                              const byTime = aFirst.localeCompare(bFirst);
+                                              if (byTime !== 0) return byTime;
+                                              return aName.localeCompare(bName, undefined, { sensitivity: 'base' });
+                                            })
                                             .map(([customerName, custBookings]) => {
                                               const custKey = `${stationKey}::${customerName}`;
                                               const isCustOpen = expandedStationCustomers.has(custKey);
@@ -4179,23 +4187,38 @@ export default function BookingManagement() {
                                                 [...custBookings].sort(compareBookingSlotIntervals)
                                               );
                                               const couponCount = custBookings.filter(b => b.coupon_code).length;
+                                              const timeSummary =
+                                                slots.length > 0
+                                                  ? slots
+                                                      .map(
+                                                        (s) =>
+                                                          `${formatTime(s.start_time)}–${formatTime(s.end_time)}`
+                                                      )
+                                                      .join(' · ')
+                                                  : '';
 
                                               return (
                                                 <Collapsible key={custKey} open={isCustOpen}>
                                                   <CollapsibleTrigger
                                                     onClick={() => toggleStationCustomerExpansion(custKey)}
-                                                    className="flex items-center gap-2 w-full p-2 text-left rounded-md bg-muted/25 border border-border/50 hover:bg-muted/40 transition-colors"
+                                                    className="flex flex-wrap items-center gap-x-2 gap-y-1 w-full p-2 text-left rounded-md bg-muted/25 border border-border/50 hover:bg-muted/40 transition-colors"
                                                   >
                                                     {isCustOpen ? (
-                                                      <ChevronDown className="h-3 w-3" />
+                                                      <ChevronDown className="h-3 w-3 shrink-0" />
                                                     ) : (
-                                                      <ChevronRight className="h-3 w-3" />
+                                                      <ChevronRight className="h-3 w-3 shrink-0" />
                                                     )}
-                                                    <Users className="h-3 w-3" />
+                                                    <Users className="h-3 w-3 shrink-0" />
                                                     <span className="font-medium">{customerName}</span>
                                                     <span className="text-xs text-muted-foreground truncate max-w-[140px] sm:max-w-[220px]">
                                                       {custBookings[0]?.customer.phone}
                                                     </span>
+                                                    {timeSummary && (
+                                                      <span className="flex items-center gap-1 text-xs font-medium text-orange-600 dark:text-orange-300 tabular-nums">
+                                                        <Clock className="h-3 w-3 shrink-0 opacity-80" />
+                                                        <span className="truncate max-w-[min(100%,18rem)]">{timeSummary}</span>
+                                                      </span>
+                                                    )}
                                                     <div className="ml-auto flex items-center gap-1.5 shrink-0">
                                                       <Badge variant="secondary" className="text-xs">
                                                         {slots.length} slot{slots.length !== 1 ? 's' : ''}
