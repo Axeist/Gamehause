@@ -1796,34 +1796,42 @@ export default function PublicBooking() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl">
+            <Card className="bg-white/5 backdrop-blur-xl border border-orange-500/15 rounded-2xl shadow-[0_0_40px_-12px_rgba(249,115,22,0.15)]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <div className="w-8 h-8 rounded-lg bg-gamehaus-magenta/20 ring-1 ring-white/10 flex items-center justify-center">
+                  <div
+                    className={cn(
+                      "w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
+                      isTimeSelectionAvailable()
+                        ? "bg-gradient-to-br from-orange-500/25 to-gamehaus-magenta/20 ring-1 ring-orange-500/35 shadow-[0_0_20px_-8px_rgba(249,115,22,0.4)]"
+                        : "bg-white/[0.06] ring-1 ring-white/10"
+                    )}
+                  >
                     {!isTimeSelectionAvailable() ? (
                       <Lock className="h-4 w-4 text-gray-500" />
                     ) : (
-                      <CalendarIcon className="h-4 w-4 text-gamehaus-magenta" />
+                      <CalendarIcon className="h-4 w-4 text-orange-300" />
                     )}
                   </div>
                   Step 3: Choose Date & Time
                   {isTimeSelectionAvailable() && isAllStationsAssigned && (
-                    <CheckCircle className="h-5 w-5 text-green-400 ml-auto" />
+                    <CheckCircle className="h-5 w-5 text-orange-400 ml-auto drop-shadow-[0_0_8px_rgba(249,115,22,0.55)]" />
                   )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {!isTimeSelectionAvailable() ? (
-                  <div className="bg-black/30 border border-white/10 rounded-xl p-6 text-center">
-                    <Lock className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+                  <div className="bg-black/30 border border-orange-500/15 rounded-xl p-6 text-center">
+                    <Lock className="h-8 w-8 text-orange-400/50 mx-auto mb-2" />
                     <p className="text-gray-400">
                       Select stations to unlock date and time selection
                     </p>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                     <div>
-                      <Label className="text-base font-medium text-gray-200">
+                      <Label className="text-base font-medium text-orange-100/90 flex items-center gap-2">
+                        <span className="inline-block h-1 w-1 rounded-full bg-orange-400" />
                         Choose Date
                       </Label>
                       <div className="mt-2">
@@ -1839,9 +1847,17 @@ export default function PublicBooking() {
                             
                             return compareDate < today;
                           }}
-                          className={cn(
-                            "rounded-xl border bg-black/30 border-white/10 pointer-events-auto"
-                          )}
+                          className="rounded-xl border bg-black/40 border-orange-500/20 pointer-events-auto"
+                          classNames={{
+                            day_selected:
+                              "bg-gradient-to-br from-orange-500 to-gamehaus-magenta text-white hover:from-orange-500 hover:to-gamehaus-magenta focus:from-orange-500 focus:to-gamehaus-magenta rounded-md shadow-[0_4px_14px_-4px_rgba(249,115,22,0.5)]",
+                            day_today:
+                              "bg-orange-500/15 text-orange-200 border border-orange-500/30 font-semibold",
+                            caption_label: "text-sm font-semibold text-orange-100/95",
+                            head_cell: "text-orange-200/70 font-medium",
+                            nav_button:
+                              "h-7 w-7 p-0 opacity-90 hover:opacity-100 rounded-lg border border-orange-500/30 bg-orange-500/10 text-orange-200 hover:bg-orange-500/25 hover:text-white",
+                          }}
                         />
                       </div>
                     </div>
@@ -1849,7 +1865,7 @@ export default function PublicBooking() {
                       <div>
                         {selectedStations.length > 1 && (
                           <div className="mb-3 space-y-2">
-                            <Label className="text-sm text-gray-300">Select game/resource</Label>
+                            <Label className="text-sm text-orange-100/80">Select game/resource</Label>
                             <Select
                               value={activeStationId || ""}
                               onValueChange={(value) => {
@@ -1857,7 +1873,7 @@ export default function PublicBooking() {
                                 setBookingStepError("");
                               }}
                             >
-                              <SelectTrigger className="mt-2 bg-black/30 border-white/10 text-gray-100">
+                              <SelectTrigger className="mt-2 bg-black/30 border-orange-500/25 text-gray-100 focus:ring-orange-500/30">
                                 <SelectValue placeholder="Choose game/resource" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1873,7 +1889,7 @@ export default function PublicBooking() {
                                 type="button"
                                 size="sm"
                                 variant="secondary"
-                                className="bg-white/10 border border-white/15 text-gray-100 hover:bg-white/20"
+                                className="bg-orange-500/15 border border-orange-500/30 text-orange-100 hover:bg-orange-500/25"
                                 onClick={applySameTimeToAll}
                               >
                                 Apply Same Time to All
@@ -1881,7 +1897,8 @@ export default function PublicBooking() {
                             </div>
                           </div>
                         )}
-                        <Label className="text-base font-medium text-gray-200">
+                        <Label className="text-base font-medium text-orange-100/90 flex items-center gap-2">
+                          <span className="inline-block h-1 w-1 rounded-full bg-orange-400" />
                           Available Time Slots
                         </Label>
                         <div className="mt-2">

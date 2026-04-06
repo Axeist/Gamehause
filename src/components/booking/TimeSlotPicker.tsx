@@ -248,7 +248,10 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-12 bg-muted/50 rounded-md animate-pulse" />
+          <div
+            key={i}
+            className="h-14 rounded-xl bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/10 animate-pulse"
+          />
         ))}
       </div>
     );
@@ -264,9 +267,10 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
 
   if (slots.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p>No time slots available for this date</p>
+      <div className="text-center py-10 px-4 rounded-xl border border-orange-500/15 bg-orange-500/[0.04]">
+        <Clock className="h-12 w-12 mx-auto mb-3 text-orange-400/70" />
+        <p className="text-sm text-gray-300">No time slots available for this date</p>
+        <p className="text-xs text-gray-500 mt-1">Try another day or check back later</p>
       </div>
     );
   }
@@ -284,36 +288,87 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p
+        className={cn(
+          "text-sm",
+          variant === "dark" ? "text-gray-400" : "text-muted-foreground"
+        )}
+      >
         Click a slot to select. Click again to deselect.
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={clearSelection}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={clearSelection}
+          className={
+            variant === "dark"
+              ? "border-orange-500/35 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20 hover:text-white"
+              : undefined
+          }
+        >
           Clear Selection
         </Button>
         {numberOfSelectedSlots > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span
+            className={cn(
+              "text-xs",
+              variant === "dark" ? "text-orange-200/80" : "text-muted-foreground"
+            )}
+          >
             {numberOfSelectedSlots} slot{numberOfSelectedSlots !== 1 ? "s" : ""} selected
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-blue-500 border border-blue-600" />
-          <span>Selected</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-white border border-gray-200" />
-          <span>Available</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-gray-200" />
-          <span>Unavailable</span>
-        </div>
+      <div
+        className={cn(
+          "flex items-center gap-4 text-sm flex-wrap",
+          variant === "dark" ? "text-gray-300" : "text-muted-foreground"
+        )}
+      >
+        {variant === "dark" ? (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-sm bg-gradient-to-br from-orange-500 to-gamehaus-magenta shadow-[0_0_10px_-2px_rgba(249,115,22,0.45)]" />
+              <span className="font-medium text-orange-100/95">Selected</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-sm border border-white/20 bg-white/[0.06]" />
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-sm border border-white/10 bg-white/[0.04]" />
+              <span className="text-gray-500">Unavailable</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-sm bg-blue-500 border border-blue-600" />
+              <span>Selected</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-sm bg-white border border-gray-200" />
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-sm bg-gray-200" />
+              <span>Unavailable</span>
+            </div>
+          </>
+        )}
         {resolvedRangeForWarning.length > 1 && (
-          <div className="ml-auto text-xs text-primary font-medium">
+          <div
+            className={cn(
+              "ml-auto text-xs font-medium",
+              variant === "dark"
+                ? "rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-orange-200"
+                : "text-primary"
+            )}
+          >
             {resolvedRangeForWarning.length} slots (
             {resolvedRangeForWarning[0].start_time} –{" "}
             {resolvedRangeForWarning[resolvedRangeForWarning.length - 1].end_time})
@@ -324,58 +379,72 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
       {selectedSlot &&
         ((payAtVenueEnabled && contiguousForBooking.length < 1) ||
           (!payAtVenueEnabled && contiguousForBooking.length < 2)) && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-md p-2 text-xs text-amber-700 dark:text-amber-400">
+          <div
+            className={cn(
+              "rounded-xl p-2.5 text-xs leading-relaxed",
+              variant === "dark"
+                ? "border border-orange-500/35 bg-gradient-to-r from-orange-500/12 to-gamehaus-magenta/10 text-orange-100/95"
+                : "bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400"
+            )}
+          >
             {payAtVenueEnabled
               ? "Please select at least 1 slot (30 minutes)."
               : "Minimum booking is 2 slots (60 minutes). Select another consecutive slot, or use Shift+click / drag across a range."}
           </div>
         )}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 select-none">
-        {slots.map((slot, index) => {
-          const slotId = makeSlotId(resourceId, date, slot.start_time, slot.end_time);
-          const booked = isSlotDisabled(slot);
-          const isSelected = selectedSlots.some((s) => s.id === slotId);
+      <div
+        className={cn(
+          variant === "dark" &&
+            "rounded-xl border border-orange-500/20 bg-gradient-to-b from-orange-500/[0.07] via-transparent to-transparent p-2 sm:p-3"
+        )}
+      >
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 select-none">
+          {slots.map((slot, index) => {
+            const slotId = makeSlotId(resourceId, date, slot.start_time, slot.end_time);
+            const booked = isSlotDisabled(slot);
+            const isSelected = selectedSlots.some((s) => s.id === slotId);
 
-          return (
-            <button
-              key={slotId}
-              type="button"
-              disabled={booked}
-              onClick={(e) => handleSlotClick(slot, index, e)}
-              onMouseDown={(e) => onSlotMouseDown(slot, index, e)}
-              onMouseEnter={() => onSlotMouseEnter(index)}
-              aria-pressed={isSelected}
-              className={cn(
-                "px-4 py-2 rounded-lg transition-all duration-200 border text-sm font-medium",
-                variant === "light" &&
-                  booked &&
-                  "bg-gray-200 text-gray-400 cursor-not-allowed border-transparent",
-                variant === "light" &&
-                  !booked &&
-                  !isSelected &&
-                  "bg-white hover:bg-gray-100 border-gray-200 text-gray-900",
-                variant === "light" &&
-                  !booked &&
-                  isSelected &&
-                  "bg-blue-500 text-white border-blue-600 shadow-sm",
-                variant === "dark" &&
-                  booked &&
-                  "bg-white/5 text-gray-500 cursor-not-allowed border-white/10",
-                variant === "dark" &&
-                  !booked &&
-                  !isSelected &&
-                  "bg-white/10 hover:bg-white/15 border-white/15 text-gray-100",
-                variant === "dark" &&
-                  !booked &&
-                  isSelected &&
-                  "bg-blue-500 text-white border-blue-600 shadow-sm"
-              )}
-            >
-              {formatTimeLabel(slot.start_time)} – {formatTimeLabel(slot.end_time)}
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={slotId}
+                type="button"
+                disabled={booked}
+                onClick={(e) => handleSlotClick(slot, index, e)}
+                onMouseDown={(e) => onSlotMouseDown(slot, index, e)}
+                onMouseEnter={() => onSlotMouseEnter(index)}
+                aria-pressed={isSelected}
+                className={cn(
+                  "px-3 py-2.5 rounded-xl transition-all duration-200 border text-sm font-medium",
+                  variant === "light" &&
+                    booked &&
+                    "bg-gray-200 text-gray-400 cursor-not-allowed border-transparent",
+                  variant === "light" &&
+                    !booked &&
+                    !isSelected &&
+                    "bg-white hover:bg-gray-100 border-gray-200 text-gray-900",
+                  variant === "light" &&
+                    !booked &&
+                    isSelected &&
+                    "bg-blue-500 text-white border-blue-600 shadow-sm",
+                  variant === "dark" &&
+                    booked &&
+                    "bg-white/[0.04] text-gray-500 cursor-not-allowed border-white/10",
+                  variant === "dark" &&
+                    !booked &&
+                    !isSelected &&
+                    "bg-white/[0.06] text-gray-100 border-white/12 hover:border-orange-400/45 hover:bg-orange-500/10 hover:shadow-[0_0_18px_-6px_rgba(249,115,22,0.35)]",
+                  variant === "dark" &&
+                    !booked &&
+                    isSelected &&
+                    "border-orange-400/70 bg-gradient-to-br from-orange-500 via-orange-500 to-gamehaus-magenta text-white shadow-[0_6px_28px_-8px_rgba(249,115,22,0.5)] ring-2 ring-orange-400/45 ring-offset-2 ring-offset-[#070707]"
+                )}
+              >
+                {formatTimeLabel(slot.start_time)} – {formatTimeLabel(slot.end_time)}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
