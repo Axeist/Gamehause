@@ -135,6 +135,45 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  const handleAddStock = (product: Product, quantity: number) => {
+    try {
+      const previousStock = product.stock;
+      const previousTotalStock = product.totalStock ?? product.stock;
+      const newStock = previousStock + quantity;
+      const newTotalStock = previousTotalStock + quantity;
+
+      const updatedProduct: Product = {
+        ...product,
+        stock: newStock,
+        totalStock: newTotalStock,
+      };
+
+      updateProduct(updatedProduct);
+
+      const stockLog = createStockLog(
+        updatedProduct,
+        previousStock,
+        newStock,
+        'addition',
+        user?.name || user?.email || 'Unknown User',
+        `Added ${quantity} units via quick stock update`
+      );
+      saveStockLog(stockLog);
+
+      toast({
+        title: 'Stock Updated',
+        description: `Added ${quantity} units to ${product.name}. New stock: ${newStock}`,
+      });
+    } catch (error) {
+      console.error('Add stock error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update stock. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Define categories that shouldn't show buying/selling price fields
   const hidePricingFieldsCategories = ['membership', 'challenges'];
 
@@ -444,6 +483,7 @@ const ProductsPage: React.FC = () => {
           categoryCounts={categoryCounts}
           onEdit={handleEditProduct}
           onDelete={handleDeleteProduct}
+          onAddStock={handleAddStock}
           onAddProduct={handleOpenDialog}
           showManagementActions={true}
           isAdmin={isAdmin}

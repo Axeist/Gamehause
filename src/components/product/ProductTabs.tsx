@@ -12,6 +12,7 @@ interface ProductTabsProps {
   categoryCounts: Record<string, number>;
   onEdit: (product: Product) => void;
   onDelete: (id: string) => void;
+  onAddStock?: (product: Product, quantity: number) => void;
   onAddProduct: () => void;
   showManagementActions?: boolean;
   isAdmin?: boolean;
@@ -24,6 +25,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
   categoryCounts,
   onEdit,
   onDelete,
+  onAddStock,
   onAddProduct,
   showManagementActions = false,
   isAdmin = false
@@ -52,6 +54,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
             isAdmin={isAdmin}
             onEdit={onEdit}
             onDelete={onDelete}
+            onAddStock={onAddStock}
             showManagementActions={showManagementActions}
           />
         ))}

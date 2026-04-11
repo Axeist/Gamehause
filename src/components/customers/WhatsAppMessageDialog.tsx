@@ -169,38 +169,38 @@ const WhatsAppMessageDialog: React.FC<WhatsAppMessageDialogProps> = ({
       {
         title: "Personalized Welcome Back",
         icon: <Clock className="h-4 w-4 text-blue-400" />,
-        message: `Hi ${customer.name}! 🎮\n\nGreat to see you back! You've been part of our gaming family since ${memberSince} and have logged an impressive ${totalPlayTime} of playtime. That's some serious gaming dedication! 🔥\n\n${getRandomOffer(0)}\n\nCome over and let's continue your gaming journey!\n\nBest regards,\nCuephoria Gaming`
+        message: `Hi ${customer.name}! 🎮\n\nGreat to see you back! You've been part of our gaming family since ${memberSince} and have logged an impressive ${totalPlayTime} of playtime. That's some serious gaming dedication! 🔥\n\n${getRandomOffer(0)}\n\nCome over and let's continue your gaming journey!\n\nBest regards,\nGamehause`
       },
       {
         title: "Loyalty Points Special",
         icon: <Star className="h-4 w-4 text-yellow-400" />,
         message: customer.loyaltyPoints > 100 
-          ? `Hey ${customer.name}! ⭐\n\nYou're sitting on a goldmine of ${customer.loyaltyPoints} loyalty points! That's enough for some amazing rewards! 💎\n\n${getRandomOffer(1)}\n\nDon't let those points gather dust - come redeem them for something awesome!\n\nHappy Gaming!\nCuephoria Gaming`
-          : `Hi ${customer.name}! 🎮\n\nYou currently have ${customer.loyaltyPoints} loyalty points. Every game session gets you closer to exciting rewards!\n\n${getRandomOffer(1)}\n\nKeep playing, keep earning!\n\nCuephoria Gaming`
+          ? `Hey ${customer.name}! ⭐\n\nYou're sitting on a goldmine of ${customer.loyaltyPoints} loyalty points! That's enough for some amazing rewards! 💎\n\n${getRandomOffer(1)}\n\nDon't let those points gather dust - come redeem them for something awesome!\n\nHappy Gaming!\nGamehause`
+          : `Hi ${customer.name}! 🎮\n\nYou currently have ${customer.loyaltyPoints} loyalty points. Every game session gets you closer to exciting rewards!\n\n${getRandomOffer(1)}\n\nKeep playing, keep earning!\n\nGamehause`
       },
       {
         title: "Exclusive Member Offer",
         icon: <Gift className="h-4 w-4 text-gamehaus-lightpurple" />,
         message: customer.isMember 
-          ? `👑 VIP Member Alert - ${customer.name}!\n\nAs our valued member with ₹${customer.totalSpent.toLocaleString('en-IN')} lifetime spending, you deserve the best!\n\n${getRandomOffer(2)}\n\n${customer.membershipHoursLeft ? `You have ${customer.membershipHoursLeft} hours left on your membership - make them count!` : ''}\n\nYour loyalty means everything to us!\nCuephoria Gaming`
-          : `Hey ${customer.name}! 🎮\n\nYou've spent ₹${customer.totalSpent.toLocaleString('en-IN')} with us - thank you for your trust!\n\nReady to level up? Consider our membership for exclusive benefits:\n• Priority booking\n• Member-only discounts\n• Extended play hours\n• Special events access\n\n${getRandomOffer(2)}\n\nLet's game together!\nCuephoria Gaming`
+          ? `👑 VIP Member Alert - ${customer.name}!\n\nAs our valued member with ₹${customer.totalSpent.toLocaleString('en-IN')} lifetime spending, you deserve the best!\n\n${getRandomOffer(2)}\n\n${customer.membershipHoursLeft ? `You have ${customer.membershipHoursLeft} hours left on your membership - make them count!` : ''}\n\nYour loyalty means everything to us!\nGamehause`
+          : `Hey ${customer.name}! 🎮\n\nYou've spent ₹${customer.totalSpent.toLocaleString('en-IN')} with us - thank you for your trust!\n\nReady to level up? Consider our membership for exclusive benefits:\n• Priority booking\n• Member-only discounts\n• Extended play hours\n• Special events access\n\n${getRandomOffer(2)}\n\nLet's game together!\nGamehause`
       },
       {
         title: "Tournament Invitation",
         icon: <Trophy className="h-4 w-4 text-gold-400" />,
         message: getUpcomingTournament() 
-          ? `🏆 Special Invitation for ${customer.name}!\n\n${getUpcomingTournament()}\n\nWith your ${totalPlayTime} of gaming experience, you'd be a strong contender!\n\n${getRandomOffer(3)}\n\nReady to show your skills? Let us know!\n\nGame On!\nCuephoria Gaming`
-          : `Hi ${customer.name}! 🎮\n\nKeep an eye out for our upcoming tournaments! With your ${totalPlayTime} of experience, you'd be a formidable opponent.\n\n${getRandomOffer(3)}\n\nStay tuned for tournament announcements!\n\nCuephoria Gaming`
+          ? `🏆 Special Invitation for ${customer.name}!\n\n${getUpcomingTournament()}\n\nWith your ${totalPlayTime} of gaming experience, you'd be a strong contender!\n\n${getRandomOffer(3)}\n\nReady to show your skills? Let us know!\n\nGame On!\nGamehause`
+          : `Hi ${customer.name}! 🎮\n\nKeep an eye out for our upcoming tournaments! With your ${totalPlayTime} of experience, you'd be a formidable opponent.\n\n${getRandomOffer(3)}\n\nStay tuned for tournament announcements!\n\nGamehause`
       },
       {
         title: "Birthday/Special Occasion",
         icon: <Calendar className="h-4 w-4 text-pink-400" />,
-        message: `🎉 Special Day Wishes for ${customer.name}! 🎉\n\nWe hope you're having an amazing day! As someone who's been with us since ${memberSince}, you're truly special to our gaming community.\n\n🎁 Birthday Special:\n${getRandomOffer(4)}\n\nCome celebrate with us - let's make this day even more memorable with some epic gaming!\n\nWishing you happiness and high scores!\nCuephoria Gaming`
+        message: `🎉 Special Day Wishes for ${customer.name}! 🎉\n\nWe hope you're having an amazing day! As someone who's been with us since ${memberSince}, you're truly special to our gaming community.\n\n🎁 Birthday Special:\n${getRandomOffer(4)}\n\nCome celebrate with us - let's make this day even more memorable with some epic gaming!\n\nWishing you happiness and high scores!\nGamehause`
       },
       {
         title: "Community Engagement",
         icon: <Users className="h-4 w-4 text-green-400" />,
-        message: `Hey ${customer.name}! 👥\n\nOur gaming community is growing stronger every day, and players like you (with ${totalPlayTime} of experience) are what make it special!\n\n${getRandomOffer(5)}\n\nBring your friends along - gaming is always better together! We have group packages and friend referral rewards too.\n\nSee you in the arena!\nCuephoria Gaming`
+        message: `Hey ${customer.name}! 👥\n\nOur gaming community is growing stronger every day, and players like you (with ${totalPlayTime} of experience) are what make it special!\n\n${getRandomOffer(5)}\n\nBring your friends along - gaming is always better together! We have group packages and friend referral rewards too.\n\nSee you in the arena!\nGamehause`
       }
     ];
 

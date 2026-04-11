@@ -75,7 +75,7 @@ const Contact: React.FC = () => {
               </div>
               <h3 className="text-lg font-semibold mb-2">Visit Us</h3>
               <p className="text-gray-300">
-                Cuephoria Gaming Lounge
+                Gamehause
               </p>
               <a 
                 href="https://maps.app.goo.gl/cuephoria" 

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { usePOS, Product } from '@/context/POSContext';
 import { CurrencyDisplay } from '@/components/ui/currency';
-import { ShoppingCart, Edit, Trash, Clock, GraduationCap, Lock } from 'lucide-react';
+import { ShoppingCart, Edit, Trash, Clock, GraduationCap, Lock, PackagePlus } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuth } from '@/context/AuthContext';
 import { usePinVerification } from '@/hooks/usePinVerification';
 import PinVerificationDialog from '@/components/PinVerificationDialog';
@@ -13,8 +15,9 @@ interface ProductCardProps {
   isAdmin?: boolean;
   onEdit?: (product: Product) => void;
   onDelete?: (id: string) => void;
+  onAddStock?: (product: Product, quantity: number) => void;
   className?: string;
-  showManagementActions?: boolean; // New prop to control showing edit/delete buttons
+  showManagementActions?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ 
@@ -22,12 +25,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
   isAdmin = false, 
   onEdit, 
   onDelete,
+  onAddStock,
   className = '',
   showManagementActions = false
 }) => {
   const { addToCart, isStudentDiscount, setIsStudentDiscount, cart } = usePOS();
   const { user } = useAuth();
   const { showPinDialog, requestPinVerification, handlePinSuccess, handlePinCancel } = usePinVerification();
+  const [stockToAdd, setStockToAdd] = useState<string>('');
+  const [addStockOpen, setAddStockOpen] = useState(false);
 
   // Define categories that shouldn't show buying/selling price info
   const hidePricingFieldsCategories = ['membership', 'challenges'];
@@ -37,6 +43,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
     if (onDelete) {
       requestPinVerification(() => onDelete(product.id));
     }
+  };
+
+  const handleAddStock = () => {
+    const qty = parseInt(stockToAdd, 10);
+    if (!qty || qty <= 0) return;
+    onAddStock?.(product, qty);
+    setStockToAdd('');
+    setAddStockOpen(false);
   };
 
   const getCategoryStyles = (category: string) => {
@@ -203,27 +217,65 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </CardContent>
         <CardFooter className="mt-auto pt-2">
           {showManagementActions ? (
-            <div className="flex w-full space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex-1 justify-center"
-                onClick={() => onEdit && onEdit(product)}
-              >
-                <Edit className="h-4 w-4 mr-2" /> Edit
-              </Button>
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                className="flex-1 justify-center relative"
-                onClick={handleDelete}
-                title={!isAdmin ? "PIN verification required for staff" : "Delete product"}
-              >
-                <Trash className="h-4 w-4 mr-2" /> Delete
-                {!isAdmin && (
-                  <Lock className="h-3 w-3 absolute -top-1 -right-1 text-amber-500" />
-                )}
-              </Button>
+            <div className="flex flex-col w-full gap-2">
+              {product.category !== 'membership' && onAddStock && (
+                <Popover open={addStockOpen} onOpenChange={setAddStockOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-center border-green-600/50 text-green-600 hover:bg-green-600/10 hover:text-green-500"
+                    >
+                      <PackagePlus className="h-4 w-4 mr-2" /> Add Stock
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-3" align="center">
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">Add stock for {product.name}</p>
+                      <p className="text-xs text-muted-foreground">Current: {product.stock} / {product.totalStock ?? product.stock}</p>
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="Quantity to add"
+                        value={stockToAdd}
+                        onChange={(e) => setStockToAdd(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddStock()}
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        onClick={handleAddStock}
+                        disabled={!stockToAdd || parseInt(stockToAdd, 10) <= 0}
+                      >
+                        Update Stock
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+              <div className="flex w-full space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 justify-center"
+                  onClick={() => onEdit && onEdit(product)}
+                >
+                  <Edit className="h-4 w-4 mr-2" /> Edit
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="flex-1 justify-center relative"
+                  onClick={handleDelete}
+                  title={!isAdmin ? "PIN verification required for staff" : "Delete product"}
+                >
+                  <Trash className="h-4 w-4 mr-2" /> Delete
+                  {!isAdmin && (
+                    <Lock className="h-3 w-3 absolute -top-1 -right-1 text-amber-500" />
+                  )}
+                </Button>
+              </div>
             </div>
           ) : (
             <Button 
