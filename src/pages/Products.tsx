@@ -174,6 +174,50 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  const handleReduceStock = (product: Product, quantity: number) => {
+    try {
+      const previousStock = product.stock;
+      const newStock = Math.max(0, previousStock - quantity);
+
+      if (quantity > previousStock) {
+        toast({
+          title: 'Warning',
+          description: `Only ${previousStock} units available. Stock reduced to 0.`,
+          variant: 'destructive',
+        });
+      }
+
+      const updatedProduct: Product = {
+        ...product,
+        stock: newStock,
+      };
+
+      updateProduct(updatedProduct);
+
+      const stockLog = createStockLog(
+        updatedProduct,
+        previousStock,
+        newStock,
+        'deduction',
+        user?.name || user?.email || 'Unknown User',
+        `Removed ${previousStock - newStock} units via quick stock reduce`
+      );
+      saveStockLog(stockLog);
+
+      toast({
+        title: 'Stock Reduced',
+        description: `Removed ${previousStock - newStock} units from ${product.name}. New stock: ${newStock}`,
+      });
+    } catch (error) {
+      console.error('Reduce stock error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reduce stock. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Define categories that shouldn't show buying/selling price fields
   const hidePricingFieldsCategories = ['membership', 'challenges'];
 
@@ -484,6 +528,7 @@ const ProductsPage: React.FC = () => {
           onEdit={handleEditProduct}
           onDelete={handleDeleteProduct}
           onAddStock={handleAddStock}
+          onReduceStock={handleReduceStock}
           onAddProduct={handleOpenDialog}
           showManagementActions={true}
           isAdmin={isAdmin}

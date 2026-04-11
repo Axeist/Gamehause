@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { usePOS, Product } from '@/context/POSContext';
 import { CurrencyDisplay } from '@/components/ui/currency';
-import { ShoppingCart, Edit, Trash, Clock, GraduationCap, Lock, PackagePlus } from 'lucide-react';
+import { ShoppingCart, Edit, Trash, Clock, GraduationCap, Lock, PackagePlus, PackageMinus } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useAuth } from '@/context/AuthContext';
 import { usePinVerification } from '@/hooks/usePinVerification';
@@ -16,6 +16,7 @@ interface ProductCardProps {
   onEdit?: (product: Product) => void;
   onDelete?: (id: string) => void;
   onAddStock?: (product: Product, quantity: number) => void;
+  onReduceStock?: (product: Product, quantity: number) => void;
   className?: string;
   showManagementActions?: boolean;
 }
@@ -26,6 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onEdit, 
   onDelete,
   onAddStock,
+  onReduceStock,
   className = '',
   showManagementActions = false
 }) => {
@@ -34,6 +36,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const { showPinDialog, requestPinVerification, handlePinSuccess, handlePinCancel } = usePinVerification();
   const [stockToAdd, setStockToAdd] = useState<string>('');
   const [addStockOpen, setAddStockOpen] = useState(false);
+  const [stockToReduce, setStockToReduce] = useState<string>('');
+  const [reduceStockOpen, setReduceStockOpen] = useState(false);
 
   // Define categories that shouldn't show buying/selling price info
   const hidePricingFieldsCategories = ['membership', 'challenges'];
@@ -51,6 +55,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
     onAddStock?.(product, qty);
     setStockToAdd('');
     setAddStockOpen(false);
+  };
+
+  const handleReduceStock = () => {
+    const qty = parseInt(stockToReduce, 10);
+    if (!qty || qty <= 0) return;
+    onReduceStock?.(product, qty);
+    setStockToReduce('');
+    setReduceStockOpen(false);
   };
 
   const getCategoryStyles = (category: string) => {
@@ -219,40 +231,80 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {showManagementActions ? (
             <div className="flex flex-col w-full gap-2">
               {product.category !== 'membership' && onAddStock && (
-                <Popover open={addStockOpen} onOpenChange={setAddStockOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-center border-green-600/50 text-green-600 hover:bg-green-600/10 hover:text-green-500"
-                    >
-                      <PackagePlus className="h-4 w-4 mr-2" /> Add Stock
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3" align="center">
-                    <div className="space-y-3">
-                      <p className="text-sm font-medium">Add stock for {product.name}</p>
-                      <p className="text-xs text-muted-foreground">Current: {product.stock} / {product.totalStock ?? product.stock}</p>
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="Quantity to add"
-                        value={stockToAdd}
-                        onChange={(e) => setStockToAdd(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddStock()}
-                        autoFocus
-                      />
+                <div className="flex w-full gap-2">
+                  <Popover open={addStockOpen} onOpenChange={setAddStockOpen}>
+                    <PopoverTrigger asChild>
                       <Button
+                        variant="outline"
                         size="sm"
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        onClick={handleAddStock}
-                        disabled={!stockToAdd || parseInt(stockToAdd, 10) <= 0}
+                        className={`${isAdmin && onReduceStock ? 'flex-1' : 'w-full'} justify-center border-green-600/50 text-green-600 hover:bg-green-600/10 hover:text-green-500`}
                       >
-                        Update Stock
+                        <PackagePlus className="h-4 w-4 mr-2" /> Add Stock
                       </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-3" align="center">
+                      <div className="space-y-3">
+                        <p className="text-sm font-medium">Add stock for {product.name}</p>
+                        <p className="text-xs text-muted-foreground">Current: {product.stock} / {product.totalStock ?? product.stock}</p>
+                        <Input
+                          type="number"
+                          min="1"
+                          placeholder="Quantity to add"
+                          value={stockToAdd}
+                          onChange={(e) => setStockToAdd(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddStock()}
+                          autoFocus
+                        />
+                        <Button
+                          size="sm"
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          onClick={handleAddStock}
+                          disabled={!stockToAdd || parseInt(stockToAdd, 10) <= 0}
+                        >
+                          Update Stock
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  {isAdmin && onReduceStock && (
+                    <Popover open={reduceStockOpen} onOpenChange={setReduceStockOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 justify-center border-red-600/50 text-red-600 hover:bg-red-600/10 hover:text-red-500"
+                        >
+                          <PackageMinus className="h-4 w-4 mr-2" /> Reduce
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64 p-3" align="center">
+                        <div className="space-y-3">
+                          <p className="text-sm font-medium">Reduce stock for {product.name}</p>
+                          <p className="text-xs text-muted-foreground">Current: {product.stock} / {product.totalStock ?? product.stock}</p>
+                          <Input
+                            type="number"
+                            min="1"
+                            max={product.stock}
+                            placeholder="Quantity to reduce"
+                            value={stockToReduce}
+                            onChange={(e) => setStockToReduce(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleReduceStock()}
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="w-full"
+                            onClick={handleReduceStock}
+                            disabled={!stockToReduce || parseInt(stockToReduce, 10) <= 0 || parseInt(stockToReduce, 10) > product.stock}
+                          >
+                            Reduce Stock
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
               )}
               <div className="flex w-full space-x-2">
                 <Button 
